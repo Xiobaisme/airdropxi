@@ -315,11 +315,12 @@
         const SUPABASE_URL = 'https://hmjjujirktpqviayfehe.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtamp1amlya3RwcXZpYXlmZWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1NzQsImV4cCI6MjA4OTE1NzU3NH0.nmCK3b66fU8Zh-mwQw5YUS_I3dFJAYnvfWlO050doSY';
         
-        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+        // FIX FATAL: Nama variabel diubah jadi supabaseClient agar tidak crash
+        const supabaseClient = supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
         // CEK SESI LOGIN SAAT WEB DIBUKA
         document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await supabase.auth.getSession();
+            const { data: { session } } = await supabaseClient.auth.getSession();
             if (!session) {
                 document.getElementById('login-modal').classList.remove('hidden');
                 document.body.style.overflow = 'hidden';
@@ -334,7 +335,7 @@
         });
 
         async function loginWithProvider(providerName) {
-            await supabase.auth.signInWithOAuth({
+            await supabaseClient.auth.signInWithOAuth({
                 provider: providerName,
                 options: { redirectTo: window.location.origin }
             });
@@ -343,18 +344,18 @@
         async function loginWithEmail() {
             const emailInput = prompt(currentLang === 'id' ? "Masukkan Email Anda untuk Login:" : "Enter your Email to Login:");
             if (!emailInput) return;
-            const { error } = await supabase.auth.signInWithOtp({ email: emailInput });
+            const { error } = await supabaseClient.auth.signInWithOtp({ email: emailInput });
             if (error) alert("Error: " + error.message);
             else alert(currentLang === 'id' ? "Sukses! Cek Kotak Masuk atau Spam Email Anda untuk link login." : "Success! Check your Email Inbox or Spam for the login link.");
         }
 
-        async function logoutFromSupabase() { await supabase.auth.signOut(); window.location.reload(); }
+        async function logoutFromSupabase() { await supabaseClient.auth.signOut(); window.location.reload(); }
 
         async function fetchAirdropsFromDB() {
             const container = document.getElementById('airdrops');
             if(!container) return;
             try {
-                const { data, error } = await supabase.from('airdrops').select('*');
+                const { data, error } = await supabaseClient.from('airdrops').select('*');
                 if (error) throw error;
                 if (data && data.length > 0) renderAirdrops(data);
                 else container.innerHTML = '<p class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500 font-mono">Belum ada daftar airdrop di database.</p>';
@@ -453,7 +454,6 @@
             renderCategories(); renderSecurity(); renderFAQ(); fetchCryptoNews();
         }
 
-        // RENDER FUNGSI UNTUK AIRDROP
         function renderAirdrops(dataToRender) {
             globalAirdropData = dataToRender; 
             const container = document.getElementById('airdrops'); 
