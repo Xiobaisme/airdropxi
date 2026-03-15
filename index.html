@@ -24,9 +24,39 @@
         .ticker-content { display: flex; gap: 2rem; animation: marquee 40s linear infinite; }
         .ticker-wrap:hover .ticker-content { animation-play-state: paused; }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .glass-card { background: rgba(11, 14, 20, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(0, 255, 163, 0.2); box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); }
+
+        /* Estetik Pola Latar Belakang Geometris Neon untuk Kartu */
+        .glass-card-bg-pattern {
+            background-color: rgba(11, 14, 20, 0.9);
+            background-image: 
+                linear-gradient(rgba(0, 255, 163, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(0, 255, 163, 0.05) 1px, transparent 1px),
+                linear-gradient(rgba(0, 255, 163, 0.02) 2px, transparent 2px),
+                linear-gradient(90deg, rgba(0, 255, 163, 0.02) 2px, transparent 2px);
+            background-size: 50px 50px, 50px 50px, 10px 10px, 10px 10px;
+            background-position: -1px -1px, -1px -1px, -1px -1px, -1px -1px;
+        }
+        
+        /* Pola Merah untuk Kartu Keamanan */
+        .security-card-bg-pattern {
+            background-color: rgba(15, 20, 28, 0.9);
+            background-image: 
+                linear-gradient(rgba(255, 77, 79, 0.05) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(255, 77, 79, 0.05) 1px, transparent 1px);
+            background-size: 50px 50px, 50px 50px;
+        }
+
+        .glass-card { 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(0, 255, 163, 0.2); 
+            box-shadow: 0 4px 30px rgba(0, 0, 0, 0.5); 
+        }
         .glass-nav { background: rgba(11, 14, 20, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 255, 163, 0.3); }
-        .security-card { background: rgba(15, 20, 28, 0.85); backdrop-filter: blur(12px); border: 1px solid rgba(255, 77, 79, 0.3); transition: all 0.3s ease; }
+        .security-card { 
+            backdrop-filter: blur(12px); 
+            border: 1px solid rgba(255, 77, 79, 0.3); 
+            transition: all 0.3s ease; 
+        }
         .security-card:hover { border-color: #ff4d4f; box-shadow: 0 0 15px rgba(255, 77, 79, 0.2); transform: translateY(-3px); }
         .hover-glow:hover { box-shadow: 0 0 20px rgba(0, 255, 163, 0.4); transform: translateY(-5px); transition: all 0.3s ease; border-color: #00FFA3; }
         details > summary { list-style: none; outline: none; }
@@ -38,12 +68,33 @@
         .calc-btn { background: rgba(31, 41, 55, 0.8); border: 1px solid #374151; color: white; font-weight: bold; border-radius: 0.5rem; transition: all 0.2s; }
         .calc-btn:hover { background: #00FFA3; color: black; border-color: #00FFA3; transform: scale(1.05); }
         .calc-btn-op { background: rgba(59, 130, 246, 0.2); color: #3b82f6; border-color: rgba(59, 130, 246, 0.5); }
+
+        /* Animasi Neon Pulsa untuk Kartu */
+        @keyframes neon-pulse {
+            0% { border-color: rgba(0, 255, 163, 0.2); box-shadow: 0 0 5px rgba(0, 255, 163, 0.1); }
+            50% { border-color: rgba(0, 255, 163, 0.6); box-shadow: 0 0 15px rgba(0, 255, 163, 0.3); }
+            100% { border-color: rgba(0, 255, 163, 0.2); box-shadow: 0 0 5px rgba(0, 255, 163, 0.1); }
+        }
+        @keyframes danger-pulse {
+            0% { border-color: rgba(255, 77, 79, 0.3); box-shadow: 0 0 5px rgba(255, 77, 79, 0.1); }
+            50% { border-color: rgba(255, 77, 79, 0.7); box-shadow: 0 0 15px rgba(255, 77, 79, 0.4); }
+            100% { border-color: rgba(255, 77, 79, 0.3); box-shadow: 0 0 5px rgba(255, 77, 79, 0.1); }
+        }
+
+        /* Terapkan Animasi Neon Pulsa ke Kartu Grid Airdrop */
+        .airdrop-card-pulse {
+            animation: neon-pulse 3s infinite ease-in-out;
+        }
+        /* Terapkan Animasi Danger Pulsa ke Kartu Keamanan */
+        .security-card-pulse {
+            animation: danger-pulse 3s infinite ease-in-out;
+        }
     </style>
 </head>
 <body class="bg-black text-gray-200 font-sans antialiased min-h-screen relative overflow-x-hidden">
 
     <div id="login-modal" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center hidden transition-opacity duration-500">
-        <div class="glass-card p-10 rounded-2xl max-w-md w-full mx-4 text-center relative border-primary/50 shadow-[0_0_50px_rgba(0,255,163,0.1)]">
+        <div class="glass-card glass-card-bg-pattern p-10 rounded-2xl max-w-md w-full mx-4 text-center relative border-primary/50 shadow-[0_0_50px_rgba(0,255,163,0.1)]">
             
             <div class="absolute -top-12 left-1/2 transform -translate-x-1/2">
                 <div class="w-24 h-24 bg-[#0B0E14] border-2 border-primary rounded-full flex items-center justify-center shadow-[0_0_20px_rgba(0,255,163,0.5)] overflow-hidden p-1">
@@ -157,11 +208,11 @@
                     <p class="text-gray-400 mt-2" id="calc-main-desc">Convert crypto assets live and calculate your capital.</p>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="glass-card rounded-2xl p-8 flex flex-col h-full">
+                    <div class="glass-card glass-card-bg-pattern rounded-2xl p-8 flex flex-col h-full hover-glow">
                         <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-2" id="calc-conv-title">Live Crypto Conversion</h3>
                         <div class="flex flex-col mb-6">
                             <label class="text-xs font-mono text-primary mb-2" id="calc-lbl1">AMOUNT (FROM)</label>
-                            <div class="flex bg-gray-900 border border-gray-700 rounded-lg overflow-hidden focus-within:border-primary transition">
+                            <div class="flex bg-gray-900 border border-gray-700 rounded-lg overflow-hidden focus-within:border-primary transition overflow-x-auto">
                                 <input type="number" id="calc-input1" class="w-full bg-transparent text-white p-4 outline-none font-bold text-lg" value="1" oninput="calculateExchange()">
                                 <select id="calc-currency1" class="bg-gray-800 text-white p-4 font-bold outline-none cursor-pointer border-l border-gray-700 w-32" onchange="calculateExchange()"></select>
                             </div>
@@ -171,19 +222,19 @@
                         </div>
                         <div class="flex flex-col mt-2">
                             <label class="text-xs font-mono text-primary mb-2" id="calc-lbl2">RESULT VALUE (TO)</label>
-                            <div class="flex bg-gray-900 border border-gray-700 rounded-lg overflow-hidden focus-within:border-primary transition">
+                            <div class="flex bg-gray-900 border border-gray-700 rounded-lg overflow-hidden focus-within:border-primary transition overflow-x-auto">
                                 <input type="text" id="calc-input2" class="w-full bg-transparent text-white p-4 outline-none font-bold text-lg" readonly placeholder="Result...">
                                 <select id="calc-currency2" class="bg-gray-800 text-white p-4 font-bold outline-none cursor-pointer border-l border-gray-700 w-32" onchange="calculateExchange()"></select>
                             </div>
                         </div>
                     </div>
-                    <div class="glass-card rounded-2xl p-8 flex flex-col h-full">
+                    <div class="glass-card glass-card-bg-pattern rounded-2xl p-8 flex flex-col h-full hover-glow">
                         <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-2" id="calc-math-title">Standard Calculator</h3>
                         <div class="bg-gray-900 border border-gray-700 rounded-lg p-4 mb-4">
-                            <input type="text" id="math-display" class="w-full bg-transparent text-right text-white text-3xl font-mono outline-none tracking-wider" readonly value="0">
+                            <input type="text" id="math-display" class="w-full bg-transparent text-right text-white text-3xl font-mono outline-none tracking-wider overflow-x-auto" readonly value="0">
                         </div>
                         <div class="grid grid-cols-4 gap-3 flex-grow font-mono text-lg">
-                            <button onclick="calcClear()" class="col-span-2 calc-btn text-red-400 hover:text-black hover:border-red-400 hover:bg-red-400">AC</button>
+                            <button onclick="calcClear()" class="col-span-2 calc-btn text-red-400 hover:text-black hover:border-red-400 hover:bg-red-400 AC-btn">AC</button>
                             <button onclick="calcAppend('/')" class="calc-btn calc-btn-op hover:bg-blue-400 hover:border-blue-400 hover:text-black">÷</button>
                             <button onclick="calcAppend('*')" class="calc-btn calc-btn-op hover:bg-blue-400 hover:border-blue-400 hover:text-black">×</button>
                             <button onclick="calcAppend('7')" class="calc-btn">7</button>
@@ -256,7 +307,7 @@
 
         <div class="border-t border-gray-800 bg-black/60 pt-12 pb-6 px-4">
             <div class="max-w-5xl mx-auto text-center">
-                <div class="inline-flex items-center justify-center p-3 bg-yellow-500/10 rounded-full mb-4 border border-yellow-500/20">
+                <div class="inline-flex items-center justify-center p-3 bg-yellow-500/10 rounded-full mb-4 border border-yellow-500/20 overflow-x-auto">
                     <svg class="w-6 h-6 text-yellow-500" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 9v2m0 4h.01m-6.938 4h13.856c1.54 0 2.502-1.667 1.732-3L13.732 4c-.77-1.333-2.694-1.333-3.464 0L3.34 16c-.77 1.333.192 3 1.732 3z"></path></svg>
                 </div>
                 <h4 class="text-gray-300 font-bold text-lg mb-3 tracking-widest uppercase" id="disc-title">Risk Warning & DYOR</h4>
@@ -438,7 +489,7 @@
             setTxt('login-btn-e', langData[currentLang].loginE); setTxt('login-terms', langData[currentLang].loginTerms);
             setTxt('btn-logout', langData[currentLang].btnLogout);
 
-            renderAirdrops(); renderCategories(); renderSecurity(); renderFAQ();
+            renderAirdrops(); renderCategories(); renderSecurity(); renderFAQ(); fetchCryptoNews();
         }
 
         // DATA AIRDROP 2026
@@ -451,22 +502,14 @@
             { name: "Veera", status: "Active", RaisedID: "$10 M", RaisedEN: "$10 M", tasksID: "Selesaikan Semua Tugas Sosial.", tasksEN: "Complete All Tasks Sosial.", link: "https://hub.veerarewards.com/loyalty?referral_code=K55N0EUK", tags: ["DeFi"] },
             { name: "Konnex World", status: "Active", RaisedID: "$15 M", RaisedEN: "$15 M", tasksID: "Selesaikan Semua Tugas Sosial.", tasksEN: "Complete All Tasks Sosial.", link: "https://hub.konnex.world/points?referral_code=XLVAN3KS", tags: ["Blockchain Service"] },
             { name: "4AI", status: "Active", RaisedID: "$6 M", RaisedEN: "$6 M", tasksID: "Selesaikan Semua Tugas Sosial.", tasksEN: "Complete All Tasks Sosial.", link: "https://4bsc.ai/final-run?invite_by=hKvuDn", tags: ["Blockchain Service"] },
-            { name: "Skale", status: "Active", RaisedID: "$27 M", RaisedEN: "$27 M", tasksID: "Selesaikan Semua Tugas Sosial.", tasksEN: "Complete All Tasks Sosial.", link: "https://loyalty.skale.space/loyalty?referral_code=UW5BQN2Q", tags: ["Chain"] },
-            { name: "dTelecom", status: "Active", RaisedID: "$1.2 M", RaisedEN: "$1.2 M", tasksID: "Selesaikan Semua Tugas Sosial, Mendapatkan Peran.", tasksEN: "Complete All Tasks Sosial, Getting A Role.", link: "https://rewards.dtelecom.org/reward?referral_code=7T7EHN1T", tags: ["Blockchain Infrastructure"] },
-            { name: "Mahojin AI", status: "Active", RaisedID: "$5.50 M", RaisedEN: "$5.50 M", tasksID: "Berinteraksi dengan AI.", tasksEN: "Interack With AI.", link: "https://app.mahojin.ai/maho-point", tags: ["Blockchain Service"] },
-            { name: "zenrise", status: "Active", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "Selesaikan Semua Tugas Sosia.", tasksEN: "Complete All Tasks Social.", link: "https://zenrise.horizen.io/home?referral_code=C4PRQDZA", tags: ["Blockchain Infrastructure"] },
-            { name: "Degen NFT", status: "Waitlist", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "Putar Roda, Selesaikan Tugas.", tasksEN: "Spin the Wheel, Complete Task Social.", link: "https://dream.degen.tips/dashboard", tags: ["NFT", "MEME"] },
-            { name: "DAWN", status: "Active", RaisedID: "$48.50 M", RaisedEN: "$48.50 M", tasksID: "Download DAWN Extension, Kerjakan task.", tasksEN: "Download DAWN Extension, do the task.", link: "https://dashboard.dawninternet.com/dashboard", tags: ["Blockchain Service","Depin"] },
-            { name: "Action Model", status: "Active", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "Unduh Ekstensi, Selesaikan Tugas Sosial, Berinteraksi Dengan AI.", tasksEN: "Download Extension, Complete Social Tasks, Interack With AI.", link: "https://join.actionmodel.com/XIOBAIISHIKII", tags: ["DeFi"] },
-            { name: "Noise ", status: "Waitlist", RaisedID: "$7.10 M", RaisedEN: "$7.10 M", tasksID: "Buat konten Kebisingan di X, Sosial.", tasksEN: "Create Noise content on X , Social.", link: "https://www.noise.xyz/?ref=FJARZWNM", tags: ["DeFi"] },
-            { name: "N/A", status: "Coming Soon", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "N/A.", tasksEN: "N/A.", link: "N/A", tags: ["N/A", "N/A"] },
-            { name: "N/A", status: "Coming Soon", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "N/A.", tasksEN: "N/A.", link: "N/A", tags: ["N/A", "N/A"] },
-            { name: "N/A", status: "Coming Soon", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "N/A,", tasksEN: "N/A.", link: "N/A", tags: ["N/A", "N/A"] },
-            { name: "N/A", status: "Coming Soon", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "N/A.", tasksEN: "N/A.", link: "N/A", tags: ["N/A", "N/A"] },
-            { name: "N/A", status: "Coming Soon", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "N/A.", tasksEN: "N/A.", link: "N/A", tags: ["N/A", "N/A"] },
-            { name: "N/A", status: "Coming Soon", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "N/A.", tasksEN: "N/A.", link: "N/A", tags: ["N/A", "N/A"] },
-            { name: "N/A", status: "Coming Soon", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "N/A.", tasksEN: "N/A.", link: "N/A", tags: ["N/A", "N/A"] },
-            { name: "N/A", status: "Coming Soon", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "N/A.", tasksEN: "N/A.", link: "N/A", tags: ["N/A", "N/A"] }
+            { name: "Skale", status: "Active", RaisedID: "$27 M", RaisedEN: "$27 M", tasksID: "Social Tasks, Mainnet Tx.", tasksEN: "Social Tasks, Mainnet Tx.", link: "https://loyalty.skale.space/loyalty?referral_code=UW5BQN2Q", tags: ["Chain"] },
+            { name: "dTelecom", status: "Active", RaisedID: "$1.2 M", RaisedEN: "$1.2 M", tasksID: "Discord Role, Selesaikan Tugas.", tasksEN: "Discord Role, Complete Task.", link: "https://rewards.dtelecom.org/reward?referral_code=7T7EHN1T", tags: ["Blockchain Infrastructure"] },
+            { name: "Mahojin AI", status: "Active", RaisedID: "$5.50 M", RaisedEN: "$5.50 M", tasksID: "Selesaikan Tugas Sosial.", tasksEN: "Complete Social Task.", link: "https://app.mahojin.ai/maho-point", tags: ["Blockchain Service"] },
+            { name: "zenrise", status: "Active", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "Tugas Sosial.", tasksEN: "Social Task.", link: "https://zenrise.horizen.io/home?referral_code=C4PRQDZA", tags: ["Blockchain Infrastructure"] },
+            { name: "Degen NFT", status: "Waitlist", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "Waitlist, Social Tasks.", tasksEN: "Waitlist, Social Tasks.", link: "https://dream.degen.tips/dashboard", tags: ["NFT", "MEME"] },
+            { name: "DAWN", status: "Active", RaisedID: "$48.50 M", RaisedEN: "$48.50 M", tasksID: "Depin, Selesaikan Tugas Sosial.", tasksEN: "Depin, Complete Social Task.", link: "https://dashboard.dawninternet.com/dashboard", tags: ["Blockchain Service","Depin"] },
+            { name: "Action Model", status: "Active", RaisedID: "N/A", RaisedEN: "N/A", tasksID: "AI Model, Selesaikan Tugas Sosial.", tasksEN: "AI Model, Complete Social Task.", link: "https://join.actionmodel.com/XIOBAIISHIKII", tags: ["DeFi"] },
+            { name: "Noise ", status: "Waitlist", RaisedID: "$7.10 M", RaisedEN: "$7.10 M", tasksID: "AI Creator, Selesaikan Tugas Sosial.", tasksEN: "AI Creator, Complete Social Task.", link: "https://www.noise.xyz/?ref=FJARZWNM", tags: ["DeFi"] }
         ];
 
         function renderAirdrops() {
@@ -486,7 +529,19 @@
                     if (airdrop.status === 'Segera Hadir') displayStatus = 'Coming Soon';
                 }
 
-                container.innerHTML += `<div class="glass-card hover-glow rounded-xl p-6 flex flex-col h-full relative overflow-hidden group"><div class="absolute top-0 left-0 w-full h-1 bg-gradient-to-r from-transparent via-primary to-transparent opacity-0 group-hover:opacity-100 transition-opacity"></div><div class="flex justify-between items-start mb-4"><h3 class="text-xl font-bold text-white tracking-wide">${airdrop.name}</h3><span class="text-xs font-bold px-2 py-1 rounded border ${statusColor}">${displayStatus}</span></div><div class="mb-4 flex flex-wrap gap-2">${tagsHtml}</div><div class="mb-6 flex-grow font-mono text-sm"><p class="text-gray-400 mb-2"><strong class="text-primary">${langData[currentLang].lblKesulitan}</strong> <span class="text-white">${raised}</span></p><p class="text-gray-400"><strong class="text-primary">${langData[currentLang].lblTugas}</strong> ${tasks}</p></div><a href="${airdrop.link}" target="_blank" class="w-full block text-center bg-primary/20 border border-primary hover:bg-primary text-primary hover:text-black font-bold py-3 px-4 rounded transition duration-300 text-sm">${langData[currentLang].btnEksekusi}</a></div>`;
+                // Terapkan Pola Latar Belakang Estetis (glass-card-bg-pattern) dan Animasi Pulsa Neon (airdrop-card-pulse)
+                container.innerHTML += `<div class="glass-card glass-card-bg-pattern airdrop-card-pulse rounded-xl p-6 flex flex-col h-full hover-glow group transition-all duration-300">
+                    <div class="flex justify-between items-start mb-4">
+                        <h3 class="text-xl font-bold text-white tracking-wide">${airdrop.name}</h3>
+                        <span class="text-xs font-bold px-2 py-1 rounded border ${statusColor}">${displayStatus}</span>
+                    </div>
+                    <div class="mb-4 flex flex-wrap gap-2">${tagsHtml}</div>
+                    <div class="mb-6 flex-grow font-mono text-sm">
+                        <p class="text-gray-400 mb-2 overflow-x-auto"><strong class="text-primary">${langData[currentLang].lblKesulitan}</strong> <span class="text-white">${raised}</span></p>
+                        <p class="text-gray-400 overflow-x-auto"><strong class="text-primary">${langData[currentLang].lblTugas}</strong> ${tasks}</p>
+                    </div>
+                    <a href="${airdrop.link}" target="_blank" class="w-full block text-center bg-primary/20 border border-primary hover:bg-primary text-primary hover:text-black font-bold py-3 px-4 rounded transition duration-300 text-sm">${langData[currentLang].btnEksekusi}</a>
+                </div>`;
             });
         }
 
@@ -504,10 +559,11 @@
             const container = document.getElementById('categories-container'); if(!container) return; container.innerHTML = '';
             categoryData.forEach(item => {
                 const desc = currentLang === 'id' ? item.descID : item.descEN;
-                container.innerHTML += `<div class="glass-card rounded-xl p-6 hover-glow group transition-all duration-300 flex flex-col items-center text-center">
+                // Kartu Kategori: Estetik Geometris dan Pulsa Neon Lembut
+                container.innerHTML += `<div class="glass-card glass-card-bg-pattern airdrop-card-pulse rounded-xl p-6 hover-glow group transition-all duration-300 flex flex-col items-center text-center">
                     <div class="text-4xl mb-4 group-hover:scale-125 transition-transform duration-300 drop-shadow-[0_0_15px_rgba(0,255,163,0.5)]">${item.icon}</div>
                     <h4 class="text-xl font-bold text-white mb-3 group-hover:text-primary transition-colors">${item.title}</h4>
-                    <p class="text-sm text-gray-400 leading-relaxed">${desc}</p>
+                    <p class="text-sm text-gray-400 leading-relaxed overflow-x-auto">${desc}</p>
                 </div>`;
             });
         }
@@ -522,7 +578,12 @@
             const container = document.getElementById('security-container'); if(!container) return; container.innerHTML = '';
             securityData.forEach(item => {
                 const title = currentLang === 'id' ? item.titleID : item.titleEN; const desc = currentLang === 'id' ? item.descID : item.descEN;
-                container.innerHTML += `<div class="security-card rounded-xl p-6 flex flex-col items-center text-center"><div class="bg-danger/10 p-3 rounded-full mb-4 border border-danger/30">${item.icon}</div><h4 class="text-lg font-bold text-white mb-2">${title}</h4><p class="text-sm text-gray-400 leading-relaxed">${desc}</p></div>`;
+                // Kartu Keamanan: Estetik Geometris (Merah) dan Pulsa Danger (security-card-pulse)
+                container.innerHTML += `<div class="security-card security-card-bg-pattern security-card-pulse rounded-xl p-6 flex flex-col items-center text-center">
+                    <div class="bg-danger/10 p-3 rounded-full mb-4 border border-danger/30">${item.icon}</div>
+                    <h4 class="text-lg font-bold text-white mb-2 overflow-x-auto">${title}</h4>
+                    <p class="text-sm text-gray-400 leading-relaxed overflow-x-auto">${desc}</p>
+                </div>`;
             });
         }
 
@@ -536,7 +597,16 @@
             const container = document.getElementById('faq-container'); if(!container) return; container.innerHTML = '';
             faqData.forEach(item => {
                 const q = currentLang === 'id' ? item.qID : item.qEN; const a = currentLang === 'id' ? item.aID : item.aEN;
-                container.innerHTML += `<details class="faq-card group"><summary class="flex justify-between items-center font-semibold text-lg cursor-pointer p-6 text-gray-100 hover:text-blue-400 transition-colors select-none"><span>${q}</span><span class="transition-transform duration-300 group-open:rotate-180 text-blue-400 bg-blue-500/10 p-1.5 rounded-full border border-blue-500/20"><svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20"><path d="M6 9l6 6 6-6"></path></svg></span></summary><div class="text-gray-300 p-6 pt-0 text-base leading-relaxed border-t border-gray-700 mt-3 pt-4">${a}</div></details>`;
+                // Kartu FAQ: Tanpa Animasi Pulsa atau Pola Latar Belakang agar Lebih Tenang
+                container.innerHTML += `<details class="faq-card group transition-all duration-300">
+                    <summary class="flex justify-between items-center font-semibold text-lg cursor-pointer p-6 text-gray-100 hover:text-blue-400 transition-colors select-none">
+                        <span class="overflow-x-auto">${q}</span>
+                        <span class="transition-transform duration-300 group-open:rotate-180 text-blue-400 bg-blue-500/10 p-1.5 rounded-full border border-blue-500/20">
+                            <svg fill="none" height="20" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round" stroke-width="2" viewBox="0 0 24 24" width="20"><path d="M6 9l6 6 6-6"></path></svg>
+                        </span>
+                    </summary>
+                    <div class="text-gray-300 p-6 pt-0 text-base leading-relaxed border-t border-gray-700 mt-3 pt-4 overflow-x-auto">${a}</div>
+                </details>`;
             });
         }
 
@@ -548,10 +618,23 @@
                 data.items.slice(0, 3).forEach(item => {
                     const pubDate = new Date(item.pubDate).toLocaleDateString('en-US', { day: 'numeric', month: 'short', year: 'numeric' });
                     const imgUrl = item.thumbnail || 'https://images.unsplash.com/photo-1621416894569-0f39ed31d247?ixlib=rb-4.0.3&auto=format&fit=crop&w=600&q=80'; 
-                    newsHtml += `<div class="glass-card hover-glow rounded-xl overflow-hidden flex flex-col cursor-pointer group" onclick="window.open('${item.link}', '_blank')"><div class="h-40 overflow-hidden relative"><img src="${imgUrl}" alt="News" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500"><div class="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded shadow">Hot News</div></div><div class="p-5 flex flex-col flex-grow"><p class="text-xs text-gray-500 font-mono mb-2">${pubDate} • Web3 Media</p><h4 class="text-md font-bold text-white mb-3 group-hover:text-blue-400 transition line-clamp-3">${item.title}</h4><div class="mt-auto"><span class="text-sm text-primary font-bold">Read More &rarr;</span></div></div></div>`;
+                    // Kartu Berita: Tanpa Animasi Pulsa atau Pola Latar Belakang agar Lebih Tenang
+                    newsHtml += `<div class="glass-card rounded-xl overflow-hidden flex flex-col cursor-pointer group hover-glow transition-all duration-300" onclick="window.open('${item.link}', '_blank')">
+                        <div class="h-40 overflow-hidden relative">
+                            <img src="${imgUrl}" alt="News" class="w-full h-full object-cover transform group-hover:scale-110 transition duration-500">
+                            <div class="absolute top-2 right-2 bg-blue-500 text-white text-xs font-bold px-2 py-1 rounded shadow">Hot News</div>
+                        </div>
+                        <div class="p-5 flex flex-col flex-grow">
+                            <p class="text-xs text-gray-500 font-mono mb-2 overflow-x-auto">${pubDate} • Web3 Media</p>
+                            <h4 class="text-md font-bold text-white mb-3 group-hover:text-blue-400 transition line-clamp-3 overflow-x-auto">${item.title}</h4>
+                            <div class="mt-auto">
+                                <span class="text-sm text-primary font-bold overflow-x-auto">Read More &rarr;</span>
+                            </div>
+                        </div>
+                    </div>`;
                 });
                 newsContainer.innerHTML = newsHtml;
-            } catch (error) { newsContainer.innerHTML = '<p class="col-span-3 text-center text-red-400 font-mono">Failed to load news. Server is busy.</p>'; }
+            } catch (error) { newsContainer.innerHTML = '<p class="col-span-3 text-center text-red-400 font-mono overflow-x-auto">Failed to load news. Server is busy.</p>'; }
         }
 
         async function handleSubscribe(e) {
