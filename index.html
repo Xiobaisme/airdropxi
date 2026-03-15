@@ -619,14 +619,29 @@
             document.getElementById('calc-input2').value = result.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
         }
 
-        const canvas = document.getElementById('hacker-bg'); const ctx = canvas.getContext('2d');
-        function resizeCanvas() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; }
-        resizeCanvas(); window.addEventListener('resize', resizeCanvas);
+const canvas = document.getElementById('hacker-bg'); const ctx = canvas.getContext('2d');
         const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%""\'#&_(),.;:?!\\|{}<>[]^~';
-        let drops = []; for(let x = 0; x < canvas.width/16; x++) drops[x] = 1;
+        let drops = [];
+        
+        function resizeCanvas() { 
+            canvas.width = window.innerWidth; 
+            canvas.height = window.innerHeight; 
+            let columns = Math.floor(canvas.width / 16);
+            while(drops.length < columns) { 
+                drops.push(Math.random() * canvas.height / 16); 
+            }
+        }
+        resizeCanvas(); 
+        window.addEventListener('resize', resizeCanvas);
+
         setInterval(() => {
-            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height); ctx.fillStyle = '#00FFA3'; ctx.font = '16px monospace';
-            for(let i = 0; i < drops.length; i++) { ctx.fillText(letters.charAt(Math.floor(Math.random() * letters.length)), i * 16, drops[i] * 16); if(drops[i] * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++; }
+            ctx.fillStyle = 'rgba(0, 0, 0, 0.05)'; ctx.fillRect(0, 0, canvas.width, canvas.height); 
+            ctx.fillStyle = '#00FFA3'; ctx.font = '16px monospace';
+            for(let i = 0; i < drops.length; i++) { 
+                ctx.fillText(letters.charAt(Math.floor(Math.random() * letters.length)), i * 16, drops[i] * 16); 
+                if(drops[i] * 16 > canvas.height && Math.random() > 0.975) drops[i] = 0; 
+                drops[i]++; 
+            }
         }, 33);
 
         async function fetchCryptoPrices() {
