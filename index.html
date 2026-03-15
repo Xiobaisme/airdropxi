@@ -10,6 +10,8 @@
     <meta name="theme-color" content="#0B0E14">
     <link rel="apple-touch-icon" href="logo.png">
     
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -86,15 +88,15 @@
             <h2 class="text-2xl font-bold text-white mt-12 mb-2" id="login-title">Restricted Access</h2>
             <p class="text-sm text-gray-400 mb-8" id="login-desc">Sign in to view the list of hidden Web3 airdrop tasks and premium features.</p>
             <div class="space-y-4">
-                <button onclick="simulateLogin('X', this)" class="w-full flex items-center justify-center space-x-3 bg-black border border-gray-600 hover:border-white text-white py-3 px-4 rounded-lg transition duration-300 group">
+                <button onclick="loginWithProvider('twitter')" class="w-full flex items-center justify-center space-x-3 bg-black border border-gray-600 hover:border-white text-white py-3 px-4 rounded-lg transition duration-300 group">
                     <svg class="w-5 h-5 group-hover:scale-110 transition" fill="currentColor" viewBox="0 0 24 24"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     <span class="font-bold" id="login-btn-x">Continue with X</span>
                 </button>
-                <button onclick="simulateLogin('Google', this)" class="w-full flex items-center justify-center space-x-3 bg-white hover:bg-gray-200 text-black py-3 px-4 rounded-lg transition duration-300 group">
+                <button onclick="loginWithProvider('google')" class="w-full flex items-center justify-center space-x-3 bg-white hover:bg-gray-200 text-black py-3 px-4 rounded-lg transition duration-300 group">
                     <svg class="w-5 h-5 group-hover:scale-110 transition" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
                     <span class="font-bold" id="login-btn-g">Continue with Google</span>
                 </button>
-                <button onclick="simulateLogin('Email', this)" class="w-full flex items-center justify-center space-x-3 bg-gray-800 border border-gray-700 hover:border-primary text-gray-300 hover:text-white py-3 px-4 rounded-lg transition duration-300">
+                <button onclick="loginWithEmail()" class="w-full flex items-center justify-center space-x-3 bg-gray-800 border border-gray-700 hover:border-primary text-gray-300 hover:text-white py-3 px-4 rounded-lg transition duration-300">
                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M3 8l7.89 5.26a2 2 0 002.22 0L21 8M5 19h14a2 2 0 002-2V7a2 2 0 00-2-2H5a2 2 0 00-2 2v10a2 2 0 002 2z"></path></svg>
                     <span class="font-bold" id="login-btn-e">Continue with Email</span>
                 </button>
@@ -121,7 +123,7 @@
                             <a href="#categories" class="text-gray-300 hover:text-primary px-3 py-2 text-sm font-medium transition" id="nav-cat">Categories</a>
                             <a href="#news" class="text-gray-300 hover:text-primary px-3 py-2 text-sm font-medium transition" id="nav-news">News</a>
                             <a href="#security" class="text-gray-300 hover:text-danger px-3 py-2 text-sm font-medium transition flex items-center gap-1" id="nav-security">
-                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg> Security
+                                <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 15v2m-6 4h12a2 2 0 002-2v-6a2 2 0 00-2-2H6a2 2 0 00-2 2v6a2 2 0 002 2zm10-10V7a4 4 0 00-8 0v4h8z"></path></svg Security>
                             </a>
                         </div>
                         <button onclick="toggleLanguage()" class="flex items-center space-x-1 border border-gray-600 bg-gray-800 hover:bg-gray-700 text-white px-3 py-1 rounded text-sm transition">
@@ -130,10 +132,10 @@
                         <div id="user-profile" class="hidden relative group">
                             <button class="flex items-center space-x-2 bg-gray-800 hover:bg-gray-700 border border-primary/50 text-white px-3 py-1.5 rounded-full text-sm transition">
                                 <div class="w-5 h-5 rounded-full bg-gradient-to-r from-primary to-blue-500"></div>
-                                <span class="font-mono text-xs hidden sm:block">0xHunter...</span>
+                                <span class="font-mono text-xs hidden sm:block" id="user-email-display">0xUser...</span>
                             </button>
                             <div class="absolute right-0 mt-2 w-32 bg-black border border-gray-700 rounded-lg shadow-lg opacity-0 group-hover:opacity-100 invisible group-hover:visible transition-all">
-                                <button onclick="logout()" class="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg" id="btn-logout">Log Out</button>
+                                <button onclick="logoutFromSupabase()" class="block w-full text-left px-4 py-2 text-sm text-red-400 hover:bg-red-500/10 rounded-lg" id="btn-logout">Log Out</button>
                             </div>
                         </div>
                         <button id="mobile-menu-btn" class="lg:hidden text-gray-300 hover:text-primary focus:outline-none transition">
@@ -308,40 +310,86 @@
 
     <script>
         // =====================================================================
-        // INTEGRASI SUPABASE (DATABASE REAL-TIME)
+        // INTEGRASI SUPABASE (DATABASE & LOGIN REAL-TIME)
         // =====================================================================
         
-        // DATA API DARI SUPABASE MILIK XIOBAI
         const SUPABASE_URL = 'https://hmjjujirktpqviayfehe.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtamp1amlya3RwcXZpYXlmZWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1NzQsImV4cCI6MjA4OTE1NzU3NH0.nmCK3b66fU8Zh-mwQw5YUS_I3dFJAYnvfWlO050doSY';
+        
+        // Inisialisasi Supabase Client Asli
+        const supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
+        // CEK SESI LOGIN SAAT WEB DIBUKA
+        document.addEventListener('DOMContentLoaded', async () => {
+            const { data: { session } } = await supabase.auth.getSession();
+            
+            if (!session) {
+                // Belum Login
+                document.getElementById('login-modal').classList.remove('hidden');
+                document.body.style.overflow = 'hidden';
+            } else {
+                // Sudah Login
+                document.getElementById('user-profile').classList.remove('hidden');
+                
+                // Tampilkan sebagian email user di tombol profile
+                if(session.user.email) {
+                    const emailParts = session.user.email.split('@');
+                    document.getElementById('user-email-display').innerText = emailParts[0].substring(0, 6) + '...';
+                }
+            }
+            
+            // Panggil data setelah cek session
+            fetchAirdropsFromDB();
+        });
+
+        // FUNGSI LOGIN OAUTH (GOOGLE & TWITTER)
+        async function loginWithProvider(providerName) {
+            const { data, error } = await supabase.auth.signInWithOAuth({
+                provider: providerName,
+            });
+            if (error) {
+                alert("Error: " + error.message + "\n\nNote: Kamu harus mengaktifkan provider ini di Supabase Dashboard (Authentication -> Providers) terlebih dahulu.");
+            }
+        }
+
+        // FUNGSI LOGIN EMAIL (MAGIC LINK)
+        async function loginWithEmail() {
+            const emailInput = prompt(currentLang === 'id' ? "Masukkan Email Anda untuk Login:" : "Enter your Email to Login:");
+            if (!emailInput) return;
+            
+            const { data, error } = await supabase.auth.signInWithOtp({
+                email: emailInput,
+            });
+            
+            if (error) {
+                alert("Error: " + error.message);
+            } else {
+                alert(currentLang === 'id' ? "Sukses! Cek Kotak Masuk atau Spam Email Anda untuk link login." : "Success! Check your Email Inbox or Spam for the login link.");
+            }
+        }
+
+        // FUNGSI LOGOUT
+        async function logoutFromSupabase() {
+            await supabase.auth.signOut();
+            window.location.reload();
+        }
+
+        // FUNGSI MENGAMBIL DATA AIRDROP DARI DATABASE SUPABASE
         async function fetchAirdropsFromDB() {
             const container = document.getElementById('airdrops');
             if(!container) return;
             
             try {
-                const response = await fetch(`${SUPABASE_URL}/rest/v1/airdrops?select=*`, {
-                    headers: {
-                        'apikey': SUPABASE_ANON_KEY,
-                        'Authorization': `Bearer ${SUPABASE_ANON_KEY}`
-                    }
-                });
+                // Menggunakan Supabase JS SDK untuk memanggil data
+                const { data, error } = await supabase.from('airdrops').select('*');
                 
-                if (!response.ok) throw new Error('Gagal konek ke DB');
-                const data = await response.json();
+                if (error) throw error;
                 
-                const formattedData = data.map(item => ({
-                    name: item.name || "Unknown",
-                    status: item.status || "N/A",
-                    RaisedID: item.RaisedID || "N/A",
-                    RaisedEN: item.RaisedEN || "N/A",
-                    tasksID: item.tasksID || "N/A",
-                    tasksEN: item.tasksEN || "N/A",
-                    link: item.link || "#",
-                    tags: item.tags ? item.tags.split(',').map(tag => tag.trim()) : []
-                }));
-                
-                renderAirdrops(formattedData);
+                if (data && data.length > 0) {
+                    renderAirdrops(data);
+                } else {
+                    container.innerHTML = '<p class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-gray-500 font-mono">Belum ada daftar airdrop di database.</p>';
+                }
             } catch (error) {
                 console.error("Error:", error);
                 container.innerHTML = '<p class="col-span-1 md:col-span-2 lg:col-span-3 text-center text-danger font-mono">Failed to load airdrops. Check Database configuration.</p>';
@@ -446,23 +494,26 @@
             container.innerHTML = ''; 
             
             dataToRender.forEach(airdrop => {
-                const raised = currentLang === 'id' ? airdrop.RaisedID : airdrop.RaisedEN;
-                const tasks = currentLang === 'id' ? airdrop.tasksID : airdrop.tasksEN;
+                const raised = currentLang === 'id' ? (airdrop.RaisedID || "N/A") : (airdrop.RaisedEN || "N/A");
+                const tasks = currentLang === 'id' ? (airdrop.tasksID || "N/A") : (airdrop.tasksEN || "N/A");
                 const statusColor = airdrop.status === 'Active' || airdrop.status === 'Aktif' ? 'text-primary bg-primary/10 border-primary' : 'text-yellow-400 bg-yellow-400/10 border-yellow-400';
-                const tagsHtml = airdrop.tags.map(tag => `<span class="text-xs font-mono px-2 py-1 rounded bg-gray-900 text-gray-300 border border-gray-700">${tag}</span>`).join('');
                 
-                let displayStatus = airdrop.status;
+                let tagsArray = [];
+                if(airdrop.tags) tagsArray = typeof airdrop.tags === 'string' ? airdrop.tags.split(',') : airdrop.tags;
+                const tagsHtml = tagsArray.map(tag => `<span class="text-xs font-mono px-2 py-1 rounded bg-gray-900 text-gray-300 border border-gray-700">${tag.trim()}</span>`).join('');
+                
+                let displayStatus = airdrop.status || 'Unknown';
                 if (currentLang === 'id') {
-                    if (airdrop.status === 'Active') displayStatus = 'Aktif';
-                    if (airdrop.status === 'Coming Soon') displayStatus = 'Segera Hadir';
+                    if (displayStatus === 'Active') displayStatus = 'Aktif';
+                    if (displayStatus === 'Coming Soon') displayStatus = 'Segera Hadir';
                 } else {
-                    if (airdrop.status === 'Aktif') displayStatus = 'Active';
-                    if (airdrop.status === 'Segera Hadir') displayStatus = 'Coming Soon';
+                    if (displayStatus === 'Aktif') displayStatus = 'Active';
+                    if (displayStatus === 'Segera Hadir') displayStatus = 'Coming Soon';
                 }
 
                 container.innerHTML += `<div class="glass-card glass-card-bg-pattern airdrop-card-pulse rounded-xl p-6 flex flex-col h-full hover-glow group transition-all duration-300">
                     <div class="flex justify-between items-start mb-4">
-                        <h3 class="text-xl font-bold text-white tracking-wide">${airdrop.name}</h3>
+                        <h3 class="text-xl font-bold text-white tracking-wide">${airdrop.name || 'Unknown'}</h3>
                         <span class="text-xs font-bold px-2 py-1 rounded border ${statusColor}">${displayStatus}</span>
                     </div>
                     <div class="mb-4 flex flex-wrap gap-2">${tagsHtml}</div>
@@ -470,7 +521,7 @@
                         <p class="text-gray-400 mb-2 overflow-x-auto"><strong class="text-primary">${langData[currentLang].lblKesulitan}</strong> <span class="text-white">${raised}</span></p>
                         <p class="text-gray-400 overflow-x-auto"><strong class="text-primary">${langData[currentLang].lblTugas}</strong> ${tasks}</p>
                     </div>
-                    <a href="${airdrop.link}" target="_blank" class="w-full block text-center bg-primary/20 border border-primary hover:bg-primary text-primary hover:text-black font-bold py-3 px-4 rounded transition duration-300 text-sm">${langData[currentLang].btnEksekusi}</a>
+                    <a href="${airdrop.link || '#'}" target="_blank" class="w-full block text-center bg-primary/20 border border-primary hover:bg-primary text-primary hover:text-black font-bold py-3 px-4 rounded transition duration-300 text-sm">${langData[currentLang].btnEksekusi}</a>
                 </div>`;
             });
         }
@@ -570,19 +621,7 @@
             finally { btn.innerText = originalText; btn.disabled = false; btn.classList.remove('opacity-50', 'cursor-not-allowed'); setTimeout(() => { document.getElementById('subscribe-msg').classList.add('hidden'); }, 4000); }
         }
 
-        // FUNGSI LAINNYA (Login, Calculator, Crypto Price)
-        document.addEventListener('DOMContentLoaded', () => {
-            const isLoggedIn = localStorage.getItem('airdropxi_logged_in');
-            if (!isLoggedIn) { document.getElementById('login-modal').classList.remove('hidden'); document.body.style.overflow = 'hidden'; } 
-            else { document.getElementById('user-profile').classList.remove('hidden'); }
-        });
-        function simulateLogin(provider, buttonElement) {
-            buttonElement.innerHTML = `<svg class="animate-spin h-5 w-5 mr-3 text-white" viewBox="0 0 24 24" fill="none"><circle class="opacity-25" cx="12" cy="12" r="10" stroke="currentColor" stroke-width="4"></circle><path class="opacity-75" fill="currentColor" d="M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z"></path></svg> <span class="font-bold">Loading...</span>`;
-            buttonElement.disabled = true;
-            setTimeout(() => { localStorage.setItem('airdropxi_logged_in', 'true'); document.getElementById('login-modal').classList.add('opacity-0'); setTimeout(() => { document.getElementById('login-modal').classList.add('hidden'); document.body.style.overflow = 'auto'; document.getElementById('user-profile').classList.remove('hidden'); }, 500); }, 1500);
-        }
-        function logout() { localStorage.removeItem('airdropxi_logged_in'); window.location.reload(); }
-
+        // FUNGSI LAINNYA TAMPILAN MOBILE
         const mobileBtn = document.getElementById('mobile-menu-btn');
         const mobileMenu = document.getElementById('mobile-menu');
         mobileBtn.addEventListener('click', () => { mobileMenu.classList.toggle('hidden'); });
@@ -643,11 +682,10 @@
         }
 
         // PANGGIL FUNGSI SAAT WEB DIBUKA
-        fetchAirdropsFromDB(); // MENGAMBIL DATA DARI SUPABASE
         renderCategories(); 
         renderSecurity(); 
         renderFAQ(); 
-        fetchCryptoNews(); // MENGAMBIL BERITA DARI COINTELEGRAPH
+        fetchCryptoNews(); 
         fetchCryptoPrices(); 
         setInterval(fetchCryptoPrices, 120000); 
     </script>
