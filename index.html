@@ -12,6 +12,8 @@
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
+    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -329,6 +331,39 @@
                     const emailParts = session.user.email.split('@');
                     document.getElementById('user-email-display').innerText = emailParts[0].substring(0, 10);
                 }
+
+                // =====================================================================
+                // TAMBAHAN KODE POPUP TELEGRAM DI SINI
+                // =====================================================================
+                if (!sessionStorage.getItem('telegramPopupShown')) {
+                    setTimeout(() => {
+                        Swal.fire({
+                            title: '<span style="color:#00FFA3; font-weight:bold; letter-spacing: 1px;">ALPHA SIGNAL!</span>',
+                            html: '<p style="color:#A1A1AA; font-family: monospace;">Jangan lewatkan info listing & airdrop terbaru langsung dari sumbernya.</p>',
+                            background: '#0B0E14',
+                            color: '#fff',
+                            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg',
+                            imageWidth: 80,
+                            imageHeight: 80,
+                            imageAlt: 'Telegram Logo',
+                            showCancelButton: true,
+                            confirmButtonColor: '#00FFA3',
+                            cancelButtonColor: '#1F2937',
+                            confirmButtonText: '<span style="color:#000; font-weight:bold;">Join Telegram</span>',
+                            cancelButtonText: '<span style="color:#fff">Nanti Saja</span>',
+                            customClass: {
+                                popup: 'border border-[#00FFA3]/30 shadow-[0_0_20px_rgba(0,255,163,0.2)]'
+                            }
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.open('https://t.me/NewListingsFeed', '_blank');
+                            }
+                        });
+                        // Menandai bahwa popup sudah muncul agar tidak spam saat refresh
+                        sessionStorage.setItem('telegramPopupShown', 'true');
+                    }, 5000); // Popup akan muncul 5 detik setelah user berhasil masuk
+                }
+                // =====================================================================
             }
             fetchAirdropsFromDB();
         });
@@ -619,7 +654,7 @@
             document.getElementById('calc-input2').value = result.toLocaleString('en-US', { minimumFractionDigits: 2, maximumFractionDigits: 4 });
         }
 
-const canvas = document.getElementById('hacker-bg'); const ctx = canvas.getContext('2d');
+        const canvas = document.getElementById('hacker-bg'); const ctx = canvas.getContext('2d');
         const letters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789$+-*/=%""\'#&_(),.;:?!\\|{}<>[]^~';
         let drops = [];
         
