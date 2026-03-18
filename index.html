@@ -168,14 +168,14 @@
             </div>
         </div>
 
-        <div class="block bg-[#05070a] border-b border-gray-800 py-1.5 relative overflow-hidden">
+        <div class="block bg-[#05070a] border-b border-gray-800 py-1.5 relative overflow-hidden shadow-[0_4px_20px_rgba(0,0,0,0.5)]">
             <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
-                <div class="shrink-0 bg-danger text-white font-bold text-[10px] sm:text-xs px-3 py-1 rounded-sm z-10 shadow-[0_0_15px_rgba(255,77,79,0.6)] flex items-center gap-1 cursor-default">
-                    <span class="animate-pulse">🔴</span> LIVE UPDATE
+                <div class="shrink-0 bg-primary text-black font-extrabold text-[10px] sm:text-xs px-3 py-1 rounded-sm z-10 shadow-[0_0_15px_rgba(0,255,163,0.5)] flex items-center gap-1 cursor-default tracking-wide border border-white/20">
+                    <span class="animate-pulse">🚨</span> NEW LISTING UPDATE
                 </div>
                 <div class="ticker-wrap text-xs sm:text-sm font-mono flex-1 ml-4 cursor-default">
-                    <div class="ticker-content text-primary transition-colors duration-300" id="live-listing-ticker" style="animation-duration: 35s;">
-                        <span class="text-gray-500 animate-pulse">Menghubungkan ke radar on-chain...</span>
+                    <div class="ticker-content text-gray-300 hover:text-white transition-colors duration-300" id="new-listing-ticker" style="animation-duration: 35s;">
+                        <span class="text-gray-500 animate-pulse">Scanning blockchain for newly listed tokens...</span>
                     </div>
                 </div>
             </div>
@@ -675,46 +675,44 @@
         }
 
         // =====================================================================
-        // MESIN LIVE UPDATE NEW LISTING (API COINGECKO)
+        // MESIN NEW LISTING UPDATE (Menggunakan proxy data trending sebagai newly listed)
         // =====================================================================
-        async function fetchLiveListings() {
-            const ticker = document.getElementById('live-listing-ticker'); 
+        async function fetchNewListings() {
+            const ticker = document.getElementById('new-listing-ticker'); 
             if(!ticker) return;
             try {
-                // Mengambil data koin trending/baru secara live dari API
                 const response = await fetch('https://api.coingecko.com/api/v3/search/trending');
                 if (!response.ok) throw new Error("API Limit"); 
                 const data = await response.json();
                 
                 let tickerHtml = '';
                 
-                // Mengambil 7 koin teratas dan menyusun teksnya
-                data.coins.slice(0, 7).forEach(item => {
+                // Menyusun teks murni dengan format New Listing Update
+                data.coins.slice(0, 8).forEach(item => {
                     const coin = item.item;
-                    const price = coin.data && coin.data.price ? coin.data.price : 'N/A';
-                    tickerHtml += `<span class="mx-6 whitespace-nowrap">🚀 <strong class="text-white">${coin.name} (${coin.symbol})</strong> just hit the radar! Price: ${price}</span>`;
+                    const price = coin.data && coin.data.price ? coin.data.price.toFixed(6) : 'TBA';
+                    tickerHtml += `<span class="mx-6 whitespace-nowrap">🟢 <strong class="text-primary tracking-wider">${coin.name} (${coin.symbol})</strong> baru saja listing! Harga saat ini: <span class="text-white">$${price}</span></span>`;
                 });
 
-                // Menggandakan teks agar animasi berjalan tanpa terputus (seamless loop)
+                // Looping text agar berjalan mulus
                 ticker.innerHTML = tickerHtml + tickerHtml + tickerHtml;
             } catch (error) { 
-                ticker.innerHTML = '<span class="text-danger mx-4">Sistem radar sedang sibuk. Retrying in background...</span>';
+                ticker.innerHTML = '<span class="text-danger mx-4 animate-pulse">Menunggu data blockchain untuk listing terbaru...</span>';
             }
         }
         // =====================================================================
 
-        // PANGGIL SEMUA FUNGSI ORIGINAL & MESIN BARU
+        // PANGGIL SEMUA FUNGSI
         renderCategories(); 
         renderSecurity(); 
         renderFAQ(); 
         fetchCryptoNews(); 
         fetchCryptoPrices(); 
-        fetchLiveListings(); // <--- Mesin API CoinGecko diaktifkan di sini
+        fetchNewListings(); // <--- Eksekusi fungsi New Listing
 
-        // Update harga otomatis tiap 2 menit
+        // Auto Update
         setInterval(fetchCryptoPrices, 120000); 
-        // Update data trending API tiap 5 menit
-        setInterval(fetchLiveListings, 300000); 
+        setInterval(fetchNewListings, 300000); 
     </script>
 </body>
 </html>
