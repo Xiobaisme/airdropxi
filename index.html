@@ -11,9 +11,6 @@
     <link rel="apple-touch-icon" href="logo.png">
     
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    
-    <script src="https://cdn.jsdelivr.net/npm/sweetalert2@11"></script>
-    
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
@@ -171,6 +168,18 @@
             </div>
         </div>
 
+        <div class="block bg-[#05070a] border-b border-gray-800 py-1.5 relative overflow-hidden">
+            <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 flex items-center">
+                <div class="shrink-0 bg-danger text-white font-bold text-[10px] sm:text-xs px-3 py-1 rounded-sm z-10 shadow-[0_0_15px_rgba(255,77,79,0.6)] flex items-center gap-1 cursor-default">
+                    <span class="animate-pulse">🔴</span> LIVE UPDATE
+                </div>
+                <div class="ticker-wrap text-xs sm:text-sm font-mono flex-1 ml-4 cursor-default">
+                    <div class="ticker-content text-primary transition-colors duration-300" id="live-listing-ticker" style="animation-duration: 35s;">
+                        <span class="text-gray-500 animate-pulse">Menghubungkan ke radar on-chain...</span>
+                    </div>
+                </div>
+            </div>
+        </div>
         <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
             <div class="text-center mb-14 glass-card rounded-2xl p-8 max-w-3xl mx-auto">
                 <h2 class="text-4xl font-extrabold text-white mb-4 uppercase tracking-wider" id="header-title">Hunt Web3 <span class="text-primary drop-shadow-[0_0_8px_rgba(0,255,163,0.8)]">Airdrops</span></h2>
@@ -331,39 +340,6 @@
                     const emailParts = session.user.email.split('@');
                     document.getElementById('user-email-display').innerText = emailParts[0].substring(0, 10);
                 }
-
-                // =====================================================================
-                // TAMBAHAN KODE POPUP TELEGRAM DI SINI
-                // =====================================================================
-                if (!sessionStorage.getItem('telegramPopupShown')) {
-                    setTimeout(() => {
-                        Swal.fire({
-                            title: '<span style="color:#00FFA3; font-weight:bold; letter-spacing: 1px;">ALPHA SIGNAL!</span>',
-                            html: '<p style="color:#A1A1AA; font-family: monospace;">Jangan lewatkan info listing & airdrop terbaru langsung dari sumbernya.</p>',
-                            background: '#0B0E14',
-                            color: '#fff',
-                            imageUrl: 'https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg',
-                            imageWidth: 80,
-                            imageHeight: 80,
-                            imageAlt: 'Telegram Logo',
-                            showCancelButton: true,
-                            confirmButtonColor: '#00FFA3',
-                            cancelButtonColor: '#1F2937',
-                            confirmButtonText: '<span style="color:#000; font-weight:bold;">Join Telegram</span>',
-                            cancelButtonText: '<span style="color:#fff">Nanti Saja</span>',
-                            customClass: {
-                                popup: 'border border-[#00FFA3]/30 shadow-[0_0_20px_rgba(0,255,163,0.2)]'
-                            }
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.open('https://t.me/NewListingsFeed', '_blank');
-                            }
-                        });
-                        // Menandai bahwa popup sudah muncul agar tidak spam saat refresh
-                        sessionStorage.setItem('telegramPopupShown', 'true');
-                    }, 5000); // Popup akan muncul 5 detik setelah user berhasil masuk
-                }
-                // =====================================================================
             }
             fetchAirdropsFromDB();
         });
@@ -433,7 +409,7 @@
                 calcMainDesc: "Real-time crypto conversion and farming capital management.",
                 calcConvTitle: "Live Crypto Conversion", calcMathTitle: "Standard Calculator",
                 calcLbl1: "AMOUNT (FROM)", calcLbl2: "RESULT VALUE (TO)",
-                catTitle: `<svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> On-Chain Narratives`,
+                catTitle: `<svg class="w-8 h-8 text-purple-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2V6zM14 6a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2V6zM4 16a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2H6a2 2 0 01-2-2v-2zM14 16a2 2 0 012-2h2a2 2 0 012-2h2a2 2 0 012 2v2a2 2 0 01-2 2h-2a2 2 0 01-2-2v-2z"></path></svg> On-Chain Narratives`,
                 catDesc: "Master the diverse Web3 ecosystems and maximize your farming efficiency.",
                 newsMainTitle: `<svg class="w-8 h-8 text-blue-400" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 20H5a2 2 0 01-2-2V6a2 2 0 012-2h10a2 2 0 012 2v1m2 13a2 2 0 01-2-2V7m2 13a2 2 0 002-2V9.5a2.5 2.5 0 00-2.5-2.5H15M9 11l3 3L22 4"></path></svg> Web3 Market Signals`,
                 newsMainDesc: "Automated market intelligence from top media for your portfolio sentiment.",
@@ -698,13 +674,47 @@
             } catch (error) { console.log("Menggunakan data cadangan..."); }
         }
 
-        // PANGGIL SEMUA FUNGSI ORIGINAL
+        // =====================================================================
+        // MESIN LIVE UPDATE NEW LISTING (API COINGECKO)
+        // =====================================================================
+        async function fetchLiveListings() {
+            const ticker = document.getElementById('live-listing-ticker'); 
+            if(!ticker) return;
+            try {
+                // Mengambil data koin trending/baru secara live dari API
+                const response = await fetch('https://api.coingecko.com/api/v3/search/trending');
+                if (!response.ok) throw new Error("API Limit"); 
+                const data = await response.json();
+                
+                let tickerHtml = '';
+                
+                // Mengambil 7 koin teratas dan menyusun teksnya
+                data.coins.slice(0, 7).forEach(item => {
+                    const coin = item.item;
+                    const price = coin.data && coin.data.price ? coin.data.price : 'N/A';
+                    tickerHtml += `<span class="mx-6 whitespace-nowrap">🚀 <strong class="text-white">${coin.name} (${coin.symbol})</strong> just hit the radar! Price: ${price}</span>`;
+                });
+
+                // Menggandakan teks agar animasi berjalan tanpa terputus (seamless loop)
+                ticker.innerHTML = tickerHtml + tickerHtml + tickerHtml;
+            } catch (error) { 
+                ticker.innerHTML = '<span class="text-danger mx-4">Sistem radar sedang sibuk. Retrying in background...</span>';
+            }
+        }
+        // =====================================================================
+
+        // PANGGIL SEMUA FUNGSI ORIGINAL & MESIN BARU
         renderCategories(); 
         renderSecurity(); 
         renderFAQ(); 
         fetchCryptoNews(); 
         fetchCryptoPrices(); 
+        fetchLiveListings(); // <--- Mesin API CoinGecko diaktifkan di sini
+
+        // Update harga otomatis tiap 2 menit
         setInterval(fetchCryptoPrices, 120000); 
+        // Update data trending API tiap 5 menit
+        setInterval(fetchLiveListings, 300000); 
     </script>
 </body>
 </html>
