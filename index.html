@@ -5,6 +5,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AIRDROPXI - Web3 Airdrop Aggregator</title>
     <link rel="icon" href="logo.png" type="image/png">
+    
+    <!-- Scripts Penting -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
@@ -13,79 +15,107 @@
             theme: { extend: { colors: { web3bg: '#0B0E14', primary: '#00FFA3', primaryHover: '#00cc82', danger: '#ff4d4f' } } }
         }
     </script>
+    
     <style>
+        /* Ticker Animasi */
         .ticker-wrap { width: 100%; overflow: hidden; white-space: nowrap; display: flex; align-items: center; }
         .ticker-content { display: flex; gap: 2rem; animation: marquee 40s linear infinite; }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
-        .glass-card-bg-pattern { background-color: rgba(11, 14, 20, 0.9); background-image: linear-gradient(rgba(0, 255, 163, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 163, 0.05) 1px, transparent 1px); background-size: 50px 50px; }
-        .glass-card { backdrop-filter: blur(12px); border: 1px solid rgba(0, 255, 163, 0.2); }
-        .glass-nav { background: rgba(11, 14, 20, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 255, 163, 0.3); }
+
+        /* Styling Kartu */
+        .glass-card { background: rgba(11, 14, 20, 0.9); backdrop-filter: blur(12px); border: 1px solid rgba(0, 255, 163, 0.2); }
         .hover-glow:hover { box-shadow: 0 0 20px rgba(0, 255, 163, 0.4); transform: translateY(-5px); border-color: #00FFA3; transition: all 0.3s ease; }
+        
+        /* Background Matrix (Dioptimasi agar tidak macet) */
+        #hacker-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.5; }
+        
+        /* Kalkulator */
         .calc-btn { background: rgba(31, 41, 55, 0.8); border: 1px solid #374151; color: white; font-weight: bold; border-radius: 0.5rem; transition: all 0.2s; padding: 12px; }
-        .calc-btn:hover { background: #00FFA3; color: black; }
-        .security-card { backdrop-filter: blur(12px); border: 1px solid rgba(255, 77, 79, 0.3); transition: all 0.3s ease; }
-        .security-card:hover { border-color: #ff4d4f; }
-        #hacker-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; opacity: 0.6; }
-        details > summary { list-style: none; }
+        .calc-btn:hover { background: #00FFA3; color: black; transform: scale(1.05); }
+
+        details > summary { list-style: none; outline: none; }
+        .faq-card { background: #111827; border: 1px solid #374151; border-radius: 0.75rem; margin-bottom: 1rem; }
     </style>
 </head>
 <body class="bg-black text-gray-200 font-sans antialiased min-h-screen">
 
     <canvas id="hacker-bg"></canvas>
 
+    <!-- Login Modal -->
     <div id="login-modal" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center hidden">
-        <div class="glass-card glass-card-bg-pattern p-10 rounded-2xl max-w-md w-full text-center border-primary/50">
-            <h2 class="text-2xl font-bold text-white mb-2" id="login-title">Restricted Access</h2>
-            <p class="text-sm text-gray-400 mb-8" id="login-desc">Sign in to view hidden Web3 airdrop tasks.</p>
+        <div class="glass-card p-10 rounded-2xl max-w-md w-full mx-4 text-center border-primary/50">
+            <h2 class="text-2xl font-bold text-white mb-2">Restricted Access</h2>
+            <p class="text-sm text-gray-400 mb-8">Sign in to view hidden Web3 airdrop tasks.</p>
             <div class="space-y-4">
-                <button onclick="loginWithProvider('twitter')" class="w-full flex items-center justify-center space-x-3 bg-black border border-gray-600 hover:border-white text-white py-3 rounded-lg transition"><span id="login-btn-x">Continue with X</span></button>
-                <button onclick="loginWithProvider('google')" class="w-full flex items-center justify-center space-x-3 bg-white text-black py-3 rounded-lg transition"><span id="login-btn-g">Continue with Google</span></button>
+                <button onclick="loginWithProvider('twitter')" class="w-full bg-black border border-gray-600 text-white py-3 rounded-lg font-bold">Continue with X</button>
+                <button onclick="loginWithProvider('google')" class="w-full bg-white text-black py-3 rounded-lg font-bold">Continue with Google</button>
             </div>
         </div>
     </div>
 
     <div class="relative z-10 w-full">
-        <div id="navbar-container"></div>
+        <!-- NAVBAR -->
+        <nav class="bg-[#0B0E14]/80 backdrop-blur-md border-b border-primary/30 sticky top-0 z-50">
+            <div class="max-w-7xl mx-auto px-4 h-16 flex items-center justify-between">
+                <div class="flex items-center gap-3 cursor-pointer" onclick="window.scrollTo(0,0)">
+                    <img src="logo.png" class="w-8 h-8 rounded-full border border-primary/50">
+                    <h1 class="text-2xl font-bold text-white tracking-widest">AIRDROP<span class="text-primary">XI</span></h1>
+                </div>
+                <div class="hidden lg:flex items-center gap-6">
+                    <a href="#" class="text-sm font-bold text-primary">Home</a>
+                    <a href="#airdrops" class="text-sm font-bold text-gray-300 hover:text-primary">Airdrops</a>
+                    <a href="docs.html" class="bg-primary/10 text-primary border border-primary/50 px-4 py-1.5 rounded-lg text-sm font-bold hover:bg-primary hover:text-black transition">Intel Archive</a>
+                    <a href="#security" class="text-sm font-bold text-gray-300 hover:text-danger">Security</a>
+                    <button onclick="toggleLanguage()" class="border border-gray-600 px-2 py-1 rounded text-xs bg-gray-800">
+                        <span id="lang-text">EN</span>
+                    </button>
+                </div>
+            </div>
+        </nav>
 
         <!-- TICKERS -->
-        <div class="bg-black/80 border-b border-primary/30 py-3 backdrop-blur-md">
-            <div class="max-w-7xl mx-auto px-4"><div class="ticker-wrap text-sm font-mono"><div class="ticker-content" id="crypto-ticker"><span class="text-primary animate-pulse">Syncing...</span></div></div></div>
+        <div class="bg-black/80 border-b border-primary/20 py-2.5">
+            <div class="max-w-7xl mx-auto px-4"><div class="ticker-wrap text-xs font-mono"><div class="ticker-content" id="crypto-ticker">Syncing market data...</div></div></div>
         </div>
-        <div class="bg-[#05070a] border-b border-gray-800 py-1.5 flex items-center">
-            <div class="max-w-7xl mx-auto px-4 flex items-center w-full">
-                <div class="shrink-0 bg-primary text-black font-extrabold text-[10px] px-2 py-0.5 rounded">🚨 RADAR</div>
-                <div class="ticker-wrap text-xs font-mono flex-1 ml-4"><div class="ticker-content" id="new-listing-ticker"><span>Syncing DexScreener Nodes...</span></div></div>
+        <div class="bg-[#05070a] border-b border-gray-800 py-2">
+            <div class="max-w-7xl mx-auto px-4 flex items-center">
+                <div class="bg-primary text-black font-extrabold text-[10px] px-2 py-0.5 rounded">🚨 RADAR</div>
+                <div class="ticker-wrap text-[10px] font-mono flex-1 ml-4"><div class="ticker-content" id="new-listing-ticker">Scanning DexScreener...</div></div>
             </div>
         </div>
 
-        <main class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+        <main class="max-w-7xl mx-auto px-4 py-12">
             <!-- HERO -->
-            <div class="text-center mb-14 glass-card rounded-2xl p-8 max-w-3xl mx-auto">
-                <h2 class="text-4xl font-extrabold text-white mb-4 uppercase" id="header-title">Hunt Web3 <span class="text-primary">Airdrops</span></h2>
-                <p class="text-gray-300" id="header-desc">The ultimate aggregator for testnet, mainnet, and retroactive tasks.</p>
+            <div class="text-center mb-16 glass-card rounded-2xl p-10 max-w-4xl mx-auto">
+                <h2 class="text-4xl sm:text-5xl font-black text-white mb-4 uppercase tracking-tighter" id="header-title">Hunt Web3 <span class="text-primary">Airdrops</span></h2>
+                <p class="text-gray-400 text-lg" id="header-desc">The ultimate aggregator for testnet, mainnet, and retroactive tasks.</p>
             </div>
 
             <!-- AIRDROP LIST -->
             <div id="airdrops" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
-                <p class="col-span-full text-center text-primary animate-pulse font-mono">Connecting to Supabase...</p>
+                <p class="col-span-full text-center text-primary animate-pulse font-mono">Connecting to Node...</p>
             </div>
 
             <!-- ASSET HUB -->
             <div id="calculator-section" class="mt-20 pt-10 border-t border-gray-800">
                 <div class="text-center mb-10">
-                    <h2 class="text-3xl font-extrabold text-white" id="calc-main-title">Asset Hub</h2>
-                    <p class="text-gray-400 mt-2" id="calc-main-desc">Real-time crypto conversion and farming capital management.</p>
+                    <h2 class="text-3xl font-bold text-white" id="calc-main-title">Asset Hub</h2>
                 </div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <div class="glass-card glass-card-bg-pattern rounded-2xl p-8 hover-glow">
-                        <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-2" id="calc-conv-title">Live Crypto Conversion</h3>
-                        <input type="number" id="calc-input1" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-4 text-white mb-4 outline-none focus:border-primary" value="1" oninput="calculateExchange()">
-                        <select id="calc-currency1" class="w-full bg-gray-800 text-white p-3 rounded mb-4" onchange="calculateExchange()"></select>
-                        <input type="text" id="calc-input2" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-4 text-white font-bold" readonly>
-                        <select id="calc-currency2" class="w-full bg-gray-800 text-white p-3 rounded mt-4" onchange="calculateExchange()"></select>
+                    <!-- Converter -->
+                    <div class="glass-card rounded-2xl p-8 hover-glow">
+                        <h3 class="text-lg font-bold text-primary mb-6 uppercase tracking-widest" id="calc-conv-title">Live Conversion</h3>
+                        <div class="space-y-4">
+                            <input type="number" id="calc-input1" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-4 text-white" value="1" oninput="calculateExchange()">
+                            <select id="calc-currency1" class="w-full bg-gray-800 text-white p-3 rounded" onchange="calculateExchange()"></select>
+                            <div class="text-center text-primary font-bold">⬇</div>
+                            <input type="text" id="calc-input2" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-4 text-white font-bold" readonly>
+                            <select id="calc-currency2" class="w-full bg-gray-800 text-white p-3 rounded" onchange="calculateExchange()"></select>
+                        </div>
                     </div>
-                    <div class="glass-card glass-card-bg-pattern rounded-2xl p-8 hover-glow">
-                        <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-2" id="calc-math-title">Standard Calculator</h3>
+                    <!-- Calculator -->
+                    <div class="glass-card rounded-2xl p-8 hover-glow">
+                        <h3 class="text-lg font-bold text-primary mb-6 uppercase tracking-widest" id="calc-math-title">Standard Calculator</h3>
                         <div class="bg-gray-900 p-4 rounded mb-4"><input type="text" id="math-display" class="w-full bg-transparent text-right text-3xl font-mono text-white outline-none" readonly value="0"></div>
                         <div class="grid grid-cols-4 gap-2">
                             <button onclick="calcClear()" class="col-span-2 calc-btn text-red-500">AC</button>
@@ -98,54 +128,44 @@
                 </div>
             </div>
 
-            <!-- NARRATIVES (CATEGORIES) -->
+            <!-- NARRATIVES -->
             <div id="categories" class="mt-24 pt-10 border-t border-gray-800">
-                <div class="text-center mb-10">
-                    <h2 class="text-3xl font-extrabold text-white" id="cat-title">On-Chain Narratives</h2>
-                    <p class="text-gray-400 mt-2" id="cat-desc">Master the diverse Web3 ecosystems and maximize your farming efficiency.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="categories-container"></div>
+                <h2 class="text-3xl font-bold text-white text-center mb-10" id="cat-title">On-Chain Narratives</h2>
+                <div class="grid grid-cols-2 lg:grid-cols-4 gap-4" id="categories-container"></div>
             </div>
 
-            <!-- SIGNALS (NEWS) -->
+            <!-- NEWS -->
             <div id="news" class="mt-24 pt-10 border-t border-gray-800">
-                <div class="text-center mb-10">
-                    <h2 class="text-3xl font-extrabold text-white" id="news-main-title">Web3 Market Signals</h2>
-                </div>
+                <h2 class="text-3xl font-bold text-white text-center mb-10" id="news-main-title">Market Signals</h2>
                 <div class="grid grid-cols-1 md:grid-cols-3 gap-6" id="news-container"></div>
             </div>
 
-            <!-- SECURITY PROTOCOLS -->
+            <!-- SECURITY -->
             <div id="security" class="mt-24 pt-10 border-t border-gray-800">
-                <div class="text-center mb-10">
-                    <h2 class="text-3xl font-extrabold text-white" id="sec-title">Security Protocols</h2>
-                    <p class="text-gray-400 mt-2" id="sec-desc">Strict operational standards to secure your wallet liquidity.</p>
-                </div>
-                <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6" id="security-container"></div>
+                <h2 class="text-3xl font-bold text-danger text-center mb-10" id="sec-title">Security Protocols</h2>
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-4" id="security-container"></div>
             </div>
 
             <!-- FAQ -->
-            <div id="faq" class="mt-24 max-w-5xl mx-auto pt-10 border-t border-gray-800">
-                <h2 class="text-3xl font-extrabold text-white mb-8 text-center" id="faq-title">Base Intelligence (FAQ)</h2>
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-6" id="faq-container"></div>
-            </div>
-
-            <!-- NEWSLETTER -->
-            <div id="newsletter" class="mt-24 max-w-3xl mx-auto pt-10 border-t border-gray-800 text-center">
-                <h2 class="text-3xl font-extrabold text-white mb-4" id="news-title">Catch Alpha Signals!</h2>
-                <form action="https://formspree.io/f/mzdjgbjn" method="POST" class="flex flex-col sm:flex-row gap-3 justify-center" onsubmit="handleSubscribe(event)">
-                    <input type="email" name="email" id="email-input" required placeholder="Enter email..." class="bg-gray-900 border border-gray-700 text-white px-5 py-4 rounded-lg focus:border-primary outline-none flex-1">
-                    <button type="submit" id="news-btn" class="bg-primary hover:bg-primaryHover text-black font-bold py-4 px-10 rounded-lg transition">Activate Radar</button>
-                </form>
-                <p id="subscribe-msg" class="text-primary mt-4 hidden font-mono">✓ Radar active! Email registered.</p>
+            <div id="faq" class="mt-24 max-w-4xl mx-auto pt-10 border-t border-gray-800">
+                <h2 class="text-2xl font-bold text-white text-center mb-10" id="faq-title">Intelligence FAQ</h2>
+                <div id="faq-container"></div>
             </div>
         </main>
 
-        <div id="footer-container"></div>
+        <footer class="bg-[#0B0E14] py-12 border-t border-gray-800 text-center">
+            <div class="max-w-7xl mx-auto px-4">
+                <div class="flex justify-center gap-6 mb-6">
+                    <a href="https://x.com/xiobai06" target="_blank" class="text-gray-500 hover:text-white">Twitter</a>
+                    <a href="https://t.me/Xiobaiishikii" target="_blank" class="text-gray-500 hover:text-primary">Telegram</a>
+                </div>
+                <p class="text-gray-600 text-xs font-mono">&copy; 2026 AIRDROPXI. Secure Protocol.</p>
+            </div>
+        </footer>
     </div>
 
-    <script src="js/component.js"></script>
     <script>
+        // --- SUPABASE CONFIG ---
         const SUPABASE_URL = 'https://hmjjujirktpqviayfehe.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtamp1amlya3RwcXZpYXlmZWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1NzQsImV4cCI6MjA4OTE1NzU3NH0.nmCK3b66fU8Zh-mwQw5YUS_I3dFJAYnvfWlO050doSY';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
@@ -153,18 +173,14 @@
         let currentLang = 'en';
         const langData = {
             id: {
-                headerTitle: 'Buru <span class="text-primary">Airdrop</span> Web3', headerDesc: "Agregator terpusat untuk tugas testnet, mainnet, dan retroaktif.",
-                calcMainTitle: "Pusat Hitung Aset", calcMainDesc: "Konversi aset kripto real-time dan manajemen modal farming.",
-                catTitle: "Narasi On-Chain", catDesc: "Kuasai ekosistem Web3 dan maksimalkan efisiensi farming.",
-                secTitle: "Protokol Keamanan", secDesc: "Standar operasional wajib untuk mengamankan likuiditas dompet.",
-                faqTitle: "Intelijen Basis (FAQ)", newsTitle: "Pantau Sinyal Alpha!", newsBtn: "Aktifkan Radar", btnEksekusi: "Eksekusi"
+                headerTitle: 'Buru <span class="text-primary">Airdrop</span> Web3',
+                headerDesc: "Agregator terpusat untuk tugas testnet, mainnet, dan retroaktif.",
+                calcMainTitle: "Pusat Hitung Aset", btnEksekusi: "Eksekusi"
             },
             en: {
-                headerTitle: 'Hunt Web3 <span class="text-primary">Airdrops</span>', headerDesc: "The ultimate aggregator for testnet, mainnet, and retroactive tasks.",
-                calcMainTitle: "Asset Hub", calcMainDesc: "Real-time crypto conversion and farming capital management.",
-                catTitle: "On-Chain Narratives", catDesc: "Master the diverse Web3 ecosystems and maximize your farming efficiency.",
-                secTitle: "Security Protocols", secDesc: "Strict operational standards to secure your wallet liquidity.",
-                faqTitle: "Base Intelligence (FAQ)", newsTitle: "Catch Alpha Signals!", newsBtn: "Activate Radar", btnEksekusi: "Execute"
+                headerTitle: 'Hunt Web3 <span class="text-primary">Airdrops</span>',
+                headerDesc: "The ultimate aggregator for testnet, mainnet, and retroactive tasks.",
+                calcMainTitle: "Asset Hub", btnEksekusi: "Execute"
             }
         };
 
@@ -174,51 +190,41 @@
             document.getElementById('header-title').innerHTML = langData[currentLang].headerTitle;
             document.getElementById('header-desc').innerText = langData[currentLang].headerDesc;
             document.getElementById('calc-main-title').innerText = langData[currentLang].calcMainTitle;
-            document.getElementById('calc-main-desc').innerText = langData[currentLang].calcMainDesc;
-            document.getElementById('cat-title').innerText = langData[currentLang].catTitle;
-            document.getElementById('cat-desc').innerText = langData[currentLang].catDesc;
-            document.getElementById('sec-title').innerText = langData[currentLang].secTitle;
-            document.getElementById('sec-desc').innerText = langData[currentLang].secDesc;
-            document.getElementById('faq-title').innerText = langData[currentLang].faqTitle;
-            document.getElementById('news-title').innerText = langData[currentLang].newsTitle;
-            document.getElementById('news-btn').innerText = langData[currentLang].newsBtn;
-            fetchAirdropsFromDB(); renderCategories(); renderSecurity(); renderFAQ();
+            fetchAirdrops();
         }
 
-        document.addEventListener('DOMContentLoaded', async () => {
-            const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) document.getElementById('login-modal').classList.remove('hidden');
-            fetchAirdropsFromDB(); fetchCryptoPrices(); fetchNewListings(); populateSelectOptions();
-            renderCategories(); renderSecurity(); renderFAQ(); fetchCryptoNews();
-        });
-
-        async function fetchAirdropsFromDB() {
+        async function fetchAirdrops() {
             const container = document.getElementById('airdrops');
             const { data, error } = await supabaseClient.from('airdrops').select('*');
             if (error || !data) return;
             container.innerHTML = '';
             data.forEach(item => {
                 const tasks = currentLang === 'id' ? (item.tasksID || item.tasksEN) : item.tasksEN;
-                container.innerHTML += `<div class="glass-card glass-card-bg-pattern rounded-xl p-6 hover-glow transition"><h3 class="text-xl font-bold text-white mb-2">${item.name}</h3><p class="text-gray-400 text-sm mb-4">${tasks}</p><a href="${item.link}" target="_blank" class="block text-center bg-primary/20 border border-primary text-primary py-2 rounded font-bold hover:bg-primary hover:text-black transition">${langData[currentLang].btnEksekusi}</a></div>`;
+                container.innerHTML += `
+                <div class="glass-card rounded-xl p-6 hover-glow transition">
+                    <h3 class="text-xl font-bold text-white mb-2">${item.name}</h3>
+                    <p class="text-gray-400 text-sm mb-4">${tasks}</p>
+                    <a href="${item.link}" target="_blank" class="block text-center bg-primary/20 border border-primary text-primary py-2 rounded font-bold hover:bg-primary hover:text-black transition">${langData[currentLang].btnEksekusi}</a>
+                </div>`;
             });
         }
 
-        const categoryData = [{icon:'🧪',t:'Testnet'},{icon:'⏮️',t:'Retroactive'},{icon:'📡',t:'DePIN'},{icon:'💬',t:'SocialFi'}];
-        function renderCategories() {
-            const c = document.getElementById('categories-container'); c.innerHTML = '';
-            categoryData.forEach(i => { c.innerHTML += `<div class="glass-card rounded-xl p-6 text-center hover-glow transition"><div class="text-4xl mb-2">${i.icon}</div><h4 class="text-white font-bold">${i.t}</h4></div>`; });
-        }
+        // --- FEATURES RENDERING ---
+        function renderFeatures() {
+            // Categories
+            const cat = document.getElementById('categories-container');
+            const cats = [{i:'🧪',t:'Testnet'},{i:'⏮️',t:'Retro'},{i:'📡',t:'DePIN'},{i:'💬',t:'SocialFi'}];
+            cat.innerHTML = cats.map(x => `<div class="glass-card p-4 text-center rounded-xl hover-glow transition"><div class="text-3xl mb-2">${x.i}</div><div class="text-xs font-bold text-white">${x.t}</div></div>`).join('');
 
-        function renderSecurity() {
-            const s = document.getElementById('security-container'); s.innerHTML = '';
-            const sec = ["Burner Wallet", "Private Key Safety", "Phishing Alert", "Revoke Access"];
-            sec.forEach(t => { s.innerHTML += `<div class="security-card rounded-xl p-6 text-center"><h4 class="text-white font-bold mb-2">${t}</h4><p class="text-xs text-gray-400">Security standard for Web3.</p></div>`; });
-        }
+            // Security
+            const sec = document.getElementById('security-container');
+            const secs = ["Burner Wallet", "Key Safety", "Phishing", "Revoke"];
+            sec.innerHTML = secs.map(x => `<div class="border border-danger/30 p-4 text-center rounded-xl bg-danger/5 text-xs text-white font-bold">${x}</div>`).join('');
 
-        function renderFAQ() {
-            const f = document.getElementById('faq-container'); f.innerHTML = '';
-            const faqs = [{q:"What is airdrop?", a:"Free token distribution."},{q:"Is it safe?", a:"Always use burner wallets."}];
-            faqs.forEach(i => { f.innerHTML += `<details class="bg-gray-900/50 p-4 rounded-lg mb-2 border border-gray-800"><summary class="font-bold cursor-pointer text-primary">${i.q}</summary><p class="mt-2 text-sm text-gray-400">${i.a}</p></details>`; });
+            // FAQ
+            const faq = document.getElementById('faq-container');
+            const faqs = [{q:"How to start?", a:"Use a burner wallet and follow the tasks."}, {q:"Is it free?", a:"Testnets are free, Mainnets require gas."}];
+            faq.innerHTML = faqs.map(x => `<details class="faq-card p-4"><summary class="font-bold cursor-pointer text-primary">${x.q}</summary><p class="mt-2 text-sm text-gray-400">${x.a}</p></details>`).join('');
         }
 
         // --- MATH & CONVERTER ---
@@ -227,65 +233,59 @@
         function calcClear() { mathExp = '0'; document.getElementById('math-display').value = '0'; }
         function calcCalculate() { try { mathExp = eval(mathExp).toString(); document.getElementById('math-display').value = mathExp; } catch(e) { calcClear(); } }
 
-        let coinPrices = { 'BTC': 68000, 'ETH': 3400, 'SOL': 145, 'BNB': 590 };
-        function populateSelectOptions() {
-            let html = '<option value="USD">USD</option><option value="IDR">IDR</option>';
-            Object.keys(coinPrices).forEach(c => html += `<option value="${c}">${c}</option>`);
-            document.getElementById('calc-currency1').innerHTML = html; document.getElementById('calc-currency2').innerHTML = html;
+        let prices = { 'BTC': 67000, 'ETH': 3300, 'SOL': 140, 'BNB': 580 };
+        function populateSelects() {
+            let h = '<option value="USD">USD</option><option value="IDR">IDR</option>';
+            Object.keys(prices).forEach(c => h += `<option value="${c}">${c}</option>`);
+            document.getElementById('calc-currency1').innerHTML = h; document.getElementById('calc-currency2').innerHTML = h;
             document.getElementById('calc-currency2').value = 'IDR';
         }
         function calculateExchange() {
             const amt = parseFloat(document.getElementById('calc-input1').value) || 0;
             const c1 = document.getElementById('calc-currency1').value; const c2 = document.getElementById('calc-currency2').value;
-            let inUSD = c1 === 'USD' ? amt : (c1 === 'IDR' ? amt / 15800 : amt * coinPrices[c1]);
-            let res = c2 === 'USD' ? inUSD : (c2 === 'IDR' ? inUSD * 15800 : inUSD / coinPrices[c2]);
+            let usd = c1 === 'USD' ? amt : (c1 === 'IDR' ? amt / 15800 : amt * prices[c1]);
+            let res = c2 === 'USD' ? usd : (c2 === 'IDR' ? usd * 15800 : usd / prices[c2]);
             document.getElementById('calc-input2').value = res.toLocaleString();
         }
 
-        async function fetchCryptoPrices() {
+        // --- APIS & TICKERS ---
+        async function fetchTickers() {
             try {
-                const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd&include_24hr_change=true');
-                const d = await r.json(); const m = {bitcoin:'BTC',ethereum:'ETH',solana:'SOL',binancecoin:'BNB'};
-                let h = ''; Object.keys(m).forEach(id => {
-                    h += `<div class="flex items-center space-x-2 mr-8"><span class="font-bold text-white">${m[id]}</span><span class="text-gray-300">$${d[id].usd.toLocaleString()}</span></div>`;
-                });
-                document.getElementById('crypto-ticker').innerHTML = h + h;
+                const r = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd');
+                const d = await r.json(); 
+                document.getElementById('crypto-ticker').innerHTML = `BTC: $${d.bitcoin.usd} | ETH: $${d.ethereum.usd} | SOL: $${d.solana.usd} | BNB: $${d.binancecoin.usd}`;
             } catch(e) {}
-        }
-
-        async function fetchNewListings() {
+            
             try {
                 const r = await fetch('https://api.dexscreener.com/token-profiles/latest/v1');
                 const p = await r.json();
-                let h = p.slice(0,10).map(t => `<span class="mx-6">🟢 New Profile: <strong class="text-primary">${t.chainId.toUpperCase()}</strong> - ${t.tokenAddress.substring(0,8)}...</span>`).join('');
-                document.getElementById('new-listing-ticker').innerHTML = h + h;
+                document.getElementById('new-listing-ticker').innerHTML = p.slice(0,5).map(t => `<span class="mr-10">🟢 New: ${t.chainId.toUpperCase()} - ${t.tokenAddress.substring(0,10)}...</span>`).join('');
             } catch(e) {}
         }
 
-        async function fetchCryptoNews() {
-            const n = document.getElementById('news-container');
-            try {
-                const r = await fetch('https://api.rss2json.com/v1/api.json?rss_url=https://cointelegraph.com/rss');
-                const d = await r.json(); let h = '';
-                d.items.slice(0, 3).forEach(i => {
-                    h += `<div class="glass-card rounded-xl p-5 hover-glow transition cursor-pointer" onclick="window.open('${i.link}', '_blank')"><h4 class="text-white font-bold text-sm line-clamp-2">${i.title}</h4><p class="text-[10px] text-primary mt-2">Read Alpha &rarr;</p></div>`;
-                });
-                n.innerHTML = h;
-            } catch (e) { n.innerHTML = '<p class="text-xs text-danger">News connection failed.</p>'; }
-        }
-
+        // --- MATRIX BACKGROUND ---
         const canvas = document.getElementById('hacker-bg'); const ctx = canvas.getContext('2d');
         let drops = [];
-        function initMatrix() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; let cols = Math.floor(canvas.width/16); for(let i=0; i<cols; i++) drops[i] = 1; }
+        function initMatrix() { 
+            canvas.width = window.innerWidth; canvas.height = window.innerHeight; 
+            let cols = Math.floor(canvas.width/20); for(let i=0; i<cols; i++) drops[i] = 1; 
+        }
         function drawMatrix() {
-            ctx.fillStyle = 'rgba(0,0,0,0.1)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = 'rgba(0,0,0,0.15)'; ctx.fillRect(0,0,canvas.width,canvas.height);
             ctx.fillStyle = '#00FFA3'; ctx.font = '15px monospace';
             for(let i=0; i<drops.length; i++) {
-                ctx.fillText(String.fromCharCode(Math.random()*128), i*16, drops[i]*16);
-                if(drops[i]*16 > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++;
+                ctx.fillText(Math.floor(Math.random()*2), i*20, drops[i]*20);
+                if(drops[i]*20 > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++;
             }
         }
-        initMatrix(); setInterval(drawMatrix, 50); window.onresize = initMatrix;
+
+        // INIT
+        window.onload = () => {
+            fetchAirdrops(); renderFeatures(); populateSelects(); fetchTickers(); initMatrix();
+            setInterval(drawMatrix, 60); 
+            setInterval(fetchTickers, 60000);
+        };
+        window.onresize = initMatrix;
     </script>
 </body>
 </html>
