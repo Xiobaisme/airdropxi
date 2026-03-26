@@ -5,249 +5,250 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AIRDROPXI - Web3 Airdrop Aggregator</title>
     <link rel="icon" href="logo.png" type="image/png">
-    
-    <!-- Meta & Manifest -->
     <link rel="manifest" href="manifest.json">
     <meta name="theme-color" content="#0B0E14">
-    <link rel="apple-touch-icon" href="logo.png">
     
-    <!-- Scripts & Styles -->
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     <script src="https://cdn.tailwindcss.com"></script>
     <script>
         tailwind.config = {
             darkMode: 'class',
             theme: {
-                extend: { 
-                    colors: { 
-                        web3bg: '#0B0E14', 
-                        primary: '#00FFA3', 
-                        primaryHover: '#00cc82', 
-                        danger: '#ff4d4f' 
-                    } 
-                }
+                extend: { colors: { web3bg: '#0B0E14', primary: '#00FFA3', primaryHover: '#00cc82', danger: '#ff4d4f' } }
             }
         }
     </script>
     <style>
-        /* Ticker Animation */
         .ticker-wrap { width: 100%; overflow: hidden; white-space: nowrap; display: flex; align-items: center; }
         .ticker-content { display: flex; gap: 2rem; animation: marquee 40s linear infinite; }
-        .ticker-wrap:hover .ticker-content { animation-play-state: paused; }
         @keyframes marquee { 0% { transform: translateX(0); } 100% { transform: translateX(-50%); } }
 
-        /* Patterns & Glassmorphism */
         .glass-card-bg-pattern {
             background-color: rgba(11, 14, 20, 0.9);
-            background-image: 
-                linear-gradient(rgba(0, 255, 163, 0.05) 1px, transparent 1px),
-                linear-gradient(90deg, rgba(0, 255, 163, 0.05) 1px, transparent 1px);
+            background-image: linear-gradient(rgba(0, 255, 163, 0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(0, 255, 163, 0.05) 1px, transparent 1px);
             background-size: 50px 50px;
         }
         .glass-card { backdrop-filter: blur(12px); border: 1px solid rgba(0, 255, 163, 0.2); }
-        .glass-nav { background: rgba(11, 14, 20, 0.8); backdrop-filter: blur(10px); border-bottom: 1px solid rgba(0, 255, 163, 0.3); }
-        .hover-glow:hover { box-shadow: 0 0 20px rgba(0, 255, 163, 0.4); transform: translateY(-5px); transition: all 0.3s ease; border-color: #00FFA3; }
+        .hover-glow:hover { box-shadow: 0 0 20px rgba(0, 255, 163, 0.4); transform: translateY(-5px); border-color: #00FFA3; transition: all 0.3s ease; }
         
-        /* Pulses */
-        @keyframes neon-pulse {
-            0% { border-color: rgba(0, 255, 163, 0.2); }
-            50% { border-color: rgba(0, 255, 163, 0.6); box-shadow: 0 0 15px rgba(0, 255, 163, 0.2); }
-            100% { border-color: rgba(0, 255, 163, 0.2); }
-        }
+        .calc-btn { background: rgba(31, 41, 55, 0.8); border: 1px solid #374151; color: white; font-weight: bold; border-radius: 0.5rem; transition: all 0.2s; padding: 12px; }
+        .calc-btn:hover { background: #00FFA3; color: black; transform: scale(1.05); }
+        
+        @keyframes neon-pulse { 0%, 100% { border-color: rgba(0, 255, 163, 0.2); } 50% { border-color: rgba(0, 255, 163, 0.6); } }
         .airdrop-card-pulse { animation: neon-pulse 3s infinite ease-in-out; }
-        
-        /* Utility */
-        .calc-btn { background: rgba(31, 41, 55, 0.8); border: 1px solid #374151; color: white; font-weight: bold; border-radius: 0.5rem; transition: all 0.2s; padding: 15px; }
-        .calc-btn:hover { background: #00FFA3; color: black; border-color: #00FFA3; transform: scale(1.05); }
+        #hacker-bg { position: fixed; top: 0; left: 0; width: 100%; height: 100%; z-index: 0; pointer-events: none; }
     </style>
 </head>
-<body class="bg-black text-gray-200 font-sans antialiased min-h-screen relative overflow-x-hidden">
+<body class="bg-black text-gray-200 font-sans antialiased min-h-screen">
 
-    <!-- Supabase Login Modal -->
+    <canvas id="hacker-bg"></canvas>
+
+    <!-- Login Modal -->
     <div id="login-modal" class="fixed inset-0 z-[100] bg-black/95 backdrop-blur-md flex items-center justify-center hidden">
-        <div class="glass-card glass-card-bg-pattern p-10 rounded-2xl max-w-md w-full mx-4 text-center border-primary/50 shadow-[0_0_50px_rgba(0,255,163,0.1)]">
+        <div class="glass-card glass-card-bg-pattern p-10 rounded-2xl max-w-md w-full text-center border-primary/50">
             <h2 class="text-2xl font-bold text-white mb-2" id="login-title">Restricted Access</h2>
-            <p class="text-sm text-gray-400 mb-8" id="login-desc">Sign in to view premium Web3 airdrop tasks.</p>
+            <p class="text-sm text-gray-400 mb-8" id="login-desc">Sign in to view hidden Web3 airdrop tasks.</p>
             <div class="space-y-4">
-                <button onclick="loginWithProvider('twitter')" class="w-full flex items-center justify-center space-x-3 bg-black border border-gray-600 hover:border-white text-white py-3 px-4 rounded-lg transition group">
-                    <span class="font-bold" id="login-btn-x">Continue with X</span>
-                </button>
-                <button onclick="loginWithProvider('google')" class="w-full flex items-center justify-center space-x-3 bg-white hover:bg-gray-200 text-black py-3 px-4 rounded-lg transition">
-                    <span class="font-bold" id="login-btn-g">Continue with Google</span>
-                </button>
+                <button onclick="loginWithProvider('twitter')" class="w-full flex items-center justify-center space-x-3 bg-black border border-gray-600 hover:border-white text-white py-3 rounded-lg transition"><span id="login-btn-x">Continue with X</span></button>
+                <button onclick="loginWithProvider('google')" class="w-full flex items-center justify-center space-x-3 bg-white text-black py-3 rounded-lg transition"><span id="login-btn-g">Continue with Google</span></button>
             </div>
         </div>
     </div>
 
-    <!-- Background Matrix Effect -->
-    <canvas id="hacker-bg" class="fixed top-0 left-0 w-full h-full" style="z-index: 0;"></canvas>
-
     <div class="relative z-10 w-full">
-        <!-- MODULAR NAVBAR: Diambil dari js/component.js -->
+        <!-- NAVBAR MASTER -->
         <div id="navbar-container"></div>
 
-        <!-- Crypto Price Ticker -->
+        <!-- TICKERS -->
         <div class="bg-black/80 border-b border-primary/30 py-3 backdrop-blur-md">
-            <div class="max-w-7xl mx-auto px-4">
-                <div class="ticker-wrap text-sm font-mono">
-                    <div class="ticker-content" id="crypto-ticker">
-                        <span class="text-primary animate-pulse">Syncing live market data...</span>
-                    </div>
-                </div>
-            </div>
+            <div class="max-w-7xl mx-auto px-4"><div class="ticker-wrap text-sm font-mono"><div class="ticker-content" id="crypto-ticker"><span class="text-primary animate-pulse">Syncing market data...</span></div></div></div>
         </div>
-
-        <!-- DexScreener New Listing Ticker -->
         <div class="bg-[#05070a] border-b border-gray-800 py-2">
             <div class="max-w-7xl mx-auto px-4 flex items-center">
-                <div class="shrink-0 bg-primary text-black font-extrabold text-[10px] px-3 py-1 rounded-sm shadow-[0_0_10px_rgba(0,255,163,0.5)]">
-                    🚨 RADAR
-                </div>
-                <div class="ticker-wrap text-xs font-mono flex-1 ml-4">
-                    <div class="ticker-content text-gray-300" id="new-listing-ticker">
-                        <span>Menghubungkan ke node DexScreener...</span>
-                    </div>
-                </div>
+                <div class="bg-primary text-black font-extrabold text-[10px] px-2 py-0.5 rounded">🚨 RADAR</div>
+                <div class="ticker-wrap text-xs font-mono flex-1 ml-4"><div class="ticker-content" id="new-listing-ticker"><span>Connecting to DexScreener nodes...</span></div></div>
             </div>
         </div>
 
         <main class="max-w-7xl mx-auto px-4 py-12">
-            <!-- Hero Section -->
+            <!-- HERO -->
             <div class="text-center mb-14 glass-card rounded-2xl p-8 max-w-3xl mx-auto">
                 <h2 class="text-4xl font-extrabold text-white mb-4 uppercase" id="header-title">Hunt Web3 <span class="text-primary">Airdrops</span></h2>
-                <p class="text-gray-300" id="header-desc">Aggregator terpusat untuk tugas testnet, mainnet, dan retroactive.</p>
+                <p class="text-gray-300" id="header-desc">The ultimate aggregator for testnet, mainnet, and retroactive tasks.</p>
             </div>
 
-            <!-- Airdrop List Container (Supabase) -->
+            <!-- AIRDROP LIST -->
             <div id="airdrops" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-8 mb-24">
-                <p class="col-span-full text-center text-primary animate-pulse font-mono">Connecting to Database...</p>
+                <p class="col-span-full text-center text-primary animate-pulse font-mono">Syncing Database...</p>
             </div>
 
-            <!-- Asset Hub (Calculators) -->
+            <!-- ASSET HUB -->
             <div id="calculator-section" class="mt-20 pt-10 border-t border-gray-800">
-                <div class="text-center mb-10">
-                    <h2 class="text-3xl font-extrabold text-white" id="calc-main-title">Asset Hub</h2>
-                </div>
+                <div class="text-center mb-10"><h2 class="text-3xl font-extrabold text-white" id="calc-main-title">Asset Hub</h2></div>
                 <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
-                    <!-- Conversion -->
+                    <!-- Converter -->
                     <div class="glass-card glass-card-bg-pattern rounded-2xl p-8 hover-glow">
-                        <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-2">Crypto Converter</h3>
-                        <input type="number" id="calc-input1" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-4 text-white mb-4" value="1" oninput="calculateExchange()">
-                        <select id="calc-currency1" class="w-full bg-gray-800 text-white p-3 rounded mb-4" onchange="calculateExchange()"></select>
-                        <input type="text" id="calc-input2" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-4 text-white font-bold" readonly>
-                        <select id="calc-currency2" class="w-full bg-gray-800 text-white p-3 rounded mt-4" onchange="calculateExchange()"></select>
-                    </div>
-
-                    <!-- Math Calc -->
-                    <div class="glass-card glass-card-bg-pattern rounded-2xl p-8 hover-glow">
-                        <div class="bg-gray-900 p-4 rounded mb-4">
-                            <input type="text" id="math-display" class="w-full bg-transparent text-right text-3xl font-mono text-white outline-none" readonly value="0">
+                        <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-2" id="calc-conv-title">Conversion</h3>
+                        <div class="space-y-4">
+                            <input type="number" id="calc-input1" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-4 text-white" value="1" oninput="calculateExchange()">
+                            <select id="calc-currency1" class="w-full bg-gray-800 text-white p-3 rounded" onchange="calculateExchange()"></select>
+                            <input type="text" id="calc-input2" class="w-full bg-gray-900 border border-gray-700 rounded-lg p-4 text-white font-bold" readonly>
+                            <select id="calc-currency2" class="w-full bg-gray-800 text-white p-3 rounded" onchange="calculateExchange()"></select>
                         </div>
+                    </div>
+                    <!-- Math -->
+                    <div class="glass-card glass-card-bg-pattern rounded-2xl p-8 hover-glow">
+                        <h3 class="text-xl font-bold text-white mb-6 border-b border-gray-700 pb-2" id="calc-math-title">Calculator</h3>
+                        <div class="bg-gray-900 p-4 rounded mb-4"><input type="text" id="math-display" class="w-full bg-transparent text-right text-3xl font-mono text-white outline-none" readonly value="0"></div>
                         <div class="grid grid-cols-4 gap-2">
                             <button onclick="calcClear()" class="col-span-2 calc-btn text-red-500">AC</button>
-                            <button onclick="calcAppend('/')" class="calc-btn">/</button>
-                            <button onclick="calcAppend('*')" class="calc-btn">×</button>
-                            <!-- Row 789 -->
-                            <button onclick="calcAppend('7')" class="calc-btn">7</button>
-                            <button onclick="calcAppend('8')" class="calc-btn">8</button>
-                            <button onclick="calcAppend('9')" class="calc-btn">9</button>
-                            <button onclick="calcAppend('-')" class="calc-btn">-</button>
-                            <!-- Row 456 -->
-                            <button onclick="calcAppend('4')" class="calc-btn">4</button>
-                            <button onclick="calcAppend('5')" class="calc-btn">5</button>
-                            <button onclick="calcAppend('6')" class="calc-btn">6</button>
-                            <button onclick="calcAppend('+')" class="calc-btn">+</button>
-                            <!-- Row 123= -->
-                            <button onclick="calcAppend('1')" class="calc-btn">1</button>
-                            <button onclick="calcAppend('2')" class="calc-btn">2</button>
-                            <button onclick="calcAppend('3')" class="calc-btn">3</button>
-                            <button onclick="calcCalculate()" class="calc-btn bg-primary text-black">=</button>
+                            <button onclick="calcAppend('/')" class="calc-btn">/</button><button onclick="calcAppend('*')" class="calc-btn">×</button>
+                            <button onclick="calcAppend('7')" class="calc-btn">7</button><button onclick="calcAppend('8')" class="calc-btn">8</button><button onclick="calcAppend('9')" class="calc-btn">9</button><button onclick="calcAppend('-')" class="calc-btn">-</button>
+                            <button onclick="calcAppend('4')" class="calc-btn">4</button><button onclick="calcAppend('5')" class="calc-btn">5</button><button onclick="calcAppend('6')" class="calc-btn">6</button><button onclick="calcAppend('+')" class="calc-btn">+</button>
+                            <button onclick="calcAppend('1')" class="calc-btn">1</button><button onclick="calcAppend('2')" class="calc-btn">2</button><button onclick="calcAppend('3')" class="calc-btn">3</button><button onclick="calcCalculate()" class="calc-btn bg-primary text-black">=</button>
                         </div>
                     </div>
                 </div>
+            </div>
+            
+            <!-- Newsletter -->
+            <div id="newsletter" class="mt-24 max-w-3xl mx-auto text-center py-10 border-t border-gray-800">
+                <h2 class="text-3xl font-extrabold text-white mb-4" id="news-title">Catch Alpha Signals!</h2>
+                <form action="https://formspree.io/f/mzdjgbjn" method="POST" class="flex flex-col sm:flex-row gap-3 justify-center" onsubmit="handleSubscribe(event)">
+                    <input type="email" name="email" id="email-input" required placeholder="Email..." class="bg-gray-900 border border-gray-700 text-white px-5 py-3 rounded-lg focus:border-primary outline-none">
+                    <button type="submit" id="news-btn" class="bg-primary hover:bg-primaryHover text-black font-bold px-8 py-3 rounded-lg transition">Activate Radar</button>
+                </form>
+                <p id="subscribe-msg" class="text-primary mt-4 hidden font-mono">✓ Radar active!</p>
             </div>
         </main>
 
-        <!-- MODULAR FOOTER: Diambil dari js/component.js -->
         <div id="footer-container"></div>
     </div>
 
-    <!-- IMPORTANT SCRIPTS -->
-    <script src="js/component.js"></script> <!-- Navbar & Footer -->
+    <!-- SCRIPTS CORE -->
+    <script src="js/component.js"></script>
     <script>
         // --- KONFIGURASI SUPABASE ---
         const SUPABASE_URL = 'https://hmjjujirktpqviayfehe.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtamp1amlya3RwcXZpYXlmZWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1NzQsImV4cCI6MjA4OTE1NzU3NH0.nmCK3b66fU8Zh-mwQw5YUS_I3dFJAYnvfWlO050doSY';
         const supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-        // --- AUTH CHECK ---
+        // --- MULTI LANGUAGE DATA ---
+        let currentLang = 'en';
+        const langData = {
+            id: {
+                headerTitle: 'Buru <span class="text-primary">Airdrop</span> Web3',
+                headerDesc: "Agregator terpusat untuk tugas testnet, mainnet, dan retroaktif.",
+                calcMainTitle: "Pusat Hitung Aset", calcConvTitle: "Konversi Kripto Live", calcMathTitle: "Kalkulator Standar",
+                newsTitle: "Pantau Sinyal Alpha!", newsBtn: "Aktifkan Radar", btnEksekusi: "Eksekusi"
+            },
+            en: {
+                headerTitle: 'Hunt Web3 <span class="text-primary">Airdrops</span>',
+                headerDesc: "The ultimate aggregator for testnet, mainnet, and retroactive tasks.",
+                calcMainTitle: "Asset Hub", calcConvTitle: "Live Conversion", calcMathTitle: "Standard Calculator",
+                newsTitle: "Catch Alpha Signals!", newsBtn: "Activate Radar", btnEksekusi: "Execute"
+            }
+        };
+
+        function toggleLanguage() {
+            currentLang = currentLang === 'en' ? 'id' : 'en';
+            const navBtn = document.getElementById('lang-text');
+            if(navBtn) navBtn.innerText = currentLang.toUpperCase();
+            // Update UI
+            document.getElementById('header-title').innerHTML = langData[currentLang].headerTitle;
+            document.getElementById('header-desc').innerText = langData[currentLang].headerDesc;
+            document.getElementById('calc-main-title').innerText = langData[currentLang].calcMainTitle;
+            document.getElementById('news-title').innerText = langData[currentLang].newsTitle;
+            document.getElementById('news-btn').innerText = langData[currentLang].newsBtn;
+            fetchAirdropsFromDB();
+        }
+
+        // --- SUPABASE & TICKERS ---
         document.addEventListener('DOMContentLoaded', async () => {
             const { data: { session } } = await supabaseClient.auth.getSession();
-            if (!session) {
-                document.getElementById('login-modal').classList.remove('hidden');
-                document.body.style.overflow = 'hidden';
-            }
-            fetchAirdropsFromDB();
-            fetchCryptoPrices();
-            fetchNewListings();
-            populateSelectOptions();
+            if (!session) document.getElementById('login-modal').classList.remove('hidden');
+            fetchAirdropsFromDB(); fetchCryptoPrices(); fetchNewListings(); populateSelectOptions();
         });
 
         async function fetchAirdropsFromDB() {
             const container = document.getElementById('airdrops');
             const { data, error } = await supabaseClient.from('airdrops').select('*');
-            if (error) {
-                container.innerHTML = '<p class="text-danger text-center col-span-full">Database Error.</p>';
-                return;
-            }
+            if(error || !data) return;
             container.innerHTML = '';
             data.forEach(item => {
+                const tasks = currentLang === 'id' ? (item.tasksID || item.tasksEN) : item.tasksEN;
                 container.innerHTML += `
                 <div class="glass-card glass-card-bg-pattern airdrop-card-pulse rounded-xl p-6 hover-glow transition">
                     <h3 class="text-xl font-bold text-white mb-2">${item.name}</h3>
-                    <p class="text-gray-400 text-sm mb-4">${item.tasksEN || item.tasksID}</p>
-                    <a href="${item.link}" target="_blank" class="block text-center bg-primary/20 border border-primary text-primary py-2 rounded font-bold hover:bg-primary hover:text-black transition">Eksekusi</a>
+                    <p class="text-gray-400 text-sm mb-4">${tasks}</p>
+                    <a href="${item.link}" target="_blank" class="block text-center bg-primary/20 border border-primary text-primary py-2 rounded font-bold hover:bg-primary hover:text-black transition">${langData[currentLang].btnEksekusi}</a>
                 </div>`;
             });
         }
 
-        // --- CALCULATOR LOGIC ---
-        let mathExpression = '0';
-        function calcAppend(v) { mathExpression === '0' ? mathExpression = v : mathExpression += v; document.getElementById('math-display').value = mathExpression; }
-        function calcClear() { mathExpression = '0'; document.getElementById('math-display').value = '0'; }
-        function calcCalculate() { try { mathExpression = eval(mathExpression).toString(); document.getElementById('math-display').value = mathExpression; } catch(e) { calcClear(); } }
+        // --- MATH & CONVERTER ---
+        let mathExp = '0';
+        function calcAppend(v) { mathExp === '0' ? mathExp = v : mathExp += v; document.getElementById('math-display').value = mathExp; }
+        function calcClear() { mathExp = '0'; document.getElementById('math-display').value = '0'; }
+        function calcCalculate() { try { mathExp = eval(mathExp).toString(); document.getElementById('math-display').value = mathExp; } catch(e) { calcClear(); } }
 
-        // --- MATRIX BACKGROUND ---
+        let coinPrices = { 'BTC': 70000, 'ETH': 3500, 'SOL': 140, 'BNB': 600 };
+        function populateSelectOptions() {
+            let html = '<option value="USD">USD</option><option value="IDR">IDR</option>';
+            Object.keys(coinPrices).forEach(c => html += `<option value="${c}">${c}</option>`);
+            document.getElementById('calc-currency1').innerHTML = html;
+            document.getElementById('calc-currency2').innerHTML = html;
+            document.getElementById('calc-currency2').value = 'IDR';
+        }
+        function calculateExchange() {
+            const amt = parseFloat(document.getElementById('calc-input1').value) || 0;
+            const c1 = document.getElementById('calc-currency1').value;
+            const c2 = document.getElementById('calc-currency2').value;
+            const rates = { 'USD': 1, 'IDR': 15800, ...coinPrices };
+            // Simple logic: convert c1 to USD, then USD to c2
+            let inUSD = c1 === 'USD' ? amt : (coinPrices[c1] ? amt * coinPrices[c1] : amt / 15800);
+            let result = c2 === 'USD' ? inUSD : (coinPrices[c2] ? inUSD / coinPrices[c2] : inUSD * 15800);
+            document.getElementById('calc-input2').value = result.toLocaleString();
+        }
+
+        // --- TICKERS ---
+        async function fetchCryptoPrices() {
+            try {
+                const res = await fetch('https://api.coingecko.com/api/v3/simple/price?ids=bitcoin,ethereum,solana,binancecoin&vs_currencies=usd&include_24hr_change=true');
+                const data = await res.json();
+                const map = { bitcoin:'BTC', ethereum:'ETH', solana:'SOL', binancecoin:'BNB' };
+                let html = '';
+                Object.keys(map).forEach(id => {
+                    const price = data[id].usd; const change = data[id].usd_24h_change.toFixed(2);
+                    html += `<div class="flex items-center space-x-2 mr-8"><span class="font-bold text-white">${map[id]}</span><span class="text-gray-300">$${price.toLocaleString()}</span><span class="${change >= 0 ? 'text-primary' : 'text-danger'}">${change}%</span></div>`;
+                });
+                document.getElementById('crypto-ticker').innerHTML = html + html;
+            } catch(e) {}
+        }
+
+        async function fetchNewListings() {
+            try {
+                const res = await fetch('https://api.dexscreener.com/token-profiles/latest/v1');
+                const p = await res.json();
+                let html = p.slice(0,10).map(t => `<span class="mx-6">🟢 New Listing: <strong class="text-primary">${t.chainId.toUpperCase()}</strong> - ${t.tokenAddress.substring(0,8)}...</span>`).join('');
+                document.getElementById('new-listing-ticker').innerHTML = html + html;
+            } catch(e) {}
+        }
+
+        // --- MATRIX ---
         const canvas = document.getElementById('hacker-bg');
         const ctx = canvas.getContext('2d');
         let drops = [];
-        function initMatrix() {
-            canvas.width = window.innerWidth; canvas.height = window.innerHeight;
-            let cols = Math.floor(canvas.width / 16);
-            for(let i=0; i<cols; i++) drops[i] = 1;
-        }
+        function initMatrix() { canvas.width = window.innerWidth; canvas.height = window.innerHeight; let cols = Math.floor(canvas.width/16); for(let i=0; i<cols; i++) drops[i] = 1; }
         function drawMatrix() {
-            ctx.fillStyle = 'rgba(0,0,0,0.05)'; ctx.fillRect(0,0,canvas.width,canvas.height);
+            ctx.fillStyle = 'rgba(0,0,0,0.08)'; ctx.fillRect(0,0,canvas.width,canvas.height);
             ctx.fillStyle = '#00FFA3'; ctx.font = '15px monospace';
             for(let i=0; i<drops.length; i++) {
-                const text = String.fromCharCode(Math.random()*128);
-                ctx.fillText(text, i*16, drops[i]*16);
-                if(drops[i]*16 > canvas.height && Math.random() > 0.975) drops[i] = 0;
-                drops[i]++;
+                ctx.fillText(String.fromCharCode(Math.random()*128), i*16, drops[i]*16);
+                if(drops[i]*16 > canvas.height && Math.random() > 0.975) drops[i] = 0; drops[i]++;
             }
         }
-        initMatrix(); setInterval(drawMatrix, 33); window.onresize = initMatrix;
-
-        // --- DEXSCREENER RADAR ---
-        async function fetchNewListings() {
-            const ticker = document.getElementById('new-listing-ticker');
-            try {
-                const res = await fetch('https://api.dexscreener.com/token-profiles/latest/v1');
-                const profiles = await res.json();
-                let html = profiles.slice(0, 10).map(p => `<span class="mx-6">🟢 New Profile: <strong class="text-primary">${p.tokenAddress.substring(0,6)}...</strong> on ${p.chainId.toUpperCase()}</span>`).join('');
-                ticker.innerHTML = html + html;
-            } catch(e) { ticker.innerHTML = "Node syncing..."; }
-        }
+        initMatrix(); setInterval(drawMatrix, 40); window.onresize = initMatrix;
     </script>
 </body>
 </html>
