@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AirdropXI - Modern Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
     
     <style>
         body { 
@@ -24,14 +24,8 @@
             box-shadow: 0 12px 40px rgba(56, 189, 248, 0.12);
             border-color: rgba(56, 189, 248, 0.4);
         }
-        /* Custom Scrollbar untuk text area yang panjang */
-        .custom-scrollbar::-webkit-scrollbar {
-            width: 4px;
-        }
-        .custom-scrollbar::-webkit-scrollbar-thumb {
-            background-color: #475569;
-            border-radius: 10px;
-        }
+        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
+        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
     </style>
 </head>
 <body class="min-h-screen flex flex-col font-sans antialiased selection:bg-cyan-500 selection:text-white">
@@ -39,7 +33,6 @@
     <main class="flex-grow p-4 md:p-6">
         <div class="max-w-7xl mx-auto">
             
-            <!-- Header & Language Toggle -->
             <header class="mb-12 text-center mt-8 relative">
                 <h1 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-4 tracking-tight drop-shadow-lg">
                     AirdropXI
@@ -47,118 +40,79 @@
                 <p id="header-desc" class="text-slate-400 text-lg max-w-2xl mx-auto mb-6">
                     Tracker airdrop Web3 paling update. Garap sekarang sebelum snapshot!
                 </p>
-
-                <!-- Toggle Bahasa -->
                 <div class="inline-flex bg-slate-800/80 p-1 rounded-xl border border-slate-700/50 backdrop-blur-sm shadow-inner">
-                    <button id="btn-id" onclick="setLanguage('id')" class="px-5 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-sm transition-all shadow-md">
-                        🇮🇩 ID
-                    </button>
-                    <button id="btn-en" onclick="setLanguage('en')" class="px-5 py-2 rounded-lg text-slate-400 hover:text-white font-bold text-sm transition-all">
-                        🇬🇧 EN
-                    </button>
+                    <button id="btn-id" onclick="setLanguage('id')" class="px-5 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-sm transition-all shadow-md">🇮🇩 ID</button>
+                    <button id="btn-en" onclick="setLanguage('en')" class="px-5 py-2 rounded-lg text-slate-400 hover:text-white font-bold text-sm transition-all">🇬🇧 EN</button>
                 </div>
             </header>
 
-            <!-- Container Airdrop -->
-            <div id="airdrop-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                <div id="loading-state" class="col-span-full flex flex-col items-center justify-center py-20">
-                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500 mb-4"></div>
-                    <p class="text-slate-400 animate-pulse">Sinkronisasi data...</p>
-                </div>
+            <!-- 1. LOADING STATE (Aman, dipisah dari konten) -->
+            <div id="loading-state" class="flex flex-col items-center justify-center py-20">
+                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500 mb-4"></div>
+                <p class="text-slate-400 animate-pulse">Menarik data dari server...</p>
             </div>
+
+            <!-- 2. ERROR STATE (Akan muncul kalau ada yang gagal) -->
+            <div id="error-state" class="hidden text-center bg-red-900/20 border border-red-500/50 p-6 rounded-xl max-w-md mx-auto mb-10"></div>
+
+            <!-- 3. CONTAINER AIRDROP (Awalnya disembunyikan) -->
+            <div id="airdrop-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden"></div>
         </div>
     </main>
 
-    <!-- Footer / DYOR -->
     <footer class="mt-10 py-8 border-t border-slate-800/60 bg-slate-900/40 backdrop-blur-md">
         <div class="max-w-4xl mx-auto px-6 text-center">
-            <p id="footer-dyor" class="text-slate-400 text-sm leading-relaxed">
-                <span class="font-bold text-amber-500">⚠️ Disclaimer (DYOR):</span> Semua daftar project di sini hanya untuk edukasi. Kami tidak bertanggung jawab atas kerugian. Selalu lakukan riset Anda sendiri.
-            </p>
-            <p class="text-slate-600 text-xs mt-4 font-mono">
-                &copy; 2026 AirdropXI. Stay Safe & Keep Grinding!
-            </p>
+            <p id="footer-dyor" class="text-slate-400 text-sm leading-relaxed"><span class="font-bold text-amber-500">⚠️ Disclaimer (DYOR):</span> Semua daftar project di sini hanya untuk edukasi. Kami tidak bertanggung jawab atas kerugian. Selalu lakukan riset Anda sendiri.</p>
+            <p class="text-slate-600 text-xs mt-4 font-mono">&copy; 2026 AirdropXI. Stay Safe & Keep Grinding!</p>
         </div>
     </footer>
 
     <script>
-        // --- KONFIGURASI ---
         const SUPABASE_URL = 'https://hmjjujirktpqviayfehe.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtamp1amlya3RwcXZpYXlmZWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1NzQsImV4cCI6MjA4OTE1NzU3NH0.nmCK3b66fU8Zh-mwQw5YUS_I3dFJAYnvfWlO050doSY';
         
         let supabase;
         let globalAirdropData = [];
-        let currentLang = 'id'; // Default bahasa
+        let currentLang = 'id';
 
-        // --- KAMUS TEKS STATIS ---
         const textDict = {
-            id: {
-                headerDesc: "Tracker airdrop Web3 paling update. Garap sekarang sebelum snapshot!",
-                footerDyor: "<span class='font-bold text-amber-500'>⚠️ Disclaimer (DYOR):</span> Semua daftar project di sini hanya untuk edukasi. Kami tidak bertanggung jawab atas kerugian. Selalu lakukan riset Anda sendiri.",
-                emptyData: "Belum ada list airdrop nih, bro.",
-                raisedLabel: "Dana Terkumpul",
-                tasksLabel: "Tugas",
-                btnLabel: "Garap Sekarang",
-                unknown: "Menunggu Info"
-            },
-            en: {
-                headerDesc: "The most updated Web3 airdrop tracker. Farm now before the snapshot!",
-                footerDyor: "<span class='font-bold text-amber-500'>⚠️ Disclaimer (DYOR):</span> All projects listed here are for educational purposes. We are not liable for any losses. Always do your own research.",
-                emptyData: "No airdrops listed yet, bro.",
-                raisedLabel: "Total Raised",
-                tasksLabel: "Tasks",
-                btnLabel: "Join Airdrop",
-                unknown: "TBA"
-            }
+            id: { headerDesc: "Tracker airdrop Web3 paling update. Garap sekarang sebelum snapshot!", footerDyor: "<span class='font-bold text-amber-500'>⚠️ Disclaimer (DYOR):</span> Semua daftar project di sini hanya untuk edukasi. Kami tidak bertanggung jawab atas kerugian. Selalu lakukan riset Anda sendiri.", emptyData: "Belum ada list airdrop nih, bro.", raisedLabel: "Dana Terkumpul", tasksLabel: "Tugas", btnLabel: "Garap Sekarang", unknown: "Menunggu Info" },
+            en: { headerDesc: "The most updated Web3 airdrop tracker. Farm now before the snapshot!", footerDyor: "<span class='font-bold text-amber-500'>⚠️ Disclaimer (DYOR):</span> All projects listed here are for educational purposes. We are not liable for any losses. Always do your own research.", emptyData: "No airdrops listed yet, bro.", raisedLabel: "Total Raised", tasksLabel: "Tasks", btnLabel: "Join Airdrop", unknown: "TBA" }
         };
 
-        // --- FUNGSI UBAH BAHASA ---
         function setLanguage(lang) {
             currentLang = lang;
-            
-            // Ubah gaya tombol toggle
             const btnClassActive = "px-5 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-sm transition-all shadow-md";
             const btnClassInactive = "px-5 py-2 rounded-lg text-slate-400 hover:text-slate-200 font-bold text-sm transition-all hover:bg-slate-700/50";
             
             document.getElementById('btn-id').className = lang === 'id' ? btnClassActive : btnClassInactive;
             document.getElementById('btn-en').className = lang === 'en' ? btnClassActive : btnClassInactive;
-
-            // Update teks statis di halaman
             document.getElementById('header-desc').innerHTML = textDict[lang].headerDesc;
             document.getElementById('footer-dyor').innerHTML = textDict[lang].footerDyor;
 
-            // Render ulang kartu dengan bahasa baru
             renderCards();
         }
 
-        // --- FUNGSI RENDER KARTU ---
         function renderCards() {
             const container = document.getElementById('airdrop-container');
             const dict = textDict[currentLang];
+            container.innerHTML = ''; 
 
             if (globalAirdropData.length === 0) {
-                container.innerHTML = `
-                    <div class="col-span-full text-center py-16 bg-slate-800/30 rounded-2xl border border-slate-700 border-dashed">
-                        <p class="text-slate-400 text-lg">${dict.emptyData}</p>
-                    </div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-16 bg-slate-800/30 rounded-2xl border border-slate-700 border-dashed"><p class="text-slate-400 text-lg">${dict.emptyData}</p></div>`;
                 return;
             }
 
-            container.innerHTML = ''; // Bersihkan kontainer
-
             globalAirdropData.forEach(item => {
-                // Pilih data sesuai bahasa
                 const raisedInfo = currentLang === 'id' ? (item.RaisedID || dict.unknown) : (item.RaisedEN || dict.unknown);
                 const tasksInfo = currentLang === 'id' ? (item.tasksID || dict.unknown) : (item.tasksEN || dict.unknown);
 
-                // Styling Status Badge
-                let statusStyles = 'bg-slate-500/10 text-slate-400 border-slate-500/20'; // Default
+                let statusStyles = 'bg-slate-500/10 text-slate-400 border-slate-500/20';
                 const stat = item.status?.toLowerCase() || '';
                 if (stat.includes('active')) statusStyles = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]';
                 else if (stat.includes('waitlist')) statusStyles = 'bg-amber-500/10 text-amber-400 border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]';
                 else if (stat.includes('mint')) statusStyles = 'bg-purple-500/10 text-purple-400 border-purple-500/30 shadow-[0_0_10px_rgba(168,85,247,0.2)]';
 
-                // Format Tags (Pemisah koma)
                 let tagsHTML = '';
                 if (item.tags) {
                     const tagArray = item.tags.split(',').map(t => t.trim());
@@ -167,23 +121,12 @@
 
                 const cardHTML = `
                     <div class="glass-card rounded-2xl p-6 flex flex-col h-full relative overflow-hidden group">
-                        
-                        <!-- Header Card -->
                         <div class="flex justify-between items-start mb-3">
                             <h2 class="text-2xl font-black text-white tracking-wide group-hover:text-cyan-400 transition-colors">${item.name || 'Unknown'}</h2>
-                            <span class="px-3 py-1 rounded-full text-[11px] font-bold border uppercase tracking-widest ${statusStyles}">
-                                ${item.status || 'TBA'}
-                            </span>
+                            <span class="px-3 py-1 rounded-full text-[11px] font-bold border uppercase tracking-widest ${statusStyles}">${item.status || 'TBA'}</span>
                         </div>
-
-                        <!-- Tags Section -->
-                        <div class="flex flex-wrap gap-2 mb-5">
-                            ${tagsHTML}
-                        </div>
-
-                        <!-- Content Details -->
+                        <div class="flex flex-wrap gap-2 mb-5">${tagsHTML}</div>
                         <div class="space-y-4 mb-6 flex-grow">
-                            <!-- Raised Info -->
                             <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50 flex items-center gap-3">
                                 <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
@@ -193,64 +136,58 @@
                                     <p class="text-sm font-bold text-emerald-300">${raisedInfo}</p>
                                 </div>
                             </div>
-
-                            <!-- Tasks Info -->
                             <div>
                                 <h3 class="text-xs text-slate-500 font-medium mb-1 flex items-center gap-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                                     ${dict.tasksLabel}:
                                 </h3>
-                                <div class="text-slate-300 text-sm leading-relaxed custom-scrollbar max-h-24 overflow-y-auto pl-1 border-l-2 border-slate-700">
-                                    ${tasksInfo}
-                                </div>
+                                <div class="text-slate-300 text-sm leading-relaxed custom-scrollbar max-h-24 overflow-y-auto pl-1 border-l-2 border-slate-700">${tasksInfo}</div>
                             </div>
                         </div>
-
-                        <!-- Action Button -->
-                        <a href="${item.link || '#'}" target="_blank" rel="noopener noreferrer" 
-                           class="mt-auto block w-full text-center bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transform hover:-translate-y-1">
-                            ${dict.btnLabel}
-                        </a>
+                        <a href="${item.link || '#'}" target="_blank" rel="noopener noreferrer" class="mt-auto block w-full text-center bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transform hover:-translate-y-1">${dict.btnLabel}</a>
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', cardHTML);
             });
         }
 
-        // --- INISIALISASI & AMBIL DATA ---
         async function init() {
+            const uiLoading = document.getElementById('loading-state');
+            const uiError = document.getElementById('error-state');
+            const uiContainer = document.getElementById('airdrop-container');
+
             try {
-                if (typeof window.supabase === 'undefined') {
-                    throw new Error("Library Supabase gagal dimuat.");
-                }
+                if (!window.supabase) throw new Error("Gagal memuat sistem Database. Refresh halaman ini.");
 
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                const { data, error } = await supabase
-                    .from('airdrops')
-                    .select('*')
-                    .order('created_at', { ascending: false }); 
-
+                // Tarik data
+                const { data, error } = await supabase.from('airdrops').select('*').order('created_at', { ascending: false }); 
+                
                 if (error) throw error;
 
-                // Simpan data ke variabel global agar tidak perlu fetch ulang saat ganti bahasa
                 globalAirdropData = data || [];
                 
-                // Render pertama kali pakai bahasa default (ID)
+                // Matikan loading, nyalakan container list
+                uiLoading.classList.add('hidden');
+                uiContainer.classList.remove('hidden');
+
+                // Render datanya
                 setLanguage(currentLang);
 
             } catch (error) {
-                console.error("Error:", error);
-                document.getElementById('loading-state').innerHTML = `
-                    <div class="text-center bg-red-900/20 border border-red-500/50 p-6 rounded-xl max-w-md mx-auto">
-                        <p class="text-red-400 font-bold text-xl mb-2">Gagal Memuat Data</p>
-                        <p class="text-slate-300 text-sm mb-2 font-mono">${error.message || error}</p>
-                        <p class="text-slate-500 text-xs">Pastikan nama kolom di Supabase sudah benar.</p>
-                    </div>`;
+                console.error("DEBUG ERROR:", error);
+                // Matikan loading, nyalakan layar merah error
+                uiLoading.classList.add('hidden');
+                uiError.classList.remove('hidden');
+                uiError.innerHTML = `
+                    <p class="text-red-400 font-bold text-xl mb-2">Gagal Menarik Data!</p>
+                    <p class="text-slate-300 text-sm mb-4 font-mono">${error.message || JSON.stringify(error)}</p>
+                    <p class="text-slate-500 text-xs">Pastikan nama kolom di tabel <b>airdrops</b> Supabase (seperti: RaisedID, tasksID) sudah sama persis (huruf besar/kecilnya).</p>
+                `;
             }
         }
 
-        // Jalankan
         init();
     </script>
 </body>
