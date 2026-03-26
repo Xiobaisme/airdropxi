@@ -5,8 +5,6 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AirdropXI - Modern Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    
-    <!-- Ganti CDN Supabase ke Unpkg -->
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <style>
@@ -28,25 +26,41 @@
         }
     </style>
 </head>
-<body class="min-h-screen p-6 font-sans antialiased selection:bg-cyan-500 selection:text-white">
+<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-cyan-500 selection:text-white">
 
-    <div class="max-w-7xl mx-auto">
-        <header class="mb-14 text-center mt-10">
-            <h1 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 mb-4 tracking-tight">
-                AirdropXI
-            </h1>
-            <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto">
-                Tracker airdrop Web3 paling update. Garap sekarang sebelum snapshot!
-            </p>
-        </header>
+    <!-- Konten Utama -->
+    <main class="flex-grow p-6">
+        <div class="max-w-7xl mx-auto">
+            <header class="mb-14 text-center mt-10">
+                <h1 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-600 mb-4 tracking-tight">
+                    AirdropXI
+                </h1>
+                <p class="text-slate-400 text-lg md:text-xl max-w-2xl mx-auto">
+                    Tracker airdrop Web3 paling update. Garap sekarang sebelum snapshot!
+                </p>
+            </header>
 
-        <div id="airdrop-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            <div id="loading-state" class="col-span-full flex flex-col items-center justify-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500 mb-4"></div>
-                <p class="text-slate-400 animate-pulse">Memproses sistem...</p>
+            <div id="airdrop-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                <div id="loading-state" class="col-span-full flex flex-col items-center justify-center py-20">
+                    <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500 mb-4"></div>
+                    <p class="text-slate-400 animate-pulse">Memproses sistem...</p>
+                </div>
             </div>
         </div>
-    </div>
+    </main>
+
+    <!-- Footer / DYOR Section -->
+    <footer class="mt-10 py-8 border-t border-slate-800/60 bg-slate-900/30 backdrop-blur-sm">
+        <div class="max-w-4xl mx-auto px-6 text-center">
+            <p class="text-slate-500 text-sm leading-relaxed">
+                <span class="font-bold text-amber-500/90">⚠️ Disclaimer (DYOR):</span> Semua daftar project di <span class="text-slate-300 font-semibold">AirdropXI</span> disediakan hanya untuk tujuan informasi dan edukasi. Kami tidak bertanggung jawab atas kerugian finansial atau risiko keamanan apa pun. 
+                Selalu lakukan riset Anda sendiri (<strong class="text-cyan-500">Do Your Own Research</strong>) sebelum menghubungkan wallet atau berinteraksi dengan dApps dan smart contract.
+            </p>
+            <p class="text-slate-600 text-xs mt-4">
+                &copy; 2026 AirdropXI. Stay Safe & Keep Grinding!
+            </p>
+        </div>
+    </footer>
 
     <script>
         async function initAndFetch() {
@@ -54,14 +68,12 @@
             const loadingState = document.getElementById('loading-state');
 
             try {
-                // 1. CEK APAKAH LIBRARY SUPABASE BERHASIL DIMUAT
                 if (typeof window.supabase === 'undefined') {
                     throw new Error("Library Supabase gagal dimuat. Coba matikan AdBlock atau cek koneksi internet.");
                 }
 
                 loadingState.querySelector('p').innerText = "Menghubungkan ke database...";
 
-                // 2. SETUP KREDENSIAL
                 const SUPABASE_URL = 'https://hmjjujirktpqviayfehe.supabase.co';
                 const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtamp1amlya3RwcXZpYXlmZWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1NzQsImV4cCI6MjA4OTE1NzU3NH0.nmCK3b66fU8Zh-mwQw5YUS_I3dFJAYnvfWlO050doSY';
                 
@@ -69,7 +81,6 @@
 
                 loadingState.querySelector('p').innerText = "Menarik data airdrop...";
 
-                // 3. TARIK DATA
                 const { data, error } = await supabase
                     .from('airdrops')
                     .select('*')
@@ -77,7 +88,6 @@
 
                 if (error) throw error;
 
-                // 4. RENDER DATA
                 loadingState.style.display = 'none';
 
                 if (!data || data.length === 0) {
@@ -123,7 +133,6 @@
 
             } catch (error) {
                 console.error("Error Detail:", error);
-                // ERROR LANGSUNG DITAMPILKAN DI LAYAR
                 loadingState.innerHTML = `
                     <div class="text-center col-span-full bg-red-900/20 border border-red-500/50 p-6 rounded-xl">
                         <p class="text-red-400 font-bold text-xl mb-2">Terjadi Kesalahan!</p>
@@ -133,7 +142,6 @@
             }
         }
 
-        // Jalankan
         initAndFetch();
     </script>
 </body>
