@@ -5,7 +5,9 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>AirdropXI - Modern Tracker</title>
     <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    
+    <!-- PAKAI UNPKG (Ini CDN yang kemarin berhasil nembus di jaringan kamu) -->
+    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <style>
         body { 
@@ -46,16 +48,16 @@
                 </div>
             </header>
 
-            <!-- 1. LOADING STATE (Aman, dipisah dari konten) -->
+            <!-- 1. LOADING STATE -->
             <div id="loading-state" class="flex flex-col items-center justify-center py-20">
                 <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500 mb-4"></div>
                 <p class="text-slate-400 animate-pulse">Menarik data dari server...</p>
             </div>
 
-            <!-- 2. ERROR STATE (Akan muncul kalau ada yang gagal) -->
+            <!-- 2. ERROR STATE -->
             <div id="error-state" class="hidden text-center bg-red-900/20 border border-red-500/50 p-6 rounded-xl max-w-md mx-auto mb-10"></div>
 
-            <!-- 3. CONTAINER AIRDROP (Awalnya disembunyikan) -->
+            <!-- 3. CONTAINER AIRDROP -->
             <div id="airdrop-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden"></div>
         </div>
     </main>
@@ -115,8 +117,11 @@
 
                 let tagsHTML = '';
                 if (item.tags) {
-                    const tagArray = item.tags.split(',').map(t => t.trim());
-                    tagsHTML = tagArray.map(t => `<span class="px-2.5 py-1 rounded-md bg-slate-800/80 border border-slate-700 text-[10px] font-semibold text-slate-300 uppercase tracking-wider">${t}</span>`).join('');
+                    // Mencegah error kalau tipe data tags di Supabase bukan text/string
+                    try {
+                        const tagArray = String(item.tags).split(',').map(t => t.trim());
+                        tagsHTML = tagArray.map(t => `<span class="px-2.5 py-1 rounded-md bg-slate-800/80 border border-slate-700 text-[10px] font-semibold text-slate-300 uppercase tracking-wider">${t}</span>`).join('');
+                    } catch (e) { tagsHTML = ''; }
                 }
 
                 const cardHTML = `
@@ -161,29 +166,25 @@
 
                 supabase = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
 
-                // Tarik data
                 const { data, error } = await supabase.from('airdrops').select('*').order('created_at', { ascending: false }); 
                 
                 if (error) throw error;
 
                 globalAirdropData = data || [];
                 
-                // Matikan loading, nyalakan container list
                 uiLoading.classList.add('hidden');
                 uiContainer.classList.remove('hidden');
 
-                // Render datanya
                 setLanguage(currentLang);
 
             } catch (error) {
                 console.error("DEBUG ERROR:", error);
-                // Matikan loading, nyalakan layar merah error
                 uiLoading.classList.add('hidden');
                 uiError.classList.remove('hidden');
                 uiError.innerHTML = `
                     <p class="text-red-400 font-bold text-xl mb-2">Gagal Menarik Data!</p>
                     <p class="text-slate-300 text-sm mb-4 font-mono">${error.message || JSON.stringify(error)}</p>
-                    <p class="text-slate-500 text-xs">Pastikan nama kolom di tabel <b>airdrops</b> Supabase (seperti: RaisedID, tasksID) sudah sama persis (huruf besar/kecilnya).</p>
+                    <p class="text-slate-500 text-xs">Pesan ini muncul kalau nama kolom (RaisedID, tasksID, dsb) belum sama persis di Supabase.</p>
                 `;
             }
         }
