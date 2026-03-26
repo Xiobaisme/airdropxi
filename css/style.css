@@ -1,0 +1,30 @@
+/* Reset & Base */
+:root {
+    --primary-neon: #00FFA3;
+}
+
+body {
+    background-color: #000; /* Pastikan background dasar tetap hitam */
+    margin: 0;
+    padding: 0;
+}
+
+/* Perbaikan untuk Container Airdrop agar rapi */
+#airdrops {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 2rem;
+    padding: 20px 0;
+}
+
+/* Fix untuk Header yang teksnya numpuk */
+header h1 {
+    line-height: 1.2;
+    margin-bottom: 0.5rem;
+}
+
+/* Pastikan Canvas Matrix tidak menutupi tombol */
+#hacker-bg {
+    pointer-events: none;
+    opacity: 0.5; /* Kurangi opacity kalau terlalu silau */
+}
