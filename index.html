@@ -10,7 +10,7 @@
     <style>
         /* === BACKGROUND UTAMA === */
         body { 
-            background-color: #040b16; /* Warna biru super gelap khas Cyberpunk */
+            background-color: #040b16; 
             background-image: radial-gradient(circle at top right, #0b172a, #040b16);
             color: #f8fafc; 
             position: relative;
@@ -34,7 +34,6 @@
             opacity: 0.15; 
             z-index: -1; 
             pointer-events: none; 
-            /* Efek logo berdenyut (breathing) halus */
             animation: neonPulse 4s infinite alternate ease-in-out;
         }
 
@@ -48,24 +47,21 @@
             background: rgba(10, 15, 25, 0.7); 
             backdrop-filter: blur(16px);
             -webkit-backdrop-filter: blur(16px);
-            /* Border dan Shadow Neon Hijau */
             border: 1px solid rgba(52, 211, 153, 0.4);
             box-shadow: 0 0 15px rgba(52, 211, 153, 0.15), inset 0 0 15px rgba(52, 211, 153, 0.05);
             transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
         }
         
-        /* Efek Hover saat kartu disorot mouse */
         .glass-card:hover {
             transform: translateY(-6px);
             border-color: rgba(52, 211, 153, 0.9);
             box-shadow: 0 0 30px rgba(52, 211, 153, 0.4), inset 0 0 20px rgba(52, 211, 153, 0.15);
         }
         
-        /* Scrollbar kustom */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(52, 211, 153, 0.5); border-radius: 10px; }
 
-        /* === STYLING TICKER KRIPTO === */
+        /* === STYLING TICKER KRIPTO (DIPERLAMBAT) === */
         .crypto-ticker-container {
             width: 100%;
             background-color: rgba(4, 11, 22, 0.8);
@@ -74,7 +70,7 @@
             padding: 10px 0;
             overflow: hidden;
             white-space: nowrap;
-            border-bottom: 1px solid rgba(52, 211, 153, 0.2); /* Garis bawah ticker ikut hijau neon */
+            border-bottom: 1px solid rgba(52, 211, 153, 0.2); 
             box-sizing: border-box;
             display: flex;
             position: relative;
@@ -82,7 +78,8 @@
         }
         .crypto-ticker {
             display: inline-block;
-            animation: ticker-scroll 60s linear infinite;
+            /* DIUBAH MENJADI 180s AGAR SANGAT LAMBAT DAN TIDAK BIKIN PUSING */
+            animation: ticker-scroll 180s linear infinite; 
         }
         .crypto-ticker:hover {
             animation-play-state: paused;
@@ -125,7 +122,7 @@
     <main class="flex-grow p-4 md:p-6 relative z-10">
         <div class="max-w-7xl mx-auto">
             
-            <header class="mb-12 text-center mt-8 relative">
+            <header class="mb-10 text-center mt-8 relative">
                 <h1 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 mb-4 tracking-tight drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
                     AirdropXI
                 </h1>
@@ -137,6 +134,40 @@
                     <button id="btn-en" onclick="setLanguage('en')" class="px-5 py-2 rounded-lg text-slate-400 hover:text-white font-bold text-sm transition-all">🇬🇧 EN</button>
                 </div>
             </header>
+
+            <!-- DASHBOARD OVERVIEW (NEW) -->
+            <div id="dashboard-overview" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 hidden">
+                <!-- Card Total -->
+                <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] flex items-center justify-between transition-all hover:-translate-y-1 hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.3)]">
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1" id="lbl-dash-total">Total Airdrop</p>
+                        <h3 id="dash-total" class="text-4xl font-black text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]">0</h3>
+                    </div>
+                    <div class="p-4 bg-cyan-500/20 rounded-xl text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
+                    </div>
+                </div>
+                <!-- Card Active -->
+                <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] flex items-center justify-between transition-all hover:-translate-y-1 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(16,185,129,0.3)]">
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1" id="lbl-dash-active">Status: Aktif</p>
+                        <h3 id="dash-active" class="text-4xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.6)]">0</h3>
+                    </div>
+                    <div class="p-4 bg-emerald-500/20 rounded-xl text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
+                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
+                    </div>
+                </div>
+                <!-- Card Listing/Ended -->
+                <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] flex items-center justify-between transition-all hover:-translate-y-1 hover:border-purple-400 hover:shadow-[0_0_25px_rgba(168,85,247,0.3)]">
+                    <div>
+                        <p class="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1" id="lbl-dash-ended">Listing / Selesai</p>
+                        <h3 id="dash-listing" class="text-4xl font-black text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">0</h3>
+                    </div>
+                    <div class="p-4 bg-purple-500/20 rounded-xl text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
+                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
+                    </div>
+                </div>
+            </div>
 
             <!-- LOADING STATE -->
             <div id="loading-state" class="flex flex-col items-center justify-center py-20">
@@ -170,8 +201,30 @@
 
         // === FITUR BAHASA ===
         const textDict = {
-            id: { headerDesc: "Tracker airdrop Web3 paling update. Garap sekarang sebelum snapshot!", footerDyor: "<span class='font-bold text-amber-500'>⚠️ Disclaimer (DYOR):</span> Semua daftar project di sini hanya untuk edukasi. Kami tidak bertanggung jawab atas kerugian. Selalu lakukan riset Anda sendiri.", emptyData: "Belum ada list airdrop nih, bro.", raisedLabel: "Dana Terkumpul", tasksLabel: "Tugas", btnLabel: "Garap Sekarang", unknown: "Menunggu Info" },
-            en: { headerDesc: "The most updated Web3 airdrop tracker. Farm now before the snapshot!", footerDyor: "<span class='font-bold text-amber-500'>⚠️ Disclaimer (DYOR):</span> All projects listed here are for educational purposes. We are not liable for any losses. Always do your own research.", emptyData: "No airdrops listed yet, bro.", raisedLabel: "Total Raised", tasksLabel: "Tasks", btnLabel: "Join Airdrop", unknown: "TBA" }
+            id: { 
+                headerDesc: "Tracker airdrop Web3 paling update. Garap sekarang sebelum snapshot!", 
+                footerDyor: "<span class='font-bold text-amber-500'>⚠️ Disclaimer (DYOR):</span> Semua daftar project di sini hanya untuk edukasi. Kami tidak bertanggung jawab atas kerugian. Selalu lakukan riset Anda sendiri.", 
+                emptyData: "Belum ada list airdrop nih, bro.", 
+                raisedLabel: "Dana Terkumpul", 
+                tasksLabel: "Tugas", 
+                btnLabel: "Garap Sekarang", 
+                unknown: "Menunggu Info",
+                dashTotal: "Total Airdrop",
+                dashActive: "Status: Aktif",
+                dashEnded: "Listing / Selesai"
+            },
+            en: { 
+                headerDesc: "The most updated Web3 airdrop tracker. Farm now before the snapshot!", 
+                footerDyor: "<span class='font-bold text-amber-500'>⚠️ Disclaimer (DYOR):</span> All projects listed here are for educational purposes. We are not liable for any losses. Always do your own research.", 
+                emptyData: "No airdrops listed yet, bro.", 
+                raisedLabel: "Total Raised", 
+                tasksLabel: "Tasks", 
+                btnLabel: "Join Airdrop", 
+                unknown: "TBA",
+                dashTotal: "Total Airdrops",
+                dashActive: "Status: Active",
+                dashEnded: "Listed / Ended"
+            }
         };
 
         function setLanguage(lang) {
@@ -181,10 +234,41 @@
             
             document.getElementById('btn-id').className = lang === 'id' ? btnClassActive : btnClassInactive;
             document.getElementById('btn-en').className = lang === 'en' ? btnClassActive : btnClassInactive;
+            
+            // Update Teks Umum
             document.getElementById('header-desc').innerHTML = textDict[lang].headerDesc;
             document.getElementById('footer-dyor').innerHTML = textDict[lang].footerDyor;
+            
+            // Update Teks Dashboard
+            document.getElementById('lbl-dash-total').innerText = textDict[lang].dashTotal;
+            document.getElementById('lbl-dash-active').innerText = textDict[lang].dashActive;
+            document.getElementById('lbl-dash-ended').innerText = textDict[lang].dashEnded;
 
             renderCards();
+        }
+
+        // === FITUR UPDATE DASHBOARD ===
+        function updateDashboard() {
+            const total = globalAirdropData.length;
+            let active = 0;
+            let listing = 0;
+
+            globalAirdropData.forEach(item => {
+                const stat = (item.status || '').toLowerCase();
+                
+                // Jika status mengandung kata 'listing', 'end', atau 'selesai', masuk ke kategori Listing/Ended
+                if (stat.includes('listing') || stat.includes('end') || stat.includes('selesai')) {
+                    listing++;
+                } else {
+                    // Sisanya (termasuk active, waitlist, mint, dll) dihitung sebagai Aktif
+                    active++;
+                }
+            });
+
+            // Update angka di HTML
+            document.getElementById('dash-total').innerText = total;
+            document.getElementById('dash-active').innerText = active;
+            document.getElementById('dash-listing').innerText = listing;
         }
 
         // === FITUR RENDER KARTU AIRDROP ===
@@ -204,9 +288,17 @@
 
                 let statusStyles = 'bg-slate-800/50 text-slate-300 border-slate-600/50';
                 const stat = item.status?.toLowerCase() || '';
-                if (stat.includes('active')) statusStyles = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.4)]';
-                else if (stat.includes('waitlist')) statusStyles = 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.4)]';
-                else if (stat.includes('mint')) statusStyles = 'bg-purple-500/20 text-purple-400 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.4)]';
+                
+                // Ubah gaya warna sesuai status
+                if (stat.includes('active')) {
+                    statusStyles = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.4)]';
+                } else if (stat.includes('waitlist')) {
+                    statusStyles = 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.4)]';
+                } else if (stat.includes('mint')) {
+                    statusStyles = 'bg-blue-500/20 text-blue-400 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.4)]';
+                } else if (stat.includes('listing') || stat.includes('end') || stat.includes('selesai')) {
+                    statusStyles = 'bg-purple-500/20 text-purple-400 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.4)]';
+                }
 
                 let tagsHTML = '';
                 if (item.tags) {
@@ -292,6 +384,7 @@
             const uiLoading = document.getElementById('loading-state');
             const uiError = document.getElementById('error-state');
             const uiContainer = document.getElementById('airdrop-container');
+            const uiDashboard = document.getElementById('dashboard-overview');
 
             try {
                 if (!window.supabase) throw new Error("Gagal memuat sistem Database. Refresh halaman ini.");
@@ -304,6 +397,10 @@
 
                 globalAirdropData = data || [];
                 
+                // Kalkulasi Dashboard lalu munculkan
+                updateDashboard();
+                uiDashboard.classList.remove('hidden');
+
                 uiLoading.classList.add('hidden');
                 uiContainer.classList.remove('hidden');
 
