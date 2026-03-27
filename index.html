@@ -8,14 +8,37 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <style>
+        /* === STYLING BACKGROUND DENGAN LOGO === */
         body { 
             background-color: #0f172a; 
             color: #f8fafc; 
-            background-image: radial-gradient(circle at top right, #1e293b, #0f172a);
+            position: relative;
+            min-height: 100vh;
         }
+        
+        /* Gambar Latar Belakang (Logo) */
+        body::before {
+            content: "";
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100vw;
+            height: 100vh;
+            /* URL logo diambil dari raw github kamu */
+            background-image: url('https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/logo.png');
+            background-size: cover;
+            background-position: center;
+            background-repeat: no-repeat;
+            opacity: 0.15; /* Atur angka ini (0.1 - 0.3) untuk mengatur tingkat transparansi logo */
+            z-index: -1; /* Memastikan logo berada di belakang semua elemen */
+            pointer-events: none; /* Mencegah logo menghalangi klik pada website */
+        }
+
+        /* Styling Glassmorphism Card */
         .glass-card {
-            background: rgba(30, 41, 59, 0.6);
-            backdrop-filter: blur(16px);
+            background: rgba(15, 23, 42, 0.65); /* Sedikit digelapkan agar teks lebih terbaca di atas gambar */
+            backdrop-filter: blur(12px);
+            -webkit-backdrop-filter: blur(12px);
             border: 1px solid rgba(255, 255, 255, 0.08);
             transition: all 0.3s ease;
         }
@@ -24,20 +47,25 @@
             box-shadow: 0 12px 40px rgba(56, 189, 248, 0.12);
             border-color: rgba(56, 189, 248, 0.4);
         }
+        
+        /* Scrollbar kustom */
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: #475569; border-radius: 10px; }
 
-        /* Styling untuk Ticker Kripto */
+        /* === STYLING TICKER KRIPTO === */
         .crypto-ticker-container {
             width: 100%;
-            background-color: #0f172a; /* Menyatu dengan tema gelap */
+            background-color: rgba(15, 23, 42, 0.9); /* Sedikit transparan */
+            backdrop-filter: blur(10px);
             color: #ffffff;
             padding: 10px 0;
             overflow: hidden;
             white-space: nowrap;
-            border-bottom: 1px solid #1e293b;
+            border-bottom: 1px solid rgba(255, 255, 255, 0.05);
             box-sizing: border-box;
             display: flex;
+            position: relative;
+            z-index: 10;
         }
         .crypto-ticker {
             display: inline-block;
@@ -61,10 +89,10 @@
         }
         .ticker-price {
             margin-right: 8px;
-            color: #38bdf8; /* Warna cyan agar cocok dengan tema AirdropXI */
+            color: #38bdf8;
         }
-        .ticker-change.positive { color: #10b981; } /* Hijau Tailwind */
-        .ticker-change.negative { color: #ef4444; } /* Merah Tailwind */
+        .ticker-change.positive { color: #10b981; }
+        .ticker-change.negative { color: #ef4444; }
 
         @keyframes ticker-scroll {
             0% { transform: translateX(0); }
@@ -72,7 +100,7 @@
         }
     </style>
 </head>
-<body class="min-h-screen flex flex-col font-sans antialiased selection:bg-cyan-500 selection:text-white">
+<body class="flex flex-col font-sans antialiased selection:bg-cyan-500 selection:text-white relative">
 
     <!-- Crypto Ticker Container -->
     <div class="crypto-ticker-container">
@@ -81,17 +109,17 @@
         </div>
     </div>
 
-    <main class="flex-grow p-4 md:p-6">
+    <main class="flex-grow p-4 md:p-6 relative z-10">
         <div class="max-w-7xl mx-auto">
             
             <header class="mb-12 text-center mt-8 relative">
                 <h1 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-cyan-400 to-blue-500 mb-4 tracking-tight drop-shadow-lg">
                     AirdropXI
                 </h1>
-                <p id="header-desc" class="text-slate-400 text-lg max-w-2xl mx-auto mb-6">
+                <p id="header-desc" class="text-slate-300 text-lg max-w-2xl mx-auto mb-6 drop-shadow-md">
                     Tracker airdrop Web3 paling update. Garap sekarang sebelum snapshot!
                 </p>
-                <div class="inline-flex bg-slate-800/80 p-1 rounded-xl border border-slate-700/50 backdrop-blur-sm shadow-inner">
+                <div class="inline-flex bg-slate-800/80 p-1 rounded-xl border border-slate-700/50 backdrop-blur-md shadow-inner">
                     <button id="btn-id" onclick="setLanguage('id')" class="px-5 py-2 rounded-lg bg-gradient-to-r from-cyan-600 to-blue-600 text-white font-bold text-sm transition-all shadow-md">🇮🇩 ID</button>
                     <button id="btn-en" onclick="setLanguage('en')" class="px-5 py-2 rounded-lg text-slate-400 hover:text-white font-bold text-sm transition-all">🇬🇧 EN</button>
                 </div>
@@ -100,21 +128,21 @@
             <!-- LOADING STATE -->
             <div id="loading-state" class="flex flex-col items-center justify-center py-20">
                 <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-cyan-500 mb-4"></div>
-                <p class="text-slate-400 animate-pulse">Menarik data dari server...</p>
+                <p class="text-slate-300 animate-pulse">Menarik data dari server...</p>
             </div>
 
             <!-- ERROR STATE -->
-            <div id="error-state" class="hidden text-center bg-red-900/20 border border-red-500/50 p-6 rounded-xl max-w-md mx-auto mb-10"></div>
+            <div id="error-state" class="hidden text-center bg-red-900/40 backdrop-blur-md border border-red-500/50 p-6 rounded-xl max-w-md mx-auto mb-10"></div>
 
             <!-- CONTAINER AIRDROP -->
             <div id="airdrop-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden"></div>
         </div>
     </main>
 
-    <footer class="mt-10 py-8 border-t border-slate-800/60 bg-slate-900/40 backdrop-blur-md">
+    <footer class="mt-10 py-8 border-t border-slate-800/60 bg-slate-900/60 backdrop-blur-lg relative z-10">
         <div class="max-w-4xl mx-auto px-6 text-center">
             <p id="footer-dyor" class="text-slate-400 text-sm leading-relaxed"><span class="font-bold text-amber-500">⚠️ Disclaimer (DYOR):</span> Semua daftar project di sini hanya untuk edukasi. Kami tidak bertanggung jawab atas kerugian. Selalu lakukan riset Anda sendiri.</p>
-            <p class="text-slate-600 text-xs mt-4 font-mono">&copy; 2026 AirdropXI. Stay Safe & Keep Grinding!</p>
+            <p class="text-slate-500 text-xs mt-4 font-mono">&copy; 2026 AirdropXI. Stay Safe & Keep Grinding!</p>
         </div>
     </footer>
 
@@ -153,7 +181,7 @@
             container.innerHTML = ''; 
 
             if (globalAirdropData.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-16 bg-slate-800/30 rounded-2xl border border-slate-700 border-dashed"><p class="text-slate-400 text-lg">${dict.emptyData}</p></div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-16 bg-slate-800/50 backdrop-blur-md rounded-2xl border border-slate-700 border-dashed"><p class="text-slate-300 text-lg">${dict.emptyData}</p></div>`;
                 return;
             }
 
@@ -161,46 +189,46 @@
                 const raisedInfo = currentLang === 'id' ? (item.RaisedID || dict.unknown) : (item.RaisedEN || dict.unknown);
                 const tasksInfo = currentLang === 'id' ? (item.tasksID || dict.unknown) : (item.tasksEN || dict.unknown);
 
-                let statusStyles = 'bg-slate-500/10 text-slate-400 border-slate-500/20';
+                let statusStyles = 'bg-slate-500/10 text-slate-300 border-slate-500/30';
                 const stat = item.status?.toLowerCase() || '';
-                if (stat.includes('active')) statusStyles = 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 shadow-[0_0_10px_rgba(16,185,129,0.2)]';
-                else if (stat.includes('waitlist')) statusStyles = 'bg-amber-500/10 text-amber-400 border-amber-500/30 shadow-[0_0_10px_rgba(245,158,11,0.2)]';
-                else if (stat.includes('mint')) statusStyles = 'bg-purple-500/10 text-purple-400 border-purple-500/30 shadow-[0_0_10px_rgba(168,85,247,0.2)]';
+                if (stat.includes('active')) statusStyles = 'bg-emerald-500/20 text-emerald-300 border-emerald-500/40 shadow-[0_0_15px_rgba(16,185,129,0.3)]';
+                else if (stat.includes('waitlist')) statusStyles = 'bg-amber-500/20 text-amber-300 border-amber-500/40 shadow-[0_0_15px_rgba(245,158,11,0.3)]';
+                else if (stat.includes('mint')) statusStyles = 'bg-purple-500/20 text-purple-300 border-purple-500/40 shadow-[0_0_15px_rgba(168,85,247,0.3)]';
 
                 let tagsHTML = '';
                 if (item.tags) {
                     try {
                         const tagArray = String(item.tags).split(',').map(t => t.trim());
-                        tagsHTML = tagArray.map(t => `<span class="px-2.5 py-1 rounded-md bg-slate-800/80 border border-slate-700 text-[10px] font-semibold text-slate-300 uppercase tracking-wider">${t}</span>`).join('');
+                        tagsHTML = tagArray.map(t => `<span class="px-2.5 py-1 rounded-md bg-slate-800/80 border border-slate-600 text-[10px] font-semibold text-slate-200 uppercase tracking-wider shadow-sm">${t}</span>`).join('');
                     } catch (e) { tagsHTML = ''; }
                 }
 
                 const cardHTML = `
                     <div class="glass-card rounded-2xl p-6 flex flex-col h-full relative overflow-hidden group">
                         <div class="flex justify-between items-start mb-3">
-                            <h2 class="text-2xl font-black text-white tracking-wide group-hover:text-cyan-400 transition-colors">${item.name || 'Unknown'}</h2>
-                            <span class="px-3 py-1 rounded-full text-[11px] font-bold border uppercase tracking-widest ${statusStyles}">${item.status || 'TBA'}</span>
+                            <h2 class="text-2xl font-black text-white tracking-wide group-hover:text-cyan-400 transition-colors drop-shadow-md">${item.name || 'Unknown'}</h2>
+                            <span class="px-3 py-1 rounded-full text-[11px] font-bold border uppercase tracking-widest backdrop-blur-sm ${statusStyles}">${item.status || 'TBA'}</span>
                         </div>
                         <div class="flex flex-wrap gap-2 mb-5">${tagsHTML}</div>
                         <div class="space-y-4 mb-6 flex-grow">
-                            <div class="bg-slate-800/40 rounded-xl p-3 border border-slate-700/50 flex items-center gap-3">
-                                <div class="p-2 bg-emerald-500/10 rounded-lg text-emerald-400">
+                            <div class="bg-slate-800/50 rounded-xl p-3 border border-slate-600/50 flex items-center gap-3 backdrop-blur-sm shadow-inner">
+                                <div class="p-2 bg-emerald-500/20 rounded-lg text-emerald-400">
                                     <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
                                 </div>
                                 <div>
-                                    <p class="text-xs text-slate-500 font-medium">${dict.raisedLabel}</p>
-                                    <p class="text-sm font-bold text-emerald-300">${raisedInfo}</p>
+                                    <p class="text-xs text-slate-400 font-medium">${dict.raisedLabel}</p>
+                                    <p class="text-sm font-bold text-emerald-300 drop-shadow-sm">${raisedInfo}</p>
                                 </div>
                             </div>
                             <div>
-                                <h3 class="text-xs text-slate-500 font-medium mb-1 flex items-center gap-1">
+                                <h3 class="text-xs text-slate-400 font-medium mb-1 flex items-center gap-1">
                                     <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
                                     ${dict.tasksLabel}:
                                 </h3>
-                                <div class="text-slate-300 text-sm leading-relaxed custom-scrollbar max-h-24 overflow-y-auto pl-1 border-l-2 border-slate-700">${tasksInfo}</div>
+                                <div class="text-slate-200 text-sm leading-relaxed custom-scrollbar max-h-24 overflow-y-auto pl-1 border-l-2 border-slate-600">${tasksInfo}</div>
                             </div>
                         </div>
-                        <a href="${item.link || '#'}" target="_blank" rel="noopener noreferrer" class="mt-auto block w-full text-center bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.3)] hover:shadow-[0_0_25px_rgba(6,182,212,0.5)] transform hover:-translate-y-1">${dict.btnLabel}</a>
+                        <a href="${item.link || '#'}" target="_blank" rel="noopener noreferrer" class="mt-auto block w-full text-center bg-gradient-to-r from-blue-600 to-cyan-500 hover:from-blue-500 hover:to-cyan-400 text-white font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_0_20px_rgba(6,182,212,0.4)] hover:shadow-[0_0_30px_rgba(6,182,212,0.6)] transform hover:-translate-y-1">${dict.btnLabel}</a>
                     </div>
                 `;
                 container.insertAdjacentHTML('beforeend', cardHTML);
@@ -212,10 +240,9 @@
             const tickerElement = document.getElementById('crypto-ticker');
             
             try {
-                // Fetch Top 100 berdasarkan Market Cap
                 const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false');
                 
-                if (!response.ok) throw new Error('Limit API tercapai / Jaringan bermasalah');
+                if (!response.ok) throw new Error('Limit API tercapai');
                 
                 const data = await response.json();
                 let tickerHTML = '';
@@ -236,7 +263,6 @@
                     `;
                 });
 
-                // Gandakan HTML agar loop scroll tidak terputus
                 tickerElement.innerHTML = tickerHTML + tickerHTML;
 
             } catch (error) {
@@ -245,7 +271,6 @@
             }
         }
 
-        // Panggil Ticker pertama kali dan set interval per 5 menit
         fetchCryptoPrices();
         setInterval(fetchCryptoPrices, 300000);
 
@@ -278,7 +303,7 @@
                 uiError.innerHTML = `
                     <p class="text-red-400 font-bold text-xl mb-2">Gagal Menarik Data!</p>
                     <p class="text-slate-300 text-sm mb-4 font-mono">${error.message || JSON.stringify(error)}</p>
-                    <p class="text-slate-500 text-xs">Pesan ini muncul kalau nama kolom (RaisedID, tasksID, dsb) belum sama persis di Supabase.</p>
+                    <p class="text-slate-400 text-xs">Pesan ini muncul kalau nama kolom belum sama persis di Supabase.</p>
                 `;
             }
         }
