@@ -8,7 +8,6 @@
     <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
     
     <style>
-        /* === BACKGROUND UTAMA === */
         body { 
             background-color: #040b16; 
             background-image: radial-gradient(circle at top right, #0b172a, #040b16);
@@ -18,7 +17,6 @@
             z-index: 0;
         }
         
-        /* === LOGO WATERMARK & EFEK NEON GLOW === */
         body::before {
             content: "";
             position: fixed;
@@ -42,7 +40,6 @@
             100% { opacity: 0.2; filter: drop-shadow(0 0 30px rgba(52, 211, 153, 0.3)); }
         }
 
-        /* === KARTU GLASSMORPHISM DENGAN BORDER NEON === */
         .glass-card {
             background: rgba(10, 15, 25, 0.7); 
             backdrop-filter: blur(16px);
@@ -61,7 +58,7 @@
         .custom-scrollbar::-webkit-scrollbar { width: 4px; }
         .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(52, 211, 153, 0.5); border-radius: 10px; }
 
-        /* === STYLING TICKER KRIPTO (DIPERLAMBAT) === */
+        /* === TICKER HARGA CRYPTO === */
         .crypto-ticker-container {
             width: 100%;
             background-color: rgba(4, 11, 22, 0.8);
@@ -78,12 +75,10 @@
         }
         .crypto-ticker {
             display: inline-block;
-            /* DIUBAH MENJADI 180s AGAR SANGAT LAMBAT DAN TIDAK BIKIN PUSING */
             animation: ticker-scroll 180s linear infinite; 
         }
-        .crypto-ticker:hover {
-            animation-play-state: paused;
-        }
+        .crypto-ticker:hover { animation-play-state: paused; }
+
         .ticker-item {
             display: inline-flex;
             align-items: center;
@@ -91,31 +86,158 @@
             font-size: 14px;
             font-weight: 500;
         }
-        .ticker-symbol {
-            font-weight: 700;
-            color: #e2e8f0;
-            margin-right: 8px;
-            text-transform: uppercase;
-        }
-        .ticker-price {
-            margin-right: 8px;
-            color: #38bdf8;
-        }
+        .ticker-symbol { font-weight: 700; color: #e2e8f0; margin-right: 8px; text-transform: uppercase; }
+        .ticker-price { margin-right: 8px; color: #38bdf8; }
         .ticker-change.positive { color: #34d399; text-shadow: 0 0 5px rgba(52, 211, 153, 0.5); }
         .ticker-change.negative { color: #f87171; text-shadow: 0 0 5px rgba(248, 113, 113, 0.5); }
 
         @keyframes ticker-scroll {
-            0% { transform: translateX(0); }
+            0%   { transform: translateX(0); }
             100% { transform: translateX(-50%); } 
         }
+
+        /* ============================================
+           NEWS TICKER SUPABASE — BARU
+        ============================================ */
+        .news-ticker-container {
+            width: 100%;
+            background-color: rgba(2, 6, 14, 0.95);
+            backdrop-filter: blur(10px);
+            overflow: hidden;
+            white-space: nowrap;
+            border-bottom: 1px solid rgba(0, 207, 255, 0.2);
+            box-sizing: border-box;
+            display: flex;
+            align-items: stretch;
+            position: relative;
+            z-index: 10;
+            height: 36px;
+        }
+
+        /* Label "LIVE NEWS" di kiri */
+        .news-label {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            padding: 0 14px;
+            background: #00cfff;
+            font-family: monospace;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: 1.5px;
+            color: #000;
+            white-space: nowrap;
+            flex-shrink: 0;
+            z-index: 2;
+        }
+
+        .live-dot {
+            width: 6px;
+            height: 6px;
+            background: #ff3b5c;
+            border-radius: 50%;
+            animation: liveBlink 1s infinite;
+            flex-shrink: 0;
+        }
+
+        @keyframes liveBlink {
+            0%,100% { opacity:1 } 50% { opacity:0.2 }
+        }
+
+        /* Track berita berjalan */
+        .news-track {
+            flex: 1;
+            overflow: hidden;
+            position: relative;
+            display: flex;
+            align-items: center;
+        }
+
+        /* Fade kanan */
+        .news-track::after {
+            content: '';
+            position: absolute;
+            right: 0; top: 0; bottom: 0;
+            width: 60px;
+            background: linear-gradient(90deg, transparent, rgba(2,6,14,0.95));
+            z-index: 3;
+            pointer-events: none;
+        }
+
+        .news-inner {
+            display: inline-flex;
+            align-items: center;
+            white-space: nowrap;
+            animation: newsScroll 30s linear infinite;
+            will-change: transform;
+        }
+
+        .news-inner:hover { animation-play-state: paused; }
+
+        @keyframes newsScroll {
+            0%   { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+
+        .n-item {
+            display: inline-flex;
+            align-items: center;
+            gap: 7px;
+            padding: 0 20px;
+            border-right: 1px solid rgba(0,207,255,0.1);
+            font-size: 12px;
+            color: #e2e8f0;
+            font-family: monospace;
+        }
+
+        .n-dot { color: #f0b429; font-size: 9px; }
+
+        .n-tag {
+            font-size: 9px;
+            font-weight: 700;
+            padding: 1px 6px;
+            border-radius: 3px;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            flex-shrink: 0;
+        }
+
+        .tag-launch   { background: rgba(0,255,136,0.12); color:#00cc70; border:1px solid rgba(0,255,136,0.25); }
+        .tag-snapshot { background: rgba(0,207,255,0.12); color:#00cfff; border:1px solid rgba(0,207,255,0.25); }
+        .tag-release  { background: rgba(240,180,41,0.12);color:#f0b429; border:1px solid rgba(240,180,41,0.25); }
+        .tag-sale     { background: rgba(160,100,255,0.12);color:#a064ff;border:1px solid rgba(160,100,255,0.25); }
+        .tag-alert    { background: rgba(255,59,92,0.12); color:#ff3b5c; border:1px solid rgba(255,59,92,0.25); }
+        .tag-news     { background: rgba(150,150,150,0.08);color:#aaa;   border:1px solid rgba(150,150,150,0.15); }
+
+        .news-loading {
+            font-size: 11px;
+            color: #4a5568;
+            padding: 0 16px;
+            font-family: monospace;
+            animation: liveBlink 1.5s infinite;
+        }
+        /* ============================================ */
     </style>
 </head>
 <body class="flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white relative">
 
-    <!-- Crypto Ticker Container -->
+    <!-- 1. TICKER HARGA CRYPTO (asli) -->
     <div class="crypto-ticker-container shadow-[0_4px_20px_rgba(52,211,153,0.1)]">
         <div class="crypto-ticker" id="crypto-ticker">
             <span style="padding-left: 20px; color: #94a3b8;">Memuat harga live Top 100 Kripto...</span>
+        </div>
+    </div>
+
+    <!-- 2. NEWS TICKER SUPABASE (baru) -->
+    <div class="news-ticker-container">
+        <div class="news-label">
+            <div class="live-dot"></div>
+            LIVE NEWS
+        </div>
+        <div class="news-track">
+            <div class="news-inner" id="newsInner">
+                <span class="news-loading">Memuat berita...</span>
+            </div>
         </div>
     </div>
 
@@ -135,9 +257,8 @@
                 </div>
             </header>
 
-            <!-- DASHBOARD OVERVIEW (NEW) -->
+            <!-- DASHBOARD OVERVIEW -->
             <div id="dashboard-overview" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 hidden">
-                <!-- Card Total -->
                 <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] flex items-center justify-between transition-all hover:-translate-y-1 hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.3)]">
                     <div>
                         <p class="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1" id="lbl-dash-total">Total Airdrop</p>
@@ -147,7 +268,6 @@
                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
                     </div>
                 </div>
-                <!-- Card Active -->
                 <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] flex items-center justify-between transition-all hover:-translate-y-1 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(16,185,129,0.3)]">
                     <div>
                         <p class="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1" id="lbl-dash-active">Status: Aktif</p>
@@ -157,7 +277,6 @@
                          <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
                     </div>
                 </div>
-                <!-- Card Listing/Ended -->
                 <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] flex items-center justify-between transition-all hover:-translate-y-1 hover:border-purple-400 hover:shadow-[0_0_25px_rgba(168,85,247,0.3)]">
                     <div>
                         <p class="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1" id="lbl-dash-ended">Listing / Selesai</p>
@@ -191,15 +310,66 @@
     </footer>
 
     <script>
-        // === KONFIGURASI SUPABASE ===
-        const SUPABASE_URL = 'https://hmjjujirktpqviayfehe.supabase.co';
+        // =============================================
+        // KONFIGURASI SUPABASE
+        // =============================================
+        const SUPABASE_URL     = 'https://hmjjujirktpqviayfehe.supabase.co';
         const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtamp1amlya3RwcXZpYXlmZWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1NzQsImV4cCI6MjA4OTE1NzU3NH0.nmCK3b66fU8Zh-mwQw5YUS_I3dFJAYnvfWlO050doSY';
-        
+
         let supabaseClient;
         let globalAirdropData = [];
         let currentLang = 'id';
 
-        // === FITUR BAHASA ===
+        // =============================================
+        // NEWS TICKER — ambil dari tabel ticker_news
+        // =============================================
+        async function loadNewsTicker() {
+            try {
+                const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
+                const { data, error } = await client
+                    .from('ticker_news')
+                    .select('*')
+                    .order('created_at', { ascending: false });
+
+                if (error) throw error;
+
+                const el = document.getElementById('newsInner');
+
+                if (!data || data.length === 0) {
+                    el.innerHTML = '<span class="news-loading">Belum ada berita — tambahkan via admin panel.</span>';
+                    return;
+                }
+
+                // Duplikasi untuk seamless loop
+                const all = [...data, ...data];
+                el.innerHTML = all.map(b => `
+                    <span class="n-item">
+                        <span class="n-dot">◆</span>
+                        <span class="n-tag tag-${esc(b.tag)}">${esc(b.tag).toUpperCase()}</span>
+                        ${esc(b.text)}
+                    </span>
+                `).join('');
+
+                // Sesuaikan kecepatan dengan panjang konten
+                const dur = Math.max(20, Math.round(el.scrollWidth / 80));
+                el.style.animationDuration = dur + 's';
+
+            } catch (err) {
+                console.warn('News ticker error:', err.message);
+            }
+        }
+
+        function esc(s) {
+            return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+        }
+
+        // Jalankan ticker & refresh tiap 60 detik
+        loadNewsTicker();
+        setInterval(loadNewsTicker, 60000);
+
+        // =============================================
+        // BAHASA
+        // =============================================
         const textDict = {
             id: { 
                 headerDesc: "Tracker airdrop Web3 paling update. Garap sekarang sebelum snapshot!", 
@@ -229,86 +399,68 @@
 
         function setLanguage(lang) {
             currentLang = lang;
-            const btnClassActive = "px-5 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-cyan-600 text-white font-bold text-sm transition-all shadow-[0_0_15px_rgba(52,211,153,0.4)]";
-            const btnClassInactive = "px-5 py-2 rounded-lg text-slate-400 hover:text-emerald-300 font-bold text-sm transition-all hover:bg-slate-800/50";
-            
-            document.getElementById('btn-id').className = lang === 'id' ? btnClassActive : btnClassInactive;
-            document.getElementById('btn-en').className = lang === 'en' ? btnClassActive : btnClassInactive;
-            
-            // Update Teks Umum
-            document.getElementById('header-desc').innerHTML = textDict[lang].headerDesc;
-            document.getElementById('footer-dyor').innerHTML = textDict[lang].footerDyor;
-            
-            // Update Teks Dashboard
-            document.getElementById('lbl-dash-total').innerText = textDict[lang].dashTotal;
+            const on  = "px-5 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-cyan-600 text-white font-bold text-sm transition-all shadow-[0_0_15px_rgba(52,211,153,0.4)]";
+            const off = "px-5 py-2 rounded-lg text-slate-400 hover:text-emerald-300 font-bold text-sm transition-all hover:bg-slate-800/50";
+            document.getElementById('btn-id').className = lang === 'id' ? on : off;
+            document.getElementById('btn-en').className = lang === 'en' ? on : off;
+            document.getElementById('header-desc').innerHTML  = textDict[lang].headerDesc;
+            document.getElementById('footer-dyor').innerHTML  = textDict[lang].footerDyor;
+            document.getElementById('lbl-dash-total').innerText  = textDict[lang].dashTotal;
             document.getElementById('lbl-dash-active').innerText = textDict[lang].dashActive;
-            document.getElementById('lbl-dash-ended').innerText = textDict[lang].dashEnded;
-
+            document.getElementById('lbl-dash-ended').innerText  = textDict[lang].dashEnded;
             renderCards();
         }
 
-        // === FITUR UPDATE DASHBOARD ===
+        // =============================================
+        // DASHBOARD
+        // =============================================
         function updateDashboard() {
-            const total = globalAirdropData.length;
-            let active = 0;
-            let listing = 0;
-
+            let active = 0, listing = 0;
             globalAirdropData.forEach(item => {
-                const stat = (item.status || '').toLowerCase();
-                
-                // Jika status mengandung kata 'listing', 'end', atau 'selesai', masuk ke kategori Listing/Ended
-                if (stat.includes('listing') || stat.includes('end') || stat.includes('selesai')) {
-                    listing++;
-                } else {
-                    // Sisanya (termasuk active, waitlist, mint, dll) dihitung sebagai Aktif
-                    active++;
-                }
+                const s = (item.status || '').toLowerCase();
+                if (s.includes('listing') || s.includes('end') || s.includes('selesai')) listing++;
+                else active++;
             });
-
-            // Update angka di HTML
-            document.getElementById('dash-total').innerText = total;
-            document.getElementById('dash-active').innerText = active;
+            document.getElementById('dash-total').innerText   = globalAirdropData.length;
+            document.getElementById('dash-active').innerText  = active;
             document.getElementById('dash-listing').innerText = listing;
         }
 
-        // === FITUR RENDER KARTU AIRDROP ===
+        // =============================================
+        // RENDER KARTU AIRDROP
+        // =============================================
         function renderCards() {
             const container = document.getElementById('airdrop-container');
             const dict = textDict[currentLang];
-            container.innerHTML = ''; 
+            container.innerHTML = '';
 
             if (globalAirdropData.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-16 bg-slate-900/60 backdrop-blur-md rounded-2xl border border-emerald-500/20 border-dashed shadow-[0_0_20px_rgba(52,211,153,0.05)]"><p class="text-emerald-400 text-lg font-medium">${dict.emptyData}</p></div>`;
+                container.innerHTML = `<div class="col-span-full text-center py-16 bg-slate-900/60 backdrop-blur-md rounded-2xl border border-emerald-500/20 border-dashed"><p class="text-emerald-400 text-lg font-medium">${dict.emptyData}</p></div>`;
                 return;
             }
 
             globalAirdropData.forEach(item => {
                 const raisedInfo = currentLang === 'id' ? (item.RaisedID || dict.unknown) : (item.RaisedEN || dict.unknown);
-                const tasksInfo = currentLang === 'id' ? (item.tasksID || dict.unknown) : (item.tasksEN || dict.unknown);
+                const tasksInfo  = currentLang === 'id' ? (item.tasksID  || dict.unknown) : (item.tasksEN  || dict.unknown);
 
                 let statusStyles = 'bg-slate-800/50 text-slate-300 border-slate-600/50';
                 const stat = item.status?.toLowerCase() || '';
-                
-                // Ubah gaya warna sesuai status
-                if (stat.includes('active')) {
-                    statusStyles = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.4)]';
-                } else if (stat.includes('waitlist')) {
-                    statusStyles = 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.4)]';
-                } else if (stat.includes('mint')) {
-                    statusStyles = 'bg-blue-500/20 text-blue-400 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.4)]';
-                } else if (stat.includes('listing') || stat.includes('end') || stat.includes('selesai')) {
+                if (stat.includes('active'))   statusStyles = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.4)]';
+                else if (stat.includes('waitlist')) statusStyles = 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.4)]';
+                else if (stat.includes('mint'))     statusStyles = 'bg-blue-500/20 text-blue-400 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.4)]';
+                else if (stat.includes('listing') || stat.includes('end') || stat.includes('selesai'))
                     statusStyles = 'bg-purple-500/20 text-purple-400 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.4)]';
-                }
 
                 let tagsHTML = '';
                 if (item.tags) {
                     try {
-                        const tagArray = String(item.tags).split(',').map(t => t.trim());
-                        tagsHTML = tagArray.map(t => `<span class="px-2.5 py-1 rounded-md bg-slate-900/80 border border-emerald-500/30 text-[10px] font-semibold text-emerald-200 uppercase tracking-wider shadow-[0_0_5px_rgba(52,211,153,0.2)]">${t}</span>`).join('');
-                    } catch (e) { tagsHTML = ''; }
+                        tagsHTML = String(item.tags).split(',').map(t =>
+                            `<span class="px-2.5 py-1 rounded-md bg-slate-900/80 border border-emerald-500/30 text-[10px] font-semibold text-emerald-200 uppercase tracking-wider shadow-[0_0_5px_rgba(52,211,153,0.2)]">${t.trim()}</span>`
+                        ).join('');
+                    } catch(e) {}
                 }
 
-                const cardHTML = `
+                container.insertAdjacentHTML('beforeend', `
                     <div class="glass-card rounded-2xl p-6 flex flex-col h-full relative overflow-hidden group">
                         <div class="flex justify-between items-start mb-4">
                             <h2 class="text-2xl font-black text-white tracking-wide group-hover:text-emerald-400 transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">${item.name || 'Unknown'}</h2>
@@ -335,86 +487,69 @@
                         </div>
                         <a href="${item.link || '#'}" target="_blank" rel="noopener noreferrer" class="mt-auto block w-full text-center bg-transparent border-2 border-cyan-500 text-cyan-400 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-cyan-500 hover:text-white hover:border-transparent font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_25px_rgba(52,211,153,0.5)] transform hover:-translate-y-1">${dict.btnLabel}</a>
                     </div>
-                `;
-                container.insertAdjacentHTML('beforeend', cardHTML);
+                `);
             });
         }
 
-        // === FITUR TICKER CRYPTO REAL-TIME ===
+        // =============================================
+        // TICKER HARGA CRYPTO (asli)
+        // =============================================
         async function fetchCryptoPrices() {
             const tickerElement = document.getElementById('crypto-ticker');
-            
             try {
                 const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false');
-                
                 if (!response.ok) throw new Error('Limit API tercapai');
-                
                 const data = await response.json();
-                let tickerHTML = '';
-
+                let html = '';
                 data.forEach(coin => {
-                    const price = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(coin.current_price);
+                    const price  = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(coin.current_price);
                     const change = coin.price_change_percentage_24h ? coin.price_change_percentage_24h.toFixed(2) : 0;
-                    const changeClass = change >= 0 ? 'positive' : 'negative';
-                    const changeSign = change >= 0 ? '+' : '';
-
-                    tickerHTML += `
+                    const cls    = change >= 0 ? 'positive' : 'negative';
+                    const sign   = change >= 0 ? '+' : '';
+                    html += `
                         <div class="ticker-item">
-                            <img src="${coin.image}" alt="${coin.symbol}" style="width: 18px; height: 18px; margin-right: 8px; border-radius: 50%; box-shadow: 0 0 5px rgba(255,255,255,0.3);">
+                            <img src="${coin.image}" alt="${coin.symbol}" style="width:18px;height:18px;margin-right:8px;border-radius:50%;box-shadow:0 0 5px rgba(255,255,255,0.3);">
                             <span class="ticker-symbol drop-shadow-md">${coin.symbol}</span>
                             <span class="ticker-price drop-shadow-md">${price}</span>
-                            <span class="ticker-change ${changeClass}">${changeSign}${change}%</span>
-                        </div>
-                    `;
+                            <span class="ticker-change ${cls}">${sign}${change}%</span>
+                        </div>`;
                 });
-
-                tickerElement.innerHTML = tickerHTML + tickerHTML;
-
+                tickerElement.innerHTML = html + html;
             } catch (error) {
-                console.error('Gagal memuat ticker kripto:', error);
-                tickerElement.innerHTML = '<span style="padding-left: 20px; color: #f87171; text-shadow: 0 0 5px rgba(248,113,113,0.5);">Sedang memuat ulang harga pasar... (Menunggu limit API)</span>';
+                tickerElement.innerHTML = '<span style="padding-left:20px;color:#f87171;">Sedang memuat ulang harga pasar...</span>';
             }
         }
 
         fetchCryptoPrices();
         setInterval(fetchCryptoPrices, 300000);
 
-        // === INIT SUPABASE & RENDER ===
+        // =============================================
+        // INIT SUPABASE & AIRDROP DATA
+        // =============================================
         async function init() {
-            const uiLoading = document.getElementById('loading-state');
-            const uiError = document.getElementById('error-state');
+            const uiLoading   = document.getElementById('loading-state');
+            const uiError     = document.getElementById('error-state');
             const uiContainer = document.getElementById('airdrop-container');
             const uiDashboard = document.getElementById('dashboard-overview');
 
             try {
                 if (!window.supabase) throw new Error("Gagal memuat sistem Database. Refresh halaman ini.");
-
                 supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-
-                const { data, error } = await supabaseClient.from('airdrops').select('*').order('created_at', { ascending: false }); 
-                
+                const { data, error } = await supabaseClient.from('airdrops').select('*').order('created_at', { ascending: false });
                 if (error) throw error;
-
                 globalAirdropData = data || [];
-                
-                // Kalkulasi Dashboard lalu munculkan
                 updateDashboard();
                 uiDashboard.classList.remove('hidden');
-
                 uiLoading.classList.add('hidden');
                 uiContainer.classList.remove('hidden');
-
                 setLanguage(currentLang);
-
             } catch (error) {
-                console.error("DEBUG ERROR:", error);
                 uiLoading.classList.add('hidden');
                 uiError.classList.remove('hidden');
                 uiError.innerHTML = `
-                    <p class="text-red-400 font-bold text-xl mb-2 drop-shadow-[0_0_5px_rgba(239,68,68,0.5)]">Gagal Menarik Data!</p>
+                    <p class="text-red-400 font-bold text-xl mb-2">Gagal Menarik Data!</p>
                     <p class="text-slate-300 text-sm mb-4 font-mono">${error.message || JSON.stringify(error)}</p>
-                    <p class="text-slate-400 text-xs">Pesan ini muncul kalau nama kolom belum sama persis di Supabase.</p>
-                `;
+                    <p class="text-slate-400 text-xs">Pesan ini muncul kalau nama kolom belum sama persis di Supabase.</p>`;
             }
         }
 
