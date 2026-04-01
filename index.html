@@ -1,559 +1,245 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>AirdropXI - Modern Tracker</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-    
-    <style>
-        body { 
-            background-color: #040b16; 
-            background-image: radial-gradient(circle at top right, #0b172a, #040b16);
-            color: #f8fafc; 
-            position: relative;
-            min-height: 100vh;
-            z-index: 0;
-        }
-        
-        body::before {
-            content: "";
-            position: fixed;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            width: 100vw;
-            height: 100vh;
-            background-image: url('https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/logo.png');
-            background-size: 65vmin; 
-            background-position: center;
-            background-repeat: no-repeat;
-            opacity: 0.15; 
-            z-index: -1; 
-            pointer-events: none; 
-            animation: neonPulse 4s infinite alternate ease-in-out;
-        }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AirdropXI — Find Legit Airdrops Before Everyone Else</title>
 
-        @keyframes neonPulse {
-            0% { opacity: 0.1; filter: drop-shadow(0 0 10px rgba(52, 211, 153, 0.1)); }
-            100% { opacity: 0.2; filter: drop-shadow(0 0 30px rgba(52, 211, 153, 0.3)); }
-        }
+<script src="https://cdn.tailwindcss.com"></script>
+<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 
-        .glass-card {
-            background: rgba(10, 15, 25, 0.7); 
-            backdrop-filter: blur(16px);
-            -webkit-backdrop-filter: blur(16px);
-            border: 1px solid rgba(52, 211, 153, 0.4);
-            box-shadow: 0 0 15px rgba(52, 211, 153, 0.15), inset 0 0 15px rgba(52, 211, 153, 0.05);
-            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
-        }
-        
-        .glass-card:hover {
-            transform: translateY(-6px);
-            border-color: rgba(52, 211, 153, 0.9);
-            box-shadow: 0 0 30px rgba(52, 211, 153, 0.4), inset 0 0 20px rgba(52, 211, 153, 0.15);
-        }
-        
-        .custom-scrollbar::-webkit-scrollbar { width: 4px; }
-        .custom-scrollbar::-webkit-scrollbar-thumb { background-color: rgba(52, 211, 153, 0.5); border-radius: 10px; }
-
-        /* === TICKER HARGA CRYPTO === */
-        .crypto-ticker-container {
-            width: 100%;
-            background-color: rgba(4, 11, 22, 0.8);
-            backdrop-filter: blur(10px);
-            color: #ffffff;
-            padding: 10px 0;
-            overflow: hidden;
-            white-space: nowrap;
-            border-bottom: 1px solid rgba(52, 211, 153, 0.2); 
-            box-sizing: border-box;
-            display: flex;
-            position: relative;
-            z-index: 10;
-        }
-        .crypto-ticker {
-            display: inline-block;
-            animation: ticker-scroll 180s linear infinite; 
-        }
-        .crypto-ticker:hover { animation-play-state: paused; }
-
-        .ticker-item {
-            display: inline-flex;
-            align-items: center;
-            margin: 0 25px;
-            font-size: 14px;
-            font-weight: 500;
-        }
-        .ticker-symbol { font-weight: 700; color: #e2e8f0; margin-right: 8px; text-transform: uppercase; }
-        .ticker-price { margin-right: 8px; color: #38bdf8; }
-        .ticker-change.positive { color: #34d399; text-shadow: 0 0 5px rgba(52, 211, 153, 0.5); }
-        .ticker-change.negative { color: #f87171; text-shadow: 0 0 5px rgba(248, 113, 113, 0.5); }
-
-        @keyframes ticker-scroll {
-            0%   { transform: translateX(0); }
-            100% { transform: translateX(-50%); } 
-        }
-
-        /* ============================================
-           NEWS TICKER SUPABASE — BARU
-        ============================================ */
-        .news-ticker-container {
-            width: 100%;
-            background-color: rgba(2, 6, 14, 0.95);
-            backdrop-filter: blur(10px);
-            overflow: hidden;
-            white-space: nowrap;
-            border-bottom: 1px solid rgba(0, 207, 255, 0.2);
-            box-sizing: border-box;
-            display: flex;
-            align-items: stretch;
-            position: relative;
-            z-index: 10;
-            height: 36px;
-        }
-
-        /* Label "LIVE NEWS" di kiri */
-        .news-label {
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            padding: 0 14px;
-            background: #00cfff;
-            font-family: monospace;
-            font-size: 10px;
-            font-weight: 700;
-            letter-spacing: 1.5px;
-            color: #000;
-            white-space: nowrap;
-            flex-shrink: 0;
-            z-index: 2;
-        }
-
-        .live-dot {
-            width: 6px;
-            height: 6px;
-            background: #ff3b5c;
-            border-radius: 50%;
-            animation: liveBlink 1s infinite;
-            flex-shrink: 0;
-        }
-
-        @keyframes liveBlink {
-            0%,100% { opacity:1 } 50% { opacity:0.2 }
-        }
-
-        /* Track berita berjalan */
-        .news-track {
-            flex: 1;
-            overflow: hidden;
-            position: relative;
-            display: flex;
-            align-items: center;
-        }
-
-        /* Fade kanan */
-        .news-track::after {
-            content: '';
-            position: absolute;
-            right: 0; top: 0; bottom: 0;
-            width: 60px;
-            background: linear-gradient(90deg, transparent, rgba(2,6,14,0.95));
-            z-index: 3;
-            pointer-events: none;
-        }
-
-        .news-inner {
-            display: inline-flex;
-            align-items: center;
-            white-space: nowrap;
-            animation: newsScroll 30s linear infinite;
-            will-change: transform;
-        }
-
-        .news-inner:hover { animation-play-state: paused; }
-
-        @keyframes newsScroll {
-            0%   { transform: translateX(0); }
-            100% { transform: translateX(-50%); }
-        }
-
-        .n-item {
-            display: inline-flex;
-            align-items: center;
-            gap: 7px;
-            padding: 0 20px;
-            border-right: 1px solid rgba(0,207,255,0.1);
-            font-size: 12px;
-            color: #e2e8f0;
-            font-family: monospace;
-        }
-
-        .n-dot { color: #f0b429; font-size: 9px; }
-
-        .n-tag {
-            font-size: 9px;
-            font-weight: 700;
-            padding: 1px 6px;
-            border-radius: 3px;
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            flex-shrink: 0;
-        }
-
-        .tag-launch   { background: rgba(0,255,136,0.12); color:#00cc70; border:1px solid rgba(0,255,136,0.25); }
-        .tag-snapshot { background: rgba(0,207,255,0.12); color:#00cfff; border:1px solid rgba(0,207,255,0.25); }
-        .tag-release  { background: rgba(240,180,41,0.12);color:#f0b429; border:1px solid rgba(240,180,41,0.25); }
-        .tag-sale     { background: rgba(160,100,255,0.12);color:#a064ff;border:1px solid rgba(160,100,255,0.25); }
-        .tag-alert    { background: rgba(255,59,92,0.12); color:#ff3b5c; border:1px solid rgba(255,59,92,0.25); }
-        .tag-news     { background: rgba(150,150,150,0.08);color:#aaa;   border:1px solid rgba(150,150,150,0.15); }
-
-        .news-loading {
-            font-size: 11px;
-            color: #4a5568;
-            padding: 0 16px;
-            font-family: monospace;
-            animation: liveBlink 1.5s infinite;
-        }
-        /* ============================================ */
-    </style>
+<link rel="stylesheet" href="css/style.css">
 </head>
-<body class="flex flex-col font-sans antialiased selection:bg-emerald-500 selection:text-white relative">
+<body>
 
-    <!-- 1. TICKER HARGA CRYPTO (asli) -->
-    <div class="crypto-ticker-container shadow-[0_4px_20px_rgba(52,211,153,0.1)]">
-        <div class="crypto-ticker" id="crypto-ticker">
-            <span style="padding-left: 20px; color: #94a3b8;">Memuat harga live Top 100 Kripto...</span>
-        </div>
+<div id="cursor"></div>
+<div id="cursor-ring"></div>
+<canvas id="bg-canvas"></canvas>
+
+<div class="pticker-wrap z1">
+  <div class="pticker-inner" id="price-ticker">
+    <span style="padding:0 20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">Memuat harga pasar...</span>
+  </div>
+</div>
+
+<div class="nticker-wrap z1">
+  <div class="nticker-label"><div class="ldot"></div>LIVE NEWS</div>
+  <div class="nticker-track">
+    <div class="nticker-inner" id="news-ticker">
+      <span class="ni"><span class="ni-dot">◆</span>Memuat berita terbaru...</span>
+    </div>
+  </div>
+</div>
+
+<nav class="z1">
+  <div class="nav-logo">
+    <div class="nav-logo-icon">⚡</div>
+    AirdropXI
+  </div>
+  <div class="nav-links">
+    <a href="#airdrops" id="nav-explore">Explore</a>
+    <a href="#guide" id="nav-guide">Guide</a>
+  </div>
+  <div class="nav-right">
+    <div class="nav-social">
+      <a href="https://x.com/xiobai06" target="_blank" title="Twitter/X">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+      </a>
+      <a href="https://t.me/Xiobaiishikii" target="_blank" title="Telegram">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+      </a>
+    </div>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-id" onclick="setLang('id')">🇮🇩 ID</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">🇬🇧 EN</button>
+    </div>
+  </div>
+</nav>
+
+<div class="z1" style="border-bottom:1px solid var(--border)">
+<div class="hero">
+  <div>
+    <div class="hero-badge"><div class="hero-badge-dot"></div><span id="h-badge">🔥 20+ Airdrop Aktif Sekarang</span></div>
+    <h1 id="h-title">Find Legit Airdrops<br><span>Before Everyone Else</span></h1>
+    <p class="hero-sub" id="h-sub">Auto-filtered, verified, dan siap snapshot. Jangan sampai ketinggalan reward dari project Web3 terbaik.</p>
+    <div class="hero-btns">
+      <button class="btn-primary" onclick="document.getElementById('airdrops').scrollIntoView({behavior:'smooth'})">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
+        <span id="h-btn1">Explore Airdrops</span>
+      </button>
+      <button class="btn-ghost" id="h-btn2" onclick="document.getElementById('guide').scrollIntoView({behavior:'smooth'})">Guide & Tutorial</button>
+    </div>
+    <div class="hero-stats">
+      <div class="hstat"><div class="hstat-num" id="hs-total">0</div><div class="hstat-lbl" id="hs-total-l">Total Airdrops</div></div>
+      <div class="hstat"><div class="hstat-num" id="hs-active">0</div><div class="hstat-lbl" id="hs-active-l">Active Now</div></div>
+      <div class="hstat"><div class="hstat-num">100%</div><div class="hstat-lbl">Verified</div></div>
+    </div>
+  </div>
+  
+<div class="hero-visual">
+    <div class="universe-container">
+      <div class="sun-btc"><img id="uni-sun" src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/btc.svg" alt="Top 1"></div>
+      
+      <div class="orbit-ring ring-1">
+        <div class="planet" style="top:0; left:50%;"><img id="uni-p1" src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/eth.svg" class="planet-counter" alt="Top 2"></div>
+        <div class="planet" style="top:100%; left:50%;"><img id="uni-p2" src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/bnb.svg" class="planet-counter" alt="Top 3"></div>
+      </div>
+
+      <div class="orbit-ring ring-2">
+        <div class="planet" style="top:50%; left:0;"><img id="uni-p3" src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/sol.svg" class="planet-counter-2" alt="Top 4"></div>
+        <div class="planet" style="top:50%; left:100%;"><img id="uni-p4" src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/xrp.svg" class="planet-counter-2" alt="Top 5"></div>
+      </div>
+
+      <div class="orbit-ring ring-3">
+        <div class="planet" style="top:15%; left:15%;"><img id="uni-p5" src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/ada.svg" class="planet-counter-3" alt="Top 6"></div>
+        <div class="planet" style="top:85%; left:85%;"><img id="uni-p6" src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/doge.svg" class="planet-counter-3" alt="Top 7"></div>
+      </div>
+
+      <div class="float-card float-card-1">
+        <div class="fc-title" id="fc-latest-title">LATEST DROP</div>
+        <div class="fc-val" id="fc-latest">—</div>
+        <div class="fc-sub">Active Now</div>
+      </div>
+      <div class="float-card float-card-2">
+        <div class="fc-title">TOTAL RAISED</div>
+        <div class="fc-val" id="fc-raised">$—</div>
+        <div class="fc-sub">Across all projects</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<main class="z1" id="airdrops">
+<section>
+  <div class="section-tag" id="t-dash">DASHBOARD</div>
+  <h2 class="section-title" id="t-title">Airdrop Radar</h2>
+  <p class="section-sub" id="t-sub">Pantau status, total dana, dan tugas dari project-project potensial di ekosistem Web3.</p>
+
+  <div class="dash-grid reveal" style="margin-top:32px;">
+    <div class="dash-card">
+      <div class="dash-label" id="lbl-total">Total Airdrop</div>
+      <div class="dash-num dash-num-g" id="dash-total">0</div>
+      <div class="dash-ico" style="background:rgba(0,255,135,0.08)">📋</div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-label" id="lbl-active">Status Aktif</div>
+      <div class="dash-num dash-num-c" id="dash-active">0</div>
+      <div class="dash-ico" style="background:rgba(0,212,255,0.08)">⚡</div>
+    </div>
+    <div class="dash-card">
+      <div class="dash-label" id="lbl-ended">Listing / Selesai</div>
+      <div class="dash-num dash-num-p" id="dash-listing">0</div>
+      <div class="dash-ico" style="background:rgba(192,132,252,0.08)">✓</div>
+    </div>
+  </div>
+
+  <div class="filter-bar reveal">
+    <div class="search-box">
+      <span class="search-ico">🔍</span>
+      <input type="text" id="search-input" placeholder="Search project..." oninput="filterCards()">
+    </div>
+    <div class="filter-btns">
+      <button class="fbtn active" data-filter="all" onclick="setFilter(this,'all')"><span class="fbtn-dot"></span><span id="fb-all">All</span></button>
+      <button class="fbtn" data-filter="active" onclick="setFilter(this,'active')"><span class="fbtn-dot" style="color:var(--g)"></span>Active</button>
+      <button class="fbtn" data-filter="listing" onclick="setFilter(this,'listing')"><span class="fbtn-dot" style="color:#c084fc"></span>Listed</button>
+    </div>
+  </div>
+
+  <div id="loading-state">
+    <div class="spinner"></div>
+    <p style="font-family:'JetBrains Mono',monospace;font-size:13px;color:var(--muted)">Pulling data from the chain...</p>
+  </div>
+  <div id="error-state">
+    <p style="color:#ff2d55;font-weight:700;font-size:16px;margin-bottom:8px">Failed to load data</p>
+    <p id="error-msg" style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--muted)"></p>
+  </div>
+
+  <div id="airdrop-container" style="display:none"></div>
+</section>
+
+<section id="guide" style="border-top:1px solid var(--border);">
+  <div class="section-tag" id="g-tag">PEMULA</div>
+  <h2 class="section-title" id="g-title">Guide & Tutorial</h2>
+  <p class="section-sub" id="g-sub">Selamat datang di pusat informasi AirdropXI. Di sini kami menyediakan panduan lengkap untuk memaksimalkan cuan dari ekosistem Crypto.</p>
+  
+  <div class="guide-grid reveal">
+    <div class="guide-card">
+      <div class="g-icon">🎒</div>
+      <h3 class="g-title" id="g-prep-title">Persiapan Wajib</h3>
+      <p class="g-desc" id="g-prep-desc">Apa yang harus disiapkan sebelum mulai menggarap?</p>
+      <ul class="g-list">
+        <li><strong style="color:#fff; min-width:80px;">Wallet:</strong> <span id="g-prep-1">MetaMask (EVM), Phantom (Solana), Keplr (Cosmos).</span></li>
+        <li><strong style="color:#fff; min-width:80px;">Sosmed:</strong> <span id="g-prep-2">Akun Twitter (X), Discord, dan Telegram yang aktif.</span></li>
+        <li><strong style="color:#fff; min-width:80px;">Browser:</strong> <span id="g-prep-3">Mises Browser atau Kiwi Browser (jika di HP) agar bisa pasang Extension.</span></li>
+        <li><strong style="color:#fff; min-width:80px;">Gas Fee:</strong> <span id="g-prep-4">Siapkan sedikit saldo (ETH/BNB/SOL) untuk transaksi on-chain.</span></li>
+      </ul>
     </div>
 
-    <!-- 2. NEWS TICKER SUPABASE (baru) -->
-    <div class="news-ticker-container">
-        <div class="news-label">
-            <div class="live-dot"></div>
-            LIVE NEWS
+    <div class="guide-card">
+      <div class="g-icon">🛡️</div>
+      <h3 class="g-title" id="g-rule-title">Aturan & Status Airdrop</h3>
+      <p class="g-desc" id="g-rule-desc">Keamanan adalah prioritas. Pahami status sebelum eksekusi.</p>
+      <ul class="g-list" style="margin-bottom: 20px;">
+        <li><strong style="color:#fff;">Burner Wallet:</strong> <span id="g-rule-1">Selalu gunakan wallet khusus airdrop (bukan utama).</span></li>
+        <li><strong style="color:#fff;">No Seed Phrase:</strong> <span id="g-rule-2">Admin AirdropXI tidak akan pernah meminta Private Key kamu.</span></li>
+        <li><strong style="color:#fff;">DYOR:</strong> <span id="g-rule-3">Lakukan riset mandiri, kelola waktu dan aset dengan bijak.</span></li>
+      </ul>
+      
+      <div class="st-badge-wrap">
+        <div class="st-item">
+          <div class="st-dot" style="background:#00ff87; box-shadow:0 0 10px #00ff87;"></div>
+          <div class="st-item-text"><strong>Confirmed</strong> <span id="g-st-1">Dikonfirmasi dev. Pasti cair.</span></div>
         </div>
-        <div class="news-track">
-            <div class="news-inner" id="newsInner">
-                <span class="news-loading">Memuat berita...</span>
-            </div>
+        <div class="st-item">
+          <div class="st-dot" style="background:#f0b429; box-shadow:0 0 10px #f0b429;"></div>
+          <div class="st-item-text"><strong>Potential</strong> <span id="g-st-2">Belum resmi, tapi sangat layak digarap (testnet/points).</span></div>
         </div>
+        <div class="st-item">
+          <div class="st-dot" style="background:#ff2d55; box-shadow:0 0 10px #ff2d55;"></div>
+          <div class="st-item-text"><strong>Ended</strong> <span id="g-st-3">Periode selesai, tinggal tunggu distribusi.</span></div>
+        </div>
+      </div>
     </div>
+  </div>
+</section>
+</main>
 
-    <main class="flex-grow p-4 md:p-6 relative z-10">
-        <div class="max-w-7xl mx-auto">
-            
-            <header class="mb-10 text-center mt-8 relative">
-                <h1 class="text-5xl md:text-6xl font-extrabold text-transparent bg-clip-text bg-gradient-to-r from-emerald-400 to-cyan-500 mb-4 tracking-tight drop-shadow-[0_0_15px_rgba(52,211,153,0.3)]">
-                    AirdropXI
-                </h1>
-                <p id="header-desc" class="text-slate-300 text-lg max-w-2xl mx-auto mb-6 drop-shadow-md">
-                    Tracker airdrop Web3 paling update. Garap sekarang sebelum snapshot!
-                </p>
-                <div class="inline-flex bg-slate-900/80 p-1 rounded-xl border border-emerald-500/30 backdrop-blur-md shadow-[0_0_10px_rgba(52,211,153,0.1)]">
-                    <button id="btn-id" onclick="setLanguage('id')" class="px-5 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-cyan-600 text-white font-bold text-sm transition-all shadow-md">🇮🇩 ID</button>
-                    <button id="btn-en" onclick="setLanguage('en')" class="px-5 py-2 rounded-lg text-slate-400 hover:text-white font-bold text-sm transition-all">🇬🇧 EN</button>
-                </div>
-            </header>
-
-            <!-- DASHBOARD OVERVIEW -->
-            <div id="dashboard-overview" class="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12 hidden">
-                <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-cyan-500/30 shadow-[0_0_15px_rgba(6,182,212,0.15)] flex items-center justify-between transition-all hover:-translate-y-1 hover:border-cyan-400 hover:shadow-[0_0_25px_rgba(6,182,212,0.3)]">
-                    <div>
-                        <p class="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1" id="lbl-dash-total">Total Airdrop</p>
-                        <h3 id="dash-total" class="text-4xl font-black text-cyan-400 drop-shadow-[0_0_10px_rgba(6,182,212,0.6)]">0</h3>
-                    </div>
-                    <div class="p-4 bg-cyan-500/20 rounded-xl text-cyan-400 shadow-[0_0_10px_rgba(6,182,212,0.2)]">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"></path></svg>
-                    </div>
-                </div>
-                <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-emerald-500/30 shadow-[0_0_15px_rgba(16,185,129,0.15)] flex items-center justify-between transition-all hover:-translate-y-1 hover:border-emerald-400 hover:shadow-[0_0_25px_rgba(16,185,129,0.3)]">
-                    <div>
-                        <p class="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1" id="lbl-dash-active">Status: Aktif</p>
-                        <h3 id="dash-active" class="text-4xl font-black text-emerald-400 drop-shadow-[0_0_10px_rgba(16,185,129,0.6)]">0</h3>
-                    </div>
-                    <div class="p-4 bg-emerald-500/20 rounded-xl text-emerald-400 shadow-[0_0_10px_rgba(16,185,129,0.2)]">
-                         <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path></svg>
-                    </div>
-                </div>
-                <div class="bg-slate-900/60 backdrop-blur-md rounded-2xl p-5 border border-purple-500/30 shadow-[0_0_15px_rgba(168,85,247,0.15)] flex items-center justify-between transition-all hover:-translate-y-1 hover:border-purple-400 hover:shadow-[0_0_25px_rgba(168,85,247,0.3)]">
-                    <div>
-                        <p class="text-xs text-slate-400 uppercase font-bold tracking-widest mb-1" id="lbl-dash-ended">Listing / Selesai</p>
-                        <h3 id="dash-listing" class="text-4xl font-black text-purple-400 drop-shadow-[0_0_10px_rgba(168,85,247,0.6)]">0</h3>
-                    </div>
-                    <div class="p-4 bg-purple-500/20 rounded-xl text-purple-400 shadow-[0_0_10px_rgba(168,85,247,0.2)]">
-                        <svg class="w-8 h-8" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path></svg>
-                    </div>
-                </div>
-            </div>
-
-            <!-- LOADING STATE -->
-            <div id="loading-state" class="flex flex-col items-center justify-center py-20">
-                <div class="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-emerald-500 mb-4 shadow-[0_0_15px_rgba(52,211,153,0.5)]"></div>
-                <p class="text-emerald-400 animate-pulse font-medium">Menarik data dari server...</p>
-            </div>
-
-            <!-- ERROR STATE -->
-            <div id="error-state" class="hidden text-center bg-red-900/40 backdrop-blur-md border border-red-500/50 p-6 rounded-xl max-w-md mx-auto mb-10 shadow-[0_0_20px_rgba(239,68,68,0.2)]"></div>
-
-            <!-- CONTAINER AIRDROP -->
-            <div id="airdrop-container" class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 hidden"></div>
+<footer class="z1">
+  <div class="footer-inner">
+    <div class="dyor-badge">⚠️ DYOR — Semua informasi hanya untuk edukasi. Selalu lakukan riset sendiri sebelum berinvestasi.</div>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>Airdrop<span>XI</span></h3>
+        <p>Tracker airdrop Web3 terpercaya. Real-time, verified, dan selalu update untuk kamu yang tidak mau ketinggalan.</p>
+        <div class="footer-socials">
+          <a class="fsoc" href="https://x.com/xiobai06" target="_blank" title="Twitter/X">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a class="fsoc" href="https://t.me/Xiobaiishikii" target="_blank" title="Telegram">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          </a>
         </div>
-    </main>
+      </div>
+      <div class="footer-links">
+        <h4>Navigate</h4>
+        <a href="#airdrops">Explore Airdrops</a>
+        <a href="#guide">Guide & Tutorial</a>
+      </div>
+      <div class="footer-links">
+        <h4>Community</h4>
+        <a href="https://x.com/xiobai06" target="_blank">Twitter / X</a>
+        <a href="https://t.me/Xiobaiishikii" target="_blank">Telegram</a>
+      </div>
+    </div>
+    <div class="footer-bottom">
+      <span>© 2026 AirdropXI — Stay Safe & Keep Grinding</span>
+      <span style="color:var(--g)">Built with ⚡ for Web3 hunters</span>
+    </div>
+  </div>
+</footer>
 
-    <footer class="mt-10 py-8 border-t border-emerald-900/50 bg-slate-900/80 backdrop-blur-lg relative z-10">
-        <div class="max-w-4xl mx-auto px-6 text-center">
-            <p id="footer-dyor" class="text-slate-400 text-sm leading-relaxed"><span class="font-bold text-amber-500">⚠️ Disclaimer (DYOR):</span> Semua daftar project di sini hanya untuk edukasi. Kami tidak bertanggung jawab atas kerugian. Selalu lakukan riset Anda sendiri.</p>
-            <p class="text-slate-500 text-xs mt-4 font-mono">&copy; 2026 AirdropXI. Stay Safe & Keep Grinding!</p>
-        </div>
-    </footer>
-
-    <script>
-        // =============================================
-        // KONFIGURASI SUPABASE
-        // =============================================
-        const SUPABASE_URL     = 'https://hmjjujirktpqviayfehe.supabase.co';
-        const SUPABASE_ANON_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtamp1amlya3RwcXZpYXlmZWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1NzQsImV4cCI6MjA4OTE1NzU3NH0.nmCK3b66fU8Zh-mwQw5YUS_I3dFJAYnvfWlO050doSY';
-
-        let supabaseClient;
-        let globalAirdropData = [];
-        let currentLang = 'id';
-
-        // =============================================
-        // NEWS TICKER — ambil dari tabel ticker_news
-        // =============================================
-        async function loadNewsTicker() {
-            try {
-                const client = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                const { data, error } = await client
-                    .from('ticker_news')
-                    .select('*')
-                    .order('created_at', { ascending: false });
-
-                if (error) throw error;
-
-                const el = document.getElementById('newsInner');
-
-                if (!data || data.length === 0) {
-                    el.innerHTML = '<span class="news-loading">Belum ada berita — tambahkan via admin panel.</span>';
-                    return;
-                }
-
-                // Duplikasi untuk seamless loop
-                const all = [...data, ...data];
-                el.innerHTML = all.map(b => `
-                    <span class="n-item">
-                        <span class="n-dot">◆</span>
-                        <span class="n-tag tag-${esc(b.tag)}">${esc(b.tag).toUpperCase()}</span>
-                        ${esc(b.text)}
-                    </span>
-                `).join('');
-
-                // Sesuaikan kecepatan dengan panjang konten
-                const dur = Math.max(20, Math.round(el.scrollWidth / 80));
-                el.style.animationDuration = dur + 's';
-
-            } catch (err) {
-                console.warn('News ticker error:', err.message);
-            }
-        }
-
-        function esc(s) {
-            return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
-        }
-
-        // Jalankan ticker & refresh tiap 60 detik
-        loadNewsTicker();
-        setInterval(loadNewsTicker, 60000);
-
-        // =============================================
-        // BAHASA
-        // =============================================
-        const textDict = {
-            id: { 
-                headerDesc: "Tracker airdrop Web3 paling update. Garap sekarang sebelum snapshot!", 
-                footerDyor: "<span class='font-bold text-amber-500'>⚠️ Disclaimer (DYOR):</span> Semua daftar project di sini hanya untuk edukasi. Kami tidak bertanggung jawab atas kerugian. Selalu lakukan riset Anda sendiri.", 
-                emptyData: "Belum ada list airdrop nih, bro.", 
-                raisedLabel: "Dana Terkumpul", 
-                tasksLabel: "Tugas", 
-                btnLabel: "Garap Sekarang", 
-                unknown: "Menunggu Info",
-                dashTotal: "Total Airdrop",
-                dashActive: "Status: Aktif",
-                dashEnded: "Listing / Selesai"
-            },
-            en: { 
-                headerDesc: "The most updated Web3 airdrop tracker. Farm now before the snapshot!", 
-                footerDyor: "<span class='font-bold text-amber-500'>⚠️ Disclaimer (DYOR):</span> All projects listed here are for educational purposes. We are not liable for any losses. Always do your own research.", 
-                emptyData: "No airdrops listed yet, bro.", 
-                raisedLabel: "Total Raised", 
-                tasksLabel: "Tasks", 
-                btnLabel: "Join Airdrop", 
-                unknown: "TBA",
-                dashTotal: "Total Airdrops",
-                dashActive: "Status: Active",
-                dashEnded: "Listed / Ended"
-            }
-        };
-
-        function setLanguage(lang) {
-            currentLang = lang;
-            const on  = "px-5 py-2 rounded-lg bg-gradient-to-r from-emerald-600 to-cyan-600 text-white font-bold text-sm transition-all shadow-[0_0_15px_rgba(52,211,153,0.4)]";
-            const off = "px-5 py-2 rounded-lg text-slate-400 hover:text-emerald-300 font-bold text-sm transition-all hover:bg-slate-800/50";
-            document.getElementById('btn-id').className = lang === 'id' ? on : off;
-            document.getElementById('btn-en').className = lang === 'en' ? on : off;
-            document.getElementById('header-desc').innerHTML  = textDict[lang].headerDesc;
-            document.getElementById('footer-dyor').innerHTML  = textDict[lang].footerDyor;
-            document.getElementById('lbl-dash-total').innerText  = textDict[lang].dashTotal;
-            document.getElementById('lbl-dash-active').innerText = textDict[lang].dashActive;
-            document.getElementById('lbl-dash-ended').innerText  = textDict[lang].dashEnded;
-            renderCards();
-        }
-
-        // =============================================
-        // DASHBOARD
-        // =============================================
-        function updateDashboard() {
-            let active = 0, listing = 0;
-            globalAirdropData.forEach(item => {
-                const s = (item.status || '').toLowerCase();
-                if (s.includes('listing') || s.includes('end') || s.includes('selesai')) listing++;
-                else active++;
-            });
-            document.getElementById('dash-total').innerText   = globalAirdropData.length;
-            document.getElementById('dash-active').innerText  = active;
-            document.getElementById('dash-listing').innerText = listing;
-        }
-
-        // =============================================
-        // RENDER KARTU AIRDROP
-        // =============================================
-        function renderCards() {
-            const container = document.getElementById('airdrop-container');
-            const dict = textDict[currentLang];
-            container.innerHTML = '';
-
-            if (globalAirdropData.length === 0) {
-                container.innerHTML = `<div class="col-span-full text-center py-16 bg-slate-900/60 backdrop-blur-md rounded-2xl border border-emerald-500/20 border-dashed"><p class="text-emerald-400 text-lg font-medium">${dict.emptyData}</p></div>`;
-                return;
-            }
-
-            globalAirdropData.forEach(item => {
-                const raisedInfo = currentLang === 'id' ? (item.RaisedID || dict.unknown) : (item.RaisedEN || dict.unknown);
-                const tasksInfo  = currentLang === 'id' ? (item.tasksID  || dict.unknown) : (item.tasksEN  || dict.unknown);
-
-                let statusStyles = 'bg-slate-800/50 text-slate-300 border-slate-600/50';
-                const stat = item.status?.toLowerCase() || '';
-                if (stat.includes('active'))   statusStyles = 'bg-emerald-500/20 text-emerald-400 border-emerald-500/50 shadow-[0_0_15px_rgba(16,185,129,0.4)]';
-                else if (stat.includes('waitlist')) statusStyles = 'bg-amber-500/20 text-amber-400 border-amber-500/50 shadow-[0_0_15px_rgba(245,158,11,0.4)]';
-                else if (stat.includes('mint'))     statusStyles = 'bg-blue-500/20 text-blue-400 border-blue-500/50 shadow-[0_0_15px_rgba(59,130,246,0.4)]';
-                else if (stat.includes('listing') || stat.includes('end') || stat.includes('selesai'))
-                    statusStyles = 'bg-purple-500/20 text-purple-400 border-purple-500/50 shadow-[0_0_15px_rgba(168,85,247,0.4)]';
-
-                let tagsHTML = '';
-                if (item.tags) {
-                    try {
-                        tagsHTML = String(item.tags).split(',').map(t =>
-                            `<span class="px-2.5 py-1 rounded-md bg-slate-900/80 border border-emerald-500/30 text-[10px] font-semibold text-emerald-200 uppercase tracking-wider shadow-[0_0_5px_rgba(52,211,153,0.2)]">${t.trim()}</span>`
-                        ).join('');
-                    } catch(e) {}
-                }
-
-                container.insertAdjacentHTML('beforeend', `
-                    <div class="glass-card rounded-2xl p-6 flex flex-col h-full relative overflow-hidden group">
-                        <div class="flex justify-between items-start mb-4">
-                            <h2 class="text-2xl font-black text-white tracking-wide group-hover:text-emerald-400 transition-colors drop-shadow-[0_0_8px_rgba(255,255,255,0.2)]">${item.name || 'Unknown'}</h2>
-                            <span class="px-3 py-1 rounded-full text-[11px] font-bold border uppercase tracking-widest backdrop-blur-sm ${statusStyles}">${item.status || 'TBA'}</span>
-                        </div>
-                        <div class="flex flex-wrap gap-2 mb-5">${tagsHTML}</div>
-                        <div class="space-y-4 mb-6 flex-grow">
-                            <div class="bg-slate-900/60 rounded-xl p-3 border border-emerald-500/20 flex items-center gap-3 backdrop-blur-md shadow-inner">
-                                <div class="p-2 bg-emerald-500/20 rounded-lg text-emerald-400 shadow-[0_0_10px_rgba(52,211,153,0.3)]">
-                                    <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 8c-1.657 0-3 .895-3 2s1.343 2 3 2 3 .895 3 2-1.343 2-3 2m0-8c1.11 0 2.08.402 2.599 1M12 8V7m0 1v8m0 0v1m0-1c-1.11 0-2.08-.402-2.599-1M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path></svg>
-                                </div>
-                                <div>
-                                    <p class="text-xs text-slate-400 font-medium">${dict.raisedLabel}</p>
-                                    <p class="text-sm font-bold text-emerald-300 drop-shadow-[0_0_5px_rgba(52,211,153,0.4)]">${raisedInfo}</p>
-                                </div>
-                            </div>
-                            <div>
-                                <h3 class="text-xs text-emerald-400/80 font-medium mb-2 flex items-center gap-1">
-                                    <svg class="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v12a2 2 0 002 2h10a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2m-6 9l2 2 4-4"></path></svg>
-                                    ${dict.tasksLabel}:
-                                </h3>
-                                <div class="text-slate-200 text-sm leading-relaxed custom-scrollbar max-h-24 overflow-y-auto pl-2 border-l-2 border-emerald-500/40">${tasksInfo}</div>
-                            </div>
-                        </div>
-                        <a href="${item.link || '#'}" target="_blank" rel="noopener noreferrer" class="mt-auto block w-full text-center bg-transparent border-2 border-cyan-500 text-cyan-400 hover:bg-gradient-to-r hover:from-emerald-500 hover:to-cyan-500 hover:text-white hover:border-transparent font-bold py-3.5 rounded-xl transition-all duration-300 shadow-[0_0_15px_rgba(6,182,212,0.2)] hover:shadow-[0_0_25px_rgba(52,211,153,0.5)] transform hover:-translate-y-1">${dict.btnLabel}</a>
-                    </div>
-                `);
-            });
-        }
-
-        // =============================================
-        // TICKER HARGA CRYPTO (asli)
-        // =============================================
-        async function fetchCryptoPrices() {
-            const tickerElement = document.getElementById('crypto-ticker');
-            try {
-                const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false');
-                if (!response.ok) throw new Error('Limit API tercapai');
-                const data = await response.json();
-                let html = '';
-                data.forEach(coin => {
-                    const price  = new Intl.NumberFormat('en-US', { style: 'currency', currency: 'USD' }).format(coin.current_price);
-                    const change = coin.price_change_percentage_24h ? coin.price_change_percentage_24h.toFixed(2) : 0;
-                    const cls    = change >= 0 ? 'positive' : 'negative';
-                    const sign   = change >= 0 ? '+' : '';
-                    html += `
-                        <div class="ticker-item">
-                            <img src="${coin.image}" alt="${coin.symbol}" style="width:18px;height:18px;margin-right:8px;border-radius:50%;box-shadow:0 0 5px rgba(255,255,255,0.3);">
-                            <span class="ticker-symbol drop-shadow-md">${coin.symbol}</span>
-                            <span class="ticker-price drop-shadow-md">${price}</span>
-                            <span class="ticker-change ${cls}">${sign}${change}%</span>
-                        </div>`;
-                });
-                tickerElement.innerHTML = html + html;
-            } catch (error) {
-                tickerElement.innerHTML = '<span style="padding-left:20px;color:#f87171;">Sedang memuat ulang harga pasar...</span>';
-            }
-        }
-
-        fetchCryptoPrices();
-        setInterval(fetchCryptoPrices, 300000);
-
-        // =============================================
-        // INIT SUPABASE & AIRDROP DATA
-        // =============================================
-        async function init() {
-            const uiLoading   = document.getElementById('loading-state');
-            const uiError     = document.getElementById('error-state');
-            const uiContainer = document.getElementById('airdrop-container');
-            const uiDashboard = document.getElementById('dashboard-overview');
-
-            try {
-                if (!window.supabase) throw new Error("Gagal memuat sistem Database. Refresh halaman ini.");
-                supabaseClient = window.supabase.createClient(SUPABASE_URL, SUPABASE_ANON_KEY);
-                const { data, error } = await supabaseClient.from('airdrops').select('*').order('created_at', { ascending: false });
-                if (error) throw error;
-                globalAirdropData = data || [];
-                updateDashboard();
-                uiDashboard.classList.remove('hidden');
-                uiLoading.classList.add('hidden');
-                uiContainer.classList.remove('hidden');
-                setLanguage(currentLang);
-            } catch (error) {
-                uiLoading.classList.add('hidden');
-                uiError.classList.remove('hidden');
-                uiError.innerHTML = `
-                    <p class="text-red-400 font-bold text-xl mb-2">Gagal Menarik Data!</p>
-                    <p class="text-slate-300 text-sm mb-4 font-mono">${error.message || JSON.stringify(error)}</p>
-                    <p class="text-slate-400 text-xs">Pesan ini muncul kalau nama kolom belum sama persis di Supabase.</p>`;
-            }
-        }
-
-        init();
-    </script>
+<script src="js/app.js"></script>
 </body>
 </html>
