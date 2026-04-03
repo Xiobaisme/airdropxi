@@ -400,17 +400,18 @@ Selalu ingatkan user untuk hanya gunakan link dari sumber resmi AirdropXI.bot da
       const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-          'Authorization': 'Bearer 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',
+  'Authorization': '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'
+}
           'Content-Type': 'application/json',
           'HTTP-Referer': 'https://airdropxi.bot',
           'X-Title': 'AirdropXI Bot'
         },
         body: JSON.stringify({
-          model: 'google/gemini-flash-1.5',
-          messages: [{ role: 'system', content: AI_SYSTEM }, ...aiHistory],
-          max_tokens: 800, temperature: 0.7
-        })
-      });
+  model: 'openrouter/free',
+  messages: [
+    { role: 'user', content: text }
+  ]
+})
       const data = await res.json();
       aiRemoveTyping();
       if (data.choices && data.choices[0]) {
