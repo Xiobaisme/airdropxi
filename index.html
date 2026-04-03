@@ -244,7 +244,35 @@
     </div>
   </div>
 </footer>
-
+  
+<!-- AI AGENT CHAT PANEL -->
+<div class="ai-panel" id="aiPanel">
+  <div class="ai-panel-header">
+    <div class="ai-panel-avatar">⚡</div>
+    <div class="ai-panel-info">
+      <div class="ai-panel-name">AirdropXI Bot</div>
+      <div class="ai-panel-status"><span class="ai-status-dot"></span>Online · AI-Powered</div>
+    </div>
+    <button class="ai-panel-close" onclick="toggleAI()">✕</button>
+  </div>
+  <div class="ai-messages" id="aiMessages">
+    <div class="ai-msg ai-msg-bot">
+      <div class="ai-msg-avatar">⚡</div>
+      <div class="ai-msg-bubble">Halo! Saya <strong>AirdropXI Bot</strong> 👋<br><br>Tanya apa aja soal airdrop, Web3, atau crypto. Saya siap bantu!</div>
+    </div>
+  </div>
+  <div class="ai-quick-btns">
+    <button class="ai-qbtn" onclick="aiSendQuick('Airdrop apa yang aktif sekarang?')">🔥 Airdrop aktif</button>
+    <button class="ai-qbtn" onclick="aiSendQuick('Cara ikut airdrop untuk pemula?')">📖 Cara ikut</button>
+    <button class="ai-qbtn" onclick="aiSendQuick('Apa itu Web3?')">🌐 Web3</button>
+  </div>
+  <div class="ai-input-row">
+    <textarea class="ai-input" id="aiInput" placeholder="Tanya tentang airdrop, Web3, crypto..." rows="1"
+      onkeydown="aiHandleKey(event)" oninput="aiAutoResize(this)"></textarea>
+    <button class="ai-send-btn" id="aiSendBtn" onclick="aiSend()">➤</button>
+  </div>
+</div>
+  
 <script src="js/app.js"></script>
 </body>
 </html>
