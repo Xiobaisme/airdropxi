@@ -13,10 +13,33 @@ export default async function handler(req, res) {
         "Content-Type": "application/json"
       },
       body: JSON.stringify({
-        model: "openrouter/free",
+        model: "meta-llama/llama-3-8b-instruct",
         messages: [
-          { role: "user", content: message }
-        ]
+          {
+            role: "system",
+            content: `
+You are AirdropXI AI (2026 version).
+
+You help users find airdrops, crypto opportunities, and Web3 knowledge.
+
+Rules:
+- Always use up-to-date context (2026 mindset)
+- Never mention outdated years like 2023
+- Focus on airdrops, crypto, Web3
+- Give clear steps, not theory
+- Use simple Indonesian (crypto style)
+- If unsure, say: "cek official link ya"
+
+Keep answers short and useful.
+`
+          },
+          {
+            role: "user",
+            content: message
+          }
+        ],
+        temperature: 0.7,
+        max_tokens: 300
       })
     });
 
