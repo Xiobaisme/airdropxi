@@ -430,3 +430,18 @@ footer{background:rgba(0,0,0,0.6);border-top:1px solid var(--border);backdrop-fi
 @media(max-width:768px){
   .ai-panel { right: 12px; left: 12px; width: auto; top: 120px; }
 }
+/* Mengatur ukuran logo agar pas dengan tulisan */
+.nav-logo-icon img {
+    width: 24px;       /* Sesuaikan ukuran petirnya di sini */
+    height: 24px;      /* Samakan agar tetap kotak */
+    object-fit: contain;
+    display: inline-block;
+    vertical-align: middle; /* Supaya sejajar dengan teks AirdropXI */
+}
+
+/* Memastikan wadah logo dan teks rapi kesamping */
+.nav-logo {
+    display: flex;
+    align-items: center;
+    gap: 8px;          /* Jarak antara logo dan tulisan */
+}
