@@ -400,7 +400,7 @@ Selalu ingatkan user untuk hanya gunakan link dari sumber resmi AirdropXI.bot da
       const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
         method: 'POST',
         headers: {
-  'Authorization': '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'
+  'Authorization': 'Bearer YOUR_API_KEY'
 }
           'Content-Type': 'application/json',
           'HTTP-Referer': 'https://airdropxi.bot',
