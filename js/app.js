@@ -316,3 +316,116 @@ async function loadPrices(){
 loadPrices();setInterval(loadPrices,300000);
 
 init();
+// ==========================================
+// F. AI AGENT CHATBOT
+// ==========================================
+(function(){
+  let aiOpen = false, aiLoading = false;
+  const aiHistory = [];
+
+  const AI_SYSTEM = `Kamu adalah AirdropXI Bot, asisten AI resmi dari AirdropXI.bot — platform tracker airdrop crypto terpercaya di Indonesia.
+
+Kepribadian:
+- Friendly, santai, informatif, antusias soal crypto & Web3
+- Bahasa Indonesia yang natural dan mudah dipahami
+- Selalu hati-hati dan ingatkan user soal keamanan & scam
+- Sering sebut AirdropXI.bot sebagai sumber terpercaya
+
+Keahlian:
+- Airdrop crypto (cara ikut, syarat, tips, strategi)
+- Web3, DeFi, NFT, GameFi, blockchain
+- Keamanan crypto, cara hindari scam & rug pull
+- Token, wallet, gas fee, DEX, CEX
+- Analisis project & tokenomics dasar
+
+Selalu ingatkan user untuk hanya gunakan link dari sumber resmi AirdropXI.bot dan jangan pernah share private key atau seed phrase.`;
+
+  window.toggleAI = function() {
+    aiOpen = !aiOpen;
+    document.getElementById('aiPanel').classList.toggle('open', aiOpen);
+  };
+
+  window.aiHandleKey = function(e) {
+    if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); aiSend(); }
+  };
+
+  window.aiAutoResize = function(el) {
+    el.style.height = '38px';
+    el.style.height = Math.min(el.scrollHeight, 90) + 'px';
+  };
+
+  window.aiSendQuick = function(text) {
+    document.getElementById('aiInput').value = text;
+    aiSend();
+  };
+
+  function aiAddMsg(role, html) {
+    const box = document.getElementById('aiMessages');
+    const d = document.createElement('div');
+    d.className = 'ai-msg ' + (role === 'user' ? 'ai-msg-user' : 'ai-msg-bot');
+    d.innerHTML = `<div class="ai-msg-avatar">${role === 'user' ? '👤' : '⚡'}</div><div class="ai-msg-bubble">${html}</div>`;
+    box.appendChild(d);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function aiShowTyping() {
+    const box = document.getElementById('aiMessages');
+    const d = document.createElement('div');
+    d.className = 'ai-msg ai-msg-bot'; d.id = 'aiTyping';
+    d.innerHTML = `<div class="ai-msg-avatar">⚡</div><div class="ai-msg-bubble"><div class="ai-typing"><div class="ai-tdot"></div><div class="ai-tdot"></div><div class="ai-tdot"></div></div></div>`;
+    box.appendChild(d);
+    box.scrollTop = box.scrollHeight;
+  }
+
+  function aiRemoveTyping() {
+    const t = document.getElementById('aiTyping');
+    if (t) t.remove();
+  }
+
+  window.aiSend = async function() {
+    if (aiLoading) return;
+    const input = document.getElementById('aiInput');
+    const text = input.value.trim();
+    if (!text) return;
+
+    input.value = ''; input.style.height = '38px';
+    aiAddMsg('user', text.replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+    aiHistory.push({ role: 'user', content: text });
+
+    aiLoading = true;
+    document.getElementById('aiSendBtn').disabled = true;
+    aiShowTyping();
+
+    try {
+      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
+        method: 'POST',
+        headers: {
+          'Authorization': 'Bearer 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',
+          'Content-Type': 'application/json',
+          'HTTP-Referer': 'https://airdropxi.bot',
+          'X-Title': 'AirdropXI Bot'
+        },
+        body: JSON.stringify({
+          model: 'google/gemini-flash-1.5',
+          messages: [{ role: 'system', content: AI_SYSTEM }, ...aiHistory],
+          max_tokens: 800, temperature: 0.7
+        })
+      });
+      const data = await res.json();
+      aiRemoveTyping();
+      if (data.choices && data.choices[0]) {
+        const reply = data.choices[0].message.content;
+        aiHistory.push({ role: 'assistant', content: reply });
+        aiAddMsg('bot', reply.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>'));
+      } else {
+        aiAddMsg('bot', 'Maaf, ada gangguan koneksi. Coba lagi ya! 🙏');
+      }
+    } catch(e) {
+      aiRemoveTyping();
+      aiAddMsg('bot', 'Koneksi bermasalah. Cek internet kamu dan coba lagi! 🔌');
+    }
+
+    aiLoading = false;
+    document.getElementById('aiSendBtn').disabled = false;
+  };
+})();
