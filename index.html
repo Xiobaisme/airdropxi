@@ -5,26 +5,25 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <link rel="icon" type="image/png" href="logo.png">
 <title>AirdropXI — Find Legit Airdrops Before Everyone Else</title>
-
 <script src="https://cdn.tailwindcss.com"></script>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-
 <link rel="stylesheet" href="css/style.css">
 </head>
 <body>
-
 <div id="cursor"></div>
 <div id="cursor-ring"></div>
 <canvas id="bg-canvas"></canvas>
 
+<!-- Price Ticker -->
 <div class="pticker-wrap z1">
   <div class="pticker-inner" id="price-ticker">
     <span style="padding:0 20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--muted)">Memuat harga pasar...</span>
   </div>
 </div>
 
+<!-- News Ticker -->
 <div class="nticker-wrap z1">
   <div class="nticker-label"><div class="ldot"></div>LIVE NEWS</div>
   <div class="nticker-track">
@@ -34,17 +33,18 @@
   </div>
 </div>
 
+<!-- Navbar -->
 <nav class="z1">
-   <div class="nav-logo">
-    <img src="logo.png" alt="Logo" style="width: 35px; height: 35px; object-fit: contain; margin-right: 8px; vertical-align: middle;">
+  <div class="nav-logo">
+    <img src="logo.png" alt="Logo" style="width:35px;height:35px;object-fit:contain;margin-right:8px;vertical-align:middle;">
     AirdropXI
-</div>
-</nav>
-</nav>
+  </div>
+
   <div class="nav-links">
     <a href="#airdrops" id="nav-explore">Explore</a>
     <a href="#guide" id="nav-guide">Guide</a>
   </div>
+
   <div class="nav-right">
     <div class="nav-social">
       <a href="https://x.com/xiobai06" target="_blank" title="Twitter/X">
@@ -59,6 +59,10 @@
       <button class="lang-btn" id="btn-en" onclick="setLang('en')">🇬🇧 EN</button>
     </div>
   </div>
+</nav>
+
+</body>
+</html>
   <!-- AI AGENT BUTTON -->
 <button class="ai-agent-btn" id="aiToggleBtn" onclick="toggleAI()">
   <span class="ai-btn-dot"></span>
