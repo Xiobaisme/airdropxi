@@ -91,13 +91,17 @@ const T={
     tDash:'DASHBOARD', tTitle:'Airdrop Radar', tSub:'Pantau status, total dana, dan tugas dari project-project potensial di ekosistem Web3.',
     raised:'Dana Terkumpul', tasks:'Tugas', cta:'Garap Sekarang', unknown:'Menunggu Info', empty:'Belum ada airdrop nih, bro.',
     totalL:'Total Airdrop', activeL:'Status Aktif', endedL:'Listing / Selesai', fbAll:'Semua',
-    // Guide Section
     gTag:'PEMULA', gTitle:'Guide & Tutorial', gSub:'Selamat datang di pusat informasi AirdropXI. Di sini kami menyediakan panduan lengkap untuk memaksimalkan cuan dari ekosistem Crypto.',
     gPrepT:'Persiapan Wajib', gPrepD:'Apa yang harus disiapkan sebelum mulai menggarap?',
     gP1:'MetaMask (EVM), Phantom (Solana), Keplr (Cosmos).', gP2:'Akun Twitter (X), Discord, dan Telegram yang aktif.', gP3:'Gunakan Mises Browser atau Kiwi Browser (jika di HP) agar bisa pasang Extension.', gP4:'Siapkan sedikit saldo (ETH/BNB/SOL) untuk transaksi on-chain.',
     gRuleT:'Aturan & Status Airdrop', gRuleD:'Keamanan adalah prioritas. Pahami status sebelum eksekusi.',
     gR1:'Selalu gunakan wallet khusus airdrop (bukan utama).', gR2:'Admin AirdropXI tidak akan pernah meminta Private Key kamu.', gR3:'Lakukan riset mandiri, kelola waktu dan aset dengan bijak.',
-    gS1:'Airdrop sudah dikonfirmasi oleh dev.', gS2:'Belum ada info resmi, sangat layak digarap.', gS3:'Periode garap selesai, tinggal tunggu distribusi.'
+    gS1:'Airdrop sudah dikonfirmasi oleh dev.', gS2:'Belum ada info resmi, sangat layak digarap.', gS3:'Periode garap selesai, tinggal tunggu distribusi.',
+    // AI Panel
+    aiGreet:'Halo! Saya <strong>AirdropXI Bot</strong> 👋<br><br>Tanya apa aja soal airdrop, Web3, atau crypto, Saya siap bantu!, ini adalah AI dan dapat melakukan kesalahan.',
+    aiQ1:'🔥 Apa Itu airdrop', aiQ2:'📖 Cara ikut', aiQ3:'🌐 Web3', aiQ4:'🗿 jangan di klik',
+    aiP1:'Apa Itu airdrop', aiP2:'Cara ikut airdrop untuk pemula?', aiP3:'Apa itu Web3?', aiP4:'aku ganteng apa jelek?',
+    aiPlaceholder:'Tanya tentang airdrop, Web3, crypto...'
   },
   en:{
     badge:'🔥 20+ Active Airdrops Right Now',
@@ -107,13 +111,17 @@ const T={
     tDash:'DASHBOARD', tTitle:'Airdrop Radar', tSub:'Monitor status, total raised, and tasks from potential projects in the Web3 ecosystem.',
     raised:'Total Raised', tasks:'Tasks', cta:'Start Task', unknown:'TBA', empty:'No airdrops listed yet, bro.',
     totalL:'Total Airdrops', activeL:'Active Now', endedL:'Listed / Ended', fbAll:'All',
-    // Guide Section
     gTag:'BEGINNER', gTitle:'Guide & Tutorial', gSub:'Welcome to the AirdropXI info center. Here we provide comprehensive guides to maximize your Crypto gains.',
     gPrepT:'Preparation', gPrepD:'What do you need before starting?',
     gP1:'MetaMask (EVM), Phantom (Solana), Keplr (Cosmos).', gP2:'Active Twitter (X), Discord, and Telegram accounts.', gP3:'Use Mises or Kiwi Browser (for mobile) to install Extensions.', gP4:'Prepare a small amount of ETH/BNB/SOL for on-chain gas fees.',
     gRuleT:'Rules & Status', gRuleD:'Security is priority. Understand statuses before executing.',
     gR1:'Always use a dedicated burner wallet for airdrops.', gR2:'AirdropXI admins will never ask for your Private Key.', gR3:'Do your own research, manage time and assets wisely.',
-    gS1:'Confirmed by developers. Sure profit.', gS2:'No official info yet, but highly farmable.', gS3:'Farming period ended, waiting for distribution.'
+    gS1:'Confirmed by developers. Sure profit.', gS2:'No official info yet, but highly farmable.', gS3:'Farming period ended, waiting for distribution.',
+    // AI Panel
+    aiGreet:'Hello! I\'m <strong>AirdropXI Bot</strong> 👋<br><br>Ask me anything about airdrops, Web3, or crypto. I\'m here to help! Note: I\'m an AI and can make mistakes.',
+    aiQ1:'🔥 What is airdrop', aiQ2:'📖 How to join', aiQ3:'🌐 Web3', aiQ4:'🗿 don\'t click',
+    aiP1:'What is an airdrop?', aiP2:'How to join an airdrop for beginners?', aiP3:'What is Web3?', aiP4:'am I handsome or ugly?',
+    aiPlaceholder:'Ask about airdrops, Web3, crypto...'
   }
 };
 
@@ -154,8 +162,34 @@ function setLang(l){
   document.getElementById('g-st-1').textContent=t.gS1;
   document.getElementById('g-st-2').textContent=t.gS2;
   document.getElementById('g-st-3').textContent=t.gS3;
-  
+
+  // ✅ AI Panel Language
+  applyAILang(l);
+
   renderCards();
+}
+
+// AI Panel Language Apply
+function applyAILang(l) {
+  window._lang = l;
+  const t = T[l];
+
+  // Pesan sambutan bot (hanya bubble pertama)
+  const firstBubble = document.querySelector('#aiMessages .ai-msg-bot .ai-msg-bubble');
+  if (firstBubble) firstBubble.innerHTML = t.aiGreet;
+
+  // Quick buttons — label & prompt
+  const qbtns = document.querySelectorAll('.ai-qbtn');
+  const qKeys = ['aiQ1','aiQ2','aiQ3','aiQ4'];
+  const pKeys = ['aiP1','aiP2','aiP3','aiP4'];
+  qbtns.forEach((btn, i) => {
+    if (qKeys[i]) btn.innerHTML = t[qKeys[i]];
+    if (pKeys[i]) btn.dataset.prompt = t[pKeys[i]];
+  });
+
+  // Placeholder textarea
+  const input = document.getElementById('aiInput');
+  if (input) input.placeholder = t.aiPlaceholder;
 }
 
 // ==========================================
@@ -316,6 +350,7 @@ async function loadPrices(){
 loadPrices();setInterval(loadPrices,300000);
 
 init();
+
 // ==========================================
 // F. AI AGENT CHATBOT
 // ==========================================
@@ -354,6 +389,7 @@ Selalu ingatkan user untuk hanya gunakan link dari sumber resmi AirdropXI.bot da
     el.style.height = Math.min(el.scrollHeight, 90) + 'px';
   };
 
+  // Quick send pakai data-prompt yang sudah diset oleh applyAILang
   window.aiSendQuick = function(text) {
     document.getElementById('aiInput').value = text;
     aiSend();
@@ -363,7 +399,7 @@ Selalu ingatkan user untuk hanya gunakan link dari sumber resmi AirdropXI.bot da
     const box = document.getElementById('aiMessages');
     const d = document.createElement('div');
     d.className = 'ai-msg ' + (role === 'user' ? 'ai-msg-user' : 'ai-msg-bot');
-    d.innerHTML = `<div class="ai-msg-avatar">${role === 'user' ? '👤' : '⚡'}</div><div class="ai-msg-bubble">${html}</div>`;
+    d.innerHTML = `<div class="ai-msg-avatar">${role === 'user' ? '👤' : '<img src="logo.png" style="width:22px;height:22px;object-fit:contain;border-radius:4px;">'}</div><div class="ai-msg-bubble">${html}</div>`;
     box.appendChild(d);
     box.scrollTop = box.scrollHeight;
   }
@@ -372,7 +408,7 @@ Selalu ingatkan user untuk hanya gunakan link dari sumber resmi AirdropXI.bot da
     const box = document.getElementById('aiMessages');
     const d = document.createElement('div');
     d.className = 'ai-msg ai-msg-bot'; d.id = 'aiTyping';
-    d.innerHTML = `<div class="ai-msg-avatar">⚡</div><div class="ai-msg-bubble"><div class="ai-typing"><div class="ai-tdot"></div><div class="ai-tdot"></div><div class="ai-tdot"></div></div></div>`;
+    d.innerHTML = `<div class="ai-msg-avatar"><img src="logo.png" style="width:22px;height:22px;object-fit:contain;border-radius:4px;"></div><div class="ai-msg-bubble"><div class="ai-typing"><div class="ai-tdot"></div><div class="ai-tdot"></div><div class="ai-tdot"></div></div></div>`;
     box.appendChild(d);
     box.scrollTop = box.scrollHeight;
   }
@@ -396,40 +432,27 @@ Selalu ingatkan user untuk hanya gunakan link dari sumber resmi AirdropXI.bot da
     document.getElementById('aiSendBtn').disabled = true;
     aiShowTyping();
 
- try {
-  const res = await fetch("/api/chat", {
-    method: "POST",
-    headers: {
-      "Content-Type": "application/json"
-    },
-    body: JSON.stringify({
-      message: text
-    })
-  });
+    try {
+      const res = await fetch("/api/chat", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ message: text })
+      });
 
-  const data = await res.json();
+      const data = await res.json();
+      aiRemoveTyping();
 
-  aiRemoveTyping();
-
-  if (data.choices && data.choices[0]) {
-    const reply = data.choices[0].message.content;
-
-    aiHistory.push({ role: 'assistant', content: reply });
-
-    aiAddMsg(
-      'bot',
-      reply
-        .replace(/\n/g, '<br>')
-        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
-    );
-  } else {
-    aiAddMsg('bot', 'AI tidak merespon, coba lagi ya 🙏');
-  }
-
-} catch (e) {
-  aiRemoveTyping();
-  aiAddMsg('bot', 'Koneksi error, coba lagi 🔌');
-}
+      if (data.choices && data.choices[0]) {
+        const reply = data.choices[0].message.content;
+        aiHistory.push({ role: 'assistant', content: reply });
+        aiAddMsg('bot', reply.replace(/\n/g, '<br>').replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>'));
+      } else {
+        aiAddMsg('bot', 'AI tidak merespon, coba lagi ya 🙏');
+      }
+    } catch (e) {
+      aiRemoveTyping();
+      aiAddMsg('bot', 'Koneksi error, coba lagi 🔌');
+    }
 
     aiLoading = false;
     document.getElementById('aiSendBtn').disabled = false;
