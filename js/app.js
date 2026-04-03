@@ -396,35 +396,40 @@ Selalu ingatkan user untuk hanya gunakan link dari sumber resmi AirdropXI.bot da
     document.getElementById('aiSendBtn').disabled = true;
     aiShowTyping();
 
-    try {
-      const res = await fetch('https://openrouter.ai/api/v1/chat/completions', {
-        method: 'POST',
-        headers: {
-  'Authorization': 'Bearer YOUR_API_KEY'
+ try {
+  const res = await fetch("/api/chat", {
+    method: "POST",
+    headers: {
+      "Content-Type": "application/json"
+    },
+    body: JSON.stringify({
+      message: text
+    })
+  });
+
+  const data = await res.json();
+
+  aiRemoveTyping();
+
+  if (data.choices && data.choices[0]) {
+    const reply = data.choices[0].message.content;
+
+    aiHistory.push({ role: 'assistant', content: reply });
+
+    aiAddMsg(
+      'bot',
+      reply
+        .replace(/\n/g, '<br>')
+        .replace(/\*\*(.*?)\*\*/g, '<strong>$1</strong>')
+    );
+  } else {
+    aiAddMsg('bot', 'AI tidak merespon, coba lagi ya 🙏');
+  }
+
+} catch (e) {
+  aiRemoveTyping();
+  aiAddMsg('bot', 'Koneksi error, coba lagi 🔌');
 }
-          'Content-Type': 'application/json',
-          'HTTP-Referer': 'https://airdropxi.bot',
-          'X-Title': 'AirdropXI Bot'
-        },
-        body: JSON.stringify({
-  model: 'openrouter/free',
-  messages: [
-    { role: 'user', content: text }
-  ]
-})
-      const data = await res.json();
-      aiRemoveTyping();
-      if (data.choices && data.choices[0]) {
-        const reply = data.choices[0].message.content;
-        aiHistory.push({ role: 'assistant', content: reply });
-        aiAddMsg('bot', reply.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>'));
-      } else {
-        aiAddMsg('bot', 'Maaf, ada gangguan koneksi. Coba lagi ya! 🙏');
-      }
-    } catch(e) {
-      aiRemoveTyping();
-      aiAddMsg('bot', 'Koneksi bermasalah. Cek internet kamu dan coba lagi! 🔌');
-    }
 
     aiLoading = false;
     document.getElementById('aiSendBtn').disabled = false;
