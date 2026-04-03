@@ -255,31 +255,92 @@
 <!-- AI AGENT CHAT PANEL -->
 <div class="ai-panel" id="aiPanel">
   <div class="ai-panel-header">
-    <div class="ai-panel-avatar">⚡</div>
+    <div class="ai-panel-avatar">
+      <img src="logo.png" alt="AirdropXI Bot" style="width:28px;height:28px;object-fit:contain;border-radius:6px;">
+    </div>
     <div class="ai-panel-info">
       <div class="ai-panel-name">AirdropXI Bot</div>
-      <div class="ai-panel-status"><span class="ai-status-dot"></span>Online · AI-Powered</div>
+      <div class="ai-panel-status"><span class="ai-status-dot"></span><span data-id="Online · AI-Powered" data-en="Online · AI-Powered">Online · AI-Powered</span></div>
     </div>
     <button class="ai-panel-close" onclick="toggleAI()">✕</button>
   </div>
+
   <div class="ai-messages" id="aiMessages">
     <div class="ai-msg ai-msg-bot">
-      <div class="ai-msg-avatar">⚡</div>
-      <div class="ai-msg-bubble">Halo! Saya <strong>AirdropXI Bot</strong> 👋<br><br>Tanya apa aja soal airdrop, Web3, atau crypto, Saya siap bantu!, ini adalah AI dan dapat melakukan kesalahan.</div>
+      <div class="ai-msg-avatar">
+        <img src="logo.png" alt="Bot" style="width:22px;height:22px;object-fit:contain;border-radius:4px;">
+      </div>
+      <div class="ai-msg-bubble">
+        <span data-id="Halo! Saya <strong>AirdropXI Bot</strong> 👋<br><br>Tanya apa aja soal airdrop, Web3, atau crypto, Saya siap bantu!, ini adalah AI dan dapat melakukan kesalahan."
+              data-en="Hello! I'm <strong>AirdropXI Bot</strong> 👋<br><br>Ask me anything about airdrops, Web3, or crypto. I'm here to help! Note: I'm an AI and can make mistakes.">
+          Halo! Saya <strong>AirdropXI Bot</strong> 👋<br><br>Tanya apa aja soal airdrop, Web3, atau crypto, Saya siap bantu!, ini adalah AI dan dapat melakukan kesalahan.
+        </span>
+      </div>
     </div>
   </div>
+
   <div class="ai-quick-btns">
-    <button class="ai-qbtn" onclick="aiSendQuick('Apa Itu airdrop')">🔥 Apa Itu airdrop</button>
-    <button class="ai-qbtn" onclick="aiSendQuick('Cara ikut airdrop untuk pemula?')">📖 Cara ikut</button>
-    <button class="ai-qbtn" onclick="aiSendQuick('Apa itu Web3?')">🌐 Web3</button>
-    <button class="ai-qbtn" onclick="aiSendQuick('aku ganteng apa jelek?')">🗿 jangan di klik</button>
+    <button class="ai-qbtn"
+      data-id="🔥 Apa Itu airdrop"
+      data-en="🔥 What is airdrop"
+      data-prompt-id="Apa Itu airdrop"
+      data-prompt-en="What is an airdrop?"
+      onclick="aiSendQuick(this.dataset['prompt' + (window._lang||'Id').charAt(0).toUpperCase() + (window._lang||'Id').slice(1)])">
+      🔥 <span data-id="Apa Itu airdrop" data-en="What is airdrop">Apa Itu airdrop</span>
+    </button>
+    <button class="ai-qbtn"
+      data-prompt-id="Cara ikut airdrop untuk pemula?"
+      data-prompt-en="How to join an airdrop for beginners?"
+      onclick="aiSendQuick(this.dataset['prompt' + (window._lang||'Id').charAt(0).toUpperCase() + (window._lang||'Id').slice(1)])">
+      📖 <span data-id="Cara ikut" data-en="How to join">Cara ikut</span>
+    </button>
+    <button class="ai-qbtn"
+      data-prompt-id="Apa itu Web3?"
+      data-prompt-en="What is Web3?"
+      onclick="aiSendQuick(this.dataset['prompt' + (window._lang||'Id').charAt(0).toUpperCase() + (window._lang||'Id').slice(1)])">
+      🌐 Web3
+    </button>
+    <button class="ai-qbtn"
+      data-prompt-id="aku ganteng apa jelek?"
+      data-prompt-en="am I handsome or ugly?"
+      onclick="aiSendQuick(this.dataset['prompt' + (window._lang||'Id').charAt(0).toUpperCase() + (window._lang||'Id').slice(1)])">
+      🗿 <span data-id="jangan di klik" data-en="don't click">jangan di klik</span>
+    </button>
   </div>
+
   <div class="ai-input-row">
-    <textarea class="ai-input" id="aiInput" placeholder="Tanya tentang airdrop, Web3, crypto..." rows="1"
-      onkeydown="aiHandleKey(event)" oninput="aiAutoResize(this)"></textarea>
+    <textarea class="ai-input" id="aiInput"
+      data-placeholder-id="Tanya tentang airdrop, Web3, crypto..."
+      data-placeholder-en="Ask about airdrops, Web3, crypto..."
+      placeholder="Tanya tentang airdrop, Web3, crypto..."
+      rows="1"
+      onkeydown="aiHandleKey(event)"
+      oninput="aiAutoResize(this)"></textarea>
     <button class="ai-send-btn" id="aiSendBtn" onclick="aiSend()">➤</button>
   </div>
 </div>
+
+<script>
+// Panggil fungsi ini dari setLang() yang sudah ada
+function applyAILang(lang) {
+  window._lang = lang;
+  const key = lang === 'en' ? 'en' : 'id';
+
+  // Teks biasa dengan data-id / data-en
+  document.querySelectorAll('[data-id][data-en]').forEach(el => {
+    el.innerHTML = el.dataset[key];
+  });
+
+  // Placeholder textarea
+  const input = document.getElementById('aiInput');
+  if (input) {
+    input.placeholder = input.dataset['placeholder' + (key === 'en' ? 'En' : 'Id')];
+  }
+}
+
+// Hubungkan ke setLang yang sudah ada — tambahkan baris ini di dalam setLang() kamu:
+// applyAILang(lang);
+</script>
   
 <script src="js/app.js"></script>
 </body>
