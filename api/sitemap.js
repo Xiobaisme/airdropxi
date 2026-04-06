@@ -6,13 +6,12 @@ export default async function handler(req, res) {
   try {
     const { data: airdrops, error } = await supabase
       .from('airdrops') 
-      .select('slug'); 
+      .select('id'); // <--- Di sini saya ganti dari 'slug' menjadi 'id'
 
     if (error) throw error;
 
     const baseUrl = 'https://airdropxi.vercel.app';
 
-    // Pastikan tidak ada spasi atau baris kosong sebelum <?xml
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
   <url>
@@ -24,7 +23,7 @@ export default async function handler(req, res) {
       airdrops.forEach((drop) => {
         xml += `
   <url>
-    <loc>${baseUrl}/detail.html?id=${drop.slug}</loc>
+    <loc>${baseUrl}/detail.html?id=${drop.id}</loc> 
     <priority>0.8</priority>
   </url>`;
       });
@@ -32,7 +31,6 @@ export default async function handler(req, res) {
 
     xml += `\n</urlset>`;
 
-    // Set header dan kirim
     res.setHeader('Content-Type', 'text/xml');
     res.status(200).send(xml);
   } catch (error) {
