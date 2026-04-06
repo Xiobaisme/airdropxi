@@ -117,7 +117,7 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 const T = {
   id: {
     badge:'🔥 20+ Airdrop Aktif Sekarang',
-    title:'Find Legit Airdrops<br><span>Sebelum Semua Orang</span>',
+    title:'Daftar Airdrop Crypto Terbaru & Potensial<br><span>Sebelum Semua Orang</span>',
     sub:'Auto-filtered, verified, dan siap snapshot. Jangan sampai ketinggalan reward dari project Web3 terbaik.',
     btn1:'Explore Airdrops', btn2:'Guide & Tutorial',
     tDash:'DASHBOARD', tTitle:'Airdrop Radar',
@@ -143,7 +143,7 @@ const T = {
   },
   en: {
     badge:'🔥 20+ Active Airdrops Right Now',
-    title:'Find Legit Airdrops<br><span>Before Everyone Else</span>',
+    title:'Latest & Potential Crypto Airdrop List<br><span>Before Everyone Else</span>',
     sub:'Auto-filtered, verified, and snapshot-ready. Never miss rewards from the best Web3 projects.',
     btn1:'Explore Airdrops', btn2:'Guide & Tutorial',
     tDash:'DASHBOARD', tTitle:'Airdrop Radar',
