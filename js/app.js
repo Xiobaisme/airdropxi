@@ -435,6 +435,33 @@ init();
     if (t) t.remove();
   }
 
+  // Deteksi bahasa dari teks user (sederhana tapi efektif)
+  function detectLang(text) {
+    // Kata-kata umum Bahasa Indonesia
+    const idWords = /\b(apa|itu|cara|untuk|dan|yang|ini|ada|bisa|saya|kamu|bagaimana|kenapa|mengapa|gimana|gak|tidak|ya|iya|dong|nih|loh|sih|juga|atau|dari|dengan|di|ke|nya|nya|mau|harus|perlu|buat|bikin|pakai|kalau|kapan|siapa)\b/i;
+    return idWords.test(text) ? 'id' : 'en';
+  }
+
+  function getSystemPrompt(lang) {
+    if (lang === 'id') {
+      return `Kamu adalah AirdropXI Bot, asisten AI resmi dari AirdropXI — platform tracker airdrop crypto terpercaya di Indonesia.
+
+Kepribadian: Friendly, santai, informatif, antusias soal crypto & Web3. Gunakan Bahasa Indonesia yang natural dan mudah dipahami. Selalu ingatkan soal keamanan & scam.
+
+Keahlian: Airdrop crypto, Web3, DeFi, NFT, GameFi, blockchain, keamanan crypto, wallet, gas fee, DEX, CEX, tokenomics.
+
+PENTING: Selalu jawab dalam Bahasa Indonesia. Ingatkan user untuk hanya gunakan link resmi AirdropXI dan jangan share private key / seed phrase.`;
+    } else {
+      return `You are AirdropXI Bot, the official AI assistant from AirdropXI — a trusted crypto airdrop tracker platform.
+
+Personality: Friendly, informative, enthusiastic about crypto & Web3. Use clear, natural English. Always remind users about security and scams.
+
+Expertise: Crypto airdrops, Web3, DeFi, NFT, GameFi, blockchain, crypto security, wallets, gas fees, DEX, CEX, tokenomics.
+
+IMPORTANT: Always respond in English. Remind users to only use official AirdropXI links and never share their private key or seed phrase.`;
+    }
+  }
+
   window.aiSend = async function () {
     if (aiLoading) return;
     const input = document.getElementById('aiInput');
@@ -442,12 +469,25 @@ init();
     if (!text) return;
     input.value = ''; input.style.height = '36px';
     aiAddMsg('user', text.replace(/</g,'&lt;').replace(/>/g,'&gt;'));
+
+    // Deteksi bahasa dari pesan user — prioritaskan bahasa yang diketik user
+    const msgLang = detectLang(text);
+
     aiHistory.push({ role:'user', content:text });
     aiLoading = true;
     document.getElementById('aiSendBtn').disabled = true;
     aiShowTyping();
     try {
-      const res  = await fetch('/api/chat', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({ message: text }) });
+      const res  = await fetch('/api/chat', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({
+          message: text,
+          lang: msgLang,
+          system: getSystemPrompt(msgLang),
+          history: aiHistory.slice(-10) // kirim history biar kontekstual
+        })
+      });
       const data = await res.json();
       aiRemoveTyping();
       if (data.choices && data.choices[0]) {
@@ -455,11 +495,13 @@ init();
         aiHistory.push({ role:'assistant', content:reply });
         aiAddMsg('bot', reply.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>'));
       } else {
-        aiAddMsg('bot', 'AI tidak merespon, coba lagi ya 🙏');
+        const errMsg = msgLang === 'id' ? 'AI tidak merespon, coba lagi ya 🙏' : 'AI did not respond, please try again 🙏';
+        aiAddMsg('bot', errMsg);
       }
     } catch(e) {
       aiRemoveTyping();
-      aiAddMsg('bot', 'Koneksi error, coba lagi 🔌');
+      const errMsg = msgLang === 'id' ? 'Koneksi error, coba lagi 🔌' : 'Connection error, please retry 🔌';
+      aiAddMsg('bot', errMsg);
     }
     aiLoading = false;
     document.getElementById('aiSendBtn').disabled = false;
