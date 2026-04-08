@@ -367,7 +367,10 @@ function animateNum(id, target) {
 // ==========================================
 async function loadNews() {
   try {
-    const client = window.supabase.createClient(SB_URL, SB_KEY);
+    const client = window.supabase.createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
     const { data, error } = await client.from('ticker_news').select('*').order('created_at', { ascending: false });
     if (error) throw error;
     const el = document.getElementById('news-ticker');
