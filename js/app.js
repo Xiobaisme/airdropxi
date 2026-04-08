@@ -1,38 +1,17 @@
 // ==========================================
 // A. CORE CONFIG & INIT
 // ==========================================
-export default async function handler(req, res) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-
-  try {
-    const r = await fetch(`${url}/rest/v1/airdrops?select=*`, {
-      headers: {
-        apikey: key,
-        Authorization: `Bearer ${key}`
-      }
-    });
-
-    const data = await r.json();
-    res.status(200).json(data);
-  } catch (e) {
-    res.status(500).json({ error: e.message });
-  }
-}
 
 async function init() {
   try {
     const res = await fetch('/api/airdrops');
     if (!res.ok) throw new Error('Failed to fetch data');
-
     const data = await res.json();
     allData = data || [];
-
     updateDash();
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('airdrop-container').style.display = 'grid';
     setLang(currentLang);
-
   } catch (e) {
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('error-state').style.display = 'block';
