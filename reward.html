@@ -21,7 +21,7 @@
             height: 100vh;
             margin: 0;
             text-align: center;
-            overflow: hidden;
+            overflow: hidden; /* Supaya emoji tidak buat scrollbar */
         }
 
         /* Language Switcher */
@@ -29,6 +29,7 @@
             position: absolute;
             top: 20px;
             right: 20px;
+            z-index: 10;
         }
 
         .lang-btn {
@@ -51,6 +52,7 @@
             letter-spacing: 4px;
             text-transform: uppercase;
             margin-bottom: 0;
+            z-index: 5;
         }
 
         #countdown {
@@ -59,11 +61,13 @@
             margin: 20px 0;
             text-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
             font-variant-numeric: tabular-nums;
+            z-index: 5;
         }
 
         .message-box {
             height: 50px;
             margin-bottom: 40px;
+            z-index: 5;
         }
 
         .message {
@@ -82,12 +86,30 @@
             text-transform: uppercase;
             font-size: 0.8rem;
             letter-spacing: 2px;
+            z-index: 5;
         }
 
         .back-btn:hover {
             box-shadow: 0 0 15px var(--neon-green);
             background: var(--neon-green);
             color: var(--dark-bg);
+        }
+
+        /* CSS UNTUK EMOJI JATUH */
+        .emoji-fall {
+            position: fixed;
+            top: -50px;
+            font-size: 24px;
+            z-index: 1; /* Di bawah teks tapi di atas background */
+            user-select: none;
+            pointer-events: none;
+            animation: fall linear forwards;
+        }
+
+        @keyframes fall {
+            to {
+                transform: translateY(110vh) rotate(360deg);
+            }
         }
     </style>
 </head>
@@ -98,17 +120,18 @@
         <button class="lang-btn" onclick="setLang('en')">EN</button>
     </div>
 
-    <h1 id="titleText">REWARD UNLOCK IN</h1>
+    <h1 id="titleText">REWARD TERBUKA DALAM</h1>
     
     <div id="countdown">00y 00d 00h 00m 00s</div>
     
     <div class="message-box">
-        <p class="message" id="quoteText">"True hunters know that patience is the ultimate strategy."</p>
+        <p class="message" id="quoteText">"Hunter sejati tahu bahwa kesabaran adalah strategi utama."</p>
     </div>
 
-    <a href="index.html" class="back-btn" id="backBtn">Keep Grinding</a>
+    <a href="index.html" class="back-btn" id="backBtn">Kembali Berjuang</a>
 
     <script>
+        // --- LOGIC BAHASA ---
         const content = {
             id: {
                 title: "REWARD TERBUKA DALAM",
@@ -134,7 +157,7 @@
             updateTimer();
         }
 
-        // Set target 10 tahun
+        // --- LOGIC TIMER 10 TAHUN ---
         const targetDate = new Date();
         targetDate.setFullYear(targetDate.getFullYear() + 10);
 
@@ -153,8 +176,32 @@
                 `${y}${l.years} ${d}${l.days} ${h}${l.hours} ${m}${l.minutes} ${s}${l.seconds}`;
         }
 
+        // --- LOGIC HUJAN EMOJI ---
+        function createEmoji() {
+            const emojis = ['😂', '🤣', '💀', '🤡', '🤑']; 
+            const emoji = document.createElement('div');
+            
+            emoji.className = 'emoji-fall';
+            emoji.innerText = emojis[Math.floor(Math.random() * emojis.length)];
+            
+            emoji.style.left = Math.random() * 100 + 'vw';
+            emoji.style.fontSize = Math.random() * 30 + 20 + 'px';
+            
+            const duration = Math.random() * 5 + 3;
+            emoji.style.animationDuration = duration + 's';
+            emoji.style.opacity = Math.random() * 0.4 + 0.1;
+
+            document.body.appendChild(emoji);
+
+            setTimeout(() => {
+                emoji.remove();
+            }, duration * 1000);
+        }
+
+        // Jalankan semua fungsi
         setInterval(updateTimer, 1000);
-        setLang('id'); // Default bahasa Indonesia
+        setInterval(createEmoji, 300); // Muncul emoji tiap 0.3 detik
+        setLang('id'); 
     </script>
 </body>
 </html>
