@@ -1,0 +1,160 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>AirdropXI - Ultimate Reward</title>
+    <style>
+        :root {
+            --neon-green: #00ff88;
+            --dark-bg: #050a05;
+        }
+
+        body {
+            background-color: var(--dark-bg);
+            color: var(--neon-green);
+            font-family: 'Courier New', Courier, monospace;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            height: 100vh;
+            margin: 0;
+            text-align: center;
+            overflow: hidden;
+        }
+
+        /* Language Switcher */
+        .lang-switch {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+        }
+
+        .lang-btn {
+            background: transparent;
+            border: 1px solid var(--neon-green);
+            color: var(--neon-green);
+            padding: 5px 10px;
+            cursor: pointer;
+            font-family: inherit;
+            font-size: 0.8rem;
+        }
+
+        .lang-btn:hover {
+            background: var(--neon-green);
+            color: var(--dark-bg);
+        }
+
+        h1 {
+            font-size: 1.2rem;
+            letter-spacing: 4px;
+            text-transform: uppercase;
+            margin-bottom: 0;
+        }
+
+        #countdown {
+            font-size: clamp(2rem, 8vw, 4rem);
+            font-weight: bold;
+            margin: 20px 0;
+            text-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
+            font-variant-numeric: tabular-nums;
+        }
+
+        .message-box {
+            height: 50px;
+            margin-bottom: 40px;
+        }
+
+        .message {
+            color: #666;
+            font-size: 0.9rem;
+            max-width: 500px;
+            font-style: italic;
+        }
+
+        .back-btn {
+            color: var(--neon-green);
+            text-decoration: none;
+            border: 1px solid var(--neon-green);
+            padding: 12px 24px;
+            transition: all 0.3s ease;
+            text-transform: uppercase;
+            font-size: 0.8rem;
+            letter-spacing: 2px;
+        }
+
+        .back-btn:hover {
+            box-shadow: 0 0 15px var(--neon-green);
+            background: var(--neon-green);
+            color: var(--dark-bg);
+        }
+    </style>
+</head>
+<body>
+
+    <div class="lang-switch">
+        <button class="lang-btn" onclick="setLang('id')">ID</button>
+        <button class="lang-btn" onclick="setLang('en')">EN</button>
+    </div>
+
+    <h1 id="titleText">REWARD UNLOCK IN</h1>
+    
+    <div id="countdown">00y 00d 00h 00m 00s</div>
+    
+    <div class="message-box">
+        <p class="message" id="quoteText">"True hunters know that patience is the ultimate strategy."</p>
+    </div>
+
+    <a href="index.html" class="back-btn" id="backBtn">Keep Grinding</a>
+
+    <script>
+        const content = {
+            id: {
+                title: "REWARD TERBUKA DALAM",
+                quote: '"Hunter sejati tahu bahwa kesabaran adalah strategi utama."',
+                back: "Kembali Berjuang",
+                years: "th", days: "hr", hours: "j", minutes: "m", seconds: "d"
+            },
+            en: {
+                title: "REWARD UNLOCK IN",
+                quote: '"True hunters know that patience is the ultimate strategy."',
+                back: "Keep Grinding",
+                years: "y", days: "d", hours: "h", minutes: "m", seconds: "s"
+            }
+        };
+
+        let currentLang = 'id';
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('titleText').innerText = content[lang].title;
+            document.getElementById('quoteText').innerText = content[lang].quote;
+            document.getElementById('backBtn').innerText = content[lang].back;
+            updateTimer();
+        }
+
+        // Set target 10 tahun
+        const targetDate = new Date();
+        targetDate.setFullYear(targetDate.getFullYear() + 10);
+
+        function updateTimer() {
+            const now = new Date().getTime();
+            const distance = targetDate - now;
+
+            const y = Math.floor(distance / (1000 * 60 * 60 * 24 * 365.25));
+            const d = Math.floor((distance % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24));
+            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
+            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
+            const s = Math.floor((distance % (1000 * 60)) / 1000);
+
+            const l = content[currentLang];
+            document.getElementById("countdown").innerHTML = 
+                `${y}${l.years} ${d}${l.days} ${h}${l.hours} ${m}${l.minutes} ${s}${l.seconds}`;
+        }
+
+        setInterval(updateTimer, 1000);
+        setLang('id'); // Default bahasa Indonesia
+    </script>
+</body>
+</html>
