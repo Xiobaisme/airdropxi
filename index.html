@@ -7,354 +7,8 @@
 <title>AirdropXI — Latest & Potential Crypto Airdrop List</title>
 <script src="https://unpkg.com/@supabase/supabase-js@2"></script>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<!-- FONT CHANGE: Ganti Plus Jakarta Sans → Syne (display) + DM Sans (body) + JetBrains Mono (code) -->
-<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=DM+Sans:ital,opsz,wght@0,9..40,300;0,9..40,400;0,9..40,500;0,9..40,600;0,9..40,700;1,9..40,300&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="css/style.css">
-
-<style>
-/* ══════════════════════════════════════════════
-   FONT OVERRIDE — Syne + DM Sans (lebih elegan)
-   Hanya override font-family, tidak ubah hal lain
-══════════════════════════════════════════════ */
-body,
-.nav-links a,
-.lang-btn,
-.btn-primary,
-.btn-ghost,
-.fbtn,
-.acard-btn,
-.g-title,
-.section-title,
-.footer-brand h3,
-h1, h2, h3, h4, h5, h6 {
-  font-family: 'Syne', sans-serif !important;
-}
-
-.hero-sub,
-.section-sub,
-.acard-name,
-.dash-label,
-.hstat-lbl,
-.g-desc,
-.g-list,
-.dp,
-.acard-tasks,
-.tasks-body,
-footer p,
-.footer-brand p,
-.footer-links a,
-.footer-bottom,
-.dyor-badge,
-body {
-  font-family: 'DM Sans', sans-serif !important;
-}
-
-.ptick,
-.ptick-sym,
-.ptick-price,
-.ptick-up,
-.ptick-dn,
-.nticker-label,
-.ni,
-.ni-tag,
-.section-tag,
-.hero-badge,
-.hstat-num,
-.dash-num,
-.atag,
-.acard-status,
-.loading-text,
-#loading-text,
-.ai-input,
-.ai-msg-bubble,
-.ai-panel-status,
-.ai-qbtn,
-.raised-val,
-.raised-lbl,
-.tasks-lbl,
-.prog-meta,
-.fc-title,
-.fc-sub,
-.acard-status {
-  font-family: 'JetBrains Mono', monospace !important;
-}
-
-/* ══════════════════════════════════════════════
-   TOP 4 MARKET CAP WIDGET — mengganti hero-visual
-══════════════════════════════════════════════ */
-.hero-visual {
-  display: flex !important;
-  flex-direction: column !important;
-  justify-content: center !important;
-  align-items: stretch !important;
-  position: relative !important;
-  animation: fadeUp .8s .2s ease both;
-}
-
-.mc-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  margin-bottom: 20px;
-}
-
-.mc-header-left {
-  display: flex;
-  align-items: center;
-  gap: 10px;
-}
-
-.mc-title {
-  font-family: 'Syne', sans-serif !important;
-  font-size: 13px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: 0.5px;
-  text-transform: uppercase;
-}
-
-.mc-live-dot {
-  display: flex;
-  align-items: center;
-  gap: 5px;
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 9px;
-  color: var(--g);
-  letter-spacing: 1px;
-}
-
-.mc-live-dot::before {
-  content: '';
-  width: 6px;
-  height: 6px;
-  background: var(--g);
-  border-radius: 50%;
-  animation: ldot 1.5s infinite;
-  flex-shrink: 0;
-}
-
-.mc-global-cap {
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 10px;
-  color: var(--text2);
-}
-
-.mc-refresh-btn {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  color: var(--text2);
-  font-size: 11px;
-  padding: 5px 10px;
-  border-radius: var(--radius-sm);
-  cursor: pointer;
-  font-family: 'JetBrains Mono', monospace !important;
-  transition: all .2s;
-  display: flex;
-  align-items: center;
-  gap: 5px;
-}
-
-.mc-refresh-btn:hover {
-  border-color: var(--g);
-  color: var(--g);
-}
-
-.mc-refresh-btn.spinning svg {
-  animation: spinLoader .6s linear infinite;
-}
-
-.mc-cards {
-  display: flex;
-  flex-direction: column;
-  gap: 11px;
-}
-
-.mc-card {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  cursor: pointer;
-  transition: all .3s cubic-bezier(.4,0,.2,1);
-  position: relative;
-  overflow: hidden;
-}
-
-.mc-card::after {
-  content: '';
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 2px;
-  transform: scaleX(0);
-  transform-origin: left;
-  transition: transform .4s;
-}
-
-.mc-card:hover {
-  border-color: var(--border-h);
-  transform: translateY(-2px);
-  box-shadow: 0 16px 40px rgba(0,0,0,.3);
-}
-
-.mc-card:hover::after {
-  transform: scaleX(1);
-}
-
-.mc-card[data-sym="BTC"]::after { background: linear-gradient(90deg,#F7931A,#fbbf24); }
-.mc-card[data-sym="ETH"]::after { background: linear-gradient(90deg,#627EEA,#a78bfa); }
-.mc-card[data-sym="USDT"]::after { background: linear-gradient(90deg,#26A17B,#00e87a); }
-.mc-card[data-sym="XRP"]::after { background: linear-gradient(90deg,#0096FF,#00c8f0); }
-
-.mc-rank {
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 10px;
-  font-weight: 700;
-  color: var(--text3);
-  min-width: 20px;
-  text-align: center;
-}
-
-.mc-icon {
-  width: 40px;
-  height: 40px;
-  border-radius: 11px;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  flex-shrink: 0;
-  font-size: 20px;
-  font-weight: 700;
-  border: 1px solid var(--border);
-}
-
-.mc-icon-btc  { background: rgba(247,147,26,.12); color: #F7931A; }
-.mc-icon-eth  { background: rgba(98,126,234,.12); color: #627EEA; }
-.mc-icon-usdt { background: rgba(38,161,123,.12); color: #26A17B; }
-.mc-icon-xrp  { background: rgba(0,150,255,.12); color: #0096FF; }
-
-.mc-info {
-  flex: 1;
-  min-width: 0;
-}
-
-.mc-name-row {
-  display: flex;
-  align-items: center;
-  gap: 7px;
-  margin-bottom: 5px;
-}
-
-.mc-name {
-  font-family: 'Syne', sans-serif !important;
-  font-size: 15px;
-  font-weight: 700;
-  color: var(--text);
-  letter-spacing: -.3px;
-}
-
-.mc-sym {
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 10px;
-  color: var(--text3);
-  text-transform: uppercase;
-  background: var(--surface);
-  padding: 2px 6px;
-  border-radius: 4px;
-}
-
-.mc-meta {
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 10px;
-  color: var(--text2);
-}
-
-.mc-right {
-  text-align: right;
-  flex-shrink: 0;
-}
-
-.mc-price {
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 14px;
-  font-weight: 700;
-  color: var(--text);
-  margin-bottom: 4px;
-}
-
-.mc-change {
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 11px;
-  font-weight: 600;
-  display: flex;
-  align-items: center;
-  justify-content: flex-end;
-  gap: 3px;
-}
-
-.mc-change.up { color: var(--g); }
-.mc-change.dn { color: #ff4d6d; }
-
-.mc-skeleton {
-  background: var(--surface);
-  border: 1px solid var(--border);
-  border-radius: var(--radius);
-  padding: 16px 18px;
-  display: flex;
-  align-items: center;
-  gap: 14px;
-  animation: skeletonPulse 1.4s ease-in-out infinite;
-}
-
-@keyframes skeletonPulse {
-  0%, 100% { opacity: 1; }
-  50%       { opacity: .45; }
-}
-
-.sk-circle {
-  width: 40px; height: 40px;
-  background: var(--surface-h);
-  border-radius: 11px;
-  flex-shrink: 0;
-}
-
-.sk-lines { flex: 1; display: flex; flex-direction: column; gap: 8px; }
-.sk-line  { height: 10px; background: var(--surface-h); border-radius: 4px; }
-.sk-line.w60 { width: 60%; }
-.sk-line.w40 { width: 40%; }
-
-.mc-footer {
-  margin-top: 14px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-}
-
-.mc-updated {
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 9px;
-  color: var(--text3);
-}
-
-.mc-cmc-link {
-  font-family: 'JetBrains Mono', monospace !important;
-  font-size: 9px;
-  color: var(--text2);
-  text-decoration: none;
-  border-bottom: 1px dashed var(--border);
-  transition: color .2s, border-color .2s;
-}
-
-.mc-cmc-link:hover { color: var(--g); border-color: var(--g); }
-
-/* Responsive override untuk hero-visual */
-@media(max-width:1024px) {
-  .hero { grid-template-columns: 1fr !important; }
-  .hero-visual { transform: none !important; margin-top: 0 !important; }
-}
-</style>
 </head>
 <body>
 
@@ -417,7 +71,6 @@ body {
 <!-- Hero -->
 <div class="z1" style="border-bottom:1px solid var(--border)">
 <div class="hero">
-  <!-- Hero Left (tidak berubah) -->
   <div>
     <div class="hero-badge"><div class="hero-badge-dot"></div><span id="h-badge">🔥 20+ Airdrop Aktif Sekarang</span></div>
     <h1 id="h-title">Find Legit Airdrops<br><span>Before Everyone Else</span></h1>
@@ -429,6 +82,7 @@ body {
       </button>
       <button class="btn-ghost" id="h-btn2" onclick="document.getElementById('guide').scrollIntoView({behavior:'smooth'})">Guide & Tutorial</button>
     </div>
+    <!-- Docs CTA mini banner -->
     <a href="docs.html" id="hero-docs-banner" style="margin-top:20px;display:inline-flex;align-items:center;gap:10px;background:rgba(0,200,240,.06);border:1px solid rgba(0,200,240,.18);border-radius:10px;padding:10px 16px;text-decoration:none;transition:all .25s" onmouseover="this.style.borderColor='rgba(0,200,240,.4)'" onmouseout="this.style.borderColor='rgba(0,200,240,.18)'">
       <span style="font-size:18px">📚</span>
       <div>
@@ -442,43 +96,37 @@ body {
       <div class="hstat"><div class="hstat-num">100%</div><div class="hstat-lbl">Verified</div></div>
     </div>
   </div>
-
-  <!-- ══════════════════════════════════════
-       HERO RIGHT — TOP 4 MARKET CAP (REAL-TIME)
-       Mengganti orbit animation sebelumnya
-  ══════════════════════════════════════ -->
   <div class="hero-visual">
-    <div class="mc-header">
-      <div class="mc-header-left">
-        <span class="mc-title">Top Market Cap</span>
-        <span class="mc-live-dot">LIVE</span>
+    <div class="universe-container">
+      <div class="sun-btc"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/btc.svg" alt="BTC"></div>
+      <div class="orbit-ring ring-1">
+        <div class="planet" style="top:0;left:50%"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/eth.svg" class="planet-counter" alt="ETH"></div>
+        <div class="planet" style="top:100%;left:50%"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/bnb.svg" class="planet-counter" alt="BNB"></div>
       </div>
-      <button class="mc-refresh-btn" id="mc-refresh-btn" onclick="fetchMarketCap(true)" title="Refresh data">
-        <svg id="mc-refresh-icon" width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round">
-          <polyline points="1 4 1 10 7 10"></polyline>
-          <path d="M3.51 15a9 9 0 1 0 .49-4.51"></path>
-        </svg>
-        Refresh
-      </button>
-    </div>
-
-    <!-- Skeleton loading -->
-    <div class="mc-cards" id="mc-cards">
-      <div class="mc-skeleton"><div class="sk-circle"></div><div class="sk-lines"><div class="sk-line"></div><div class="sk-line w60"></div></div></div>
-      <div class="mc-skeleton"><div class="sk-circle"></div><div class="sk-lines"><div class="sk-line"></div><div class="sk-line w40"></div></div></div>
-      <div class="mc-skeleton"><div class="sk-circle"></div><div class="sk-lines"><div class="sk-line"></div><div class="sk-line w60"></div></div></div>
-      <div class="mc-skeleton"><div class="sk-circle"></div><div class="sk-lines"><div class="sk-line"></div><div class="sk-line w40"></div></div></div>
-    </div>
-
-    <div class="mc-footer">
-      <span class="mc-updated" id="mc-updated">Memuat data...</span>
-      <a href="https://coinmarketcap.com" target="_blank" rel="noopener" class="mc-cmc-link">CoinMarketCap →</a>
+      <div class="orbit-ring ring-2">
+        <div class="planet" style="top:50%;left:0"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/sol.svg" class="planet-counter-2" alt="SOL"></div>
+        <div class="planet" style="top:50%;left:100%"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/xrp.svg" class="planet-counter-2" alt="XRP"></div>
+      </div>
+      <div class="orbit-ring ring-3">
+        <div class="planet" style="top:15%;left:15%"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/ada.svg" class="planet-counter-3" alt="ADA"></div>
+        <div class="planet" style="top:85%;left:85%"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/doge.svg" class="planet-counter-3" alt="DOGE"></div>
+      </div>
+      <div class="float-card float-card-1">
+        <div class="fc-title" id="fc-latest-title">LATEST DROP</div>
+        <div class="fc-val" id="fc-latest">—</div>
+        <div class="fc-sub" id="fc-active-now">Active Now</div>
+      </div>
+      <div class="float-card float-card-2">
+        <div class="fc-title" id="fc-raised-title">TOTAL RAISED</div>
+        <div class="fc-val" id="fc-raised">$—</div>
+        <div class="fc-sub" id="fc-across">Across all projects</div>
+      </div>
     </div>
   </div>
 </div>
 </div>
 
-<!-- Main Content (tidak berubah dari source asli) -->
+<!-- Main Content -->
 <main class="z1" id="airdrops">
 <section>
   <div class="section-tag" id="t-dash">DASHBOARD</div>
@@ -535,6 +183,7 @@ body {
       </div>
     </div>
   </div>
+  <!-- Docs CTA Banner -->
   <a href="docs.html" class="reveal" id="docs-cta-wrap" style="margin-top:32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;background:linear-gradient(135deg,rgba(0,232,122,.05),rgba(0,200,240,.04));border:1px solid rgba(0,200,240,.2);border-radius:16px;padding:28px 32px;text-decoration:none;transition:all .3s" onmouseover="this.style.borderColor='rgba(0,200,240,.5)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(0,200,240,.2)';this.style.transform=''">
     <div style="display:flex;align-items:center;gap:16px">
       <div style="font-size:36px">📚</div>
@@ -549,7 +198,7 @@ body {
 </section>
 </main>
 
-<!-- Footer (tidak berubah) -->
+<!-- Footer -->
 <footer class="z1">
   <div class="footer-inner">
     <div class="dyor-badge" id="footer-dyor">⚠️ DYOR — Semua informasi hanya untuk edukasi. Selalu lakukan riset sendiri sebelum berinvestasi.</div>
@@ -559,7 +208,7 @@ body {
         <p id="footer-desc">Tracker airdrop Web3 terpercaya. Real-time, verified, dan selalu update untuk kamu yang tidak mau ketinggalan.</p>
         <div class="footer-socials">
           <a class="fsoc" href="https://x.com/xiobai06" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-          <a class="fsoc" href="https://t.me/Xiobaiishikii" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
+          <a class="fsoc" href="https://t.me/Xiobaiishikii" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
         </div>
       </div>
       <div class="footer-links">
@@ -581,7 +230,7 @@ body {
   </div>
 </footer>
 
-<!-- AI Chat Panel (tidak berubah) -->
+<!-- AI Chat Panel -->
 <div class="ai-panel" id="aiPanel">
   <div class="ai-panel-header">
     <div class="ai-panel-avatar"><img src="logo.png" alt="Bot" style="width:26px;height:26px;object-fit:contain;border-radius:6px;"></div>
@@ -610,173 +259,5 @@ body {
 </div>
 
 <script src="js/app.js"></script>
-
-<!-- ══════════════════════════════════════════
-     TOP 4 MARKET CAP — Real-time via CoinGecko
-     Script mandiri, tidak mengubah app.js
-══════════════════════════════════════════ -->
-<script>
-(function () {
-  'use strict';
-
-  /* Config */
-  const COINS = [
-    { id: 'bitcoin',  sym: 'BTC',  name: 'Bitcoin',  iconClass: 'mc-icon-btc',  icon: '₿' },
-    { id: 'ethereum', sym: 'ETH',  name: 'Ethereum', iconClass: 'mc-icon-eth',  icon: 'Ξ' },
-    { id: 'tether',   sym: 'USDT', name: 'Tether',   iconClass: 'mc-icon-usdt', icon: '₮' },
-    { id: 'ripple',   sym: 'XRP',  name: 'XRP',      iconClass: 'mc-icon-xrp',  icon: '◈' }
-  ];
-
-  const API_URL = 'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,tether,ripple&order=market_cap_desc&per_page=4&page=1&sparkline=false&price_change_percentage=24h';
-  const GLOBAL_URL = 'https://api.coingecko.com/api/v3/global';
-
-  let refreshInterval = null;
-
-  /* Format helpers */
-  function fmtPrice(p) {
-    if (p >= 1000) return '$' + p.toLocaleString('en-US', { maximumFractionDigits: 2 });
-    if (p >= 1)    return '$' + p.toFixed(4);
-    return '$' + p.toFixed(6);
-  }
-
-  function fmtCap(n) {
-    if (n >= 1e12) return '$' + (n / 1e12).toFixed(2) + 'T';
-    if (n >= 1e9)  return '$' + (n / 1e9).toFixed(1) + 'B';
-    if (n >= 1e6)  return '$' + (n / 1e6).toFixed(1) + 'M';
-    return '$' + n.toLocaleString();
-  }
-
-  function fmtChange(pct) {
-    if (pct == null) return { text: '—', cls: '' };
-    const sign = pct >= 0 ? '▲ +' : '▼ ';
-    return { text: sign + Math.abs(pct).toFixed(2) + '%', cls: pct >= 0 ? 'up' : 'dn' };
-  }
-
-  function fmtTime(d) {
-    return d.toLocaleTimeString('id-ID', { hour: '2-digit', minute: '2-digit', second: '2-digit' });
-  }
-
-  /* Render cards */
-  function renderCards(coins, globalCap) {
-    const container = document.getElementById('mc-cards');
-    if (!container) return;
-
-    // Update global cap di header
-    const gcEl = document.querySelector('.mc-global-cap');
-    if (gcEl && globalCap) gcEl.textContent = 'Global: ' + fmtCap(globalCap);
-
-    const order = { bitcoin: 0, ethereum: 1, tether: 2, ripple: 3 };
-    const sorted = [...coins].sort((a, b) => (order[a.id] ?? 9) - (order[b.id] ?? 9));
-
-    container.innerHTML = sorted.map((coin, idx) => {
-      const cfg = COINS.find(c => c.id === coin.id) || { sym: coin.symbol.toUpperCase(), name: coin.name, iconClass: 'mc-icon-eth', icon: '◆' };
-      const price  = fmtPrice(coin.current_price || 0);
-      const cap    = fmtCap(coin.market_cap || 0);
-      const ch     = fmtChange(coin.price_change_percentage_24h);
-      const rank   = coin.market_cap_rank || (idx + 1);
-
-      return `
-        <div class="mc-card" data-sym="${cfg.sym}" onclick="window.open('https://coinmarketcap.com/currencies/${coin.id}/', '_blank')">
-          <span class="mc-rank">#${rank}</span>
-          <div class="mc-icon ${cfg.iconClass}">${cfg.icon}</div>
-          <div class="mc-info">
-            <div class="mc-name-row">
-              <span class="mc-name">${cfg.name}</span>
-              <span class="mc-sym">${cfg.sym}</span>
-            </div>
-            <div class="mc-meta">Mkt Cap: ${cap}</div>
-          </div>
-          <div class="mc-right">
-            <div class="mc-price">${price}</div>
-            <div class="mc-change ${ch.cls}">${ch.text}</div>
-          </div>
-        </div>
-      `;
-    }).join('');
-
-    // Update timestamp
-    const updEl = document.getElementById('mc-updated');
-    if (updEl) updEl.textContent = 'Update: ' + fmtTime(new Date());
-  }
-
-  /* Render error state */
-  function renderError(msg) {
-    const container = document.getElementById('mc-cards');
-    if (!container) return;
-    container.innerHTML = `
-      <div style="grid-column:1/-1;text-align:center;padding:32px 20px;border:1px dashed var(--border);border-radius:var(--radius);">
-        <div style="font-size:24px;margin-bottom:10px">📡</div>
-        <div style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);">${msg}</div>
-        <button onclick="fetchMarketCap(true)" style="margin-top:14px;background:var(--surface);border:1px solid var(--border);color:var(--g);font-size:11px;padding:7px 16px;border-radius:var(--radius-sm);cursor:pointer;font-family:'JetBrains Mono',monospace;">Coba Lagi</button>
-      </div>
-    `;
-    const updEl = document.getElementById('mc-updated');
-    if (updEl) updEl.textContent = 'Gagal memuat data';
-  }
-
-  /* Main fetch */
-  window.fetchMarketCap = async function (isManual = false) {
-    const btn  = document.getElementById('mc-refresh-btn');
-    const icon = document.getElementById('mc-refresh-icon');
-    if (btn)  btn.disabled = true;
-    if (icon) icon.parentElement.classList.add('spinning');
-
-    try {
-      const [coinsRes, globalRes] = await Promise.allSettled([
-        fetch(API_URL, { cache: 'no-cache' }),
-        fetch(GLOBAL_URL, { cache: 'no-cache' })
-      ]);
-
-      let globalCap = null;
-      if (globalRes.status === 'fulfilled' && globalRes.value.ok) {
-        const gData = await globalRes.value.json();
-        globalCap = gData?.data?.total_market_cap?.usd || null;
-      }
-
-      if (coinsRes.status === 'rejected' || !coinsRes.value.ok) {
-        throw new Error('Rate limit atau jaringan bermasalah. Coba lagi sebentar.');
-      }
-
-      const coins = await coinsRes.value.json();
-      if (!Array.isArray(coins) || !coins.length) throw new Error('Data kosong dari CoinGecko.');
-
-      renderCards(coins, globalCap);
-
-    } catch (e) {
-      if (isManual) {
-        renderError(e.message || 'Koneksi gagal.');
-      }
-      // Kalau auto-refresh gagal (rate limit), jangan timpa tampilan yang sudah ada
-      const updEl = document.getElementById('mc-updated');
-      if (updEl && !updEl.textContent.includes('Update:')) {
-        updEl.textContent = 'Rate limit — coba refresh manual';
-      }
-    } finally {
-      if (btn)  btn.disabled = false;
-      if (icon) icon.parentElement.classList.remove('spinning');
-    }
-  };
-
-  /* Auto-refresh setiap 60 detik (CoinGecko free tier friendly) */
-  function startAutoRefresh() {
-    clearInterval(refreshInterval);
-    refreshInterval = setInterval(() => window.fetchMarketCap(false), 60000);
-  }
-
-  /* Init */
-  window.fetchMarketCap(true);
-  startAutoRefresh();
-
-  /* Pause auto-refresh saat tab tidak aktif (hemat kuota API) */
-  document.addEventListener('visibilitychange', () => {
-    if (document.hidden) {
-      clearInterval(refreshInterval);
-    } else {
-      window.fetchMarketCap(false);
-      startAutoRefresh();
-    }
-  });
-})();
-</script>
 </body>
 </html>
