@@ -1,6 +1,11 @@
 export default async function handler(req, res) {
   const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
+  
+  if (!url || !key) {
+    return res.status(500).json({ error: 'Missing env variables' });
+  }
+  
   try {
     const r = await fetch(`${url}/rest/v1/airdrops?select=*`, {
       headers: {
