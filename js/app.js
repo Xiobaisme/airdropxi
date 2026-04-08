@@ -27,11 +27,9 @@ function toggleTheme() {
   const isDark = html.getAttribute('data-theme') === 'dark';
   html.setAttribute('data-theme', isDark ? 'light' : 'dark');
   document.getElementById('themeToggle').textContent = isDark ? '🌙' : '☀️';
-  // Persist
   localStorage.setItem('axi-theme', isDark ? 'light' : 'dark');
 }
 
-// Load saved theme
 (function () {
   const saved = localStorage.getItem('axi-theme') || 'dark';
   document.documentElement.setAttribute('data-theme', saved);
@@ -60,7 +58,6 @@ function bindHoverEffects() {
 }
 bindHoverEffects();
 
-// Acard mouse gradient
 document.addEventListener('mousemove', e => {
   document.querySelectorAll('.acard').forEach(card => {
     const r = card.getBoundingClientRect();
@@ -69,7 +66,6 @@ document.addEventListener('mousemove', e => {
   });
 });
 
-// Background canvas
 (function () {
   const c = document.getElementById('bg-canvas'), ctx = c.getContext('2d');
   let W, H, t = 0;
@@ -101,7 +97,6 @@ document.addEventListener('mousemove', e => {
   window.addEventListener('resize', resize); resize(); draw();
 })();
 
-// Scroll reveal
 const observer = new IntersectionObserver(entries => {
   entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
 }, { threshold: .1 });
@@ -347,10 +342,9 @@ function animateNum(id, target) {
 async function loadNews() {
   try {
     const client = window.supabase.createClient(
-  'https://hmjjujirktpqviayfehe.supabase.co',
-  'sb_publishable_Q0wdrJl_H0VIV-XpE8eiVQ_ziLgpMVx'
-);
-);
+      'https://hmjjujirktpqviayfehe.supabase.co',
+      'sb_publishable_Q0wdrJl_H0VIV-XpE8eiVQ_ziLgpMVx'
+    );
     const { data, error } = await client.from('ticker_news').select('*').order('created_at', { ascending: false });
     if (error) throw error;
     const el = document.getElementById('news-ticker');
@@ -435,9 +429,7 @@ init();
     if (t) t.remove();
   }
 
-  // Deteksi bahasa dari teks user (sederhana tapi efektif)
   function detectLang(text) {
-    // Kata-kata umum Bahasa Indonesia
     const idWords = /\b(apa|itu|cara|untuk|dan|yang|ini|ada|bisa|saya|kamu|bagaimana|kenapa|mengapa|gimana|gak|tidak|ya|iya|dong|nih|loh|sih|juga|atau|dari|dengan|di|ke|nya|nya|mau|harus|perlu|buat|bikin|pakai|kalau|kapan|siapa)\b/i;
     return idWords.test(text) ? 'id' : 'en';
   }
@@ -470,7 +462,6 @@ IMPORTANT: Always respond in English. Remind users to only use official AirdropX
     input.value = ''; input.style.height = '36px';
     aiAddMsg('user', text.replace(/</g,'&lt;').replace(/>/g,'&gt;'));
 
-    // Deteksi bahasa dari pesan user — prioritaskan bahasa yang diketik user
     const msgLang = detectLang(text);
 
     aiHistory.push({ role:'user', content:text });
@@ -485,7 +476,7 @@ IMPORTANT: Always respond in English. Remind users to only use official AirdropX
           message: text,
           lang: msgLang,
           system: getSystemPrompt(msgLang),
-          history: aiHistory.slice(-10) // kirim history biar kontekstual
+          history: aiHistory.slice(-10)
         })
       });
       const data = await res.json();
