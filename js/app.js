@@ -348,7 +348,8 @@ async function loadNews() {
   try {
     const client = window.supabase.createClient(
   'https://hmjjujirktpqviayfehe.supabase.co',
-  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+  'sb_publishable_Q0wdrJl_H0VIV-XpE8eiVQ_ziLgpMVx'
+);
 );
     const { data, error } = await client.from('ticker_news').select('*').order('created_at', { ascending: false });
     if (error) throw error;
