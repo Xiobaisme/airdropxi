@@ -2,6 +2,8 @@
 // A. CORE CONFIG & INIT
 // ==========================================
 
+let sb, allData = [], currentLang = 'id', currentFilter = 'all', activeFilter = 'all';
+
 async function init() {
   try {
     const res = await fetch('/api/airdrops');
