@@ -347,7 +347,7 @@ function animateNum(id, target) {
 async function loadNews() {
   try {
     const client = window.supabase.createClient(
-  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  'https://hmjjujirktpqviayfehe.supabase.co',
   process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
 );
     const { data, error } = await client.from('ticker_news').select('*').order('created_at', { ascending: false });
