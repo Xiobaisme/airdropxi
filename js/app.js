@@ -1,9 +1,24 @@
 // ==========================================
 // A. CORE CONFIG & INIT
 // ==========================================
-const SB_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
-const SB_KEY = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
-let sb, allData=[], currentLang='id', currentFilter='all';
+export default async function handler(req, res) {
+  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const key = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY;
+
+  try {
+    const r = await fetch(`${url}/rest/v1/airdrops?select=*`, {
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`
+      }
+    });
+
+    const data = await r.json();
+    res.status(200).json(data);
+  } catch (e) {
+    res.status(500).json({ error: e.message });
+  }
+}
 
 async function init() {
   try {
