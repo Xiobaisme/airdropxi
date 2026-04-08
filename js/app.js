@@ -1,10 +1,9 @@
 // ==========================================
 // A. CORE CONFIG & INIT
 // ==========================================
-const supabaseUrl = 'https://your-project-url.supabase.co'
-const supabaseKey = process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY 
-const supabase = supabase.createClient(supabaseUrl, supabaseKey)
-let sb, allData = [], currentLang = 'id', activeFilter = 'all';
+const SB_URL = 'https://hmjjujirktpqviayfehe.supabase.co';
+const SB_KEY = 'eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6Imhtamp1amlya3RwcXZpYXlmZWhlIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzM1ODE1NzQsImV4cCI6MjA4OTE1NzU3NH0.nmCK3b66fU8Zh-mwQw5YUS_I3dFJAYnvfWlO050doSY';
+let sb, allData=[], currentLang='id', currentFilter='all';
 
 async function init() {
   try {
