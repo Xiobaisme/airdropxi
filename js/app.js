@@ -22,15 +22,17 @@ export default async function handler(req, res) {
 
 async function init() {
   try {
-    if (!window.supabase) throw new Error('Supabase failed to load');
-    sb = window.supabase.createClient(SB_URL, SB_KEY);
-    const { data, error } = await sb.from('airdrops').select('*').order('created_at', { ascending: false });
-    if (error) throw error;
+    const res = await fetch('/api/airdrops');
+    if (!res.ok) throw new Error('Failed to fetch data');
+
+    const data = await res.json();
     allData = data || [];
+
     updateDash();
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('airdrop-container').style.display = 'grid';
     setLang(currentLang);
+
   } catch (e) {
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('error-state').style.display = 'block';
