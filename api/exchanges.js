@@ -1,37 +1,33 @@
-import { createClient } from '@supabase/supabase-js';
-
 export default async function handler(req, res) {
-  // Pastikan variabel lingkungan terbaca
-  const supabaseUrl = process.env.SUPABASE_URL;
-  const supabaseKey = process.env.SUPABASE_ANON_KEY;
+  const url = process.env.SUPABASE_URL;
+  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!supabaseUrl || !supabaseKey) {
-    return res.status(500).json({ error: "Variabel SUPABASE_URL atau KEY belum diset di Vercel" });
+  if (!url || !key) {
+    return res.status(500).json({ error: 'Missing Supabase env' });
   }
 
-  const supabase = createClient(supabaseUrl, supabaseKey);
-  const { type } = req.query;
-
   try {
-    // Gunakan query sederhana dulu untuk tes
-    let query = supabase.from('exchanges').select('*');
-    
-    // Jika ada filter type (cex/dex), baru kita filter
-    if (type) {
-      query = query.eq('type', type.toLowerCase());
+    const response = await fetch(`${url}/rest/v1/exchanges?select=*`, {
+      headers: {
+        apikey: key,
+        Authorization: `Bearer ${key}`,
+      },
+    });
+
+    if (!response.ok) {
+      const text = await response.text();
+      return res.status(response.status).json({
+        error: 'Supabase error',
+        detail: text,
+      });
     }
 
-    const { data, error } = await query;
-
-    if (error) throw error;
-
-    return res.status(200).json(data);
-  } catch (error) {
-    // Ini akan memunculkan detail error di log Vercel
-    console.error("Supabase Error:", error.message);
-    return res.status(500).json({ 
-      error: "Gagal mengambil data dari Supabase", 
-      details: error.message 
+    const data = await response.json();
+    res.status(200).json(data);
+  } catch (err) {
+    res.status(500).json({
+      error: 'Server error',
+      message: err.message,
     });
   }
 }
