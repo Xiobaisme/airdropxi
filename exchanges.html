@@ -1,67 +1,180 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Exchanges - AirdropXI Intelligence</title>
-    <script src="https://cdn.tailwindcss.com"></script>
-    <style>
-        /* Desain Grid Background identik dengan Home */
-        body {
-            background-color: #0a0a0a;
-            background-image: linear-gradient(to right, #121212 1px, transparent 1px),
-                              linear-gradient(to bottom, #121212 1px, transparent 1px);
-            background-size: 40px 40px;
-            cursor: auto !important;
-            transition: background-color 0.3s ease;
-        }
-        .neo-border { border: 1px solid rgba(34, 197, 94, 0.2); }
-        .neo-text { text-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
-        
-        /* Light Mode Logic */
-        body.light-mode { background-color: #f4f4f4; color: #1a1a1a; background-image: none; }
-        body.light-mode .neo-border { border-color: #ddd; }
-        body.light-mode .bg-zinc-900\/10 { background-color: #fff; }
-        body.light-mode h1 { color: #1a1a1a; }
-    </style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Pasar Bursa</title>
+
+  <script src="https://cdn.tailwindcss.com"></script>
+
+  <style>
+    body {
+      background-color: black;
+      background-image: linear-gradient(rgba(0,255,100,0.05) 1px, transparent 1px),
+                        linear-gradient(90deg, rgba(0,255,100,0.05) 1px, transparent 1px);
+      background-size: 40px 40px;
+    }
+  </style>
 </head>
-<body class="text-white font-sans min-h-screen">
 
-    <div class="container mx-auto p-6 max-w-6xl">
-        <div class="flex justify-between items-center mb-10">
-            <a href="index.html" class="flex items-center gap-2 group">
-                <span class="text-green-500 font-bold">←</span>
-                <span class="text-[10px] uppercase tracking-[0.2em] group-hover:text-green-500 transition" id="txt-back">Kembali ke Beranda</span>
-            </a>
-            <div class="flex gap-4">
-                <button onclick="toggleLang()" class="text-[10px] border border-zinc-800 px-3 py-1 rounded-full hover:border-green-500 transition" id="btn-lang">EN</button>
-                <button onclick="toggleTheme()" class="text-[10px] border border-zinc-800 px-3 py-1 rounded-full hover:border-green-500 transition" id="btn-theme">🌙</button>
-            </div>
-        </div>
+<body class="text-white">
 
-        <h1 class="text-3xl font-black text-white mb-2 uppercase italic neo-text" id="main-title">Pasar Bursa</h1>
-        <p class="text-zinc-500 text-[10px] mb-8 tracking-widest uppercase" id="sub-title">Data Real-Time Bursa Cryptocurrency</p>
+  <div class="max-w-6xl mx-auto px-6 py-12">
 
-        <div class="flex flex-wrap gap-4 mb-8">
-            <button onclick="switchTab('cex')" id="tab-cex" class="px-8 py-2 bg-green-500 text-black text-[10px] font-bold uppercase tracking-wider rounded-full shadow-[0_0_15px_rgba(34,197,94,0.3)]">CEX</button>
-            <button onclick="switchTab('dex')" id="tab-dex" class="px-8 py-2 border border-zinc-800 text-zinc-500 text-[10px] font-bold uppercase tracking-wider rounded-full hover:border-green-500 transition">DEX</button>
-        </div>
+    <!-- TOP BAR -->
+    <div class="flex justify-between items-center">
+      <div>
+        <h1 id="title" class="text-4xl font-extrabold tracking-wider"></h1>
+        <p id="subtitle" class="text-green-400/70 text-sm mt-2 tracking-widest"></p>
+      </div>
 
-        <div id="exchanges-container" class="bg-zinc-900/10 neo-border rounded-xl p-1 backdrop-blur-sm overflow-hidden">
-            <div class="py-20 text-center animate-pulse text-zinc-500 font-mono text-[10px]" id="txt-loading">MENYINKRONKAN DATA PASAR...</div>
-        </div>
-
-        <div class="mt-20 border-t border-zinc-900 pt-10 pb-20 text-center">
-            <div class="flex justify-center gap-4 mb-8">
-                <a href="https://twitter.com/xiobaiishikii" target="_blank" class="px-8 py-2 bg-zinc-900 border border-zinc-800 rounded-full text-[10px] font-bold hover:border-green-500 transition uppercase">Twitter</a>
-                <a href="https://t.me/AirdropXI" target="_blank" class="px-8 py-2 bg-zinc-900 border border-zinc-800 rounded-full text-[10px] font-bold hover:border-green-500 transition uppercase">Telegram</a>
-            </div>
-            <p class="text-zinc-500 text-[10px] mb-8">© 2026 Xiobaiishikii — Stay Safe & Keep Grinding ⚡</p>
-            <p class="text-[9px] text-zinc-700 uppercase tracking-[0.3em] mb-12">DYOR: Konten hanya untuk tujuan edukasi.</p>
-            <a href="index.html" class="inline-block px-10 py-4 border border-green-500 text-green-500 text-[10px] font-bold rounded-full hover:bg-green-500 hover:text-black transition uppercase tracking-widest">← Back to Home</a>
-        </div>
+      <!-- LANGUAGE TOGGLE -->
+      <button onclick="toggleLang()" 
+        class="px-4 py-2 rounded-full border border-green-400/30 text-green-400 hover:bg-green-500/10 transition">
+        <span id="langBtn">EN</span>
+      </button>
     </div>
 
-    <script src="js/exchanges.js"></script>
+    <!-- TAB -->
+    <div class="flex gap-3 mt-6">
+      <button id="cexTab" class="px-5 py-2 rounded-full bg-green-500/20 text-green-400 border border-green-400/30"></button>
+      <button id="dexTab" class="px-5 py-2 rounded-full bg-black/30 text-gray-400 border border-gray-600/20"></button>
+    </div>
+
+    <!-- CONTAINER -->
+    <div class="relative mt-10 p-6 rounded-2xl border border-green-500/20 bg-black/40 backdrop-blur-xl shadow-[0_0_40px_rgba(34,197,94,0.15)]">
+
+      <!-- LOADING -->
+      <div id="loading" class="text-center text-green-400 py-10"></div>
+
+      <!-- ERROR -->
+      <div id="error" class="hidden text-center text-red-400 py-10"></div>
+
+      <!-- TABLE -->
+      <table id="table" class="w-full text-sm text-left text-gray-300 hidden">
+        <thead class="text-xs uppercase text-green-400 border-b border-green-500/20">
+          <tr>
+            <th class="py-4" id="thRank"></th>
+            <th id="thExchange"></th>
+            <th id="thCountry"></th>
+            <th id="thAdvantage"></th>
+            <th id="thSuitable"></th>
+          </tr>
+        </thead>
+
+        <tbody id="tbody" class="divide-y divide-green-500/10"></tbody>
+      </table>
+
+    </div>
+  </div>
+
+<script>
+  let currentLang = "id";
+
+  const lang = {
+    id: {
+      title: "<span class='text-green-400'>PASAR</span> BURSA",
+      subtitle: "DATA REAL-TIME BURSA CRYPTOCURRENCY",
+      cex: "CEX",
+      dex: "DEX",
+      loading: "Mengambil data...",
+      error: "Gagal ambil data 😢",
+      rank: "Rank",
+      exchange: "Exchange",
+      country: "Negara",
+      advantage: "Kelebihan",
+      suitable: "Cocok Untuk",
+      btn: "EN"
+    },
+    en: {
+      title: "<span class='text-green-400'>MARKET</span> EXCHANGES",
+      subtitle: "REAL-TIME CRYPTO EXCHANGE DATA",
+      cex: "CEX",
+      dex: "DEX",
+      loading: "Loading data...",
+      error: "Failed to fetch data 😢",
+      rank: "Rank",
+      exchange: "Exchange",
+      country: "Country",
+      advantage: "Advantages",
+      suitable: "Suitable For",
+      btn: "ID"
+    }
+  };
+
+  function applyLang() {
+    const t = lang[currentLang];
+
+    document.getElementById("title").innerHTML = t.title;
+    document.getElementById("subtitle").innerText = t.subtitle;
+    document.getElementById("cexTab").innerText = t.cex;
+    document.getElementById("dexTab").innerText = t.dex;
+    document.getElementById("loading").innerText = t.loading;
+    document.getElementById("error").innerText = t.error;
+
+    document.getElementById("thRank").innerText = t.rank;
+    document.getElementById("thExchange").innerText = t.exchange;
+    document.getElementById("thCountry").innerText = t.country;
+    document.getElementById("thAdvantage").innerText = t.advantage;
+    document.getElementById("thSuitable").innerText = t.suitable;
+
+    document.getElementById("langBtn").innerText = t.btn;
+  }
+
+  function toggleLang() {
+    currentLang = currentLang === "id" ? "en" : "id";
+    applyLang();
+  }
+
+  async function loadData() {
+    const loading = document.getElementById("loading");
+    const error = document.getElementById("error");
+    const table = document.getElementById("table");
+    const tbody = document.getElementById("tbody");
+
+    try {
+      const res = await fetch("/api/exchanges");
+      if (!res.ok) throw new Error();
+
+      const data = await res.json();
+
+      loading.classList.add("hidden");
+      table.classList.remove("hidden");
+
+      tbody.innerHTML = "";
+
+      data.forEach((item, i) => {
+        const row = `
+          <tr class="hover:bg-green-500/5 transition duration-300 hover:scale-[1.01]">
+            <td class="py-4">${item.rank || i+1}</td>
+
+            <td class="flex items-center gap-3 py-4">
+              <div class="w-8 h-8 rounded-full bg-green-500/10 border border-green-400/20"></div>
+              <span class="font-semibold text-white">${item.name}</span>
+            </td>
+
+            <td>${item.country}</td>
+            <td class="text-gray-400">${item.advantage}</td>
+
+            <td>
+              <span class="px-3 py-1 text-xs rounded-full border border-green-400/30 text-green-300 bg-green-500/10">
+                ${item.suitable}
+              </span>
+            </td>
+          </tr>
+        `;
+        tbody.innerHTML += row;
+      });
+
+    } catch (err) {
+      loading.classList.add("hidden");
+      error.classList.remove("hidden");
+    }
+  }
+
+  applyLang();
+  loadData();
+</script>
+
 </body>
 </html>
