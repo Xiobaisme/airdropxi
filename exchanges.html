@@ -14,6 +14,65 @@
             <p class="text-zinc-500 animate-pulse">Memuat data real-time...</p>
         </div>
     </div>
+<script>
+    async function loadExchanges() {
+        const container = document.getElementById('exchanges-container');
+        
+        try {
+            // Memanggil serverless function yang baru Tuan buat di folder api
+            const response = await fetch('/api/exchanges');
+            const data = await response.json();
 
+            if (data.error) throw new Error(data.error);
+
+            let tableHtml = `
+                <div class="overflow-x-auto">
+                    <table class="w-full text-left border-collapse">
+                        <thead>
+                            <tr class="text-[10px] text-green-500 uppercase tracking-widest border-b border-zinc-800">
+                                <th class="p-4">#</th>
+                                <th class="p-4">Name</th>
+                                <th class="p-4 text-right">Adj. Vol (24h)</th>
+                                <th class="p-4 text-center">Trust</th>
+                                <th class="p-4">Jurisdiction</th>
+                            </tr>
+                        </thead>
+                        <tbody class="text-xs text-zinc-300">
+            `;
+
+            data.forEach((ex, index) => {
+                tableHtml += `
+                    <tr class="border-b border-zinc-900 hover:bg-zinc-900/50 transition">
+                        <td class="p-4 text-zinc-600">${index + 1}</td>
+                        <td class="p-4 flex items-center gap-3 font-bold text-white">
+                            <img src="${ex.image}" class="w-5 h-5 rounded-full">
+                            ${ex.name}
+                        </td>
+                        <td class="p-4 text-right text-green-400">
+                            ${ex.trade_volume_24h_btc.toFixed(2)} BTC
+                        </td>
+                        <td class="p-4 text-center">
+                            <span class="px-2 py-0.5 rounded bg-zinc-800 text-green-500 border border-green-900/30">
+                                ${ex.trust_score}/10
+                            </span>
+                        </td>
+                        <td class="p-4 text-zinc-400">${ex.country || 'International'}</td>
+                    </tr>
+                `;
+            });
+
+            tableHtml += `</tbody></table></div>`;
+            container.innerHTML = tableHtml;
+
+        } catch (error) {
+            container.innerHTML = `<p class="text-red-500 p-4 font-mono text-center uppercase tracking-tighter">Connection Error: Gagal menarik data market.</p>`;
+            console.error("Error:", error);
+        }
+    }
+
+    // Jalankan otomatis
+    document.addEventListener('DOMContentLoaded', loadExchanges);
+</script>
+    
 </body>
 </html>
