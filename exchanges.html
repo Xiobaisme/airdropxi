@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Top Cryptocurrency Exchanges</title>
+  <title>Pasar Bursa</title>
 
   <script src="https://cdn.tailwindcss.com"></script>
 
@@ -19,110 +19,177 @@
 
 <body class="text-white">
 
-  <div class="max-w-6xl mx-auto px-6 py-12">
+<div class="max-w-6xl mx-auto px-6 py-12">
 
-    <!-- TITLE -->
-    <h1 class="text-4xl font-extrabold tracking-wider">
-      <span class="text-green-400">PASAR</span> BURSA
-    </h1>
-    <p class="text-green-400/70 text-sm mt-2 tracking-widest">
-      DATA REAL-TIME BURSA CRYPTOCURRENCY
-    </p>
-
-    <!-- TAB -->
-    <div class="flex gap-3 mt-6">
-      <button class="px-5 py-2 rounded-full bg-green-500/20 text-green-400 border border-green-400/30">
-        CEX
-      </button>
-      <button class="px-5 py-2 rounded-full bg-black/30 text-gray-400 border border-gray-600/20">
-        DEX
-      </button>
+  <!-- HEADER -->
+  <div class="flex justify-between items-center">
+    <div>
+      <h1 id="title" class="text-4xl font-extrabold tracking-wider"></h1>
+      <p id="subtitle" class="text-green-400/70 text-sm mt-2 tracking-widest"></p>
     </div>
 
-    <!-- CONTAINER -->
-    <div class="relative mt-10 p-6 rounded-2xl border border-green-500/20 bg-black/40 backdrop-blur-xl shadow-[0_0_40px_rgba(34,197,94,0.15)]">
-
-      <!-- LOADING -->
-      <div id="loading" class="text-center text-green-400 py-10">
-        Loading data...
-      </div>
-
-      <!-- ERROR -->
-      <div id="error" class="hidden text-center text-red-400 py-10">
-        Gagal ambil data 😢
-      </div>
-
-      <!-- TABLE -->
-      <table id="table" class="w-full text-sm text-left text-gray-300 hidden">
-        <thead class="text-xs uppercase text-green-400 border-b border-green-500/20">
-          <tr>
-            <th class="py-4">Rank</th>
-            <th>Exchange</th>
-            <th>Negara</th>
-            <th>Kelebihan</th>
-            <th>Cocok Untuk</th>
-          </tr>
-        </thead>
-
-        <tbody id="tbody" class="divide-y divide-green-500/10"></tbody>
-      </table>
-
-    </div>
+    <button onclick="toggleLang()" 
+      class="px-4 py-2 rounded-full border border-green-400/30 text-green-400 hover:bg-green-500/10">
+      <span id="langBtn">EN</span>
+    </button>
   </div>
 
-  <script>
-    async function loadData() {
-      const loading = document.getElementById("loading");
-      const error = document.getElementById("error");
-      const table = document.getElementById("table");
-      const tbody = document.getElementById("tbody");
+  <!-- TAB -->
+  <div class="flex gap-3 mt-6">
+    <button id="cexTab" class="px-5 py-2 rounded-full bg-green-500/20 text-green-400 border border-green-400/30"></button>
+    <button id="dexTab" class="px-5 py-2 rounded-full bg-black/30 text-gray-400 border border-gray-600/20"></button>
+  </div>
 
-      try {
-        const res = await fetch("/api/exchanges");
+  <!-- CONTAINER -->
+  <div class="mt-10 p-6 rounded-2xl border border-green-500/20 bg-black/40 backdrop-blur-xl shadow-[0_0_40px_rgba(34,197,94,0.15)]">
 
-        if (!res.ok) throw new Error("API Error");
+    <div id="loading" class="text-center text-green-400 py-10"></div>
+    <div id="error" class="hidden text-center text-red-400 py-10"></div>
 
-        const data = await res.json();
+    <table id="table" class="w-full text-sm text-left text-gray-300 hidden">
+      <thead class="text-xs uppercase text-green-400 border-b border-green-500/20">
+        <tr>
+          <th class="py-4" id="thRank"></th>
+          <th id="thExchange"></th>
+          <th id="thCountry"></th>
+          <th id="thAdvantage"></th>
+          <th id="thSuitable"></th>
+        </tr>
+      </thead>
+      <tbody id="tbody" class="divide-y divide-green-500/10"></tbody>
+    </table>
 
-        loading.classList.add("hidden");
-        table.classList.remove("hidden");
+  </div>
+</div>
 
-        tbody.innerHTML = "";
+<script>
+let currentLang = "id";
 
-        data.forEach((item, i) => {
-          const row = `
-            <tr class="hover:bg-green-500/5 transition duration-300 hover:scale-[1.01]">
-              <td class="py-4">${item.rank || i+1}</td>
+const lang = {
+  id: {
+    title: "<span class='text-green-400'>PASAR</span> BURSA",
+    subtitle: "DATA REAL-TIME BURSA CRYPTOCURRENCY",
+    cex: "CEX",
+    dex: "DEX",
+    loading: "Mengambil data...",
+    error: "Gagal ambil data 😢",
+    rank: "Rank",
+    exchange: "Exchange",
+    country: "Negara",
+    advantage: "Kelebihan",
+    suitable: "Cocok Untuk",
+    btn: "EN"
+  },
+  en: {
+    title: "<span class='text-green-400'>MARKET</span> EXCHANGES",
+    subtitle: "REAL-TIME CRYPTO EXCHANGE DATA",
+    cex: "CEX",
+    dex: "DEX",
+    loading: "Loading data...",
+    error: "Failed to fetch data 😢",
+    rank: "Rank",
+    exchange: "Exchange",
+    country: "Country",
+    advantage: "Advantages",
+    suitable: "Suitable For",
+    btn: "ID"
+  }
+};
 
-              <td class="flex items-center gap-3 py-4">
-                <div class="w-8 h-8 rounded-full bg-green-500/10 border border-green-400/20"></div>
-                <span class="font-semibold text-white tracking-wide">${item.name}</span>
-              </td>
+function applyLang() {
+  const t = lang[currentLang];
 
-              <td>${item.country}</td>
+  title.innerHTML = t.title;
+  subtitle.innerText = t.subtitle;
+  cexTab.innerText = t.cex;
+  dexTab.innerText = t.dex;
+  loading.innerText = t.loading;
+  error.innerText = t.error;
 
-              <td class="text-gray-400">${item.advantage}</td>
+  thRank.innerText = t.rank;
+  thExchange.innerText = t.exchange;
+  thCountry.innerText = t.country;
+  thAdvantage.innerText = t.advantage;
+  thSuitable.innerText = t.suitable;
 
-              <td>
-                <span class="px-3 py-1 text-xs rounded-full border border-green-400/30 text-green-300 bg-green-500/10">
-                  ${item.suitable}
-                </span>
-              </td>
-            </tr>
-          `;
+  langBtn.innerText = t.btn;
+}
 
-          tbody.innerHTML += row;
-        });
+function toggleLang() {
+  currentLang = currentLang === "id" ? "en" : "id";
+  applyLang();
+}
 
-      } catch (err) {
-        console.error(err);
-        loading.classList.add("hidden");
-        error.classList.remove("hidden");
-      }
+// 🔥 AUTO MAP DATA (BIAR SELALU SINKRON)
+function mapData(item, i) {
+  return {
+    rank: item.rank ?? item.id ?? i + 1,
+    name: item.name ?? item.exchange_name ?? item.exchange ?? "-",
+    country: item.country ?? item.negara ?? "-",
+    advantage: item.advantage ?? item.kelebihan ?? "-",
+    suitable: item.suitable ?? item.cocok ?? "-"
+  };
+}
+
+async function loadData() {
+  try {
+    const res = await fetch("https://airdropxi.vercel.app/api/exchanges");
+
+    console.log("STATUS:", res.status);
+
+    if (!res.ok) {
+      const text = await res.text();
+      console.error("API ERROR:", text);
+      throw new Error();
     }
 
-    loadData();
-  </script>
+    const raw = await res.json();
+    console.log("RAW DATA:", raw);
+
+    if (!raw || raw.length === 0) {
+      loading.innerText = "Data kosong 😢";
+      return;
+    }
+
+    const data = raw.map(mapData);
+
+    loading.classList.add("hidden");
+    table.classList.remove("hidden");
+
+    tbody.innerHTML = "";
+
+    data.forEach(item => {
+      tbody.innerHTML += `
+        <tr class="hover:bg-green-500/5 transition duration-300 hover:scale-[1.01]">
+          <td class="py-4">${item.rank}</td>
+
+          <td class="flex items-center gap-3 py-4">
+            <div class="w-8 h-8 rounded-full bg-green-500/10 border border-green-400/20"></div>
+            <span class="font-semibold text-white">${item.name}</span>
+          </td>
+
+          <td>${item.country}</td>
+          <td class="text-gray-400">${item.advantage}</td>
+
+          <td>
+            <span class="px-3 py-1 text-xs rounded-full border border-green-400/30 text-green-300 bg-green-500/10">
+              ${item.suitable}
+            </span>
+          </td>
+        </tr>
+      `;
+    });
+
+  } catch (err) {
+    console.error("ERROR:", err);
+    loading.classList.add("hidden");
+    error.classList.remove("hidden");
+  }
+}
+
+applyLang();
+window.onload = loadData;
+</script>
 
 </body>
 </html>
