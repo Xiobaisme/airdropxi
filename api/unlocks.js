@@ -1,29 +1,32 @@
+// api/unlocks.js
 export default async function handler(req, res) {
-  try {
-    // Menarik 250 koin teratas (mencakup hampir semua Altcoin potensial)
-    const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=250&page=1&sparkline=false');
-    
-    if (!response.ok) throw new Error('Koneksi CoinGecko Gagal');
-    
-    const data = await response.json();
+  // Masukkan API Key CryptoRank Tuan di sini atau di Environment Variable Vercel
+  const CRYPTORANK_API_KEY = process.env; 
 
-    // Mapping data agar UI Tuan Regi terlihat profesional
-    const altcoinData = data.map(coin => ({
-      name: coin.name,
-      symbol: coin.symbol.toUpperCase(),
-      img: coin.image,
-      price: coin.current_price > 1 ? coin.current_price.toLocaleString() : coin.current_price.toFixed(6),
-      market_cap: coin.market_cap.toLocaleString(),
-      // Menghitung estimasi persentase sirkulasi (Vesting Progress)
-      unlocked_percent: coin.total_supply ? ((coin.circulating_supply / coin.total_supply) * 100).toFixed(1) : "100",
-      change_24h: coin.price_change_percentage_24h ? coin.price_change_percentage_24h.toFixed(2) : "0"
+  try {
+    // Memanggil data vesting/unlocks dari CryptoRank
+    const response = await fetch(`https://api.cryptorank.io/v1/token-unlocks?api_key=${CRYPTORANK_API_KEY}`);
+    
+    if (!response.ok) throw new Error('CryptoRank API Error');
+    
+    const result = await response.json();
+
+    // Mapping data agar UI Dashboard Tuan tetap gahar dan informatif
+    const formattedData = result.data.map(item => ({
+      name: item.name,
+      symbol: item.symbol,
+      img: item.image?.x64 || '', // Logo koin
+      price: item.price?.value || 0,
+      unlocked_percent: item.unlockedPercent || 0,
+      next_unlock_date: item.nextUnlock?.date || 'N/A',
+      next_unlock_amount: item.nextUnlock?.tokens || 0,
+      status: item.type || 'Vesting'
     }));
 
-    // Cache di Vercel selama 30 detik agar tetap "Real-time" tapi tidak kena rate limit
-    res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate');
-    return res.status(200).json(altcoinData);
+    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
+    return res.status(200).json(formattedData);
 
   } catch (error) {
-    return res.status(500).json({ error: "Gagal memuat Altcoins", detail: error.message });
+    return res.status(500).json({ error: "Gagal memuat data CryptoRank" });
   }
 }
