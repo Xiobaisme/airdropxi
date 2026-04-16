@@ -500,3 +500,35 @@ IMPORTANT: Always respond in English. Remind users to only use official AirdropX
     document.getElementById('aiSendBtn').disabled = false;
   };
 })();
+
+// js/app.js
+async function loadTokenUnlocks() {
+  const tableBody = document.getElementById('unlock-table-body');
+  
+  try {
+    const response = await fetch('/api/unlocks');
+    const data = await response.json();
+
+    // Bersihkan loading jika ada
+    tableBody.innerHTML = '';
+
+    // Misalkan kita ambil data token (logika tergantung struktur API DefiLlama)
+    // Di sini kita buat simulasi baris tabelnya
+    const row = `
+      <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
+        <td style="padding: 15px;">${data.name || 'Ethereum'}</td>
+        <td style="padding: 15px; color: #10b981;">${data.unlocked || 'Loading...'}</td>
+        <td style="padding: 15px;">Real-time Data</td>
+      </tr>
+    `;
+    tableBody.innerHTML = row;
+
+  } catch (err) {
+    console.error("Gagal Render:", err);
+  }
+}
+
+// Jalankan fungsi saat halaman dimuat
+if(window.location.pathname.includes('unlocks.html')) {
+  loadTokenUnlocks();
+}
