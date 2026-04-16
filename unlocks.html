@@ -3,80 +3,31 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Token Intelligence X | AirdropXI</title>
+    <title>Token Intelligence | AirdropXI</title>
     <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        :root {
-            --bg: #000000; --card: #000000; --text: #eff3f4;
-            --text-dim: #71767b; --border: #2f3336;
-            --accent: #1d9bf0; --emerald: #00ba7c; --rose: #f43f5e;
-        }
-
-        [data-theme="light"] {
-            --bg: #ffffff; --card: #ffffff; --text: #0f1419;
-            --text-dim: #536471; --border: #eff3f4;
-        }
-
-        body { 
-            background-color: var(--bg); color: var(--text); 
-            font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 0; 
-            transition: background 0.3s ease;
-        }
-
-        .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
-
-        /* Navigation Bar */
-        .nav-bar { 
-            display: flex; justify-content: space-between; align-items: center; 
-            padding: 15px 0; border-bottom: 1px solid var(--border); margin-bottom: 30px;
-        }
-        .btn { 
-            background: none; border: 1px solid var(--border); color: var(--text);
-            padding: 8px 20px; border-radius: 9999px; cursor: pointer; font-weight: 700;
-            font-size: 14px; text-decoration: none; transition: 0.2s;
-        }
+        :root { --bg: #000; --text: #eff3f4; --text-dim: #71767b; --border: #2f3336; --accent: #1d9bf0; --emerald: #00ba7c; }
+        [data-theme="light"] { --bg: #fff; --text: #0f1419; --text-dim: #536471; --border: #eff3f4; }
+        body { background: var(--bg); color: var(--text); font-family: 'Plus Jakarta Sans', sans-serif; margin: 0; padding: 20px; transition: 0.3s; }
+        .container { max-width: 1100px; margin: 0 auto; }
+        .nav-bar { display: flex; justify-content: space-between; margin-bottom: 30px; }
+        .btn { background: none; border: 1px solid var(--border); color: var(--text); padding: 8px 20px; border-radius: 99px; cursor: pointer; font-weight: 700; text-decoration: none; font-size: 13px; }
         .btn-theme { background: var(--text); color: var(--bg); border: none; }
-
-        /* Header */
-        .header { margin-bottom: 40px; }
-        .header h1 { font-size: 32px; font-weight: 800; margin: 0; }
-        .header p { color: var(--text-dim); margin-top: 5px; font-size: 15px; }
-
-        /* Professional Table */
-        .table-container { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--card); }
+        .table-card { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--bg); }
         .search-box { padding: 15px; border-bottom: 1px solid var(--border); }
-        .search-input { 
-            width: 100%; background: #16181c; border: none; color: white;
-            padding: 12px 20px; border-radius: 9999px; outline: none; box-sizing: border-box;
-        }
-
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th { text-align: left; padding: 16px; color: var(--text-dim); font-size: 12px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
-        td { padding: 16px; border-bottom: 1px solid var(--border); font-size: 14px; }
-
-        .price-up { color: var(--emerald); }
-        .price-down { color: var(--rose); }
-
-        /* Progress Bar */
-        .progress-track { height: 6px; background: var(--border); border-radius: 10px; width: 120px; margin-top: 6px; overflow: hidden; }
-        .progress-fill { height: 100%; background: var(--accent); border-radius: 10px; box-shadow: 0 0 8px var(--accent); }
-
+        .search-input { width: 100%; background: #16181c; border: none; color: #fff; padding: 12px 20px; border-radius: 99px; outline: none; box-sizing: border-box; }
+        table { width: 100%; border-collapse: collapse; min-width: 700px; }
+        th { text-align: left; padding: 15px; color: var(--text-dim); font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); }
+        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
+        .prog-bg { height: 6px; background: var(--border); border-radius: 10px; width: 100px; margin-top: 5px; overflow: hidden; }
+        .prog-fill { height: 100%; background: var(--accent); }
+        
         /* Footer AirdropXI Docs Style */
-        .footer-section {
-            margin-top: 60px; padding: 40px 0; border-top: 1px solid var(--border);
-            display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center;
-        }
-        .social-links { display: flex; gap: 12px; }
-        .social-btn {
-            background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff;
-            padding: 10px 24px; border-radius: 999px; text-decoration: none;
-            display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px;
-        }
-        .social-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); }
-
-        .copyright { color: var(--text-dim); font-size: 13px; margin: 10px 0; }
-        .disclaimer { font-family: monospace; color: #4b5563; font-size: 11px; letter-spacing: 1px; margin-top: 10px; text-transform: uppercase; }
-        .btn-home { margin-top: 20px; border: 1px solid var(--emerald); color: var(--emerald); padding: 12px 30px; border-radius: 999px; text-decoration: none; font-weight: 700; }
+        .footer { margin-top: 50px; display: flex; flex-direction: column; align-items: center; gap: 20px; padding-bottom: 40px; border-top: 1px solid var(--border); padding-top: 40px; }
+        .social-links { display: flex; gap: 15px; }
+        .soc-btn { background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff; padding: 10px 25px; border-radius: 99px; text-decoration: none; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
+        .copyright { color: var(--text-dim); font-size: 13px; }
+        .btn-home-green { border: 1px solid var(--emerald); color: var(--emerald); margin-top: 10px; text-transform: uppercase; }
     </style>
 </head>
 <body>
@@ -87,119 +38,103 @@
         <button class="btn btn-theme" onclick="toggleTheme()" id="themeBtn">🌙 DARK MODE</button>
     </div>
 
-    <div class="header">
-        <h1>Token Intelligence X</h1>
-        <p>Real-time monitoring of token emissions and market circulation.</p>
+    <div style="margin-bottom: 30px;">
+        <h1 style="margin:0; font-size: 28px;">Token Intelligence X</h1>
+        <p style="color: var(--text-dim); margin: 5px 0;">Monitor 100+ Altcoins in real-time.</p>
     </div>
 
-    <div class="table-container">
+    <div class="table-card">
         <div class="search-box">
-            <input type="text" id="tokenSearch" class="search-input" placeholder="Search tokens by name or symbol...">
+            <input type="text" id="tokenSearch" class="search-input" placeholder="Cari Altcoin (Contoh: SUI, ARB, OP)...">
         </div>
         <table>
             <thead>
                 <tr>
-                    <th>Market Asset</th>
-                    <th>Price</th>
-                    <th>24H Change</th>
-                    <th>Market Cap</th>
-                    <th>Circulation</th>
-                    <th>Status</th>
+                    <th>ASSET</th>
+                    <th>PRICE</th>
+                    <th>24H CHANGE</th>
+                    <th>MARKET CAP</th>
+                    <th>UNLOCKED</th>
+                    <th>STATUS</th>
                 </tr>
             </thead>
-            <tbody id="token-table">
-                </tbody>
+            <tbody id="gecko-tbody">
+                <tr><td colspan="6" style="text-align:center; padding:40px;">Initializing Data Stream...</td></tr>
+            </tbody>
         </table>
     </div>
 
-    <div class="footer-section">
-        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
-            <img src="https://airdropxi.vercel.app/logo.png" width="32" style="border-radius: 8px;" onerror="this.style.display='none'">
-            <span style="font-size: 20px; font-weight: 800;">AirdropXI Docs</span>
+    <div class="footer">
+        <div style="display:flex; align-items:center; gap:10px;">
+            <img src="https://airdropxi.vercel.app/logo.png" width="30" style="border-radius:8px;">
+            <span style="font-weight:800; font-size:20px;">AirdropXI Docs</span>
         </div>
-
         <div class="social-links">
-            <a href="https://x.com/xiobai06" target="_blank" class="social-btn">
+            <a href="https://x.com/xiobai06" target="_blank" class="soc-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                 Twitter
             </a>
-            <a href="https://t.me/xiobaiishikii" target="_blank" class="social-btn">
+            <a href="https://t.me/xiobaiishikii" target="_blank" class="soc-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.58-1.38-.94-2.23-1.5-.99-.65-.35-1.01.22-1.59.15-.15 2.71-2.48 2.76-2.69a.2.2 0 00-.05-.18c-.06-.05-.14-.03-.21-.01-.1.02-3.2 1.93-4.13 2.51-.38.25-.72.38-1.01.38-.32 0-.93-.17-1.39-.32-.56-.18-1.01-.28-.97-.59.02-.16.24-.33.65-.51 2.54-1.1 4.23-1.83 5.08-2.18 2.42-.99 2.92-1.16 3.25-1.16.07 0 .23.02.33.1.08.08.11.19.12.28 0 .04-.01.08-.01.12z"/></svg>
                 Telegram
             </a>
         </div>
-
         <p class="copyright">© 2026 Xiobaiishikii — Stay Safe & Keep Grinding ⚡</p>
-        <p class="disclaimer">DYOR: CONTENT PROVIDED FOR EDUCATIONAL PURPOSES ONLY. NO FINANCIAL ADVICE.</p>
-        
-        <a href="/" class="btn-home">BACK TO HOME</a>
+        <p style="font-size:10px; color:#4b5563; font-family:monospace; letter-spacing:1px;">DYOR: CONTENT PROVIDED FOR EDUCATIONAL PURPOSES ONLY. NO FINANCIAL ADVICE.</p>
+        <a href="/" class="btn btn-home-green">BACK TO HOME</a>
     </div>
 </div>
 
 <script>
     function toggleTheme() {
-        const html = document.documentElement;
-        const btn = document.getElementById('themeBtn');
-        if(html.getAttribute('data-theme') === 'dark') {
-            html.setAttribute('data-theme', 'light');
-            btn.innerHTML = '☀️ LIGHT MODE';
-        } else {
-            html.setAttribute('data-theme', 'dark');
-            btn.innerHTML = '🌙 DARK MODE';
-        }
+        const h = document.documentElement;
+        const b = document.getElementById('themeBtn');
+        if(h.getAttribute('data-theme')==='dark'){ h.setAttribute('data-theme','light'); b.innerHTML='☀️ LIGHT MODE'; }
+        else { h.setAttribute('data-theme','dark'); b.innerHTML='🌙 DARK MODE'; }
     }
 
-    async function fetchFromGecko() {
-        const tbody = document.getElementById('token-table');
+    async function loadCoinGeckoData() {
+        const tb = document.getElementById('gecko-tbody');
         try {
-            // Mengambil 100 koin teratas dari CoinGecko secara real-time
-            const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false');
-            const data = await res.json();
+            // Langsung fetch ke CoinGecko
+            const r = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false');
+            const data = await r.json();
 
-            tbody.innerHTML = data.map(coin => {
-                const circulation = coin.total_supply ? ((coin.circulating_supply / coin.total_supply) * 100).toFixed(1) : 100;
+            tb.innerHTML = data.map(c => {
+                const unlocked = c.total_supply ? Math.round((c.circulating_supply / c.total_supply) * 100) : 100;
                 return `
                 <tr>
-                    <td>
-                        <div style="display:flex; align-items:center; gap:10px;">
-                            <img src="${coin.image}" width="28" height="28" style="border-radius:50%">
-                            <div>
-                                <div style="font-weight:700;">${coin.name}</div>
-                                <div style="color:var(--text-dim); font-size:12px;">${coin.symbol.toUpperCase()}</div>
-                            </div>
-                        </div>
+                    <td><div style="display:flex; align-items:center; gap:10px;"><img src="${c.image}" width="24" style="border-radius:50%"><b>${c.name}</b></div></td>
+                    <td style="font-weight:700;">$${c.current_price.toLocaleString()}</td>
+                    <td style="color:${c.price_change_percentage_24h >= 0 ? '#00ba7c' : '#f43f5e'}">
+                        ${c.price_change_percentage_24h >= 0 ? '▲' : '▼'} ${Math.abs(c.price_change_percentage_24h).toFixed(2)}%
                     </td>
-                    <td style="font-weight:600;">$${coin.current_price.toLocaleString()}</td>
-                    <td class="${coin.price_change_percentage_24h >= 0 ? 'price-up' : 'price-down'}">
-                        ${coin.price_change_percentage_24h > 0 ? '+' : ''}${coin.price_change_percentage_24h.toFixed(2)}%
-                    </td>
-                    <td style="color:var(--text-dim);">$${coin.market_cap.toLocaleString()}</td>
+                    <td style="color:var(--text-dim)">$${c.market_cap.toLocaleString()}</td>
                     <td>
-                        <div style="font-size:12px; font-weight:600;">${circulation}% Unlocked</div>
-                        <div class="progress-track"><div class="progress-fill" style="width:${circulation}%"></div></div>
+                        <div style="font-size:11px; font-weight:600;">${unlocked}%</div>
+                        <div class="prog-bg"><div class="prog-fill" style="width:${unlocked}%"></div></div>
                     </td>
                     <td>
-                        <span style="font-size:10px; font-weight:800; color:${circulation > 90 ? '#00ba7c' : '#1d9bf0'}; background: rgba(255,255,255,0.03); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05);">
-                            ${circulation > 90 ? 'LIQUID' : 'VESTING'}
+                        <span style="background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:4px; font-size:10px; font-weight:800; color:${unlocked > 90 ? '#00ba7c' : '#1d9bf0'}">
+                            ${unlocked > 90 ? 'MARKET READY' : 'VESTING'}
                         </span>
                     </td>
                 </tr>
             `}).join('');
         } catch (e) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:50px; color:var(--rose);">⚠️ DATA SYNC ERROR: COINGEKO LIMIT OR CONNECTION FAILURE.</td></tr>`;
+            tb.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:40px; color:#f43f5e;">⚠️ CONNECTION ERROR: FAILED TO FETCH LIVE METRICS</td></tr>`;
         }
     }
 
     document.getElementById('tokenSearch').addEventListener('input', function(e) {
         const term = e.target.value.toLowerCase();
-        document.querySelectorAll('#token-table tr').forEach(row => {
+        document.querySelectorAll('#gecko-tbody tr').forEach(row => {
             row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none';
         });
     });
 
-    fetchFromGecko();
-    setInterval(fetchFromGecko, 60000); // Auto update tiap menit
+    loadCoinGeckoData();
+    setInterval(loadCoinGeckoData, 60000);
 </script>
-
 </body>
 </html>
