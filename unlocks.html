@@ -2,69 +2,82 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Token Unlocks | AirdropXI</title>
+    <title>Altcoin Unlocks | AirdropXI</title>
     <style>
-        body { background: #020617; color: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; padding: 40px; }
-        .header-title { color: #10b981; font-size: 32px; font-weight: 800; text-shadow: 0 0 20px rgba(16,185,129,0.3); }
-        .sub-title { color: #94a3b8; margin-bottom: 30px; }
-        
-        .table-card { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
-        table { width: 100%; border-collapse: collapse; }
-        th { background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 20px; text-align: left; font-size: 13px; text-transform: uppercase; border-bottom: 2px solid rgba(16, 185, 129, 0.2); }
-        td { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 15px; }
-        
-        .progress-container { width: 150px; background: #1e293b; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 5px; }
-        .progress-bar { background: linear-gradient(90deg, #10b981, #34d399); height: 100%; }
-        .status-badge { background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #10b981; }
-        img { border-radius: 50%; margin-right: 10px; }
+        body { background: #020617; color: #ffffff; font-family: 'Inter', sans-serif; padding: 20px; }
+        .emerald-text { color: #10b981; text-shadow: 0 0 10px rgba(16,185,129,0.3); }
+        .search-box { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid #10b981; border-radius: 8px; color: white; margin-bottom: 20px; outline: none; }
+        .table-card { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 800px; }
+        th { background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 15px; text-align: left; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #10b981; }
+        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
+        .progress-bar { width: 100px; height: 6px; background: #1e293b; border-radius: 10px; overflow: hidden; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, #10b981, #34d399); }
     </style>
 </head>
 <body>
 
-    <h1 class="header-title">Token Unlocks & Vesting</h1>
-    <p class="sub-title">Token unlocks calendar and vesting schedule flow in one comprehensive dashboard.</p>
+    <h1 class="emerald-text">Altcoin Unlocks & Vesting</h1>
+    <input type="text" id="searchAlt" class="search-box" placeholder="Cari Altcoin (Contoh: ARB, SOL, ONDO)...">
 
     <div class="table-card">
         <table>
             <thead>
                 <tr>
-                    <th>Token Asset</th>
-                    <th>Circulating Amount</th>
-                    <th>Progress (Unlocked)</th>
-                    <th>Status</th>
+                    <th>Asset</th>
+                    <th>Price (USD)</th>
+                    <th>Market Cap</th>
+                    <th>Vesting Progress</th>
+                    <th>24h Change</th>
                 </tr>
             </thead>
-            <tbody id="content">
-                <tr><td colspan="4" style="text-align:center; padding:50px;">🔄 Mengambil Data Real-time...</td></tr>
+            <tbody id="alt-table">
+                <tr><td colspan="5" style="text-align:center; padding:40px;">🔄 Sinkronisasi Ratusan Altcoin...</td></tr>
             </tbody>
         </table>
     </div>
 
     <script>
-        async function load() {
+        let allCoins = [];
+
+        async function init() {
             try {
                 const res = await fetch('/api/unlocks');
-                const data = await res.json();
-                document.getElementById('content').innerHTML = data.map(coin => `
-                    <tr>
-                        <td style="display:flex; align-items:center;">
-                            <img src="${coin.img}" width="30">
-                            <strong>${coin.name}</strong> <span style="color:#64748b; margin-left:5px;">${coin.symbol}</span>
-                        </td>
-                        <td style="color:#10b981; font-weight:bold;">${coin.amount}</td>
-                        <td>
-                            <div class="progress-container"><div class="progress-bar" style="width:${coin.percent}%"></div></div>
-                            <span style="font-size:11px; color:#94a3b8;">${coin.percent}% Supply Unlocked</span>
-                        </td>
-                        <td><span class="status-badge">${coin.status}</span></td>
-                    </tr>
-                `).join('');
+                allCoins = await res.json();
+                render(allCoins);
             } catch (e) {
-                document.getElementById('content').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Koneksi API Gagal. Cek Deployment Vercel.</td></tr>';
+                document.getElementById('alt-table').innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Gagal muat data.</td></tr>';
             }
         }
-        load();
+
+        function render(data) {
+            document.getElementById('alt-table').innerHTML = data.map(coin => `
+                <tr>
+                    <td style="display:flex; align-items:center; gap:10px;">
+                        <img src="${coin.img}" width="25">
+                        <strong>${coin.name}</strong> <span style="color:#64748b;">${coin.symbol}</span>
+                    </td>
+                    <td style="color:#10b981; font-weight:bold;">$${coin.price}</td>
+                    <td style="color:#94a3b8; font-size:13px;">$${coin.market_cap}</td>
+                    <td>
+                        <div class="progress-bar"><div class="progress-fill" style="width:${coin.unlocked_percent}%"></div></div>
+                        <span style="font-size:10px; color:#64748b;">${coin.unlocked_percent}% Unlocked</span>
+                    </td>
+                    <td style="color:${coin.change_24h > 0 ? '#10b981' : '#ef4444'}">${coin.change_24h}%</td>
+                </tr>
+            `).join('');
+        }
+
+        // Fitur Cari (Update Real-time saat Tuan mengetik)
+        document.getElementById('searchAlt').addEventListener('input', (e) => {
+            const filtered = allCoins.filter(c => 
+                c.name.toLowerCase().includes(e.target.value.toLowerCase()) || 
+                c.symbol.toLowerCase().includes(e.target.value.toLowerCase())
+            );
+            render(filtered);
+        });
+
+        init();
     </script>
 </body>
 </html>
