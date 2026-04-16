@@ -2,82 +2,177 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Altcoin Unlocks | AirdropXI</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Unlocks | AirdropXI</title>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600;700&display=swap" rel="stylesheet">
     <style>
-        body { background: #020617; color: #ffffff; font-family: 'Inter', sans-serif; padding: 20px; }
-        .emerald-text { color: #10b981; text-shadow: 0 0 10px rgba(16,185,129,0.3); }
-        .search-box { width: 100%; padding: 12px; background: rgba(255,255,255,0.05); border: 1px solid #10b981; border-radius: 8px; color: white; margin-bottom: 20px; outline: none; }
-        .table-card { background: rgba(15, 23, 42, 0.9); border: 1px solid rgba(16, 185, 129, 0.2); border-radius: 12px; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th { background: rgba(16, 185, 129, 0.15); color: #10b981; padding: 15px; text-align: left; font-size: 12px; text-transform: uppercase; border-bottom: 2px solid #10b981; }
-        td { padding: 15px; border-bottom: 1px solid rgba(255,255,255,0.05); }
-        .progress-bar { width: 100px; height: 6px; background: #1e293b; border-radius: 10px; overflow: hidden; }
-        .progress-fill { height: 100%; background: linear-gradient(90deg, #10b981, #34d399); }
+        :root { --emerald: #10b981; --dark-bg: #020617; --card-bg: #0f172a; --border: rgba(16, 185, 129, 0.2); }
+        body { background-color: var(--dark-bg); color: #ffffff; font-family: 'Inter', sans-serif; margin: 0; padding: 24px; }
+        
+        /* Top Header */
+        .header { margin-bottom: 24px; }
+        .header h1 { font-size: 24px; margin: 0; font-weight: 700; }
+        .header p { color: #94a3b8; font-size: 14px; margin: 8px 0 0 0; }
+
+        /* 3-Column Summary Cards */
+        .summary-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-bottom: 30px; }
+        .card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 12px; padding: 20px; position: relative; }
+        .card-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); padding-bottom: 10px; }
+        .card-title { font-size: 14px; font-weight: 600; color: #f8fafc; }
+        
+        /* Bar Chart Simulation */
+        .chart-container { display: flex; align-items: flex-end; gap: 8px; height: 80px; margin-top: 10px; }
+        .bar { flex: 1; border-radius: 4px 4px 0 0; background: #1e293b; transition: height 0.3s; }
+        .bar.active { background: var(--emerald); box-shadow: 0 0 15px rgba(16, 185, 129, 0.4); }
+
+        /* Table Section */
+        .table-controls { display: flex; gap: 12px; margin-bottom: 1px; background: #0f172a; padding: 16px; border: 1px solid var(--border); border-bottom: none; border-radius: 12px 12px 0 0; }
+        .search-input { background: #020617; border: 1px solid #1e293b; color: #fff; padding: 8px 12px; border-radius: 6px; flex: 1; outline: none; }
+        
+        .table-wrapper { background: var(--card-bg); border: 1px solid var(--border); border-radius: 0 0 12px 12px; overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; min-width: 1000px; }
+        th { text-align: left; padding: 16px; color: #94a3b8; font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); letter-spacing: 0.05em; }
+        td { padding: 16px; border-bottom: 1px solid rgba(255,255,255,0.03); vertical-align: middle; }
+
+        /* Table Components */
+        .coin-info { display: flex; align-items: center; gap: 12px; }
+        .coin-info img { width: 32px; height: 32px; border-radius: 50%; }
+        .coin-name { font-weight: 600; font-size: 14px; }
+        .coin-symbol { color: #64748b; font-size: 12px; text-transform: uppercase; }
+        
+        .progress-box { width: 140px; }
+        .progress-bg { height: 6px; background: #1e293b; border-radius: 10px; overflow: hidden; margin-bottom: 6px; }
+        .progress-fill { height: 100%; background: linear-gradient(90deg, var(--emerald), #34d399); }
+        
+        .price-up { color: var(--emerald); }
+        .price-down { color: #ef4444; }
     </style>
 </head>
 <body>
 
-    <h1 class="emerald-text">Altcoin Unlocks</h1>
-    <input type="text" id="searchAlt" class="search-box" placeholder="Search (Example: BTC, ETH, SOL)...">
+    <div class="header">
+        <h1>Token Unlocks & Vesting</h1>
+        <p>Token unlocks calendar and vesting schedule flow in one comprehensive dashboard.</p>
+    </div>
 
-    <div class="table-card">
+    <div class="summary-grid">
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">TGE Unlocks</span>
+            </div>
+            <div id="tge-list" style="display: flex; flex-direction: column; gap: 12px;">
+                </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Token Unlock Dynamics <span style="color:var(--emerald)">24H</span></span>
+            </div>
+            <div class="chart-container">
+                <div class="bar" style="height: 40%;"></div>
+                <div class="bar" style="height: 60%;"></div>
+                <div class="bar" style="height: 50%;"></div>
+                <div class="bar active" style="height: 100%;"></div>
+                <div class="bar" style="height: 70%;"></div>
+                <div class="bar" style="height: 45%;"></div>
+                <div class="bar" style="height: 65%;"></div>
+            </div>
+            <div style="display: flex; justify-content: space-between; margin-top: 10px; color: #64748b; font-size: 10px;">
+                <span>Apr 13</span><span>Today</span><span>Apr 19</span>
+            </div>
+        </div>
+
+        <div class="card">
+            <div class="card-header">
+                <span class="card-title">Important Upcoming Unlocks <span style="color:#3b82f6">7D</span></span>
+            </div>
+            <div id="upcoming-list" style="display: flex; flex-direction: column; gap: 12px;">
+                </div>
+        </div>
+    </div>
+
+    <div class="table-controls">
+        <input type="text" class="search-input" placeholder="Filter coins...">
+    </div>
+    <div class="table-wrapper">
         <table>
             <thead>
                 <tr>
-                    <th>Asset</th>
-                    <th>Price (USD)</th>
+                    <th>Name</th>
+                    <th>Price</th>
+                    <th>Chg (24h)</th>
                     <th>Market Cap</th>
-                    <th>Vesting Progress</th>
-                    <th>24h Change</th>
+                    <th>Unlocked</th>
+                    <th>Next Unlock</th>
                 </tr>
             </thead>
-            <tbody id="alt-table">
-                <tr><td colspan="5" style="text-align:center; padding:40px;">🔄 Sinkronisasi Ratusan Altcoin...</td></tr>
-            </tbody>
+            <tbody id="unlock-table-body">
+                </tbody>
         </table>
     </div>
 
     <script>
-        let allCoins = [];
-
-        async function init() {
+        async function fetchUnlocks() {
+            const tableBody = document.getElementById('unlock-table-body');
             try {
+                // Menghubungi API route yang menggunakan process.env.CRYPTORANK_API_KEY
                 const res = await fetch('/api/unlocks');
-                allCoins = await res.json();
-                render(allCoins);
-            } catch (e) {
-                document.getElementById('alt-table').innerHTML = '<tr><td colspan="5" style="color:red; text-align:center;">Gagal muat data.</td></tr>';
+                const data = await res.json();
+
+                if (data.error) throw new Error(data.error);
+
+                // Render Table Rows
+                tableBody.innerHTML = data.map(coin => `
+                    <tr>
+                        <td>
+                            <div class="coin-info">
+                                <img src="${coin.img}" alt="${coin.name}">
+                                <div>
+                                    <div class="coin-name">${coin.name}</div>
+                                    <div class="coin-symbol">${coin.symbol}</div>
+                                </div>
+                            </div>
+                        </td>
+                        <td style="font-weight: 600;">$${coin.price.toLocaleString()}</td>
+                        <td class="${coin.change_24h >= 0 ? 'price-up' : 'price-down'}">
+                            ${coin.change_24h > 0 ? '+' : ''}${coin.change_24h}%
+                        </td>
+                        <td style="color: #94a3b8;">$${coin.market_cap}</td>
+                        <td>
+                            <div class="progress-box">
+                                <div class="progress-bg">
+                                    <div class="progress-fill" style="width: ${coin.unlocked_percent}%"></div>
+                                </div>
+                                <div style="display: flex; justify-content: space-between; font-size: 11px; color: #94a3b8;">
+                                    <span>${coin.unlocked_percent}%</span>
+                                    <span>${(100 - coin.unlocked_percent).toFixed(1)}% Locked</span>
+                                </div>
+                            </div>
+                        </td>
+                        <td>
+                            <div style="font-weight: 600; font-size: 13px;">${coin.next_unlock_amount} ${coin.symbol}</div>
+                            <div style="font-size: 11px; color: #64748b;">${coin.next_unlock_date}</div>
+                        </td>
+                    </tr>
+                `).join('');
+
+                // Render Summary Card 1 (TGE)
+                document.getElementById('tge-list').innerHTML = data.slice(0, 2).map(coin => `
+                    <div style="display: flex; align-items: center; justify-content: space-between;">
+                        <div class="coin-info">
+                            <img src="${coin.img}" style="width:24px; height:24px;">
+                            <span style="font-size:12px; font-weight:600;">${coin.name}</span>
+                        </div>
+                        <span style="color: var(--emerald); font-size: 11px; font-weight: 700;">${coin.unlocked_percent}%</span>
+                    </div>
+                `).join('');
+
+            } catch (err) {
+                tableBody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:50px; color:#ef4444;">❌ Error: ${err.message}</td></tr>`;
             }
         }
 
-        function render(data) {
-            document.getElementById('alt-table').innerHTML = data.map(coin => `
-                <tr>
-                    <td style="display:flex; align-items:center; gap:10px;">
-                        <img src="${coin.img}" width="25">
-                        <strong>${coin.name}</strong> <span style="color:#64748b;">${coin.symbol}</span>
-                    </td>
-                    <td style="color:#10b981; font-weight:bold;">$${coin.price}</td>
-                    <td style="color:#94a3b8; font-size:13px;">$${coin.market_cap}</td>
-                    <td>
-                        <div class="progress-bar"><div class="progress-fill" style="width:${coin.unlocked_percent}%"></div></div>
-                        <span style="font-size:10px; color:#64748b;">${coin.unlocked_percent}% Unlocked</span>
-                    </td>
-                    <td style="color:${coin.change_24h > 0 ? '#10b981' : '#ef4444'}">${coin.change_24h}%</td>
-                </tr>
-            `).join('');
-        }
-
-        // Fitur Cari (Update Real-time saat Tuan mengetik)
-        document.getElementById('searchAlt').addEventListener('input', (e) => {
-            const filtered = allCoins.filter(c => 
-                c.name.toLowerCase().includes(e.target.value.toLowerCase()) || 
-                c.symbol.toLowerCase().includes(e.target.value.toLowerCase())
-            );
-            render(filtered);
-        });
-
-        init();
+        fetchUnlocks();
     </script>
 </body>
 </html>
