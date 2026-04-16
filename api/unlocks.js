@@ -1,7 +1,7 @@
 // api/unlocks.js
 export default async function handler(req, res) {
   // Masukkan API Key CryptoRank Tuan di sini atau di Environment Variable Vercel
-  const CRYPTORANK_API_KEY = process.env; 
+  const CRYPTORANK_API_KEY = process.env.CRYPTORANK_API_KEY
 
   try {
     // Memanggil data vesting/unlocks dari CryptoRank
