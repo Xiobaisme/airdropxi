@@ -57,6 +57,24 @@
     </button>
   </div>
 
+  <script>
+  const btnCex = document.getElementById("btnCex");
+  const btnDex = document.getElementById("btnDex");
+
+  function setActive(type) {
+    if (type === "cex") {
+      btnCex.classList.add("active");
+      btnDex.classList.remove("active");
+    } else {
+      btnDex.classList.add("active");
+      btnCex.classList.remove("active");
+    }
+  }
+
+  btnCex.addEventListener("click", () => setActive("cex"));
+  btnDex.addEventListener("click", () => setActive("dex"));
+</script>
+  
   <!-- CONTAINER -->
   <div class="mt-10 p-6 rounded-2xl border border-green-500/20 bg-black/40 backdrop-blur-xl">
 
