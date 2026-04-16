@@ -1,6 +1,6 @@
 /**
  * AirdropXI Intelligence - Exchange Logic
- * Integrasi Manual Supabase
+ * Optimized for Supabase & Vercel
  */
 
 window.currentTab = 'cex';
@@ -8,6 +8,14 @@ window.currentTab = 'cex';
 async function loadExchanges(type) {
     const container = document.getElementById('exchanges-container');
     window.currentTab = type;
+
+    // 1. Tampilkan Loading State & Bersihkan Pesan Error Sebelumnya
+    container.innerHTML = `
+        <div class="py-32 text-center">
+            <div class="inline-block w-4 h-4 border-2 border-green-500/30 border-t-green-500 rounded-full animate-spin mb-4"></div>
+            <div class="text-zinc-600 text-[10px] uppercase tracking-widest animate-pulse">Menghubungkan ke Supabase...</div>
+        </div>
+    `;
 
     // Update Gaya Tab secara Visual
     const btnCex = document.getElementById('tab-cex');
@@ -22,14 +30,22 @@ async function loadExchanges(type) {
     }
 
     try {
+        // 2. Ambil Data dari API
         const response = await fetch(`/api/exchanges?type=${type}`);
+        
+        if (!response.ok) {
+            throw new Error(`HTTP Error! Status: ${response.status}`);
+        }
+
         const data = await response.json();
 
-        if (data.length === 0) {
+        // 3. Cek Jika Data Kosong
+        if (!data || data.length === 0) {
             container.innerHTML = `<div class="py-32 text-center text-zinc-600 text-[10px] uppercase tracking-widest">Belum ada data ${type.toUpperCase()} di database</div>`;
             return;
         }
 
+        // 4. Susun Header Tabel
         let html = `
             <div class="overflow-x-auto">
                 <table class="w-full text-left border-collapse">
@@ -45,12 +61,15 @@ async function loadExchanges(type) {
                     <tbody class="text-[11px] font-medium italic">
         `;
 
+        // 5. Render Baris Data
         data.forEach((ex) => {
             html += `
                 <tr class="border-b border-zinc-900/50 hover:bg-green-500/5 transition group">
                     <td class="p-6 text-zinc-500 font-mono">${ex.rank || '-'}</td>
                     <td class="p-6 flex items-center gap-3">
-                        ${ex.logo_url ? `<img src="${ex.logo_url}" class="w-5 h-5 rounded-full grayscale group-hover:grayscale-0 transition duration-500">` : ''}
+                        ${ex.logo_url ? 
+                            `<img src="${ex.logo_url}" class="w-5 h-5 rounded-full grayscale group-hover:grayscale-0 transition duration-500" onerror="this.src='https://via.placeholder.com/20?text=?'">` 
+                            : `<div class="w-5 h-5 rounded-full bg-zinc-800 flex items-center justify-center text-[8px] text-zinc-600">?</div>`}
                         <span class="text-white border-b border-zinc-800 border-dotted group-hover:text-green-400 transition uppercase tracking-tighter">
                             ${ex.exchange_name}
                         </span>
@@ -67,11 +86,20 @@ async function loadExchanges(type) {
         });
 
         html += `</tbody></table></div>`;
+        
+        // 6. Tampilkan Tabel (Menghapus Loading State)
         container.innerHTML = html;
 
     } catch (error) {
-        console.error(error);
-        container.innerHTML = `<div class="py-32 text-center text-red-500 text-[10px] font-mono uppercase">Gagal Terhubung ke Database Supabase</div>`;
+        console.error("Supabase Connection Error:", error);
+        // HANYA menampilkan error jika proses di atas gagal total
+        container.innerHTML = `
+            <div class="py-32 text-center">
+                <div class="text-red-500 text-[10px] font-mono uppercase mb-2">Gagal Terhubung ke Database Supabase</div>
+                <div class="text-zinc-700 text-[8px] uppercase tracking-widest font-mono">${error.message}</div>
+                <button onclick="loadExchanges('${type}')" class="mt-4 px-4 py-2 border border-zinc-800 text-zinc-500 text-[9px] hover:text-white hover:border-white transition-all">COBA LAGI</button>
+            </div>
+        `;
     }
 }
 
@@ -79,5 +107,5 @@ function switchTab(t) {
     loadExchanges(t);
 }
 
-// Load data CEX saat halaman pertama kali dibuka
+// Inisialisasi awal
 document.addEventListener('DOMContentLoaded', () => loadExchanges('cex'));
