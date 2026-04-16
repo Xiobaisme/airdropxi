@@ -16,3 +16,50 @@
       </tbody>
   </table>
 </div>
+<script>
+        async function fetchUnlocks() {
+            const tableBody = document.getElementById('unlock-table-body');
+            
+            // Tampilkan pesan loading sementara
+            tableBody.innerHTML = '<tr><td colspan="3" style="padding: 20px; text-align: center; color: #64748b;">🔄 Sedang mengambil data real-time...</td></tr>';
+
+            try {
+                // Memanggil API yang sudah kita buat di api/unlocks.js
+                const response = await fetch('/api/unlocks');
+                const data = await response.json();
+
+                if (!Array.isArray(data)) {
+                    throw new Error("Data bukan array");
+                }
+
+                // Bersihkan tabel
+                tableBody.innerHTML = '';
+
+                // Masukkan data ke dalam tabel secara real-time
+                data.forEach(coin => {
+                    const row = `
+                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); hover: background: rgba(16,185,129,0.05);">
+                            <td style="padding: 15px; display: flex; align-items: center; gap: 10px;">
+                                <img src="${coin.image}" width="24" height="24" style="border-radius: 50%;">
+                                <b>${coin.name}</b> <span style="color: #64748b; font-size: 12px;">${coin.symbol}</span>
+                            </td>
+                            <td style="padding: 15px; color: #10b981; font-weight: bold;">
+                                $${coin.price.toLocaleString()}
+                            </td>
+                            <td style="padding: 15px; font-family: monospace; color: #94a3b8;">
+                                ${new Date().toLocaleDateString()}
+                            </td>
+                        </tr>
+                    `;
+                    tableBody.innerHTML += row;
+                });
+
+            } catch (error) {
+                console.error("Error:", error);
+                tableBody.innerHTML = `<tr><td colspan="3" style="padding: 20px; text-align: center; color: #ef4444;">❌ Gagal memuat data. Pastikan API di /api/unlocks sudah aktif.</td></tr>`;
+            }
+        }
+
+        // Jalankan fungsi saat halaman dibuka
+        fetchUnlocks();
+    </script>
