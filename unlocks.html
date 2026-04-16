@@ -5,74 +5,66 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Token Unlocks | AirdropXI</title>
     <style>
-        body { background: #020617; color: #fff; font-family: 'Inter', sans-serif; padding: 40px; }
-        .header-title { color: #10b981; font-size: 28px; font-weight: 800; margin-bottom: 5px; }
-        .sub-title { color: #64748b; margin-bottom: 30px; font-size: 14px; }
+        body { background: #020617; color: #ffffff; font-family: 'Segoe UI', Roboto, sans-serif; padding: 40px; }
+        .header-title { color: #10b981; font-size: 32px; font-weight: 800; text-shadow: 0 0 20px rgba(16,185,129,0.3); }
+        .sub-title { color: #94a3b8; margin-bottom: 30px; }
         
-        .table-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(16,185,129,0.2); border-radius: 16px; overflow: hidden; backdrop-filter: blur(10px); }
+        .table-card { background: rgba(15, 23, 42, 0.8); border: 1px solid rgba(16, 185, 129, 0.3); border-radius: 12px; overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.5); }
         table { width: 100%; border-collapse: collapse; }
-        th { background: rgba(16,185,129,0.1); color: #10b981; padding: 18px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
-        td { padding: 18px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+        th { background: rgba(16, 185, 129, 0.1); color: #10b981; padding: 20px; text-align: left; font-size: 13px; text-transform: uppercase; border-bottom: 2px solid rgba(16, 185, 129, 0.2); }
+        td { padding: 20px; border-bottom: 1px solid rgba(255,255,255,0.05); font-size: 15px; }
         
-        /* Progress Bar Modern */
-        .progress-bg { background: #1e293b; height: 8px; border-radius: 10px; width: 120px; position: relative; }
-        .progress-fill { background: linear-gradient(90deg, #10b981, #34d399); height: 100%; border-radius: 10px; }
-        
-        .status-badge { background: rgba(16,185,129,0.1); color: #10b981; padding: 4px 10px; border-radius: 6px; font-size: 11px; border: 1px solid rgba(16,185,129,0.3); }
-        .token-bold { font-weight: 700; color: #f8fafc; font-size: 16px; }
-        .symbol { color: #64748b; font-size: 12px; margin-left: 5px; }
+        .progress-container { width: 150px; background: #1e293b; height: 10px; border-radius: 5px; overflow: hidden; margin-bottom: 5px; }
+        .progress-bar { background: linear-gradient(90deg, #10b981, #34d399); height: 100%; }
+        .status-badge { background: rgba(16, 185, 129, 0.2); color: #34d399; padding: 5px 12px; border-radius: 20px; font-size: 12px; font-weight: bold; border: 1px solid #10b981; }
+        img { border-radius: 50%; margin-right: 10px; }
     </style>
 </head>
 <body>
 
     <h1 class="header-title">Token Unlocks & Vesting</h1>
-    <p class="sub-title">Monitoring real-time emisi token untuk strategi trading Tuan.</p>
+    <p class="sub-title">Token unlocks calendar and vesting schedule flow in one comprehensive dashboard.</p>
 
     <div class="table-card">
         <table>
             <thead>
                 <tr>
                     <th>Token Asset</th>
-                    <th>Unlock Amount</th>
-                    <th>Progress (Circulating)</th>
-                    <th>Next Unlock Date</th>
-                    <th>Impact Status</th>
+                    <th>Circulating Amount</th>
+                    <th>Progress (Unlocked)</th>
+                    <th>Status</th>
                 </tr>
             </thead>
-            <tbody id="unlock-body">
-                </tbody>
+            <tbody id="content">
+                <tr><td colspan="4" style="text-align:center; padding:50px;">🔄 Mengambil Data Real-time...</td></tr>
+            </tbody>
         </table>
     </div>
 
     <script>
-        async function fetchRealTime() {
-            const body = document.getElementById('unlock-body');
+        async function load() {
             try {
                 const res = await fetch('/api/unlocks');
                 const data = await res.json();
-                
-                body.innerHTML = data.map(coin => `
+                document.getElementById('content').innerHTML = data.map(coin => `
                     <tr>
-                        <td>
-                            <span class="token-bold">${coin.name}</span>
-                            <span class="symbol">${coin.symbol}</span>
+                        <td style="display:flex; align-items:center;">
+                            <img src="${coin.img}" width="30">
+                            <strong>${coin.name}</strong> <span style="color:#64748b; margin-left:5px;">${coin.symbol}</span>
                         </td>
-                        <td style="color: #34d399; font-weight: 600;">${coin.amount}</td>
+                        <td style="color:#10b981; font-weight:bold;">${coin.amount}</td>
                         <td>
-                            <div class="progress-bg">
-                                <div class="progress-fill" style="width: ${coin.percent}%"></div>
-                            </div>
-                            <span style="font-size: 10px; color: #64748b;">${coin.percent}% Unlocked</span>
+                            <div class="progress-container"><div class="progress-bar" style="width:${coin.percent}%"></div></div>
+                            <span style="font-size:11px; color:#94a3b8;">${coin.percent}% Supply Unlocked</span>
                         </td>
-                        <td style="font-family: monospace; color: #e2e8f0;">${coin.next_unlock}</td>
                         <td><span class="status-badge">${coin.status}</span></td>
                     </tr>
                 `).join('');
             } catch (e) {
-                body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px; color:#ef4444;">Koneksi API Gagal, Tuan.</td></tr>';
+                document.getElementById('content').innerHTML = '<tr><td colspan="4" style="text-align:center; color:#ef4444;">Koneksi API Gagal. Cek Deployment Vercel.</td></tr>';
             }
         }
-        fetchRealTime();
+        load();
     </script>
 </body>
 </html>
