@@ -1,65 +1,78 @@
-<div class="unlock-container" style="background: #020617; color: white; min-height: 100vh; padding: 20px;">
-  <h2 style="color: #10b981;">Token Unlocks & Vesting</h2>
-  
-  <div id="summary-cards" style="display: grid; grid-template-columns: repeat(3, 1fr); gap: 20px; margin-top: 20px;">
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Token Unlocks | AirdropXI</title>
+    <style>
+        body { background: #020617; color: #fff; font-family: 'Inter', sans-serif; padding: 40px; }
+        .header-title { color: #10b981; font-size: 28px; font-weight: 800; margin-bottom: 5px; }
+        .sub-title { color: #64748b; margin-bottom: 30px; font-size: 14px; }
+        
+        .table-card { background: rgba(255,255,255,0.02); border: 1px solid rgba(16,185,129,0.2); border-radius: 16px; overflow: hidden; backdrop-filter: blur(10px); }
+        table { width: 100%; border-collapse: collapse; }
+        th { background: rgba(16,185,129,0.1); color: #10b981; padding: 18px; text-align: left; font-size: 12px; text-transform: uppercase; letter-spacing: 1px; }
+        td { padding: 18px; border-bottom: 1px solid rgba(255,255,255,0.05); vertical-align: middle; }
+        
+        /* Progress Bar Modern */
+        .progress-bg { background: #1e293b; height: 8px; border-radius: 10px; width: 120px; position: relative; }
+        .progress-fill { background: linear-gradient(90deg, #10b981, #34d399); height: 100%; border-radius: 10px; }
+        
+        .status-badge { background: rgba(16,185,129,0.1); color: #10b981; padding: 4px 10px; border-radius: 6px; font-size: 11px; border: 1px solid rgba(16,185,129,0.3); }
+        .token-bold { font-weight: 700; color: #f8fafc; font-size: 16px; }
+        .symbol { color: #64748b; font-size: 12px; margin-left: 5px; }
+    </style>
+</head>
+<body>
+
+    <h1 class="header-title">Token Unlocks & Vesting</h1>
+    <p class="sub-title">Monitoring real-time emisi token untuk strategi trading Tuan.</p>
+
+    <div class="table-card">
+        <table>
+            <thead>
+                <tr>
+                    <th>Token Asset</th>
+                    <th>Unlock Amount</th>
+                    <th>Progress (Circulating)</th>
+                    <th>Next Unlock Date</th>
+                    <th>Impact Status</th>
+                </tr>
+            </thead>
+            <tbody id="unlock-body">
+                </tbody>
+        </table>
     </div>
 
-  <table style="width: 100%; margin-top: 40px; border-collapse: collapse; background: rgba(255,255,255,0.05);">
-    <thead>
-      <tr style="text-align: left; border-bottom: 1px solid #10b981;">
-        <th style="padding: 15px;">Token Name</th>
-        <th style="padding: 15px;">Unlock Amount</th>
-        <th style="padding: 15px;">Date</th>
-      </tr>
-    </thead>
-    <tbody id="unlock-table-body">
-      </tbody>
-  </table>
-</div>
-<script>
-        async function fetchUnlocks() {
-            const tableBody = document.getElementById('unlock-table-body');
-            
-            // Tampilkan pesan loading sementara
-            tableBody.innerHTML = '<tr><td colspan="3" style="padding: 20px; text-align: center; color: #64748b;">🔄 Sedang mengambil data real-time...</td></tr>';
-
+    <script>
+        async function fetchRealTime() {
+            const body = document.getElementById('unlock-body');
             try {
-                // Memanggil API yang sudah kita buat di api/unlocks.js
-                const response = await fetch('/api/unlocks');
-                const data = await response.json();
-
-                if (!Array.isArray(data)) {
-                    throw new Error("Data bukan array");
-                }
-
-                // Bersihkan tabel
-                tableBody.innerHTML = '';
-
-                // Masukkan data ke dalam tabel secara real-time
-                data.forEach(coin => {
-                    const row = `
-                        <tr style="border-bottom: 1px solid rgba(255,255,255,0.05); hover: background: rgba(16,185,129,0.05);">
-                            <td style="padding: 15px; display: flex; align-items: center; gap: 10px;">
-                                <img src="${coin.image}" width="24" height="24" style="border-radius: 50%;">
-                                <b>${coin.name}</b> <span style="color: #64748b; font-size: 12px;">${coin.symbol}</span>
-                            </td>
-                            <td style="padding: 15px; color: #10b981; font-weight: bold;">
-                                $${coin.price.toLocaleString()}
-                            </td>
-                            <td style="padding: 15px; font-family: monospace; color: #94a3b8;">
-                                ${new Date().toLocaleDateString()}
-                            </td>
-                        </tr>
-                    `;
-                    tableBody.innerHTML += row;
-                });
-
-            } catch (error) {
-                console.error("Error:", error);
-                tableBody.innerHTML = `<tr><td colspan="3" style="padding: 20px; text-align: center; color: #ef4444;">❌ Gagal memuat data. Pastikan API di /api/unlocks sudah aktif.</td></tr>`;
+                const res = await fetch('/api/unlocks');
+                const data = await res.json();
+                
+                body.innerHTML = data.map(coin => `
+                    <tr>
+                        <td>
+                            <span class="token-bold">${coin.name}</span>
+                            <span class="symbol">${coin.symbol}</span>
+                        </td>
+                        <td style="color: #34d399; font-weight: 600;">${coin.amount}</td>
+                        <td>
+                            <div class="progress-bg">
+                                <div class="progress-fill" style="width: ${coin.percent}%"></div>
+                            </div>
+                            <span style="font-size: 10px; color: #64748b;">${coin.percent}% Unlocked</span>
+                        </td>
+                        <td style="font-family: monospace; color: #e2e8f0;">${coin.next_unlock}</td>
+                        <td><span class="status-badge">${coin.status}</span></td>
+                    </tr>
+                `).join('');
+            } catch (e) {
+                body.innerHTML = '<tr><td colspan="5" style="text-align:center; padding:50px; color:#ef4444;">Koneksi API Gagal, Tuan.</td></tr>';
             }
         }
-
-        // Jalankan fungsi saat halaman dibuka
-        fetchUnlocks();
+        fetchRealTime();
     </script>
+</body>
+</html>
