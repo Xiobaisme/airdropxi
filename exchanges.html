@@ -48,32 +48,29 @@
   </div>
 
   <!-- TAB -->
-  <div class="flex gap-3 mt-6">
-    <button id="cexTab" class="px-5 py-2 rounded-full bg-black/30 text-gray-400 border border-gray-600/20">
-      CEX
-    </button>
-    <button id="dexTab" class="px-5 py-2 rounded-full bg-black/30 text-gray-400 border border-gray-600/20">
-      DEX
-    </button>
-  </div>
+<div class="flex gap-3 mt-6">
+  <button id="cexTab" class="px-5 py-2 rounded-full bg-black/30 text-gray-400 border border-gray-600/20" onclick="klikCex()">
+    CEX
+  </button>
+  <button id="dexTab" class="px-5 py-2 rounded-full bg-black/30 text-gray-400 border border-gray-600/20" onclick="klikDex()">
+    DEX
+  </button>
+</div>
 
-  <script>
-  const cex = document.getElementById("cexTab");
-  const dex = document.getElementById("dexTab");
+<script>
+  function klikCex() {
+    document.getElementById("cexTab").style.backgroundColor = "#22c55e";
+    document.getElementById("cexTab").style.color = "white";
+    document.getElementById("dexTab").style.backgroundColor = "black";
+    document.getElementById("dexTab").style.color = "gray";
+  }
 
-  const greyClass = "px-5 py-2 rounded-full bg-black/30 text-gray-400 border border-gray-600/20";
-  
-  const greenClass = "px-5 py-2 rounded-full bg-green-500/20 text-green-400 border border-green-400/30";
-
-  cex.onclick = function() {
-    cex.className = greenClass;
-    dex.className = greyClass;
-  };
-
-  dex.onclick = function() {
-    dex.className = greenClass;
-    cex.className = greyClass;
-  };
+  function klikDex() {
+    document.getElementById("dexTab").style.backgroundColor = "#22c55e";
+    document.getElementById("dexTab").style.color = "white";
+    document.getElementById("cexTab").style.backgroundColor = "black";
+    document.getElementById("cexTab").style.color = "gray";
+  }
 </script>
   
   <!-- CONTAINER -->
