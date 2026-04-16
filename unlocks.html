@@ -25,7 +25,7 @@
 
         .container { max-width: 1200px; margin: 0 auto; padding: 20px; }
 
-        /* Navigation & Theme Toggle */
+        /* Navigation Bar */
         .nav-bar { 
             display: flex; justify-content: space-between; align-items: center; 
             padding: 15px 0; border-bottom: 1px solid var(--border); margin-bottom: 30px;
@@ -35,15 +35,14 @@
             padding: 8px 20px; border-radius: 9999px; cursor: pointer; font-weight: 700;
             font-size: 14px; text-decoration: none; transition: 0.2s;
         }
-        .btn:hover { background: rgba(255,255,255,0.1); }
-        .btn-primary { background: var(--text); color: var(--bg); border: none; }
+        .btn-theme { background: var(--text); color: var(--bg); border: none; }
 
         /* Header */
         .header { margin-bottom: 40px; }
         .header h1 { font-size: 32px; font-weight: 800; margin: 0; }
         .header p { color: var(--text-dim); margin-top: 5px; font-size: 15px; }
 
-        /* Table Design */
+        /* Professional Table */
         .table-container { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--card); }
         .search-box { padding: 15px; border-bottom: 1px solid var(--border); }
         .search-input { 
@@ -62,25 +61,22 @@
         .progress-track { height: 6px; background: var(--border); border-radius: 10px; width: 120px; margin-top: 6px; overflow: hidden; }
         .progress-fill { height: 100%; background: var(--accent); border-radius: 10px; box-shadow: 0 0 8px var(--accent); }
 
-        /* Footer identical to AirdropXI Docs */
+        /* Footer AirdropXI Docs Style */
         .footer-section {
             margin-top: 60px; padding: 40px 0; border-top: 1px solid var(--border);
             display: flex; flex-direction: column; align-items: center; gap: 20px; text-align: center;
         }
-        .footer-logo { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
-        .footer-logo img { width: 32px; border-radius: 8px; }
-        .footer-logo span { font-size: 20px; font-weight: 800; color: #fff; }
-
         .social-links { display: flex; gap: 12px; }
         .social-btn {
             background: rgba(255,255,255,0.05); border: 1px solid var(--border); color: #fff;
             padding: 10px 24px; border-radius: 999px; text-decoration: none;
-            display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px; transition: 0.2s;
+            display: flex; align-items: center; gap: 8px; font-weight: 600; font-size: 14px;
         }
         .social-btn:hover { background: rgba(255,255,255,0.1); border-color: var(--accent); }
 
         .copyright { color: var(--text-dim); font-size: 13px; margin: 10px 0; }
         .disclaimer { font-family: monospace; color: #4b5563; font-size: 11px; letter-spacing: 1px; margin-top: 10px; text-transform: uppercase; }
+        .btn-home { margin-top: 20px; border: 1px solid var(--emerald); color: var(--emerald); padding: 12px 30px; border-radius: 999px; text-decoration: none; font-weight: 700; }
     </style>
 </head>
 <body>
@@ -88,12 +84,12 @@
 <div class="container">
     <div class="nav-bar">
         <a href="/" class="btn">← BACK TO HOME</a>
-        <button class="btn btn-primary" onclick="toggleTheme()" id="themeBtn">🌙 DARK MODE</button>
+        <button class="btn btn-theme" onclick="toggleTheme()" id="themeBtn">🌙 DARK MODE</button>
     </div>
 
     <div class="header">
         <h1>Token Intelligence X</h1>
-        <p>Real-time monitoring of token emissions and market circulation for Tuan Regi.</p>
+        <p>Real-time monitoring of token emissions and market circulation.</p>
     </div>
 
     <div class="table-container">
@@ -117,13 +113,13 @@
     </div>
 
     <div class="footer-section">
-        <div class="footer-logo">
-            <img src="https://airdropxi.vercel.app/logo.png" alt="AirdropXI Logo" onerror="this.style.display='none'">
-            <span>AirdropXI Docs</span>
+        <div style="display: flex; align-items: center; gap: 10px; margin-bottom: 5px;">
+            <img src="https://airdropxi.vercel.app/logo.png" width="32" style="border-radius: 8px;" onerror="this.style.display='none'">
+            <span style="font-size: 20px; font-weight: 800;">AirdropXI Docs</span>
         </div>
 
         <div class="social-links">
-            <a href="https://x.com/xiobai06" target="_blank" class="social-btn">
+            <a href="https://x.com/xiobaiishikii" target="_blank" class="social-btn">
                 <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                 Twitter
             </a>
@@ -134,10 +130,9 @@
         </div>
 
         <p class="copyright">© 2026 Xiobaiishikii — Stay Safe & Keep Grinding ⚡</p>
-        
         <p class="disclaimer">DYOR: CONTENT PROVIDED FOR EDUCATIONAL PURPOSES ONLY. NO FINANCIAL ADVICE.</p>
         
-        <a href="/" class="btn" style="margin-top: 10px; border-color: var(--emerald); color: var(--emerald);">BACK TO HOME</a>
+        <a href="/" class="btn-home">BACK TO HOME</a>
     </div>
 </div>
 
@@ -148,23 +143,21 @@
         if(html.getAttribute('data-theme') === 'dark') {
             html.setAttribute('data-theme', 'light');
             btn.innerHTML = '☀️ LIGHT MODE';
-            btn.classList.remove('btn-primary');
         } else {
             html.setAttribute('data-theme', 'dark');
             btn.innerHTML = '🌙 DARK MODE';
-            btn.classList.add('btn-primary');
         }
     }
 
-    async function loadData() {
+    async function fetchFromGecko() {
         const tbody = document.getElementById('token-table');
         try {
-            // Menggunakan CoinGecko secara langsung jika API route bermasalah (401)
+            // Mengambil 100 koin teratas dari CoinGecko secara real-time
             const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false');
             const data = await res.json();
 
             tbody.innerHTML = data.map(coin => {
-                const unlocked = coin.total_supply ? ((coin.circulating_supply / coin.total_supply) * 100).toFixed(1) : 100;
+                const circulation = coin.total_supply ? ((coin.circulating_supply / coin.total_supply) * 100).toFixed(1) : 100;
                 return `
                 <tr>
                     <td>
@@ -182,18 +175,18 @@
                     </td>
                     <td style="color:var(--text-dim);">$${coin.market_cap.toLocaleString()}</td>
                     <td>
-                        <div style="font-size:12px; font-weight:600;">${unlocked}% Unlocked</div>
-                        <div class="progress-track"><div class="progress-fill" style="width:${unlocked}%"></div></div>
+                        <div style="font-size:12px; font-weight:600;">${circulation}% Unlocked</div>
+                        <div class="progress-track"><div class="progress-fill" style="width:${circulation}%"></div></div>
                     </td>
                     <td>
-                        <span style="font-size:10px; font-weight:800; color:${unlocked > 90 ? '#00ba7c' : '#1d9bf0'}; background: rgba(255,255,255,0.03); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05);">
-                            ${unlocked > 90 ? 'LIQUID' : 'VESTING'}
+                        <span style="font-size:10px; font-weight:800; color:${circulation > 90 ? '#00ba7c' : '#1d9bf0'}; background: rgba(255,255,255,0.03); padding: 4px 8px; border-radius: 4px; border: 1px solid rgba(255,255,255,0.05);">
+                            ${circulation > 90 ? 'LIQUID' : 'VESTING'}
                         </span>
                     </td>
                 </tr>
             `}).join('');
         } catch (e) {
-            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:50px; color:var(--rose); font-weight:600;">⚠️ CONNECTION ERROR: FAILED TO FETCH LIVE METRICS</td></tr>`;
+            tbody.innerHTML = `<tr><td colspan="6" style="text-align:center; padding:50px; color:var(--rose);">⚠️ DATA SYNC ERROR: COINGEKO LIMIT OR CONNECTION FAILURE.</td></tr>`;
         }
     }
 
@@ -204,8 +197,8 @@
         });
     });
 
-    loadData();
-    setInterval(loadData, 60000);
+    fetchFromGecko();
+    setInterval(fetchFromGecko, 60000); // Auto update tiap menit
 </script>
 
 </body>
