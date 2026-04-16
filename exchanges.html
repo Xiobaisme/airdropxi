@@ -1,156 +1,65 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Exchanges - AirdropXI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <style>
-        /* Memastikan kursor muncul kembali */
-        body, html {
-            cursor: default !important;
+        /* Desain Grid Background agar sama dengan Home */
+        body {
             background-color: #0a0a0a;
+            background-image: linear-gradient(to right, #121212 1px, transparent 1px),
+                              linear-gradient(to bottom, #121212 1px, transparent 1px);
+            background-size: 40px 40px;
+            cursor: auto !important;
         }
+        .neo-border { border: 1px solid rgba(34, 197, 94, 0.2); }
+        .neo-text { text-shadow: 0 0 10px rgba(34, 197, 94, 0.5); }
         
-        button, a {
-            cursor: pointer !important;
-        }
-
-        /* Scrollbar custom agar senada dengan tema dark */
-        ::-webkit-scrollbar {
-            width: 5px;
-            height: 5px;
-        }
-        ::-webkit-scrollbar-track {
-            background: #0a0a0a;
-        }
-        ::-webkit-scrollbar-thumb {
-            background: #27272a;
-            border-radius: 10px;
-        }
-        ::-webkit-scrollbar-thumb:hover {
-            background: #22c55e;
-        }
+        /* Dark/Light Mode Logic */
+        body.light-mode { background-color: #f4f4f4; color: #1a1a1a; background-image: none; }
+        body.light-mode .neo-border { border-color: #ddd; }
+        body.light-mode .bg-zinc-900\/10 { background-color: #fff; }
     </style>
 </head>
-<body class="text-white font-sans selection:bg-green-500/30">
+<body class="text-white font-sans min-h-screen">
 
     <div class="container mx-auto p-6 max-w-6xl">
-        <div class="flex items-center justify-between mb-8">
-            <h1 class="text-2xl font-black text-green-500 uppercase tracking-tighter">
-                Exchange Markets
-            </h1>
-            <div class="text-[10px] text-zinc-500 font-mono uppercase">
-                Real-time Data by CoinGecko
+        <div class="flex justify-between items-center mb-10">
+            <a href="index.html" class="flex items-center gap-2 group">
+                <span class="text-green-500 font-bold">←</span>
+                <span class="text-[10px] uppercase tracking-[0.2em] group-hover:text-green-500 transition" id="txt-back">Back to Home</span>
+            </a>
+            <div class="flex gap-4">
+                <button onclick="toggleLang()" class="text-[10px] border border-zinc-800 px-2 py-1 rounded hover:border-green-500 transition" id="btn-lang">ID | EN</button>
+                <button onclick="toggleTheme()" class="text-[10px] border border-zinc-800 px-2 py-1 rounded hover:border-green-500 transition" id="btn-theme">🌙</button>
             </div>
         </div>
 
-        <div class="flex gap-8 mb-6 border-b border-zinc-800/50">
-            <button id="btn-cex" onclick="switchTab('cex')" 
-                class="pb-3 px-2 text-sm font-bold uppercase tracking-widest transition-all border-b-2 border-green-500 text-green-500">
-                CEX <span class="hidden md:inline">(Centralized)</span>
-            </button>
-            <button id="btn-dex" onclick="switchTab('dex')" 
-                class="pb-3 px-2 text-sm font-bold uppercase tracking-widest transition-all border-b-2 border-transparent text-zinc-500 hover:text-zinc-200">
-                DEX <span class="hidden md:inline">(Decentralized)</span>
-            </button>
+        <h1 class="text-3xl font-black text-white mb-2 uppercase italic neo-text" id="main-title">Exchange Markets</h1>
+        <p class="text-zinc-500 text-[10px] mb-8 tracking-widest uppercase" id="sub-title">Real-time Cryptocurrency Exchange Data</p>
+
+        <div class="flex flex-wrap gap-4 mb-8">
+            <button onclick="switchTab('cex')" id="tab-cex" class="px-6 py-2 bg-green-500 text-black text-[10px] font-bold uppercase tracking-wider rounded-full shadow-[0_0_15px_rgba(34,197,94,0.3)]">CEX</button>
+            <button onclick="switchTab('dex')" id="tab-dex" class="px-6 py-2 border border-zinc-800 text-zinc-500 text-[10px] font-bold uppercase tracking-wider rounded-full hover:border-green-500 transition">DEX</button>
         </div>
 
-        <div id="exchanges-container" class="bg-zinc-900/10 border border-zinc-800 rounded-xl overflow-hidden min-h-[400px]">
-            <div class="flex flex-col items-center justify-center h-full py-20">
-                <div class="w-8 h-8 border-2 border-green-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-                <p class="text-zinc-500 text-xs animate-pulse font-mono">INITIALIZING MARKET DATA...</p>
+        <div id="exchanges-container" class="bg-zinc-900/10 neo-border rounded-xl p-1 backdrop-blur-sm">
+            <div class="py-20 text-center animate-pulse text-zinc-500 font-mono text-[10px]">SYNCING WITH BLOCKCHAIN...</div>
+        </div>
+
+        <div class="mt-20 border-t border-zinc-900 pt-10 pb-20 text-center">
+            <div class="flex justify-center gap-4 mb-6">
+                <a href="#" class="px-6 py-2 bg-zinc-900 border border-zinc-800 rounded-full text-xs font-bold hover:border-green-500 transition">Twitter</a>
+                <a href="#" class="px-6 py-2 bg-zinc-900 border border-zinc-800 rounded-full text-xs font-bold hover:border-green-500 transition">Telegram</a>
             </div>
+            <p class="text-zinc-500 text-xs mb-8">© 2026 Xiobaiishikii — Stay Safe & Keep Grinding ⚡</p>
+            <p class="text-[9px] text-zinc-700 uppercase tracking-widest mb-10">DYOR: Content for educational purposes only.</p>
+            <a href="index.html" class="inline-block px-8 py-3 border border-green-500 text-green-500 text-xs font-bold rounded-full hover:bg-green-500 hover:text-black transition">← BACK TO HOME</a>
         </div>
     </div>
 
-    <script>
-        // Fungsi Utama Load Data
-        async function loadData(type = 'cex') {
-            const container = document.getElementById('exchanges-container');
-            const btnCex = document.getElementById('btn-cex');
-            const btnDex = document.getElementById('btn-dex');
-
-            // Update UI Tombol
-            if (type === 'cex') {
-                btnCex.classList.add('border-green-500', 'text-green-500');
-                btnCex.classList.remove('border-transparent', 'text-zinc-500');
-                btnDex.classList.add('border-transparent', 'text-zinc-500');
-                btnDex.classList.remove('border-green-500', 'text-green-500');
-            } else {
-                btnDex.classList.add('border-green-500', 'text-green-500');
-                btnDex.classList.remove('border-transparent', 'text-zinc-500');
-                btnCex.classList.add('border-transparent', 'text-zinc-500');
-                btnCex.classList.remove('border-green-500', 'text-green-500');
-            }
-
-            try {
-                // Endpoint CEX via folder api Tuan, DEX via direct (atau buat api/dex.js jika perlu)
-                const url = type === 'cex' ? '/api/exchanges' : 'https://api.coingecko.com/api/v3/exchanges?per_page=10&page=1';
-                
-                const response = await fetch(url);
-                const data = await response.json();
-
-                // Render Tabel
-                let html = `
-                    <div class="overflow-x-auto">
-                        <table class="w-full text-left border-collapse">
-                            <thead>
-                                <tr class="bg-zinc-900/40 text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800">
-                                    <th class="p-4">#</th>
-                                    <th class="p-4">Name</th>
-                                    <th class="p-4 text-right">Adj. Vol (24h)</th>
-                                    <th class="p-4 text-center">Trust</th>
-                                    <th class="p-4">Jurisdiction</th>
-                                </tr>
-                            </thead>
-                            <tbody class="text-[11px] md:text-xs text-zinc-300">
-                `;
-
-                data.forEach((ex, index) => {
-                    // Logika filter sederhana: CoinGecko API CEX list punya property 'centralized'
-                    // Jika butuh DEX murni, biasanya menggunakan endpoint /dex/ yang berbeda
-                    html += `
-                        <tr class="border-b border-zinc-900/50 hover:bg-zinc-500/5 transition-all">
-                            <td class="p-4 text-zinc-600 font-mono">${index + 1}</td>
-                            <td class="p-4 flex items-center gap-3">
-                                <img src="${ex.image}" class="w-5 h-5 rounded-full filter grayscale hover:grayscale-0 transition-all">
-                                <span class="font-bold text-zinc-200 uppercase">${ex.name}</span>
-                            </td>
-                            <td class="p-4 text-right text-green-500 font-mono">
-                                ${ex.trade_volume_24h_btc.toLocaleString(undefined, {minimumFractionDigits: 2})} BTC
-                            </td>
-                            <td class="p-4 text-center">
-                                <span class="px-2 py-0.5 rounded-sm bg-zinc-900 border border-zinc-800 text-[9px] ${ex.trust_score > 7 ? 'text-green-500' : 'text-yellow-500'}">
-                                    ${ex.trust_score || 'N/A'}/10
-                                </span>
-                            </td>
-                            <td class="p-4 text-zinc-500 italic">${ex.country || 'Global/Decentralized'}</td>
-                        </tr>
-                    `;
-                });
-
-                html += `</tbody></table></div>`;
-                container.innerHTML = html;
-
-            } catch (error) {
-                container.innerHTML = `
-                    <div class="p-20 text-center">
-                        <p class="text-red-500 font-mono text-xs uppercase tracking-tighter">Error: Failed to fetch market data</p>
-                        <button onclick="location.reload()" class="mt-4 text-[10px] text-zinc-500 underline uppercase">Retry Connection</button>
-                    </div>
-                `;
-            }
-        }
-
-        // Fungsi Switch Tab
-        function switchTab(type) {
-            loadData(type);
-        }
-
-        // Jalankan saat startup
-        document.addEventListener('DOMContentLoaded', () => loadData('cex'));
-    </script>
     <script src="js/exchanges.js"></script>
 </body>
 </html>
