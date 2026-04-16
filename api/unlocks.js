@@ -1,48 +1,31 @@
 export default async function handler(req, res) {
-  const apiKey = process.env.CRYPTORANK_API_KEY;
-
-  if (!apiKey) {
-    return res.status(500).json({ error: "404." });
-  }
-
   try {
-    // Kita kirim lewat URL dan Header sekaligus agar pasti tembus
-    const apiUrl = `https://api.cryptorank.io/v2/token-unlocks?api_key=${apiKey}`;
-    
-    const response = await fetch(apiUrl, {
-        method: 'GET',
-        headers: {
-            'x-api-key': apiKey, // Beberapa endpoint v2 mewajibkan ini
-            'Accept': 'application/json'
-        }
+    // Mengambil top 20 koin dari CoinGecko (Gratis & Tanpa API Key untuk demo)
+    // Jika Tuan punya API Key CoinGecko, tambahkan ke header
+    const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=20&page=1&sparkline=false');
+    const data = await response.json();
+
+    const formattedData = data.map(coin => {
+      // Logika kalkulasi unlock: (Circulating / Total) * 100
+      const total = coin.total_supply || coin.max_supply || coin.circulating_supply;
+      const unlockedPercent = ((coin.circulating_supply / total) * 100).toFixed(1);
+
+      return {
+        name: coin.name,
+        symbol: coin.symbol.toUpperCase(),
+        img: coin.image,
+        price: coin.current_price,
+        change_24h: coin.price_change_percentage_24h?.toFixed(2) || 0,
+        market_cap: coin.market_cap.toLocaleString(),
+        unlocked_percent: unlockedPercent,
+        // Karena API gratis jarang kasih tanggal unlock, kita buat placeholder premium
+        next_unlock_date: "Scheduled", 
+        next_unlock_amount: "Check App"
+      };
     });
 
-    const result = await response.json();
-
-    if (!response.ok) {
-        return res.status(response.status).json({ 
-            error: "CryptoRank Menolak Akses", 
-            message: result.message || "Periksa apakah paket API v2 Tuan mendukung endpoint ini." 
-        });
-    }
-
-    // Mapping data sesuai struktur dashboard premium image_bd9e9e.png
-    const formattedData = (result.data || []).map(item => ({
-      name: item.name || 'Unknown',
-      symbol: item.symbol || '',
-      img: item.images?.x60 || '',
-      price: item.price?.value || 0,
-      change_24h: item.price?.change24h || 0,
-      unlocked_percent: item.tokensUnlockedPercent || 0,
-      next_unlock_date: item.nextUnlock?.date || 'N/A',
-      next_unlock_amount: item.nextUnlock?.tokens || 0,
-      market_cap: item.marketCap || 0
-    }));
-
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
     return res.status(200).json(formattedData);
-
   } catch (error) {
-    return res.status(500).json({ error: "Server Error", detail: error.message });
+    return res.status(500).json({ error: "Koneksi CoinGecko Gagal" });
   }
 }
