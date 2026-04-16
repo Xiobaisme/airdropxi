@@ -1,23 +1,30 @@
 import { createClient } from '@supabase/supabase-js';
 
-  const supabase = createClient(
-  process.env.SUPABASE_URL,
-  process.env.SUPABASE_ANON_KEY
-);
-
 export default async function handler(req, res) {
-  const { type = 'cex' } = req.query;
+  const { type } = req.query;
+  
+  // Ambil variabel lingkungan
+  const supabaseUrl = process.env.SUPABASE_URL;
+  const supabaseKey = process.env.SUPABASE_ANON_KEY;
+
+  // Cek apakah variabel tersedia untuk menghindari crash
+  if (!supabaseUrl || !supabaseKey) {
+    return res.status(500).json({ error: "Missing Supabase Environment Variables" });
+  }
+
+  const supabase = createClient(supabaseUrl, supabaseKey);
 
   try {
     const { data, error } = await supabase
-      .from('exchanges') // Nama tabel di Supabase Anda
+      .from('exchanges')
       .select('*')
-      .eq('type', type)
-      .order('rank', { ascending: true });
+      .eq('type', type);
 
     if (error) throw error;
-    res.status(200).json(data);
+
+    return res.status(200).json(data);
   } catch (error) {
-    res.status(500).json({ error: 'Gagal mengambil data dari Supabase' });
+    console.error(error);
+    return res.status(500).json({ error: "Gagal mengambil data dari Supabase", details: error.message });
   }
 }
