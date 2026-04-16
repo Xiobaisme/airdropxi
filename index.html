@@ -1,268 +1,50 @@
 <!DOCTYPE html>
-<html lang="id" data-theme="dark">
+<html lang="id">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<link rel="icon" type="image/png" href="logo.png">
-<title>AirdropXI — Latest & Potential Crypto Airdrop List</title>
-<script src="https://unpkg.com/@supabase/supabase-js@2"></script>
-<link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-<link rel="stylesheet" href="css/style.css">
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Exchanges - AirdropX</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <style>
+        body {
+            background-color: #050505;
+            background-image: linear-gradient(to right, #121212 1px, transparent 1px),
+                              linear-gradient(to bottom, #121212 1px, transparent 1px);
+            background-size: 40px 40px;
+            color: white;
+            font-family: 'Inter', sans-serif;
+        }
+        .neon-text { color: #00ff88; text-shadow: 0 0 10px rgba(0, 255, 136, 0.5); }
+        .glass-card {
+            background: rgba(10, 10, 10, 0.8);
+            backdrop-filter: blur(10px);
+            border: 1px solid rgba(0, 255, 136, 0.1);
+        }
+        .tab-active { background: #00ff88; color: black; box-shadow: 0 0 15px rgba(0, 255, 136, 0.4); }
+    </style>
 </head>
-<body>
-
-<div id="cursor"></div>
-<div id="cursor-ring"></div>
-<canvas id="bg-canvas"></canvas>
-
-<!-- Price Ticker -->
-<div class="pticker-wrap z1">
-  <div class="pticker-inner" id="price-ticker">
-    <span style="padding:0 20px;font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)">Memuat harga pasar...</span>
-  </div>
-</div>
-
-<!-- News Ticker -->
-<div class="nticker-wrap z1">
-  <div class="nticker-label"><div class="ldot"></div>LIVE NEWS</div>
-  <div class="nticker-track">
-    <div class="nticker-inner" id="news-ticker">
-      <span class="ni"><span class="ni-dot">◆</span>Memuat berita terbaru...</span>
-    </div>
-  </div>
-</div>
-
-<!-- Navbar -->
-<nav class="z1">
-  <a class="nav-logo" href="#">
-    <img src="logo.png" alt="AirdropXI">
-    AirdropXI
-  </a>
-  <div class="nav-links">
-    <a href="#airdrops" id="nav-explore">Explore</a>
-    <a href="#guide" id="nav-guide">Guide</a>
-    <a href="unlocks.html" id="nav-unlocks">Token Unlocks</a>
-    <a href="reward.html" id="nav-reward" style="color: #4ade80;">Reward</a>
-    <a href="docs.html" id="nav-docs" style="color:var(--g)">Docs</a>
-    <a href="exchanges.html" class="hover:text-green-500 transition">EXCHANGES</a>
-</div>
-      <span style="position:absolute;top:-8px;right:-24px;background:linear-gradient(135deg,var(--g),var(--c));color:#000;font-size:7px;font-weight:800;padding:1px 5px;border-radius:4px;letter-spacing:.5px">NEW</span>
-    </a>
-  </div>
-  <div class="nav-right">
-    <div class="nav-social">
-      <a href="https://x.com/xiobai06" target="_blank" title="Twitter/X">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-      </a>
-      <a href="https://t.me/Xiobaiishikii" target="_blank" title="Telegram">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-      </a>
-    </div>
-    <button class="theme-toggle" id="themeToggle" onclick="toggleTheme()" title="Toggle tema">🌙</button>
-    <div class="lang-toggle">
-      <button class="lang-btn active" id="btn-id" onclick="setLang('id')">🇮🇩 ID</button>
-      <button class="lang-btn" id="btn-en" onclick="setLang('en')">🇬🇧 EN</button>
-    </div>
-    <button class="ai-agent-btn" id="aiToggleBtn" onclick="toggleAI()">
-      <span class="ai-btn-dot"></span>
-      <span id="nav-ai-label">AI Agent</span>
-    </button>
-  </div>
-</nav>
-
-<!-- Hero -->
-<div class="z1" style="border-bottom:1px solid var(--border)">
-<div class="hero">
-  <div>
-    <div class="hero-badge"><div class="hero-badge-dot"></div><span id="h-badge">🔥 20+ Airdrop Aktif Sekarang</span></div>
-    <h1 id="h-title">Find Legit Airdrops<br><span>Before Everyone Else</span></h1>
-    <p class="hero-sub" id="h-sub">Auto-filtered, verified, dan siap snapshot. Jangan sampai ketinggalan reward dari project Web3 terbaik.</p>
-    <div class="hero-btns">
-      <button class="btn-primary" onclick="document.getElementById('airdrops').scrollIntoView({behavior:'smooth'})">
-        <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M13 10V3L4 14h7v7l9-11h-7z"/></svg>
-        <span id="h-btn1">Explore Airdrops</span>
-      </button>
-      <button class="btn-ghost" id="h-btn2" onclick="document.getElementById('guide').scrollIntoView({behavior:'smooth'})">Guide & Tutorial</button>
-    </div>
-    <!-- Docs CTA mini banner -->
-    <a href="docs.html" id="hero-docs-banner" style="margin-top:20px;display:inline-flex;align-items:center;gap:10px;background:rgba(0,200,240,.06);border:1px solid rgba(0,200,240,.18);border-radius:10px;padding:10px 16px;text-decoration:none;transition:all .25s" onmouseover="this.style.borderColor='rgba(0,200,240,.4)'" onmouseout="this.style.borderColor='rgba(0,200,240,.18)'">
-      <span style="font-size:18px">📚</span>
-      <div>
-        <div style="font-size:10px;font-weight:700;color:var(--c);font-family:'JetBrains Mono',monospace;letter-spacing:.5px" id="h-docs-label">BARU! Web3 Docs Lengkap →</div>
-        <div style="font-size:11px;color:var(--text2);margin-top:1px" id="h-docs-sub">DeFi · GameFi · Staking · NFT · Airdrop Guide</div>
-      </div>
-    </a>
-    <div class="hero-stats" style="margin-top:32px">
-      <div class="hstat"><div class="hstat-num" id="hs-total">0</div><div class="hstat-lbl" id="hs-total-l">Total Airdrops</div></div>
-      <div class="hstat"><div class="hstat-num" id="hs-active">0</div><div class="hstat-lbl" id="hs-active-l">Active Now</div></div>
-      <div class="hstat"><div class="hstat-num">100%</div><div class="hstat-lbl">Verified</div></div>
-    </div>
-  </div>
-  <div class="hero-visual">
-    <div class="universe-container">
-      <div class="sun-btc"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/btc.svg" alt="BTC"></div>
-      <div class="orbit-ring ring-1">
-        <div class="planet" style="top:0;left:50%"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/eth.svg" class="planet-counter" alt="ETH"></div>
-        <div class="planet" style="top:100%;left:50%"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/bnb.svg" class="planet-counter" alt="BNB"></div>
-      </div>
-      <div class="orbit-ring ring-2">
-        <div class="planet" style="top:50%;left:0"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/sol.svg" class="planet-counter-2" alt="SOL"></div>
-        <div class="planet" style="top:50%;left:100%"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/xrp.svg" class="planet-counter-2" alt="XRP"></div>
-      </div>
-      <div class="orbit-ring ring-3">
-        <div class="planet" style="top:15%;left:15%"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/ada.svg" class="planet-counter-3" alt="ADA"></div>
-        <div class="planet" style="top:85%;left:85%"><img src="https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/doge.svg" class="planet-counter-3" alt="DOGE"></div>
-      </div>
-      <div class="float-card float-card-1">
-        <div class="fc-title" id="fc-latest-title">LATEST DROP</div>
-        <div class="fc-val" id="fc-latest">—</div>
-        <div class="fc-sub" id="fc-active-now">Active Now</div>
-      </div>
-      <div class="float-card float-card-2">
-        <div class="fc-title" id="fc-raised-title">TOTAL RAISED</div>
-        <div class="fc-val" id="fc-raised">$—</div>
-        <div class="fc-sub" id="fc-across">Across all projects</div>
-      </div>
-    </div>
-  </div>
-</div>
-</div>
-
-<!-- Main Content -->
-<main class="z1" id="airdrops">
-<section>
-  <div class="section-tag" id="t-dash">DASHBOARD</div>
-  <h2 class="section-title" id="t-title">Airdrop Radar</h2>
-  <p class="section-sub" id="t-sub">Pantau status, total dana, dan tugas dari project-project potensial di ekosistem Web3.</p>
-  <div class="dash-grid reveal" style="margin-top:28px">
-    <div class="dash-card"><div class="dash-label" id="lbl-total">Total Airdrop</div><div class="dash-num dash-num-g" id="dash-total">0</div><div class="dash-ico" style="background:rgba(0,232,122,.07)">📋</div></div>
-    <div class="dash-card"><div class="dash-label" id="lbl-active">Status Aktif</div><div class="dash-num dash-num-c" id="dash-active">0</div><div class="dash-ico" style="background:rgba(0,200,240,.07)">⚡</div></div>
-    <div class="dash-card"><div class="dash-label" id="lbl-ended">Listing / Selesai</div><div class="dash-num dash-num-p" id="dash-listing">0</div><div class="dash-ico" style="background:rgba(124,109,250,.07)">✓</div></div>
-  </div>
-  <div class="filter-bar reveal">
-    <div class="search-box"><span class="search-ico">🔍</span><input type="text" id="search-input" placeholder="Search project..." oninput="filterCards()"></div>
-    <div class="filter-btns">
-      <button class="fbtn active" data-filter="all" onclick="setFilter(this,'all')"><span class="fbtn-dot"></span><span id="fb-all">All</span></button>
-      <button class="fbtn" data-filter="active" onclick="setFilter(this,'active')"><span class="fbtn-dot" style="color:var(--g)"></span>Active</button>
-      <button class="fbtn" data-filter="listing" onclick="setFilter(this,'listing')"><span class="fbtn-dot" style="color:var(--accent)"></span>Listed</button>
-    </div>
-  </div>
-  <div id="loading-state"><div class="spinner"></div><p style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2)" id="loading-text">Pulling data from the chain...</p></div>
-  <div id="error-state"><p style="color:#ff2d55;font-weight:700;font-size:15px;margin-bottom:8px" id="error-title">Failed to load data</p><p id="error-msg" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)"></p></div>
-  <div id="airdrop-container" style="display:none"></div>
-</section>
-
-<!-- Guide Section -->
-<section id="guide" style="border-top:1px solid var(--border)">
-  <div class="section-tag" id="g-tag">PEMULA</div>
-  <h2 class="section-title" id="g-title">Guide & Tutorial</h2>
-  <p class="section-sub" id="g-sub">Selamat datang di pusat informasi AirdropXI. Di sini kami menyediakan panduan lengkap untuk memaksimalkan cuan dari ekosistem Crypto.</p>
-  <div class="guide-grid reveal">
-    <div class="guide-card">
-      <div class="g-icon">🎒</div>
-      <h3 class="g-title" id="g-prep-title">Persiapan Wajib</h3>
-      <p class="g-desc" id="g-prep-desc">Apa yang harus disiapkan sebelum mulai menggarap?</p>
-      <ul class="g-list">
-        <li><strong style="color:var(--text);min-width:70px">Wallet:</strong> <span id="g-prep-1">MetaMask (EVM), Phantom (Solana), Keplr (Cosmos).</span></li>
-        <li><strong style="color:var(--text);min-width:70px">Sosmed:</strong> <span id="g-prep-2">Akun Twitter (X), Discord, dan Telegram yang aktif.</span></li>
-        <li><strong style="color:var(--text);min-width:70px">Browser:</strong> <span id="g-prep-3">Mises Browser atau Kiwi Browser (HP) agar bisa pasang Extension.</span></li>
-        <li><strong style="color:var(--text);min-width:70px">Gas Fee:</strong> <span id="g-prep-4">Siapkan sedikit ETH/BNB/SOL untuk transaksi on-chain.</span></li>
-      </ul>
-    </div>
-    <div class="guide-card">
-      <div class="g-icon">🛡️</div>
-      <h3 class="g-title" id="g-rule-title">Aturan & Status Airdrop</h3>
-      <p class="g-desc" id="g-rule-desc">Keamanan adalah prioritas. Pahami status sebelum eksekusi.</p>
-      <ul class="g-list" style="margin-bottom:18px">
-        <li><strong style="color:var(--text)">Burner Wallet:</strong> <span id="g-rule-1">Selalu gunakan wallet khusus airdrop (bukan utama).</span></li>
-        <li><strong style="color:var(--text)">No Seed Phrase:</strong> <span id="g-rule-2">Admin AirdropXI tidak akan pernah meminta Private Key kamu.</span></li>
-        <li><strong style="color:var(--text)">DYOR:</strong> <span id="g-rule-3">Lakukan riset mandiri, kelola waktu dan aset dengan bijak.</span></li>
-      </ul>
-      <div class="st-badge-wrap">
-        <div class="st-item"><div class="st-dot" style="background:#00e87a;box-shadow:0 0 8px #00e87a"></div><div class="st-item-text"><strong>Confirmed</strong> <span id="g-st-1">Dikonfirmasi dev. Pasti cair.</span></div></div>
-        <div class="st-item"><div class="st-dot" style="background:#f0b429;box-shadow:0 0 8px #f0b429"></div><div class="st-item-text"><strong>Potential</strong> <span id="g-st-2">Belum resmi, sangat layak digarap (testnet/points).</span></div></div>
-        <div class="st-item"><div class="st-dot" style="background:#ff2d55;box-shadow:0 0 8px #ff2d55"></div><div class="st-item-text"><strong>Ended</strong> <span id="g-st-3">Periode selesai, tinggal tunggu distribusi.</span></div></div>
-      </div>
-    </div>
-  </div>
-  <!-- Docs CTA Banner -->
-  <a href="docs.html" class="reveal" id="docs-cta-wrap" style="margin-top:32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;background:linear-gradient(135deg,rgba(0,232,122,.05),rgba(0,200,240,.04));border:1px solid rgba(0,200,240,.2);border-radius:16px;padding:28px 32px;text-decoration:none;transition:all .3s" onmouseover="this.style.borderColor='rgba(0,200,240,.5)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(0,200,240,.2)';this.style.transform=''">
-    <div style="display:flex;align-items:center;gap:16px">
-      <div style="font-size:36px">📚</div>
-      <div>
-        <div style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--c);letter-spacing:2px;text-transform:uppercase;margin-bottom:6px" id="docs-cta-tag">Dokumentasi Lengkap</div>
-        <h3 style="font-size:20px;font-weight:800;letter-spacing:-.5px;color:var(--text);margin-bottom:4px" id="docs-cta-title">Mau Belajar Lebih Dalam?</h3>
-        <p style="font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace" id="docs-cta-desc">Web3 · DeFi · GameFi · NFT · Staking · DEX · CEX · Keamanan · Glosarium</p>
-      </div>
-    </div>
-    <div style="display:inline-flex;align-items:center;gap:8px;background:linear-gradient(135deg,var(--g),var(--c));color:#000;font-weight:700;font-size:12px;padding:12px 22px;border-radius:10px;letter-spacing:.5px;text-transform:uppercase;white-space:nowrap;flex-shrink:0" id="docs-cta-btn">Buka Docs →</div>
-  </a>
-</section>
-</main>
-
-<!-- Footer -->
-<footer class="z1">
-  <div class="footer-inner">
-    <div class="dyor-badge" id="footer-dyor">⚠️ DYOR — Semua informasi hanya untuk edukasi. Selalu lakukan riset sendiri sebelum berinvestasi.</div>
-    <div class="footer-top">
-      <div class="footer-brand">
-        <h3>Airdrop<span>XI</span></h3>
-        <p id="footer-desc">Tracker airdrop Web3 terpercaya. Real-time, verified, dan selalu update untuk kamu yang tidak mau ketinggalan.</p>
-        <div class="footer-socials">
-          <a class="fsoc" href="https://x.com/xiobai06" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg></a>
-          <a class="fsoc" href="https://t.me/Xiobaiishikii" target="_blank"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg></a>
+<body class="p-6 md:p-12 min-h-screen">
+    <div class="max-w-6xl mx-auto">
+        <div class="flex justify-between items-center mb-10">
+            <a href="index.html" class="text-[10px] uppercase tracking-widest text-zinc-500 hover:text-green-400 transition">← Back to Home</a>
+            <button id="btn-lang" onclick="toggleLang()" class="border border-zinc-800 px-4 py-1 rounded-full text-[10px] hover:border-green-500">EN</button>
         </div>
-      </div>
-      <div class="footer-links">
-        <h4 id="footer-nav-h">Navigate</h4>
-        <a href="#airdrops" id="f-explore">Explore Airdrops</a>
-        <a href="#guide" id="f-guide">Guide & Tutorial</a>
-        <a href="docs.html" id="f-docs">📚 Documentation</a>
-        <a href="unlocks.html" id="f-unlocks">🔓 Token Unlocks</a>
-        <li><a href="reward.html" style="color: #00ff88;">🎁 Reward</a></li>
-      </div>
-      <div class="footer-links">
-        <h4 id="footer-comm-h">contact</h4>
-        <a href="https://x.com/xiobai06" target="_blank">Twitter / X</a>
-        <a href="https://t.me/Xiobaiishikii" target="_blank">Telegram</a>
-      </div>
-    </div>
-    <div class="footer-bottom">
-      <span id="footer-copy">© 2025 AirdropXI — Stay Safe & Keep Grinding</span>
-      <span style="color:var(--g)">Built with ⚡ for Web3 hunters</span>
-    </div>
-  </div>
-</footer>
 
-<!-- AI Chat Panel -->
-<div class="ai-panel" id="aiPanel">
-  <div class="ai-panel-header">
-    <div class="ai-panel-avatar"><img src="logo.png" alt="Bot" style="width:26px;height:26px;object-fit:contain;border-radius:6px;"></div>
-    <div class="ai-panel-info">
-      <div class="ai-panel-name">AirdropXI Bot</div>
-      <div class="ai-panel-status"><span class="ai-status-dot"></span><span id="ai-status-txt">Online · AI-Powered</span></div>
-    </div>
-    <button class="ai-panel-close" onclick="toggleAI()">✕</button>
-  </div>
-  <div class="ai-messages" id="aiMessages">
-    <div class="ai-msg ai-msg-bot">
-      <div class="ai-msg-avatar"><img src="logo.png" alt="Bot" style="width:20px;height:20px;object-fit:contain;border-radius:4px;"></div>
-      <div class="ai-msg-bubble" id="ai-welcome-msg">Halo! Saya <strong>AirdropXI Bot</strong> 👋<br><br>Tanya apa aja soal airdrop, Web3, atau crypto. Saya siap bantu! (AI, bisa salah ya 🙏)</div>
-    </div>
-  </div>
-  <div class="ai-quick-btns" id="ai-quick-btns">
-    <button class="ai-qbtn" data-prompt="Apa Itu airdrop" onclick="aiSendQuick(this.dataset.prompt)">🔥 Apa Itu airdrop</button>
-    <button class="ai-qbtn" data-prompt="Cara ikut airdrop untuk pemula?" onclick="aiSendQuick(this.dataset.prompt)">📖 Cara ikut</button>
-    <button class="ai-qbtn" data-prompt="Apa itu Web3?" onclick="aiSendQuick(this.dataset.prompt)">🌐 Web3</button>
-    <button class="ai-qbtn" data-prompt="aku ganteng apa jelek?" onclick="aiSendQuick(this.dataset.prompt)">🗿 jangan diklik</button>
-  </div>
-  <div class="ai-input-row">
-    <textarea class="ai-input" id="aiInput" placeholder="Tanya tentang airdrop, Web3, crypto..." rows="1" onkeydown="aiHandleKey(event)" oninput="aiAutoResize(this)"></textarea>
-    <button class="ai-send-btn" id="aiSendBtn" onclick="aiSend()">➤</button>
-  </div>
-</div>
+        <h1 class="text-3xl font-black italic uppercase tracking-tighter neon-text mb-2">Pasar Bursa</h1>
+        <p class="text-zinc-500 text-[10px] tracking-[0.4em] uppercase mb-8">Database Bursa Terkurasi AirdropXI</p>
 
-<script src="js/app.js"></script>
+        <div class="flex gap-4 mb-8">
+            <button onclick="switchTab('cex')" id="tab-cex" class="tab-active px-8 py-2 rounded-full text-[10px] font-bold uppercase transition-all">CEX</button>
+            <button onclick="switchTab('dex')" id="tab-dex" class="border border-zinc-800 text-zinc-500 px-8 py-2 rounded-full text-[10px] font-bold uppercase hover:border-green-400 transition-all">DEX</button>
+        </div>
+
+        <div id="exchanges-container" class="glass-card rounded-xl overflow-hidden min-h-[400px]">
+            </div>
+
+        <footer class="mt-20 text-center opacity-50">
+            <p class="text-[9px] uppercase tracking-[0.5em]">© 2026 Xiobaiishikii — Stay Safe & Keep Grinding ⚡</p>
+        </footer>
+    </div>
+    <script src="js/exchanges.js"></script>
 </body>
 </html>
