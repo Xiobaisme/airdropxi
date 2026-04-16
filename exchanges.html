@@ -21,6 +21,19 @@
 
 <div class="max-w-6xl mx-auto px-6 py-12">
 
+  <!-- 🔙 BACK BUTTON -->
+  <div class="mb-6">
+    <a href="/" 
+      class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-400/30 text-green-400 hover:bg-green-500/10 transition">
+      
+      <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2">
+        <path d="M15 18l-6-6 6-6"/>
+      </svg>
+
+      <span id="backText">Kembali</span>
+    </a>
+  </div>
+
   <!-- HEADER -->
   <div class="flex justify-between items-center">
     <div>
@@ -81,6 +94,7 @@ const lang = {
     country: "Negara",
     advantage: "Kelebihan",
     suitable: "Cocok Untuk",
+    back: "Kembali",
     btn: "EN"
   },
   en: {
@@ -93,6 +107,7 @@ const lang = {
     country: "Country",
     advantage: "Features",
     suitable: "Best For",
+    back: "Back",
     btn: "ID"
   }
 };
@@ -111,6 +126,7 @@ function applyLang() {
   thAdvantage.innerText = t.advantage;
   thSuitable.innerText = t.suitable;
 
+  backText.innerText = t.back;
   langBtn.innerText = t.btn;
 }
 
@@ -201,7 +217,7 @@ async function loadData() {
   }
 }
 
-// 🎛️ TAB ACTION
+// 🎛️ TAB
 cexTab.onclick = () => {
   currentType = "cex";
   renderData();
