@@ -1,40 +1,21 @@
 export default async function handler(req, res) {
   try {
-    // Mengambil data vesting asli dari DefiLlama
-    const response = await fetch('https://api.llama.fi/unlocks/ethereum'); 
+    const response = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false');
     const data = await response.json();
 
-    // Mapping agar UI kita punya data yang "berguna" (bukan cuma harga)
-    const formattedData = [
-      { 
-        name: data.name || "Ethereum", 
-        symbol: "ETH", 
-        next_unlock: "12 May 2026", 
-        amount: "1.5M ETH", 
-        percent: 65,
-        status: "Linear Unlock"
-      },
-      { 
-        name: "Arbitrum", 
-        symbol: "ARB", 
-        next_unlock: "16 Apr 2026", 
-        amount: "92.6M ARB", 
-        percent: 74.2,
-        status: "Cliff Unlock"
-      },
-      { 
-        name: "Starknet", 
-        symbol: "STRK", 
-        next_unlock: "20 Apr 2026", 
-        amount: "64.0M STRK", 
-        percent: 44.1,
-        status: "High Impact"
-      }
-    ];
+    const formattedData = data.map(coin => ({
+      name: coin.name,
+      symbol: coin.symbol.toUpperCase(),
+      amount: (coin.circulating_supply / 1000000).toFixed(2) + "M",
+      percent: Math.round((coin.circulating_supply / (coin.total_supply || coin.circulating_supply)) * 100),
+      next_unlock: "Real-time",
+      status: coin.price_change_percentage_24h > 0 ? "Bullish" : "Bearish",
+      img: coin.image
+    }));
 
     res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate');
     return res.status(200).json(formattedData);
   } catch (error) {
-    return res.status(500).json({ error: "API Terputus" });
+    return res.status(500).json({ error: "Gagal ambil data" });
   }
 }
