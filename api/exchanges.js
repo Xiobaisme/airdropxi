@@ -1,113 +1,102 @@
-/**
- * Exchanges Logic for AirdropXI
- * Author: XIOBAIISHIKII
- */
+let currentLang = 'id';
+let isDark = true;
 
-let currentTab = 'cex';
+const translations = {
+    id: {
+        back: "Kembali ke Beranda",
+        title: "Pasar Bursa",
+        subtitle: "Data Bursa Kripto Real-Time",
+        jurisdiction: "Yurisdiksi",
+        loading: "Sinkronisasi Data Pasar..."
+    },
+    en: {
+        back: "Back to Home",
+        title: "Exchange Markets",
+        subtitle: "Real-time Cryptocurrency Exchange Data",
+        jurisdiction: "Jurisdiction",
+        loading: "Syncing Market Data..."
+    }
+};
+
+function toggleLang() {
+    currentLang = currentLang === 'id' ? 'en' : 'id';
+    updateLabels();
+    loadExchanges(window.currentTabType || 'cex');
+}
+
+function updateLabels() {
+    document.getElementById('txt-back').innerText = translations[currentLang].back;
+    document.getElementById('main-title').innerText = translations[currentLang].title;
+    document.getElementById('sub-title').innerText = translations[currentLang].subtitle;
+}
+
+function toggleTheme() {
+    isDark = !isDark;
+    document.body.classList.toggle('light-mode');
+    document.getElementById('btn-theme').innerText = isDark ? '🌙' : '☀️';
+}
 
 async function loadExchanges(type = 'cex') {
+    window.currentTabType = type;
     const container = document.getElementById('exchanges-container');
-    const btnCex = document.getElementById('btn-cex');
-    const btnDex = document.getElementById('btn-dex');
-
-    // 1. Update UI Button States
-    if (type === 'cex') {
-        btnCex.classList.add('border-green-500', 'text-green-500');
-        btnCex.classList.remove('border-transparent', 'text-zinc-500');
-        btnDex.classList.add('border-transparent', 'text-zinc-500');
-        btnDex.classList.remove('border-green-500', 'text-green-500');
+    
+    // Update Tab UI
+    const tCex = document.getElementById('tab-cex');
+    const tDex = document.getElementById('tab-dex');
+    if(type === 'cex') {
+        tCex.className = "px-6 py-2 bg-green-500 text-black text-[10px] font-bold uppercase rounded-full shadow-lg";
+        tDex.className = "px-6 py-2 border border-zinc-800 text-zinc-500 text-[10px] font-bold uppercase rounded-full";
     } else {
-        btnDex.classList.add('border-green-500', 'text-green-500');
-        btnDex.classList.remove('border-transparent', 'text-zinc-500');
-        btnCex.classList.add('border-transparent', 'text-zinc-500');
-        btnCex.classList.remove('border-green-500', 'text-green-500');
+        tDex.className = "px-6 py-2 bg-green-500 text-black text-[10px] font-bold uppercase rounded-full shadow-lg";
+        tCex.className = "px-6 py-2 border border-zinc-800 text-zinc-500 text-[10px] font-bold uppercase rounded-full";
     }
 
-    // 2. Show Loading State
-    container.innerHTML = `
-        <div class="flex flex-col items-center justify-center py-20">
-            <div class="w-6 h-6 border-2 border-green-500 border-t-transparent rounded-full animate-spin mb-4"></div>
-            <p class="text-[10px] text-zinc-500 font-mono tracking-tighter uppercase">Fetching ${type} data...</p>
-        </div>
-    `;
-
     try {
-        /** * Logic Endpoint:
-         * CEX menggunakan Serverless Function (api/exchanges.js)
-         * DEX menggunakan direct API CoinGecko (atau Tuan bisa buat api/dex.js nanti)
-         */
-        const url = type === 'cex' ? '/api/exchanges' : 'https://api.coingecko.com/api/v3/exchanges?per_page=15&page=1';
-        
+        const url = type === 'cex' ? '/api/exchanges' : 'https://api.coingecko.com/api/v3/exchanges?per_page=15';
         const response = await fetch(url);
-        if (!response.ok) throw new Error('Network response was not ok');
-        
         const data = await response.json();
 
-        // 3. Build Table Structure
-        let tableHtml = `
+        let html = `
             <div class="overflow-x-auto">
-                <table class="w-full text-left border-collapse cursor-default">
+                <table class="w-full text-left">
                     <thead>
-                        <tr class="bg-zinc-900/40 text-[10px] text-zinc-500 uppercase tracking-widest border-b border-zinc-800">
-                            <th class="p-4">#</th>
-                            <th class="p-4 font-medium">Name</th>
-                            <th class="p-4 text-right font-medium uppercase">Adj. Vol (24h)</th>
-                            <th class="p-4 text-center font-medium uppercase">Trust</th>
-                            <th class="p-4 font-medium uppercase">Jurisdiction</th>
+                        <tr class="text-[9px] text-zinc-600 uppercase tracking-[0.2em] border-b border-zinc-800/50">
+                            <th class="p-5">#</th>
+                            <th class="p-5">Exchange</th>
+                            <th class="p-5 text-right">Vol 24H</th>
+                            <th class="p-5 text-center">Score</th>
+                            <th class="p-5 text-right">${translations[currentLang].jurisdiction}</th>
                         </tr>
                     </thead>
-                    <tbody class="text-[11px] md:text-xs text-zinc-300">
+                    <tbody class="text-[11px] font-medium">
         `;
 
-        // 4. Map Data to Rows
-        data.forEach((ex, index) => {
-            const volume = ex.trade_volume_24h_btc ? ex.trade_volume_24h_btc.toLocaleString(undefined, { minimumFractionDigits: 2 }) : '0.00';
-            const trustColor = ex.trust_score >= 8 ? 'text-green-500' : (ex.trust_score >= 5 ? 'text-yellow-500' : 'text-red-500');
-            
-            tableHtml += `
-                <tr class="border-b border-zinc-900/50 hover:bg-zinc-500/5 transition-all group">
-                    <td class="p-4 text-zinc-600 font-mono">${index + 1}</td>
-                    <td class="p-4 flex items-center gap-3">
-                        <img src="${ex.image}" class="w-5 h-5 rounded-full filter grayscale group-hover:grayscale-0 transition-all shadow-sm">
-                        <span class="font-bold text-zinc-200 uppercase tracking-tight">${ex.name}</span>
+        data.forEach((ex, i) => {
+            html += `
+                <tr class="border-b border-zinc-900/30 hover:bg-green-500/5 transition group">
+                    <td class="p-5 text-zinc-700">${i+1}</td>
+                    <td class="p-5 flex items-center gap-3">
+                        <img src="${ex.image}" class="w-5 h-5 rounded-full grayscale group-hover:grayscale-0 transition">
+                        <span class="text-zinc-200 group-hover:text-green-500 font-bold">${ex.name.toUpperCase()}</span>
                     </td>
-                    <td class="p-4 text-right text-green-400 font-mono">
-                        ${volume} <span class="text-[9px] text-zinc-600">BTC</span>
+                    <td class="p-5 text-right text-green-500 font-mono">${ex.trade_volume_24h_btc.toFixed(2)} BTC</td>
+                    <td class="p-5 text-center">
+                        <span class="border border-zinc-800 px-2 py-0.5 rounded text-[9px]">${ex.trust_score}/10</span>
                     </td>
-                    <td class="p-4 text-center">
-                        <span class="px-2 py-0.5 rounded-sm bg-zinc-900/80 border border-zinc-800 text-[9px] ${trustColor}">
-                            ${ex.trust_score || 'N/A'}/10
-                        </span>
-                    </td>
-                    <td class="p-4 text-zinc-500 italic font-light">
-                        ${ex.country || (type === 'dex' ? 'Decentralized' : 'International')}
-                    </td>
+                    <td class="p-5 text-right text-zinc-500 italic">${ex.country || 'Global'}</td>
                 </tr>
             `;
         });
 
-        tableHtml += `</tbody></table></div>`;
-        container.innerHTML = tableHtml;
-
-    } catch (error) {
-        console.error("AirdropXI Error:", error);
-        container.innerHTML = `
-            <div class="py-20 text-center">
-                <p class="text-red-500 font-mono text-[10px] uppercase">Gagal memuat data market.</p>
-                <button onclick="loadExchanges('${type}')" class="mt-4 text-[9px] text-zinc-500 underline uppercase hover:text-green-500">Retry Connection</button>
-            </div>
-        `;
+        html += `</tbody></table></div>`;
+        container.innerHTML = html;
+    } catch (err) {
+        container.innerHTML = `<div class="p-10 text-red-500 text-center text-[10px]">FAILED TO FETCH DATA</div>`;
     }
 }
 
-// Global Switch Function
-window.switchTab = function(type) {
-    if (currentTab === type) return;
-    currentTab = type;
-    loadExchanges(type);
-};
-
-// Auto Start
+function switchTab(type) { loadExchanges(type); }
 document.addEventListener('DOMContentLoaded', () => {
+    updateLabels();
     loadExchanges('cex');
 });
