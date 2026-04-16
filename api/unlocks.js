@@ -1,25 +1,29 @@
-// api/unlocks.js
 export default async function handler(req, res) {
-  // Masukkan API Key CryptoRank Tuan di sini atau di Environment Variable Vercel
-  const CRYPTORANK_API_KEY = process.env.CRYPTORANK_API_KEY
+  // Membaca key dari Environment Variables secara aman
+  const apiKey = process.env.CRYPTORANK_API_KEY;
+
+  if (!apiKey) {
+    return res.status(500).json({ error: "API Key tidak ditemukan di Environment Variables Vercel." });
+  }
 
   try {
-    // Memanggil data vesting/unlocks dari CryptoRank
-    const response = await fetch(`https://api.cryptorank.io/v1/token-unlocks?api_key=${CRYPTORANK_API_KEY}`);
+    // Menembak endpoint CryptoRank dengan key rahasia
+    const response = await fetch(`https://api.cryptorank.io/v1/token-unlocks?api_key=${apiKey}`);
     
-    if (!response.ok) throw new Error('CryptoRank API Error');
+    if (!response.ok) throw new Error('CryptoRank API Error atau Limit Tercapai');
     
     const result = await response.json();
 
-    // Mapping data agar UI Dashboard Tuan tetap gahar dan informatif
+    // Mapping data agar sesuai dengan struktur dashboard premium
     const formattedData = result.data.map(item => ({
       name: item.name,
       symbol: item.symbol,
-      img: item.image?.x64 || '', // Logo koin
+      img: item.image?.x64 || '', 
       price: item.price?.value || 0,
       unlocked_percent: item.unlockedPercent || 0,
       next_unlock_date: item.nextUnlock?.date || 'N/A',
       next_unlock_amount: item.nextUnlock?.tokens || 0,
+      market_cap: item.marketCap?.toLocaleString() || '0',
       status: item.type || 'Vesting'
     }));
 
@@ -27,6 +31,6 @@ export default async function handler(req, res) {
     return res.status(200).json(formattedData);
 
   } catch (error) {
-    return res.status(500).json({ error: "Gagal memuat data CryptoRank" });
+    return res.status(500).json({ error: "Gagal memuat data dari CryptoRank", details: error.message });
   }
 }
