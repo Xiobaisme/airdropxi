@@ -67,36 +67,16 @@ body {
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
-  cursor: none;
+  cursor: default;  /* ← DIUBAH: dari 'none' jadi 'default' */
   transition: background 0.4s, color 0.4s;
 }
 
 [data-theme="light"] body { cursor: default; }
 
 /* ==========================================
-   3. CUSTOM CURSOR (dark only)
+   3. CUSTOM CURSOR (dark only) - DIHAPUS
    ========================================== */
-#cursor {
-  position: fixed; width:10px; height:10px;
-  background: var(--g); border-radius:50%;
-  pointer-events: none; z-index:9999;
-  transform: translate(-50%,-50%);
-  transition: width .25s, height .25s, opacity .3s;
-  mix-blend-mode: screen;
-}
-#cursor-ring {
-  position: fixed; width:32px; height:32px;
-  border: 1.5px solid rgba(0,232,122,0.45); border-radius:50%;
-  pointer-events: none; z-index:9998;
-  transform: translate(-50%,-50%);
-  transition: transform .15s ease-out, width .25s, height .25s, border-color .25s;
-}
-[data-theme="light"] #cursor,
-[data-theme="light"] #cursor-ring { display: none; }
-
-/* Hover expand */
-body.hovering #cursor { width:16px; height:16px; }
-body.hovering #cursor-ring { width:48px; height:48px; border-color: rgba(0,232,122,0.8); }
+/* Blok ini dihapus total (cursor hijau & ring) */
 
 /* ==========================================
    4. BACKGROUND CANVAS
@@ -648,133 +628,4 @@ section {
 .st-item {
   display:flex; align-items:center; gap:10px;
   background:var(--surface); padding:9px 12px;
-  border-radius:var(--radius-sm); border:1px solid var(--border);
-}
-.st-dot { width:8px; height:8px; border-radius:50%; flex-shrink:0; }
-.st-item-text { font-size:12px; color:var(--text2); }
-.st-item-text strong { color:var(--text); font-family:'JetBrains Mono',monospace; font-size:10px; text-transform:uppercase; letter-spacing:1px; display:block; margin-bottom:2px; }
-
-/* ==========================================
-   15. FOOTER
-   ========================================== */
-footer {
-  background:var(--bg2);
-  border-top:1px solid var(--border);
-  padding:48px 40px 28px;
-  margin-top:0;
-}
-.footer-inner { max-width:1360px; margin:0 auto; }
-.footer-top { display:grid; grid-template-columns:1fr 1fr 1fr; gap:44px; margin-bottom:36px; }
-.footer-brand h3 { font-size:20px; font-weight:800; letter-spacing:-1px; margin-bottom:8px; }
-.footer-brand h3 span { background:linear-gradient(135deg,var(--g),var(--c)); -webkit-background-clip:text; -webkit-text-fill-color:transparent; background-clip:text; }
-.footer-brand p { font-size:12px; color:var(--text2); font-family:'JetBrains Mono',monospace; line-height:1.65; margin-bottom:18px; }
-.footer-socials { display:flex; gap:8px; }
-.fsoc {
-  width:34px; height:34px; border:1px solid var(--border);
-  border-radius:var(--radius-sm); display:flex; align-items:center;
-  justify-content:center; color:var(--text2); text-decoration:none;
-  transition:all .25s; font-size:14px;
-}
-.fsoc:hover { border-color:var(--g); color:var(--g); background:rgba(0,232,122,.06); transform:translateY(-2px); }
-.footer-links h4 { font-size:10px; text-transform:uppercase; letter-spacing:2px; color:var(--text2); margin-bottom:14px; font-family:'JetBrains Mono',monospace; }
-.footer-links a { display:block; font-size:12px; color:var(--text2); text-decoration:none; margin-bottom:8px; transition:color .2s; font-family:'JetBrains Mono',monospace; }
-.footer-links a:hover { color:var(--g); }
-.footer-bottom { border-top:1px solid var(--border); padding-top:20px; display:flex; justify-content:space-between; align-items:center; font-size:11px; font-family:'JetBrains Mono',monospace; color:var(--text2); }
-.dyor-badge { background:rgba(245,158,11,.07); border:1px solid rgba(245,158,11,.2); border-radius:var(--radius-sm); padding:8px 14px; font-size:10px; color:#f0b429; font-family:'JetBrains Mono',monospace; max-width:600px; text-align:center; margin:0 auto 18px; }
-
-/* ==========================================
-   16. AI CHAT PANEL
-   ========================================== */
-.ai-panel {
-  position:fixed; top:108px; right:20px;
-  width:360px; height:500px;
-  background:var(--bg2);
-  border:1px solid rgba(0,232,122,.18);
-  border-radius:var(--radius);
-  display:flex; flex-direction:column; z-index:9000;
-  box-shadow:0 24px 64px rgba(0,0,0,.6), 0 0 36px rgba(0,232,122,.05);
-  backdrop-filter:blur(28px);
-  transform:scale(0.94) translateY(-10px);
-  opacity:0; pointer-events:none;
-  transition:all .25s cubic-bezier(0.34,1.56,0.64,1);
-}
-.ai-panel.open { transform:scale(1) translateY(0); opacity:1; pointer-events:all; }
-.ai-panel-header {
-  padding:13px 14px; border-bottom:1px solid rgba(0,232,122,.08);
-  display:flex; align-items:center; gap:10px;
-}
-.ai-panel-avatar {
-  width:34px; height:34px;
-  background:linear-gradient(135deg,var(--g),var(--c));
-  border-radius:9px; display:flex; align-items:center; justify-content:center;
-  font-size:15px; flex-shrink:0;
-}
-.ai-panel-info { flex:1; }
-.ai-panel-name { font-weight:700; font-size:13px; color:var(--text); }
-.ai-panel-status { font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--g); display:flex; align-items:center; gap:4px; margin-top:2px; }
-.ai-status-dot { width:5px; height:5px; background:var(--g); border-radius:50%; animation:ldot 1.5s infinite; }
-.ai-panel-close { background:none; border:none; color:var(--text2); cursor:pointer; font-size:14px; padding:4px; transition:color .2s; }
-.ai-panel-close:hover { color:var(--text); }
-.ai-messages { flex:1; overflow-y:auto; padding:13px; display:flex; flex-direction:column; gap:10px; scroll-behavior:smooth; }
-.ai-messages::-webkit-scrollbar { width:3px; }
-.ai-messages::-webkit-scrollbar-thumb { background:rgba(0,232,122,.2); border-radius:2px; }
-.ai-msg { display:flex; gap:7px; align-items:flex-start; animation:fadeUp .3s ease; }
-.ai-msg.ai-msg-user { flex-direction:row-reverse; }
-.ai-msg-avatar { width:26px; height:26px; border-radius:7px; display:flex; align-items:center; justify-content:center; font-size:12px; flex-shrink:0; }
-.ai-msg-bot .ai-msg-avatar  { background:linear-gradient(135deg,var(--g),var(--c)); }
-.ai-msg-user .ai-msg-avatar { background:var(--surface); border:1px solid var(--border); }
-.ai-msg-bubble { max-width:250px; padding:9px 12px; border-radius:10px; font-size:12px; line-height:1.6; }
-.ai-msg-bot .ai-msg-bubble  { background:rgba(0,232,122,.04); border:1px solid rgba(0,232,122,.1); color:var(--text); border-top-left-radius:3px; font-family:'JetBrains Mono',monospace; }
-.ai-msg-user .ai-msg-bubble { background:rgba(0,232,122,.1); border:1px solid rgba(0,232,122,.22); color:var(--text); border-top-right-radius:3px; }
-.ai-typing { display:flex; gap:4px; align-items:center; padding:6px 10px; }
-.ai-tdot { width:5px; height:5px; background:var(--g); border-radius:50%; animation:aiTyping 1.2s infinite; }
-.ai-tdot:nth-child(2){ animation-delay:.2s; }
-.ai-tdot:nth-child(3){ animation-delay:.4s; }
-@keyframes aiTyping { 0%,80%,100%{opacity:.2;transform:scale(.8)} 40%{opacity:1;transform:scale(1.1)} }
-.ai-quick-btns { padding:0 13px 8px; display:flex; gap:5px; flex-wrap:wrap; }
-.ai-qbtn { background:rgba(0,232,122,.06); border:1px solid rgba(0,232,122,.14); color:var(--g); padding:4px 9px; border-radius:var(--radius-pill); font-size:9px; cursor:pointer; font-family:'JetBrains Mono',monospace; transition:all .15s; }
-.ai-qbtn:hover { background:rgba(0,232,122,.14); }
-.ai-input-row { padding:9px 13px; border-top:1px solid rgba(0,232,122,.08); display:flex; gap:7px; align-items:flex-end; }
-.ai-input { flex:1; background:rgba(0,232,122,.03); border:1px solid rgba(0,232,122,.14); color:var(--text); padding:8px 11px; border-radius:var(--radius-sm); font-family:'JetBrains Mono',monospace; font-size:11px; resize:none; height:36px; max-height:88px; outline:none; transition:border-color .2s; }
-.ai-input:focus { border-color:rgba(0,232,122,.4); }
-.ai-input::placeholder { color:var(--text3); }
-.ai-send-btn { background:var(--g); border:none; color:#000; width:36px; height:36px; border-radius:var(--radius-sm); cursor:pointer; font-size:13px; display:flex; align-items:center; justify-content:center; transition:all .2s; flex-shrink:0; }
-.ai-send-btn:hover { background:var(--c); transform:scale(1.05); }
-.ai-send-btn:disabled { opacity:.35; cursor:not-allowed; transform:none; }
-
-/* ==========================================
-   17. SCROLL REVEAL
-   ========================================== */
-.reveal { opacity:0; transform:translateY(24px); transition:opacity .7s ease, transform .7s ease; }
-.reveal.visible { opacity:1; transform:translateY(0); }
-
-/* ==========================================
-   18. MOBILE RESPONSIVE
-   ========================================== */
-@media(max-width:1024px) {
-  .hero { grid-template-columns:1fr; padding:48px 24px; gap:44px; min-height:auto; text-align:center; }
-  .hero-sub { max-width:100%; margin-left:auto; margin-right:auto; }
-  .hero-btns { justify-content:center; }
-  .hero-stats { justify-content:center; }
-  .hero-visual { transform:scale(.88); }
-}
-@media(max-width:768px) {
-  nav { padding:0 16px; }
-  .nav-links { display:none; }
-  section { padding:48px 16px; }
-  .guide-grid { grid-template-columns:1fr; }
-  .dash-grid { grid-template-columns:1fr 1fr; }
-  .footer-top { grid-template-columns:1fr; gap:32px; }
-  #airdrop-container { grid-template-columns:1fr; }
-  .filter-bar { flex-direction:column; align-items:stretch; }
-  footer { padding:36px 16px 20px; }
-  .ai-panel { right:10px; left:10px; width:auto; top:108px; }
-  .hero-visual { transform:scale(.75); margin-top:-30px; }
-  .float-card-1, .float-card-2 { display:none; }
-}
-@media(max-width:480px) {
-  .dash-grid { grid-template-columns:1fr; }
-  .hero h1 { font-size:34px; letter-spacing:-1px; }
-  .hero-btns { flex-direction:column; }
-  .btn-primary, .btn-ghost { width:100%; justify-content:center; }
-}
+  border-radius:var(--
