@@ -2,250 +2,589 @@
 <html lang="en" data-theme="dark">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Global Market Intelligence | AirdropXI</title>
-    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;600;700&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>AirdropXI — Global Market Intelligence</title>
+    <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
-        :root { 
-            --bg-grid: #020617; /* Warna gelap dasar Tuan */
-            --bg-accent: rgba(16, 185, 129, 0.05); /* Hijau transparan */
-            --grid-line: rgba(16, 185, 129, 0.1); /* Garis grid halus */
-            --card-bg: rgba(15, 23, 42, 0.7); /* Background card Docs Tuan */
-            --text: #eff3f4; 
-            --text-dim: #94a3b8; /* Teks dim Docs Tuan */
-            --border: rgba(16, 185, 129, 0.2); 
-            --accent: #1d9bf0; 
-            --emerald: #10b981; /* Emerald Docs Tuan */
-            --rose: #ef4444; /* Rose Tuan */
+        /* ==========================================
+           AIRDROPXI — FULL UI (tanpa custom cursor)
+           ========================================== */
+
+        /* ── CSS VARIABLES ── */
+        :root {
+            --g: #00e87a;
+            --c: #00c8f0;
+            --accent: #7c6dfa;
+            --bg: #080f0c;
+            --bg2: #0d1a14;
+            --bg3: #111f18;
+            --surface: rgba(255,255,255,0.04);
+            --surface-h: rgba(255,255,255,0.07);
+            --border: rgba(255,255,255,0.08);
+            --border-h: rgba(0,232,122,0.4);
+            --text: #e6f2ec;
+            --text2: #8aa898;
+            --text3: #4d7060;
+            --shadow: 0 4px 24px rgba(0,0,0,0.4);
+            --shadow-lg: 0 16px 48px rgba(0,0,0,0.5);
+            --glow: 0 0 32px rgba(0,232,122,0.15);
+            --radius: 14px;
+            --radius-sm: 8px;
+            --radius-pill: 100px;
         }
 
-        [data-theme="light"] { 
-            --bg-grid: #f8fafc; 
-            --bg-accent: rgba(0, 0, 0, 0.02); 
-            --grid-line: rgba(0,0,0,0.05); 
-            --card-bg: #fff; 
-            --text: #0f1419; 
-            --text-dim: #64748b; 
-            --border: #e2e8f0; 
+        [data-theme="light"] {
+            --bg: #f0f7f4;
+            --bg2: #e4f0eb;
+            --bg3: #ffffff;
+            --surface: rgba(0,0,0,0.04);
+            --surface-h: rgba(0,0,0,0.07);
+            --border: rgba(0,0,0,0.1);
+            --border-h: rgba(0,180,96,0.5);
+            --text: #0d2018;
+            --text2: #3d6652;
+            --text3: #7aaa90;
+            --shadow: 0 4px 24px rgba(0,0,0,0.1);
+            --shadow-lg: 0 16px 48px rgba(0,0,0,0.15);
+            --glow: 0 0 32px rgba(0,180,96,0.12);
         }
 
-        body { 
-            /* Latar Belakang AirdropXI Grid Style Tuan */
-            background-color: var(--bg-grid);
+        /* BASE RESET */
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+        html { scroll-behavior: smooth; }
+
+        body {
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            min-height: 100vh;
+            overflow-x: hidden;
+            cursor: default;
+            transition: background 0.4s, color 0.4s;
+        }
+
+        [data-theme="light"] body { cursor: default; }
+
+        /* BACKGROUND CANVAS + NOISE GRID (seperti AirdropXI) */
+        #bg-canvas {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            opacity: 1;
+            transition: opacity 0.4s;
+        }
+        [data-theme="light"] #bg-canvas { opacity: 0.35; }
+
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 1;
+        }
+
+        /* GRID BACKGROUND (seperti yang kamu minta) */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
             background-image: 
-                linear-gradient(var(--bg-accent) 2px, transparent 2px), 
-                linear-gradient(90deg, var(--bg-accent) 2px, transparent 2px), 
-                linear-gradient(var(--grid-line) 1px, transparent 1px), 
-                linear-gradient(90deg, var(--grid-line) 1px, transparent 1px);
-            background-size: 100px 100px, 100px 100px, 20px 20px, 20px 20px;
-            background-position: -2px -2px, -2px -2px, -1px -1px, -1px -1px;
-            color: var(--text); 
-            font-family: 'Plus Jakarta Sans', sans-serif; 
-            margin: 0; padding: 20px; transition: 0.3s; 
+                linear-gradient(var(--bg2) 1px, transparent 1px),
+                linear-gradient(90deg, var(--bg2) 1px, transparent 1px);
+            background-size: 40px 40px;
+            opacity: 0.5;
+            pointer-events: none;
+            z-index: 0;
         }
 
-        .container { max-width: 1200px; margin: 0 auto; }
-        
-        /* Nav & Controls */
-        .nav-bar { display: flex; justify-content: space-between; align-items: center; margin-bottom: 30px; gap: 10px; flex-wrap: wrap; }
-        .controls { display: flex; gap: 10px; }
-        .btn { background: var(--card-bg); border: 1px solid var(--border); color: var(--text); padding: 8px 16px; border-radius: 99px; cursor: pointer; font-weight: 700; text-decoration: none; font-size: 12px; transition: 0.2s; }
-        .btn:hover { border-color: var(--accent); }
-        .btn-active { background: var(--emerald); color: var(--bg-grid); border: none; }
+        .z1 { position: relative; z-index: 2; }
 
-        /* Table Card Docs Style Tuan */
-        .table-card { border: 1px solid var(--border); border-radius: 16px; overflow: hidden; background: var(--card-bg); margin-bottom: 20px; backdrop-filter: blur(10px); }
-        .search-box { padding: 15px; border-bottom: 1px solid var(--border); position: sticky; top: 0; background: var(--card-bg); z-index: 10; }
-        .search-input { width: 100%; background: #0f172a; border: none; color: #fff; padding: 12px 20px; border-radius: 9999px; outline: none; box-sizing: border-box; }
-        
-        table { width: 100%; border-collapse: collapse; min-width: 800px; }
-        th { text-align: left; padding: 15px; color: var(--text-dim); font-size: 11px; text-transform: uppercase; border-bottom: 1px solid var(--border); position: sticky; top: 70px; background: var(--card-bg); z-index: 9; }
-        td { padding: 15px; border-bottom: 1px solid var(--border); font-size: 14px; }
-        
-        .prog-bg { height: 6px; background: rgba(0,0,0,0.2); border-radius: 10px; width: 80px; margin-top: 5px; overflow: hidden; }
-        .prog-fill { height: 100%; background: var(--emerald); box-shadow: 0 0 8px var(--emerald); }
-        
-        /* Footer Xiobaiishikii Brand Tuan */
-        .footer { margin-top: 50px; display: flex; flex-direction: column; align-items: center; gap: 20px; padding-bottom: 40px; border-top: 1px solid var(--border); padding-top: 40px; }
-        .social-links { display: flex; gap: 12px; }
-        .soc-btn { background: var(--card-bg); border: 1px solid var(--border); color: #fff; padding: 10px 24px; border-radius: 99px; text-decoration: none; display: flex; align-items: center; gap: 8px; font-size: 14px; font-weight: 600; }
-        .btn-home-green { border: 1px solid var(--emerald); color: var(--emerald); text-transform: uppercase; }
-        
-        #loading-sentinel { text-align: center; padding: 30px; color: var(--emerald); font-weight: 700; font-size: 11px; letter-spacing: 1px; }
+        /* CONTAINER */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 40px;
+            position: relative;
+            z-index: 2;
+        }
+
+        /* NAVBAR STYLE AIRDROPXI */
+        .nav-bar {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 40px;
+            gap: 10px;
+            flex-wrap: wrap;
+            background: rgba(8,15,12,0.75);
+            backdrop-filter: blur(30px);
+            padding: 12px 24px;
+            border-radius: var(--radius);
+            border: 1px solid var(--border);
+        }
+        [data-theme="light"] .nav-bar {
+            background: rgba(240,247,244,0.88);
+        }
+
+        .controls {
+            display: flex;
+            gap: 10px;
+        }
+
+        .btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            padding: 8px 16px;
+            border-radius: var(--radius-pill);
+            cursor: pointer;
+            font-weight: 600;
+            text-decoration: none;
+            font-size: 11px;
+            text-transform: uppercase;
+            letter-spacing: 1px;
+            transition: all 0.2s;
+            font-family: 'Plus Jakarta Sans', sans-serif;
+        }
+        .btn:hover {
+            border-color: var(--g);
+            color: var(--g);
+            background: rgba(0,232,122,0.05);
+        }
+        .btn-active {
+            background: linear-gradient(135deg, var(--g), var(--c));
+            color: #000;
+            border: none;
+        }
+
+        /* HEADER SECTION */
+        .header-section {
+            margin-bottom: 30px;
+        }
+        .header-section h1 {
+            font-size: clamp(28px, 4vw, 42px);
+            font-weight: 800;
+            letter-spacing: -1.5px;
+            margin: 0;
+            background: linear-gradient(135deg, var(--text), var(--g));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .header-section p {
+            color: var(--text2);
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 13px;
+            margin-top: 8px;
+        }
+
+        /* TABLE CARD (style AirdropXI) */
+        .table-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--radius);
+            overflow: hidden;
+            margin-bottom: 20px;
+            backdrop-filter: blur(10px);
+            transition: all 0.3s;
+        }
+        .table-card:hover {
+            border-color: var(--border-h);
+            box-shadow: var(--shadow);
+        }
+
+        .search-box {
+            padding: 18px 20px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            background: var(--surface);
+            z-index: 10;
+        }
+        .search-input {
+            width: 100%;
+            background: var(--bg3);
+            border: 1px solid var(--border);
+            border-radius: var(--radius-pill);
+            padding: 12px 20px;
+            color: var(--text);
+            font-family: 'Plus Jakarta Sans', sans-serif;
+            font-size: 13px;
+            outline: none;
+            transition: all 0.2s;
+        }
+        .search-input:focus {
+            border-color: var(--g);
+            box-shadow: 0 0 0 2px rgba(0,232,122,0.1);
+        }
+        .search-input::placeholder {
+            color: var(--text3);
+        }
+
+        /* TABLE STYLING */
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            min-width: 800px;
+        }
+        th {
+            text-align: left;
+            padding: 16px 20px;
+            color: var(--text2);
+            font-size: 10px;
+            text-transform: uppercase;
+            letter-spacing: 1.5px;
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 70px;
+            background: var(--surface);
+            z-index: 9;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        td {
+            padding: 16px 20px;
+            border-bottom: 1px solid var(--border);
+            font-size: 13px;
+            color: var(--text);
+        }
+        tr:hover td {
+            background: rgba(0,232,122,0.03);
+        }
+
+        /* PROGRESS BAR */
+        .prog-bg {
+            height: 4px;
+            background: rgba(255,255,255,0.08);
+            border-radius: 4px;
+            width: 80px;
+            margin-top: 6px;
+            overflow: hidden;
+        }
+        .prog-fill {
+            height: 100%;
+            background: linear-gradient(90deg, var(--g), var(--c));
+            border-radius: 4px;
+            transition: width 0.3s;
+        }
+
+        /* STATUS BADGE */
+        .status-badge {
+            background: rgba(0,232,122,0.08);
+            padding: 4px 12px;
+            border-radius: var(--radius-pill);
+            font-size: 9px;
+            font-weight: 700;
+            letter-spacing: 1px;
+            text-transform: uppercase;
+            display: inline-block;
+            border: 1px solid rgba(0,232,122,0.2);
+        }
+
+        /* LOADING SENTINEL */
+        #loading-sentinel {
+            text-align: center;
+            padding: 30px;
+            color: var(--g);
+            font-weight: 700;
+            font-size: 11px;
+            letter-spacing: 2px;
+            font-family: 'JetBrains Mono', monospace;
+            background: var(--surface);
+        }
+
+        /* FOOTER STYLE AIRDROPXI */
+        .footer {
+            margin-top: 60px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 24px;
+            padding: 40px 20px 30px;
+            border-top: 1px solid var(--border);
+            background: var(--bg2);
+            border-radius: var(--radius);
+        }
+        .footer-brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+        .footer-brand img {
+            width: 36px;
+            height: 36px;
+            border-radius: 10px;
+        }
+        .footer-brand span {
+            font-weight: 800;
+            font-size: 18px;
+            letter-spacing: -0.5px;
+            background: linear-gradient(135deg, var(--g), var(--c));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+        .social-links {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .soc-btn {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            padding: 10px 24px;
+            border-radius: var(--radius-pill);
+            text-decoration: none;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 12px;
+            font-weight: 600;
+            transition: all 0.2s;
+        }
+        .soc-btn:hover {
+            border-color: var(--g);
+            color: var(--g);
+            background: rgba(0,232,122,0.05);
+            transform: translateY(-2px);
+        }
+        .btn-home-green {
+            border: 1px solid var(--g);
+            color: var(--g);
+            text-transform: uppercase;
+        }
+        .footer-copyright {
+            color: var(--text3);
+            font-size: 11px;
+            font-family: 'JetBrains Mono', monospace;
+        }
+        #footer-dyor {
+            font-size: 9px;
+            color: var(--text3);
+            font-family: monospace;
+            text-align: center;
+        }
+
+        /* RESPONSIVE */
+        @media (max-width: 768px) {
+            .container { padding: 15px; }
+            .nav-bar { flex-direction: column; align-items: stretch; }
+            .controls { justify-content: center; }
+            th, td { padding: 12px; }
+            .footer { margin-top: 40px; }
+        }
+        @media (max-width: 480px) {
+            th, td { font-size: 11px; padding: 10px; }
+            .prog-bg { width: 50px; }
+        }
     </style>
 </head>
 <body>
+    <canvas id="bg-canvas"></canvas>
+    <div class="z1">
+        <div class="container">
+            <div class="nav-bar">
+                <a href="/" class="btn" id="btn-back">← BACK TO HOME</a>
+                <div class="controls">
+                    <button class="btn btn-active" onclick="setLang('en')" id="lang-en">EN</button>
+                    <button class="btn" onclick="setLang('id')" id="lang-id">ID</button>
+                    <button class="btn" onclick="toggleTheme()" id="themeBtn">🌙 DARK</button>
+                </div>
+            </div>
 
-<div class="container">
-    <div class="nav-bar">
-        <a href="/" class="btn" id="btn-back">← BACK TO HOME</a>
-        <div class="controls">
-            <button class="btn btn-active" onclick="setLang('en')" id="lang-en">EN</button>
-            <button class="btn" onclick="setLang('id')" id="lang-id">ID</button>
-            <button class="btn" onclick="toggleTheme()" id="themeBtn">☀️ DARK</button>
+            <div class="header-section">
+                <h1 id="main-title">Global Market Intelligence</h1>
+                <p id="main-subtitle">Monitoring all crypto assets from CoinGecko for Tuan Regi.</p>
+            </div>
+
+            <div class="table-card">
+                <div class="search-box">
+                    <input type="text" id="tokenSearch" class="search-input" placeholder="Search tokens...">
+                </div>
+                <div style="overflow-x: auto;">
+                    <table>
+                        <thead>
+                            <tr id="table-head">
+                                <th>ASSET</th>
+                                <th>PRICE</th>
+                                <th>24H CHANGE</th>
+                                <th>MARKET CAP</th>
+                                <th>UNLOCKED</th>
+                                <th>STATUS</th>
+                            </tr>
+                        </thead>
+                        <tbody id="token-tbody"></tbody>
+                    </table>
+                </div>
+                <div id="loading-sentinel">SYNCING GLOBAL NODES...</div>
+            </div>
+
+            <div class="footer">
+                <div class="footer-brand">
+                    <img src="https://airdropxi.vercel.app/logo.png" alt="logo" onerror="this.style.display='none'">
+                    <span>AirdropXI Intelligence</span>
+                </div>
+                <div class="social-links">
+                    <a href="https://x.com/xiobai06" target="_blank" class="soc-btn"><i class="fab fa-twitter"></i> Twitter</a>
+                    <a href="https://t.me/xiobaiishikii" target="_blank" class="soc-btn"><i class="fab fa-telegram"></i> Telegram</a>
+                </div>
+                <p class="footer-copyright">© 2026 Xiobaiishikii — Stay Safe & Keep Grinding ⚡</p>
+                <p id="footer-dyor" style="font-size:10px;">DYOR: CONTENT FOR EDUCATIONAL PURPOSES ONLY.</p>
+                <a href="/" class="btn btn-home-green" id="btn-home-footer">BACK TO HOME</a>
+            </div>
         </div>
     </div>
 
-    <div style="margin-bottom: 30px;">
-        <h1 id="main-title" style="margin:0; font-size: 28px;">Global Market Intelligence</h1>
-        <p id="main-subtitle" style="color: var(--text-dim); margin: 5px 0;">Monitoring all crypto assets from CoinGecko for Tuan Regi.</p>
-    </div>
+    <script>
+        // ========== GLOBAL MARKET INTELLIGENCE (CoinGecko) ==========
+        let currentLang = 'en';
+        let page = 1;
+        let loading = false;
+        const tbody = document.getElementById('token-tbody');
 
-    <div class="table-card">
-        <div class="search-box">
-            <input type="text" id="tokenSearch" class="search-input" placeholder="Search tokens...">
-        </div>
-        <table>
-            <thead>
-                <tr id="table-head">
-                    <th>ASSET</th>
-                    <th>PRICE</th>
-                    <th>24H CHANGE</th>
-                    <th>MARKET CAP</th>
-                    <th>UNLOCKED</th>
-                    <th>STATUS</th>
-                </tr>
-            </thead>
-            <tbody id="token-tbody"></tbody>
-        </table>
-        <div id="loading-sentinel">SYNCING GLOBAL NODES...</div>
-    </div>
-
-    <div class="footer">
-        <div style="display:flex; align-items:center; gap:10px;">
-            <img src="https://airdropxi.vercel.app/logo.png" width="30" style="border-radius:8px;">
-            <span style="font-weight:800; font-size:20px; color:#fff;">AirdropXI Intelligence</span>
-        </div>
-        <div class="social-links">
-            <a href="https://x.com/xiobai06" target="_blank" class="soc-btn">Twitter</a>
-            <a href="https://t.me/xiobaiishikii" target="_blank" class="soc-btn">Telegram</a>
-        </div>
-        <p style="color:var(--text-dim); font-size:13px;">© 2026 Xiobaiishikii — Stay Safe & Keep Grinding ⚡</p>
-        <p id="footer-dyor" style="font-size:10px; color:#4b5563; font-family:monospace;">DYOR: CONTENT FOR EDUCATIONAL PURPOSES ONLY.</p>
-        <a href="/" class="btn btn-home-green" id="btn-home-footer">BACK TO HOME</a>
-    </div>
-</div>
-
-<script>
-    let currentLang = 'en';
-    let page = 1;
-    let loading = false;
-    const tbody = document.getElementById('token-tbody');
-
-    const i18n = {
-        en: {
-            title: "Global Market Intelligence",
-            subtitle: "Monitoring all crypto assets from CoinGecko.",
-            search: "Search tokens...",
-            back: "← BACK TO HOME",
-            table: ["ASSET", "PRICE", "24H CHANGE", "MARKET CAP", "UNLOCKED", "STATUS"],
-            loading: "SYNCING GLOBAL NODES...",
-            status: ["MARKET READY", "VESTING"],
-            dyor: "DYOR: CONTENT FOR EDUCATIONAL PURPOSES ONLY."
-        },
-        id: {
-            title: "Intelijen Pasar Global",
-            subtitle: "Memantau seluruh aset kripto dari CoinGecko.",
-            search: "Cari koin...",
-            back: "← KEMBALI",
-            table: ["ASET", "HARGA", "PERUBAHAN 24J", "MARKET CAP", "SIRKULASI", "STATUS"],
-            loading: "MENYINKRONKAN DATA GLOBAL...",
-            status: ["SIAP PASAR", "VESTING"],
-            dyor: "DYOR: KONTEN HANYA UNTUK TUJUAN EDUKASI."
-        }
-    };
-
-    function setLang(lang) {
-        currentLang = lang;
-        document.getElementById('lang-en').classList.toggle('btn-active', lang === 'en');
-        document.getElementById('lang-id').classList.toggle('btn-active', lang === 'id');
-        
-        // Update UI Text
-        document.getElementById('main-title').innerText = i18n[lang].title;
-        document.getElementById('main-subtitle').innerText = i18n[lang].subtitle;
-        document.getElementById('tokenSearch').placeholder = i18n[lang].search;
-        document.getElementById('btn-back').innerText = i18n[lang].back;
-        document.getElementById('btn-home-footer').innerText = i18n[lang].back;
-        document.getElementById('loading-sentinel').innerText = i18n[lang].loading;
-        document.getElementById('footer-dyor').innerText = i18n[lang].dyor;
-
-        const headers = document.querySelectorAll('th');
-        i18n[lang].table.forEach((text, i) => headers[i].innerText = text);
-        
-        // Update existing rows status labels
-        document.querySelectorAll('.status-badge').forEach(badge => {
-            const isLiquid = badge.getAttribute('data-liquid') === 'true';
-            badge.innerText = isLiquid ? i18n[lang].status[0] : i18n[lang].status[1];
-        });
-    }
-
-    function toggleTheme() {
-        const h = document.documentElement;
-        const b = document.getElementById('themeBtn');
-        if(h.getAttribute('data-theme')==='dark'){ 
-            h.setAttribute('data-theme','light'); 
-            b.innerHTML='☀️ LIGHT'; 
-        } else { 
-            h.setAttribute('data-theme','dark'); 
-            b.innerHTML='🌙 DARK'; 
-        }
-    }
-
-    async function loadCoins() {
-        if (loading) return;
-        loading = true;
-        try {
-            const r = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=${page}&sparkline=false`);
-            const data = await r.json();
-
-            if (data.length > 0) {
-                data.forEach(c => {
-                    const unlocked = c.total_supply ? Math.round((c.circulating_supply / c.total_supply) * 100) : 100;
-                    const isLiquid = unlocked > 90;
-                    const row = document.createElement('tr');
-                    row.innerHTML = `
-                        <td><div style="display:flex; align-items:center; gap:10px;"><img src="${c.image}" width="24" style="border-radius:50%"><b>${c.name}</b></div></td>
-                        <td style="font-weight:700;">$${c.current_price.toLocaleString()}</td>
-                        <td style="color:${c.price_change_percentage_24h >= 0 ? '#10b981' : '#ef4444'}">
-                            ${c.price_change_percentage_24h >= 0 ? '▲' : '▼'} ${Math.abs(c.price_change_percentage_24h || 0).toFixed(2)}%
-                        </td>
-                        <td style="color:var(--text-dim)">$${(c.market_cap || 0).toLocaleString()}</td>
-                        <td>
-                            <div style="font-size:11px; font-weight:600;">${unlocked}%</div>
-                            <div class="prog-bg"><div class="prog-fill" style="width:${unlocked}%"></div></div>
-                        </td>
-                        <td>
-                            <span class="status-badge" data-liquid="${isLiquid}" style="background:rgba(255,255,255,0.05); padding:4px 10px; border-radius:4px; font-size:10px; font-weight:800; color:${isLiquid ? '#10b981' : '#1d9bf0'}">
-                                ${isLiquid ? i18n[currentLang].status[0] : i18n[currentLang].status[1]}
-                            </span>
-                        </td>
-                    `;
-                    tbody.appendChild(row);
-                });
-                page++;
+        const i18n = {
+            en: {
+                title: "Global Market Intelligence",
+                subtitle: "Monitoring all crypto assets from CoinGecko.",
+                search: "Search tokens...",
+                back: "← BACK TO HOME",
+                table: ["ASSET", "PRICE", "24H CHANGE", "MARKET CAP", "UNLOCKED", "STATUS"],
+                loading: "SYNCING GLOBAL NODES...",
+                status: ["MARKET READY", "VESTING"],
+                dyor: "DYOR: CONTENT FOR EDUCATIONAL PURPOSES ONLY."
+            },
+            id: {
+                title: "Intelijen Pasar Global",
+                subtitle: "Memantau seluruh aset kripto dari CoinGecko.",
+                search: "Cari koin...",
+                back: "← KEMBALI",
+                table: ["ASET", "HARGA", "PERUBAHAN 24J", "MARKET CAP", "UNLOCKED", "STATUS"],
+                loading: "MENYINKRONKAN DATA GLOBAL...",
+                status: ["SIAP PASAR", "VESTING"],
+                dyor: "DYOR: KONTEN HANYA UNTUK TUJUAN EDUKASI."
             }
-        } catch (e) {
-            console.error("Gecko Sync Error");
+        };
+
+        function setLang(lang) {
+            currentLang = lang;
+            document.getElementById('lang-en').classList.toggle('btn-active', lang === 'en');
+            document.getElementById('lang-id').classList.toggle('btn-active', lang === 'id');
+            
+            document.getElementById('main-title').innerText = i18n[lang].title;
+            document.getElementById('main-subtitle').innerText = i18n[lang].subtitle;
+            document.getElementById('tokenSearch').placeholder = i18n[lang].search;
+            document.getElementById('btn-back').innerText = i18n[lang].back;
+            document.getElementById('btn-home-footer').innerText = i18n[lang].back;
+            document.getElementById('loading-sentinel').innerText = i18n[lang].loading;
+            document.getElementById('footer-dyor').innerText = i18n[lang].dyor;
+
+            const headers = document.querySelectorAll('th');
+            i18n[lang].table.forEach((text, i) => {
+                if (headers[i]) headers[i].innerText = text;
+            });
+            
+            document.querySelectorAll('.status-badge').forEach(badge => {
+                const isLiquid = badge.getAttribute('data-liquid') === 'true';
+                badge.innerText = isLiquid ? i18n[lang].status[0] : i18n[lang].status[1];
+            });
         }
-        loading = false;
-    }
 
-    const observer = new IntersectionObserver((entries) => {
-        if (entries[0].isIntersecting) loadCoins();
-    }, { threshold: 0.1 });
+        function toggleTheme() {
+            const html = document.documentElement;
+            const btn = document.getElementById('themeBtn');
+            if (html.getAttribute('data-theme') === 'dark') {
+                html.setAttribute('data-theme', 'light');
+                btn.innerHTML = '☀️ LIGHT';
+            } else {
+                html.setAttribute('data-theme', 'dark');
+                btn.innerHTML = '🌙 DARK';
+            }
+        }
 
-    observer.observe(document.getElementById('loading-sentinel'));
+        async function loadCoins() {
+            if (loading) return;
+            loading = true;
+            try {
+                const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=${page}&sparkline=false`);
+                const data = await res.json();
+                if (data.length > 0) {
+                    data.forEach(coin => {
+                        const unlocked = coin.total_supply ? Math.round((coin.circulating_supply / coin.total_supply) * 100) : 100;
+                        const isLiquid = unlocked > 90;
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td><div style="display:flex; align-items:center; gap:10px;"><img src="${coin.image}" width="24" height="24" style="border-radius:50%;"> <b>${coin.name}</b></div></td>
+                            <td style="font-weight:700;">$${coin.current_price?.toLocaleString() || '0'}</td>
+                            <td style="color:${coin.price_change_percentage_24h >= 0 ? '#00e87a' : '#ff4d6d'}">
+                                ${coin.price_change_percentage_24h >= 0 ? '▲' : '▼'} ${Math.abs(coin.price_change_percentage_24h || 0).toFixed(2)}%
+                            </td>
+                            <td style="color:var(--text2)">$${(coin.market_cap || 0).toLocaleString()}</td>
+                            <td>
+                                <div style="font-size:11px; font-weight:600; font-family:'JetBrains Mono',monospace;">${unlocked}%</div>
+                                <div class="prog-bg"><div class="prog-fill" style="width:${unlocked}%"></div></div>
+                            </td>
+                            <td>
+                                <span class="status-badge" data-liquid="${isLiquid}" style="color:${isLiquid ? '#00e87a' : '#00c8f0'}">
+                                    ${isLiquid ? i18n[currentLang].status[0] : i18n[currentLang].status[1]}
+                                </span>
+                            </td>
+                        `;
+                        tbody.appendChild(row);
+                    });
+                    page++;
+                }
+            } catch (err) {
+                console.error("CoinGecko error:", err);
+            }
+            loading = false;
+        }
 
-    document.getElementById('tokenSearch').addEventListener('input', (e) => {
-        const term = e.target.value.toLowerCase();
-        document.querySelectorAll('#token-tbody tr').forEach(row => {
-            row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none';
+        // Infinite scroll observer
+        const observer = new IntersectionObserver((entries) => {
+            if (entries[0].isIntersecting && !loading) loadCoins();
+        }, { threshold: 0.1 });
+        observer.observe(document.getElementById('loading-sentinel'));
+
+        // Search filter
+        document.getElementById('tokenSearch').addEventListener('input', (e) => {
+            const term = e.target.value.toLowerCase();
+            document.querySelectorAll('#token-tbody tr').forEach(row => {
+                row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none';
+            });
         });
-    });
 
-    // Start with English
-    setLang('en');
-    loadCoins();
-</script>
+        // Initialize
+        setLang('en');
+        loadCoins();
+
+        // Optional: Simple canvas effect (glow)
+        const canvas = document.getElementById('bg-canvas');
+        if (canvas) {
+            const ctx = canvas.getContext('2d');
+            function resizeCanvas() {
+                canvas.width = window.innerWidth;
+                canvas.height = window.innerHeight;
+            }
+            resizeCanvas();
+            window.addEventListener('resize', resizeCanvas);
+            function draw() {
+                if (!ctx) return;
+                ctx.clearRect(0, 0, canvas.width, canvas.height);
+                ctx.fillStyle = 'rgba(0,232,122,0.02)';
+                for (let i = 0; i < 60; i++) {
+                    ctx.beginPath();
+                    ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2, 0, Math.PI * 2);
+                    ctx.fill();
+                }
+                requestAnimationFrame(draw);
+            }
+            draw();
+        }
+    </script>
 </body>
 </html>
