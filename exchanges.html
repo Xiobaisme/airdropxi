@@ -1,224 +1,697 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id" data-theme="dark">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Pasar Bursa Crypto</title>
+    <title>exchanges Crypto — AirdropXI</title>
     <script src="https://cdn.tailwindcss.com"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
-        body {
-            background-color: black;
-            background-image: linear-gradient(rgba(0,255,100,0.05) 1px, transparent 1px),
-                              linear-gradient(90deg, rgba(0,255,100,0.05) 1px, transparent 1px);
-            background-size: 40px 40px;
+        :root {
+            --bg: #000000;
+            --bg2: #0a0a0a;
+            --card: rgba(0,0,0,0.6);
+            --border: rgba(0,255,100,0.15);
+            --border2: rgba(0,255,100,0.08);
+            --text: #ffffff;
+            --text2: #9ca3af;
+            --text3: rgba(0,255,100,0.7);
+            --green: #22c55e;
+            --green2: rgba(34,197,94,0.15);
+            --green3: rgba(34,197,94,0.08);
+            --nav: rgba(0,0,0,0.85);
+            --grid: rgba(0,255,100,0.04);
         }
+        [data-theme="light"] {
+            --bg: #f0fdf4;
+            --bg2: #ecfdf5;
+            --card: rgba(255,255,255,0.85);
+            --border: rgba(34,197,94,0.25);
+            --border2: rgba(34,197,94,0.12);
+            --text: #0f1a12;
+            --text2: #374151;
+            --text3: #16a34a;
+            --green: #16a34a;
+            --green2: rgba(34,197,94,0.12);
+            --green3: rgba(34,197,94,0.06);
+            --nav: rgba(240,253,244,0.92);
+            --grid: rgba(34,197,94,0.06);
+        }
+
+        * { font-family: 'Space Grotesk', sans-serif; }
+        
+        body {
+            background-color: var(--bg);
+            color: var(--text);
+            transition: background 0.3s, color 0.3s;
+            min-height: 100vh;
+        }
+
+        /* Grid background */
+        body::before {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image:
+                linear-gradient(var(--grid) 1px, transparent 1px),
+                linear-gradient(90deg, var(--grid) 1px, transparent 1px);
+            background-size: 40px 40px;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Radial glow */
+        body::after {
+            content: '';
+            position: fixed;
+            top: -20%;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 800px;
+            height: 500px;
+            background: radial-gradient(ellipse, rgba(34,197,94,0.08) 0%, transparent 70%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        /* Navbar */
+        nav {
+            background: var(--nav);
+            backdrop-filter: blur(16px);
+            border-bottom: 1px solid var(--border);
+            position: sticky;
+            top: 0;
+            z-index: 50;
+            transition: background 0.3s;
+        }
+
+        /* Ticker */
+        .ticker-wrap {
+            background: rgba(0,0,0,0.3);
+            border-bottom: 1px solid var(--border2);
+            overflow: hidden;
+            height: 32px;
+            display: flex;
+            align-items: center;
+        }
+        [data-theme="light"] .ticker-wrap {
+            background: rgba(255,255,255,0.4);
+        }
+        .ticker-track {
+            display: flex;
+            gap: 2.5rem;
+            animation: ticker 40s linear infinite;
+            white-space: nowrap;
+        }
+        @keyframes ticker {
+            0% { transform: translateX(0); }
+            100% { transform: translateX(-50%); }
+        }
+        .ticker-item {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 11px;
+            color: var(--text3);
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .ticker-item .up { color: #22c55e; }
+        .ticker-item .down { color: #ef4444; }
+
+        /* Table styles */
+        table { border-collapse: separate; border-spacing: 0; width: 100%; }
+        thead th {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.12em;
+            color: var(--green);
+            padding: 14px 12px;
+            border-bottom: 1px solid var(--border);
+            text-align: left;
+            background: var(--green3);
+        }
+        tbody tr {
+            border-bottom: 1px solid var(--border2);
+            transition: background 0.2s;
+        }
+        tbody tr:hover { background: var(--green3); }
+        tbody td { padding: 12px; vertical-align: middle; }
+
+        /* Rank badge */
+        .rank-badge {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 12px;
+            font-weight: 600;
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            border: 1px solid var(--border);
+            color: var(--text3);
+            background: var(--green3);
+        }
+        .rank-badge.gold { border-color: rgba(250,204,21,0.4); color: #fbbf24; background: rgba(250,204,21,0.08); }
+        .rank-badge.silver { border-color: rgba(209,213,219,0.4); color: #d1d5db; background: rgba(209,213,219,0.08); }
+        .rank-badge.bronze { border-color: rgba(180,83,9,0.4); color: #f97316; background: rgba(180,83,9,0.08); }
+
+        /* Logo */
+        .logo-img {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            object-fit: cover;
+            background: var(--green3);
+            flex-shrink: 0;
+        }
+        .logo-placeholder {
+            width: 32px; height: 32px;
+            border-radius: 50%;
+            border: 1px solid var(--border);
+            background: var(--green3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 10px;
+            color: var(--green);
+            font-weight: 700;
+            flex-shrink: 0;
+        }
+
+        /* Tag */
+        .tag {
+            display: inline-block;
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 500;
+            border: 1px solid var(--border);
+            color: var(--green);
+            background: var(--green3);
+            white-space: nowrap;
+        }
+
+        /* Tab */
+        .tab-active {
+            background: var(--green2);
+            color: var(--green);
+            border: 1px solid var(--border);
+        }
+        .tab-inactive {
+            background: transparent;
+            color: var(--text2);
+            border: 1px solid var(--border2);
+        }
+
+        /* Card container */
+        .card {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            backdrop-filter: blur(20px);
+        }
+
+        /* Scrollbar */
+        ::-webkit-scrollbar { width: 4px; height: 4px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: var(--border); border-radius: 4px; }
+
+        /* Search */
+        .search-input {
+            background: var(--green3);
+            border: 1px solid var(--border);
+            color: var(--text);
+            border-radius: 10px;
+            padding: 8px 14px 8px 38px;
+            font-size: 13px;
+            outline: none;
+            transition: border 0.2s;
+            width: 100%;
+        }
+        .search-input::placeholder { color: var(--text2); }
+        .search-input:focus { border-color: var(--green); }
+
+        /* Stats card */
+        .stat-card {
+            background: var(--green3);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 14px 18px;
+            flex: 1;
+            min-width: 0;
+        }
+
+        /* Skeleton */
+        .skeleton {
+            background: linear-gradient(90deg, var(--green3) 25%, var(--green2) 50%, var(--green3) 75%);
+            background-size: 200% 100%;
+            animation: shimmer 1.5s infinite;
+            border-radius: 6px;
+        }
+        @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
+
+        /* Pulse dot */
+        .pulse-dot {
+            width: 6px; height: 6px;
+            border-radius: 50%;
+            background: var(--green);
+            animation: pulse 2s infinite;
+            display: inline-block;
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; transform: scale(1); }
+            50% { opacity: 0.5; transform: scale(1.5); }
+        }
+
+        /* Mobile table scroll */
+        .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
+
+        /* Mode toggle */
+        .mode-btn {
+            width: 36px; height: 36px;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: var(--green3);
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .mode-btn:hover { background: var(--green2); }
+
+        /* Fade in */
+        .fade-in { animation: fadeIn 0.4s ease both; }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+
+        /* Page transition */
+        main { position: relative; z-index: 1; }
     </style>
 </head>
-<body class="text-white">
+<body>
 
-<div class="max-w-6xl mx-auto px-6 py-12">
+<!-- TICKER BAR -->
+<div class="ticker-wrap">
+    <div class="ticker-track" id="tickerTrack">
+        <!-- filled by JS -->
+    </div>
+</div>
 
-    <!-- BACK BUTTON -->
-    <div class="mb-6">
-        <a href="/" class="inline-flex items-center gap-2 px-4 py-2 rounded-full border border-green-400/30 text-green-400 hover:bg-green-500/10 transition">
-            <svg xmlns="http://www.w3.org/2000/svg" class="w-4 h-4" fill="none" stroke="currentColor" stroke-width="2">
-                <path d="M15 18l-6-6 6-6"/>
-            </svg>
-            <span id="backText">Kembali</span>
+<!-- NAVBAR -->
+<nav>
+    <div class="max-w-6xl mx-auto px-4 py-3 flex items-center justify-between gap-4">
+        <!-- Logo -->
+        <a href="/" class="flex items-center gap-2 shrink-0">
+            <img src="https://airdropxi.vercel.app/logo.png" class="w-7 h-7 rounded-lg" alt="logo" onerror="this.style.display='none'">
+            <span class="font-bold text-sm" style="color:var(--text)">AirdropXI</span>
         </a>
+
+        <!-- Nav links (desktop) -->
+        <div class="hidden md:flex items-center gap-1 text-xs font-medium" style="color:var(--text2)">
+            <a href="/" class="px-3 py-1.5 rounded-lg hover:bg-green-500/10 hover:text-green-400 transition">Home</a>
+            <a href="/docs.html" class="px-3 py-1.5 rounded-lg hover:bg-green-500/10 hover:text-green-400 transition">Docs</a>
+            <a href="/unlocks.html" class="px-3 py-1.5 rounded-lg hover:bg-green-500/10 hover:text-green-400 transition">Token Unlocks</a>
+            <a href="/reward.html" class="px-3 py-1.5 rounded-lg hover:bg-green-500/10 hover:text-green-400 transition">Reward</a>
+            <a href="/exchanges.html" class="px-3 py-1.5 rounded-lg text-green-400 bg-green-500/10 border border-green-400/20 transition">Exchanges</a>
+        </div>
+
+        <!-- Right controls -->
+        <div class="flex items-center gap-2 shrink-0">
+            <!-- Lang -->
+            <button onclick="toggleLang()" class="mode-btn text-xs font-bold" id="langBtn">EN</button>
+            <!-- Dark/Light -->
+            <button onclick="toggleTheme()" class="mode-btn" id="themeBtn" title="Toggle theme">
+                <span id="themeIcon">🌙</span>
+            </button>
+        </div>
+    </div>
+</nav>
+
+<main>
+<div class="max-w-6xl mx-auto px-4 py-10">
+
+    <!-- BREADCRUMB -->
+    <div class="flex items-center gap-2 text-xs mb-8" style="color:var(--text2)">
+        <a href="/" class="hover:text-green-400 transition">Home</a>
+        <span style="color:var(--border)">›</span>
+        <span style="color:var(--green)">Exchanges</span>
     </div>
 
     <!-- HEADER -->
-    <div class="flex justify-between items-center">
-        <div>
-            <h1 id="title" class="text-4xl font-extrabold"></h1>
-            <p id="subtitle" class="text-green-400/70 text-sm mt-2"></p>
+    <div class="mb-8 fade-in">
+        <div class="flex items-center gap-3 mb-2">
+            <span class="pulse-dot"></span>
+            <span class="text-xs font-mono" style="color:var(--text3)" id="liveLabel">LIVE DATA</span>
         </div>
-        <button onclick="toggleLang()" class="px-4 py-2 rounded-full border border-green-400/30 text-green-400 hover:bg-green-500/10">
-            <span id="langBtn">EN</span>
-        </button>
+        <h1 id="pageTitle" class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
+            <span style="color:var(--green)">PASAR</span> BURSA
+        </h1>
+        <p id="pageSubtitle" class="text-sm" style="color:var(--text2)">Data real-time bursa crypto terpercaya · Top 100 CEX & DEX</p>
     </div>
 
-    <!-- TAB -->
-    <div class="flex gap-3 mt-6">
-        <button id="cexTab" class="px-5 py-2 rounded-full bg-green-500/20 text-green-400 border border-green-400/30">CEX</button>
-        <button id="dexTab" class="px-5 py-2 rounded-full bg-black/30 text-gray-400 border border-gray-600/20">DEX</button>
+    <!-- STATS ROW -->
+    <div class="flex gap-3 mb-8 flex-wrap fade-in">
+        <div class="stat-card">
+            <p class="text-xs font-mono mb-1" style="color:var(--text3)" id="statCexLabel">CEX Listed</p>
+            <p class="text-2xl font-bold" style="color:var(--text)" id="statCex">—</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs font-mono mb-1" style="color:var(--text3)" id="statDexLabel">DEX Listed</p>
+            <p class="text-2xl font-bold" style="color:var(--text)" id="statDex">—</p>
+        </div>
+        <div class="stat-card">
+            <p class="text-xs font-mono mb-1" style="color:var(--text3)" id="statTotalLabel">Total Exchanges</p>
+            <p class="text-2xl font-bold" style="color:var(--text)" id="statTotal">—</p>
+        </div>
     </div>
 
-    <!-- CONTAINER -->
-    <div class="mt-10 p-6 rounded-2xl border border-green-500/20 bg-black/40 backdrop-blur-xl">
-        <div id="loading" class="text-center text-green-400 py-10"></div>
-        <div id="error" class="hidden text-center text-red-400 py-10"></div>
-        <table id="table" class="w-full text-sm text-left text-gray-300 hidden">
-            <thead class="text-xs uppercase text-green-400 border-b border-green-500/20">
-                <tr>
-                    <th id="thRank" class="py-4"></th>
-                    <th id="thExchange"></th>
-                    <th id="thCountry"></th>
-                    <th id="thAdvantage"></th>
-                    <th id="thSuitable"></th>
-                </tr>
-            </thead>
-            <tbody id="tbody" class="divide-y divide-green-500/10"></tbody>
-        </table>
-    </div>
-
-    <!-- SOCIAL MEDIA FOOTER -->
-    <div class="mt-16 pt-8 border-t border-green-500/20 text-center">
-        <div class="flex justify-center gap-6 mb-4">
-            <a href="https://twitter.com/xiobai06" target="_blank" class="flex items-center gap-2 px-5 py-2 rounded-full bg-black/40 border border-green-400/30 text-green-400 hover:bg-green-500/10 hover:scale-105 transition-all duration-300">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+    <!-- MAIN CARD -->
+    <div class="card fade-in">
+        <!-- Tab + Search bar -->
+        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 border-b" style="border-color:var(--border2)">
+            <!-- Tabs -->
+            <div class="flex gap-2">
+                <button id="cexTab" onclick="setActiveTab('cex')" class="tab-active px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200">CEX</button>
+                <button id="dexTab" onclick="setActiveTab('dex')" class="tab-inactive px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200">DEX</button>
+            </div>
+            <!-- Search -->
+            <div class="relative max-w-xs w-full">
+                <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color:var(--text2)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24">
+                    <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
                 </svg>
-                <span>xiobai06</span>
-            </a>
-            <a href="https://t.me/Xiobaiishikii" target="_blank" class="flex items-center gap-2 px-5 py-2 rounded-full bg-black/40 border border-green-400/30 text-green-400 hover:bg-green-500/10 hover:scale-105 transition-all duration-300">
-                <svg class="w-5 h-5" fill="currentColor" viewBox="0 0 24 24">
-                    <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.6-1.38-.97-2.23-1.56-.99-.67-.35-1.04.22-1.64.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.08-.2-.09-.06-.22-.04-.31-.02-.13.02-2.18 1.38-3.16 2.01-.3.2-.57.3-.81.3-.27 0-.7-.13-1.04-.24-.42-.13-.76-.23-.81-.48-.03-.16.12-.33.34-.48.78-.54 3.26-2.11 4.62-2.98 2.2-1.4 2.66-1.64 2.96-1.65.07 0 .21.02.3.12.07.08.1.2.08.33z"/>
-                </svg>
-                <span>Xiobaiishikii</span>
+                <input type="text" id="searchInput" class="search-input" placeholder="Search exchange..." oninput="filterTable()">
+            </div>
+        </div>
+
+        <!-- Table -->
+        <div class="table-wrap">
+            <!-- Loading skeleton -->
+            <div id="loadingState" class="p-6">
+                <div class="space-y-3">
+                    ${Array(8).fill('').map(() => `
+                    <div class="flex items-center gap-3">
+                        <div class="skeleton w-8 h-8 rounded-lg"></div>
+                        <div class="skeleton w-8 h-8 rounded-full"></div>
+                        <div class="skeleton h-4 rounded flex-1"></div>
+                        <div class="skeleton h-4 rounded w-24 hidden md:block"></div>
+                        <div class="skeleton h-4 rounded w-32 hidden md:block"></div>
+                        <div class="skeleton h-6 rounded-full w-20"></div>
+                    </div>`).join('')}
+                </div>
+            </div>
+
+            <!-- Error -->
+            <div id="errorState" class="hidden text-center py-16">
+                <p class="text-4xl mb-3">😢</p>
+                <p class="font-semibold" style="color:var(--text)">Gagal mengambil data</p>
+                <p class="text-sm mt-1" style="color:var(--text2)">Periksa koneksi internet kamu</p>
+                <button onclick="loadData()" class="mt-4 px-5 py-2 rounded-full text-sm text-green-400 border border-green-400/30 hover:bg-green-500/10 transition">Coba lagi</button>
+            </div>
+
+            <!-- Empty -->
+            <div id="emptyState" class="hidden text-center py-16">
+                <p class="text-4xl mb-3">🔍</p>
+                <p class="font-semibold" style="color:var(--text)" id="emptyMsg">Tidak ditemukan</p>
+            </div>
+
+            <table id="table" class="hidden">
+                <thead>
+                    <tr>
+                        <th id="thRank" style="min-width:56px">RANK</th>
+                        <th id="thExchange" style="min-width:180px">EXCHANGE</th>
+                        <th id="thCountry" class="hidden md:table-cell" style="min-width:120px">NEGARA</th>
+                        <th id="thAdvantage" class="hidden lg:table-cell" style="min-width:200px">KELEBIHAN</th>
+                        <th id="thSuitable" style="min-width:140px">COCOK UNTUK</th>
+                    </tr>
+                </thead>
+                <tbody id="tbody"></tbody>
+            </table>
+        </div>
+
+        <!-- Footer count -->
+        <div class="flex items-center justify-between px-4 py-3 border-t" style="border-color:var(--border2)">
+            <p class="text-xs font-mono" style="color:var(--text2)" id="footerCount">—</p>
+            <a href="https://coinmarketcap.com" target="_blank" class="text-xs" style="color:var(--text2)">
+                Source: CoinMarketCap
             </a>
         </div>
-        <div class="text-gray-500 text-xs space-y-2">
-            <p>AirdropXI</p>
-            <p>© 2026 Xiobailishiki — Stay Safe & Keep Grinding</p>
-            <p class="text-yellow-500/60">DYOR: CONTENT FOR EDUCATIONAL PURPOSES ONLY.</p>
+    </div>
+
+    <!-- SOCIAL FOOTER -->
+    <div class="mt-16 pt-8" style="border-top: 1px solid var(--border2)">
+        <div class="flex flex-col md:flex-row items-center justify-between gap-6">
+            <!-- Brand -->
+            <div class="text-center md:text-left">
+                <p class="font-bold text-sm mb-1" style="color:var(--text)">AirdropXI</p>
+                <p class="text-xs" style="color:var(--text2)">© 2026 Xiobailishiki — Stay Safe & Keep Grinding</p>
+                <p class="text-xs mt-1" style="color:rgba(234,179,8,0.6)">DYOR: CONTENT FOR EDUCATIONAL PURPOSES ONLY.</p>
+            </div>
+            <!-- Social links -->
+            <div class="flex gap-3">
+                <a href="https://twitter.com/xiobai06" target="_blank" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-all hover:scale-105" style="background:var(--green3);border:1px solid var(--border);color:var(--green)">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z"/>
+                    </svg>
+                </a>
+                <a href="https://t.me/Xiobaiishikii" target="_blank" class="flex items-center gap-2 px-4 py-2 rounded-full text-sm transition-all hover:scale-105" style="background:var(--green3);border:1px solid var(--border);color:var(--green)">
+                    <svg class="w-4 h-4" fill="currentColor" viewBox="0 0 24 24">
+                        <path d="M12 2C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm4.64 6.8c-.15 1.58-.8 5.42-1.13 7.19-.14.75-.42 1-.68 1.03-.58.05-1.02-.38-1.58-.75-.88-.6-1.38-.97-2.23-1.56-.99-.67-.35-1.04.22-1.64.15-.15 2.71-2.48 2.76-2.69.01-.03.01-.14-.08-.2-.09-.06-.22-.04-.31-.02-.13.02-2.18 1.38-3.16 2.01-.3.2-.57.3-.81.3-.27 0-.7-.13-1.04-.24-.42-.13-.76-.23-.81-.48-.03-.16.12-.33.34-.48.78-.54 3.26-2.11 4.62-2.98 2.2-1.4 2.66-1.64 2.96-1.65.07 0 .21.02.3.12.07.08.1.2.08.33z"/>
+                    </svg>
+                </a>
+            </div>
         </div>
     </div>
 
 </div>
+</main>
 
 <script>
-// LANGUAGE
-let currentLang = "id";
+// ─── THEME ───────────────────────────────────────────────
+let theme = localStorage.getItem('xi-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', theme);
+document.getElementById('themeIcon').textContent = theme === 'dark' ? '🌙' : '☀️';
 
-const lang = {
-  id: {
-    title: "<span class='text-green-400'>PASAR</span> BURSA",
-    subtitle: "DATA REAL-TIME BURSA CRYPTO",
-    loading: "Mengambil data...",
-    error: "Gagal ambil data 😢",
-    rank: "Rank",
-    exchange: "Exchange",
-    country: "Negara",
-    advantage: "Kelebihan",
-    suitable: "Cocok Untuk",
-    back: "Kembali",
-    btn: "EN"
-  },
-  en: {
-    title: "<span class='text-green-400'>MARKET</span> EXCHANGES",
-    subtitle: "REAL-TIME CRYPTO EXCHANGE DATA",
-    loading: "Loading...",
-    error: "Failed to fetch 😢",
-    rank: "Rank",
-    exchange: "Exchange",
-    country: "Country",
-    advantage: "Features",
-    suitable: "Best For",
-    back: "Back",
-    btn: "ID"
-  }
+function toggleTheme() {
+    theme = theme === 'dark' ? 'light' : 'dark';
+    document.documentElement.setAttribute('data-theme', theme);
+    document.getElementById('themeIcon').textContent = theme === 'dark' ? '🌙' : '☀️';
+    localStorage.setItem('xi-theme', theme);
+}
+
+// ─── LANGUAGE ────────────────────────────────────────────
+let lang = localStorage.getItem('xi-lang') || 'id';
+
+const i18n = {
+    id: {
+        title: '<span style="color:var(--green)">PASAR</span> BURSA',
+        subtitle: 'Data real-time bursa crypto terpercaya · Top 100 CEX & DEX',
+        live: 'LIVE DATA',
+        statCex: 'CEX Terdaftar',
+        statDex: 'DEX Terdaftar',
+        statTotal: 'Total Exchange',
+        rank: 'RANK', exchange: 'EXCHANGE',
+        country: 'NEGARA', advantage: 'KELEBIHAN', suitable: 'COCOK UNTUK',
+        search: 'Cari exchange...',
+        empty: 'Exchange tidak ditemukan',
+        source: 'Sumber: CoinMarketCap',
+        lang: 'EN'
+    },
+    en: {
+        title: '<span style="color:var(--green)">MARKET</span> EXCHANGES',
+        subtitle: 'Real-time crypto exchange data · Top 100 CEX & DEX',
+        live: 'LIVE DATA',
+        statCex: 'CEX Listed',
+        statDex: 'DEX Listed',
+        statTotal: 'Total Exchanges',
+        rank: 'RANK', exchange: 'EXCHANGE',
+        country: 'COUNTRY', advantage: 'FEATURES', suitable: 'BEST FOR',
+        search: 'Search exchange...',
+        empty: 'No exchange found',
+        source: 'Source: CoinMarketCap',
+        lang: 'ID'
+    }
 };
 
 function applyLang() {
-  const t = lang[currentLang];
-  title.innerHTML = t.title;
-  subtitle.innerText = t.subtitle;
-  loading.innerText = t.loading;
-  error.innerText = t.error;
-  thRank.innerText = t.rank;
-  thExchange.innerText = t.exchange;
-  thCountry.innerText = t.country;
-  thAdvantage.innerText = t.advantage;
-  thSuitable.innerText = t.suitable;
-  backText.innerText = t.back;
-  langBtn.innerText = t.btn;
+    const t = i18n[lang];
+    document.getElementById('pageTitle').innerHTML = t.title;
+    document.getElementById('pageSubtitle').textContent = t.subtitle;
+    document.getElementById('liveLabel').textContent = t.live;
+    document.getElementById('statCexLabel').textContent = t.statCex;
+    document.getElementById('statDexLabel').textContent = t.statDex;
+    document.getElementById('statTotalLabel').textContent = t.statTotal;
+    document.getElementById('thRank').textContent = t.rank;
+    document.getElementById('thExchange').textContent = t.exchange;
+    document.getElementById('thCountry').textContent = t.country;
+    document.getElementById('thAdvantage').textContent = t.advantage;
+    document.getElementById('thSuitable').textContent = t.suitable;
+    document.getElementById('searchInput').placeholder = t.search;
+    document.getElementById('emptyMsg').textContent = t.empty;
+    document.getElementById('langBtn').textContent = t.lang;
+    updateFooterCount();
 }
 
 function toggleLang() {
-  currentLang = currentLang === "id" ? "en" : "id";
-  applyLang();
+    lang = lang === 'id' ? 'en' : 'id';
+    localStorage.setItem('xi-lang', lang);
+    applyLang();
 }
-
-// DATA
-let allData = [];
-let currentType = "cex";
-
-const cexTabBtn = document.getElementById("cexTab");
-const dexTabBtn = document.getElementById("dexTab");
-const greyClass = "px-5 py-2 rounded-full bg-black/30 text-gray-400 border border-gray-600/20";
-const greenClass = "px-5 py-2 rounded-full bg-green-500/20 text-green-400 border border-green-400/30";
-
-function mapData(item, i) {
-  return {
-    rank: item.rank ?? i + 1,
-    name: item.exchange_name,
-    country: item.country,
-    advantage: item.key_features,
-    suitable: item.best_for,
-    type: item.type,
-    logo: item.logo_url
-  };
-}
-
-function renderData() {
-  const tbody = document.getElementById("tbody");
-  const filtered = allData.map(mapData).filter(item => item.type === currentType);
-  tbody.innerHTML = "";
-  filtered.forEach(item => {
-    tbody.innerHTML += `
-      <tr class="hover:bg-green-500/5 transition duration-300">
-        <td class="py-4">${item.rank}</td>
-        <td class="flex items-center gap-3 py-4">
-          ${item.logo ? `<img src="${item.logo}" class="w-8 h-8 rounded-full"/>` : `<div class="w-8 h-8 rounded-full bg-green-500/10 border border-green-400/20"></div>`}
-          <span class="font-semibold text-white">${item.name}</span>
-        </td>
-        <td class="py-4">${item.country}</td>
-        <td class="py-4 text-gray-400">${item.advantage}</td>
-        <td class="py-4"><span class="px-3 py-1 text-xs rounded-full border border-green-400/30 text-green-300 bg-green-500/10">${item.suitable}</span></td>
-      </tr>
-    `;
-  });
-}
-
-async function loadData() {
-  try {
-    const res = await fetch("https://airdropxi.vercel.app/api/exchanges");
-    if (!res.ok) throw new Error();
-    const data = await res.json();
-    if (!data.length) { loading.innerText = "Data kosong 😢"; return; }
-    allData = data;
-    loading.classList.add("hidden");
-    table.classList.remove("hidden");
-    renderData();
-  } catch (err) {
-    console.error(err);
-    loading.classList.add("hidden");
-    error.classList.remove("hidden");
-  }
-}
-
-function setActiveTab(type) {
-  if (type === "cex") {
-    cexTabBtn.className = greenClass;
-    dexTabBtn.className = greyClass;
-    currentType = "cex";
-  } else {
-    dexTabBtn.className = greenClass;
-    cexTabBtn.className = greyClass;
-    currentType = "dex";
-  }
-  renderData();
-}
-
-cexTabBtn.onclick = () => setActiveTab("cex");
-dexTabBtn.onclick = () => setActiveTab("dex");
 
 applyLang();
-window.onload = loadData;
-setActiveTab("cex");
-</script>
 
+// ─── TICKER ──────────────────────────────────────────────
+const tickers = [
+    { s: 'BTC', p: '$83,240', c: '+1.2%', up: true },
+    { s: 'ETH', p: '$1,580', c: '-0.4%', up: false },
+    { s: 'BNB', p: '$592', c: '+0.8%', up: true },
+    { s: 'SOL', p: '$130', c: '+2.1%', up: true },
+    { s: 'XRP', p: '$2.21', c: '-0.6%', up: false },
+    { s: 'ADA', p: '$0.68', c: '+0.3%', up: true },
+    { s: 'DOGE', p: '$0.158', c: '-1.1%', up: false },
+    { s: 'AVAX', p: '$23.4', c: '+0.9%', up: true },
+    { s: 'MATIC', p: '$0.42', c: '-0.2%', up: false },
+    { s: 'DOT', p: '$4.10', c: '+1.5%', up: true },
+];
+const tickerHTML = [...tickers, ...tickers].map(t =>
+    `<span class="ticker-item">
+        <span class="font-bold" style="color:var(--text)">${t.s}</span>
+        <span>${t.p}</span>
+        <span class="${t.up ? 'up' : 'down'}">${t.c}</span>
+        <span style="color:var(--border)">|</span>
+    </span>`
+).join('');
+document.getElementById('tickerTrack').innerHTML = tickerHTML;
+
+// ─── DATA ────────────────────────────────────────────────
+let allData = [];
+let currentType = 'cex';
+let searchQuery = '';
+
+async function loadData() {
+    showLoading();
+    try {
+        const res = await fetch('https://airdropxi.vercel.app/api/exchanges');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (!data.length) throw new Error('empty');
+        allData = data;
+        updateStats();
+        renderTable();
+        hideLoading();
+    } catch (e) {
+        showError();
+    }
+}
+
+function updateStats() {
+    const cex = allData.filter(d => d.type === 'cex').length;
+    const dex = allData.filter(d => d.type === 'dex').length;
+    document.getElementById('statCex').textContent = cex;
+    document.getElementById('statDex').textContent = dex;
+    document.getElementById('statTotal').textContent = allData.length;
+}
+
+function getRankClass(rank) {
+    if (rank === 1) return 'gold';
+    if (rank === 2) return 'silver';
+    if (rank === 3) return 'bronze';
+    return '';
+}
+
+function renderTable() {
+    const tbody = document.getElementById('tbody');
+    let filtered = allData.filter(d => d.type === currentType);
+    if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(d =>
+            d.exchange_name?.toLowerCase().includes(q) ||
+            d.country?.toLowerCase().includes(q) ||
+            d.best_for?.toLowerCase().includes(q)
+        );
+    }
+
+    if (!filtered.length) {
+        document.getElementById('table').classList.add('hidden');
+        document.getElementById('emptyState').classList.remove('hidden');
+        updateFooterCount(0, 0);
+        return;
+    }
+
+    document.getElementById('emptyState').classList.add('hidden');
+    document.getElementById('table').classList.remove('hidden');
+
+    tbody.innerHTML = filtered.map(item => {
+        const rc = getRankClass(item.rank);
+        const logoHtml = item.logo_url
+            ? `<img src="${item.logo_url}" class="logo-img" alt="${item.exchange_name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+              + `<div class="logo-placeholder" style="display:none">${item.exchange_name?.[0] || '?'}</div>`
+            : `<div class="logo-placeholder">${item.exchange_name?.[0] || '?'}</div>`;
+        return `
+        <tr>
+            <td>
+                <div class="rank-badge ${rc}">${item.rank}</div>
+            </td>
+            <td>
+                <div class="flex items-center gap-3">
+                    ${logoHtml}
+                    <span class="font-semibold text-sm" style="color:var(--text)">${item.exchange_name}</span>
+                </div>
+            </td>
+            <td class="hidden md:table-cell text-sm" style="color:var(--text2)">${item.country || '—'}</td>
+            <td class="hidden lg:table-cell text-sm" style="color:var(--text2)">${item.key_features || '—'}</td>
+            <td><span class="tag">${item.best_for || '—'}</span></td>
+        </tr>`;
+    }).join('');
+
+    updateFooterCount(filtered.length, allData.filter(d => d.type === currentType).length);
+}
+
+function updateFooterCount(shown, total) {
+    const el = document.getElementById('footerCount');
+    if (shown === undefined) { el.textContent = '—'; return; }
+    el.textContent = `Menampilkan ${shown} dari ${total} exchange`;
+}
+
+function filterTable() {
+    searchQuery = document.getElementById('searchInput').value;
+    renderTable();
+}
+
+// ─── TABS ────────────────────────────────────────────────
+function setActiveTab(type) {
+    currentType = type;
+    searchQuery = '';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('cexTab').className = (type === 'cex')
+        ? 'tab-active px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200'
+        : 'tab-inactive px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200';
+    document.getElementById('dexTab').className = (type === 'dex')
+        ? 'tab-active px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200'
+        : 'tab-inactive px-5 py-2 rounded-full text-sm font-semibold transition-all duration-200';
+    if (allData.length) renderTable();
+}
+
+// ─── UI STATE ────────────────────────────────────────────
+function showLoading() {
+    document.getElementById('loadingState').classList.remove('hidden');
+    document.getElementById('errorState').classList.add('hidden');
+    document.getElementById('emptyState').classList.add('hidden');
+    document.getElementById('table').classList.add('hidden');
+}
+
+function hideLoading() {
+    document.getElementById('loadingState').classList.add('hidden');
+}
+
+function showError() {
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('errorState').classList.remove('hidden');
+}
+
+// ─── INIT ────────────────────────────────────────────────
+loadData();
+</script>
 </body>
 </html>
