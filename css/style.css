@@ -1,6 +1,6 @@
 /* ==========================================
-   AIRDROPXI — MODERN UI v2
-   Light / Dark Theme + Responsive
+   AIRDROPXI — MODERN UI v2 (FULL FIXED)
+   No custom cursor, clean AI panel
    ========================================== */
 
 /* ── Google Fonts ── */
@@ -14,7 +14,6 @@
   --c: #00c8f0;
   --accent: #7c6dfa;
 
-  /* Dark palette */
   --bg: #080f0c;
   --bg2: #0d1a14;
   --bg3: #111f18;
@@ -67,16 +66,15 @@ body {
   color: var(--text);
   min-height: 100vh;
   overflow-x: hidden;
-  cursor: default;  /* ← DIUBAH: dari 'none' jadi 'default' */
+  cursor: default;
   transition: background 0.4s, color 0.4s;
 }
 
 [data-theme="light"] body { cursor: default; }
 
 /* ==========================================
-   3. CUSTOM CURSOR (dark only) - DIHAPUS
+   3. CUSTOM CURSOR - TIDAK DIPAKAI (dihapus)
    ========================================== */
-/* Blok ini dihapus total (cursor hijau & ring) */
 
 /* ==========================================
    4. BACKGROUND CANVAS
@@ -628,4 +626,6 @@ section {
 .st-item {
   display:flex; align-items:center; gap:10px;
   background:var(--surface); padding:9px 12px;
-  border-radius:var(--
+  border-radius:var(--radius-sm); border:1px solid var(--border);
+}
+.st-dot { width:8px; height:
