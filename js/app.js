@@ -315,17 +315,19 @@ function getIcon(tags) {
 }
 
 function updateDash() {
-  let active = 0, listing = 0;
+  let active = 0, listing = 0, waitlist = 0;
   allData.forEach(i => {
     const s = (i.status || '').toLowerCase();
     if (s.includes('listing') || s.includes('end') || s.includes('selesai')) listing++;
+    else if (s.includes('waitlist')) waitlist++;
     else active++;
   });
-  animateNum('dash-total',   allData.length);
-  animateNum('dash-active',  active);
-  animateNum('dash-listing', listing);
-  animateNum('hs-total',     allData.length);
-  animateNum('hs-active',    active);
+  animateNum('dash-total',    allData.length);
+  animateNum('dash-active',   active);
+  animateNum('dash-listing',  listing);
+  animateNum('dash-waitlist', waitlist);
+  animateNum('hs-total',      allData.length);
+  animateNum('hs-active',     active);
 }
 
 function animateNum(id, target) {
