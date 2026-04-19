@@ -39,17 +39,18 @@
     <img src="logo.png" alt="AirdropXI">
     AirdropXI
   </a>
+
+  <!-- Desktop Links -->
   <div class="nav-links">
     <a href="#airdrops" id="nav-explore">Explore</a>
     <a href="#guide" id="nav-guide">Guide</a>
     <a href="unlocks.html" id="nav-unlocks">Token Unlocks</a>
-    <a href="reward.html" id="nav-reward" style="color: #4ade80;">Reward</a>
+    <a href="reward.html" id="nav-reward" style="color:#4ade80;">Reward</a>
     <a href="docs.html" id="nav-docs" style="color:var(--g)">Docs</a>
-    <a href="exchanges.html" class="hover:text-green-500 transition">EXCHANGES</a>
-</div>
-      <span style="position:absolute;top:-8px;right:-24px;background:linear-gradient(135deg,var(--g),var(--c));color:#000;font-size:7px;font-weight:800;padding:1px 5px;border-radius:4px;letter-spacing:.5px">NEW</span>
-    </a>
+    <a href="exchanges.html">Exchanges</a>
   </div>
+
+  <!-- Desktop Right -->
   <div class="nav-right">
     <div class="nav-social">
       <a href="https://x.com/xiobai06" target="_blank" title="Twitter/X">
@@ -69,6 +70,32 @@
       <span id="nav-ai-label">AI Agent</span>
     </button>
   </div>
+
+  <!-- Hamburger Button (mobile only) -->
+  <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()" aria-label="Menu">
+    <span></span>
+    <span></span>
+    <span></span>
+  </button>
+
+  <!-- Mobile Dropdown Menu -->
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="#airdrops" onclick="closeMobileMenu()">⚡ Explore</a>
+    <a href="#guide" onclick="closeMobileMenu()">📖 Guide</a>
+    <a href="unlocks.html" onclick="closeMobileMenu()">🔓 Token Unlocks</a>
+    <a href="reward.html" onclick="closeMobileMenu()" style="color:#4ade80">🎁 Reward</a>
+    <a href="docs.html" onclick="closeMobileMenu()" style="color:var(--c)">📚 Docs</a>
+    <a href="exchanges.html" onclick="closeMobileMenu()">📊 Exchanges</a>
+    <div class="mobile-menu-bottom">
+      <button class="lang-btn active" id="m-btn-id" onclick="setLang('id');closeMobileMenu()">🇮🇩 ID</button>
+      <button class="lang-btn" id="m-btn-en" onclick="setLang('en');closeMobileMenu()">🇬🇧 EN</button>
+      <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+      <button class="ai-agent-btn" onclick="toggleAI();closeMobileMenu()" style="flex:1;">
+        <span class="ai-btn-dot"></span>
+        AI Agent
+      </button>
+    </div>
+  </div>
 </nav>
 
 <!-- Hero -->
@@ -85,7 +112,6 @@
       </button>
       <button class="btn-ghost" id="h-btn2" onclick="document.getElementById('guide').scrollIntoView({behavior:'smooth'})">Guide & Tutorial</button>
     </div>
-    <!-- Docs CTA mini banner -->
     <a href="docs.html" id="hero-docs-banner" style="margin-top:20px;display:inline-flex;align-items:center;gap:10px;background:rgba(0,200,240,.06);border:1px solid rgba(0,200,240,.18);border-radius:10px;padding:10px 16px;text-decoration:none;transition:all .25s" onmouseover="this.style.borderColor='rgba(0,200,240,.4)'" onmouseout="this.style.borderColor='rgba(0,200,240,.18)'">
       <span style="font-size:18px">📚</span>
       <div>
@@ -187,7 +213,6 @@
       </div>
     </div>
   </div>
-  <!-- Docs CTA Banner -->
   <a href="docs.html" class="reveal" id="docs-cta-wrap" style="margin-top:32px;display:flex;align-items:center;justify-content:space-between;gap:24px;flex-wrap:wrap;background:linear-gradient(135deg,rgba(0,232,122,.05),rgba(0,200,240,.04));border:1px solid rgba(0,200,240,.2);border-radius:16px;padding:28px 32px;text-decoration:none;transition:all .3s" onmouseover="this.style.borderColor='rgba(0,200,240,.5)';this.style.transform='translateY(-2px)'" onmouseout="this.style.borderColor='rgba(0,200,240,.2)';this.style.transform=''">
     <div style="display:flex;align-items:center;gap:16px">
       <div style="font-size:36px">📚</div>
@@ -221,11 +246,11 @@
         <a href="#guide" id="f-guide">Guide & Tutorial</a>
         <a href="docs.html" id="f-docs">📚 Documentation</a>
         <a href="unlocks.html" id="f-unlocks">🔓 Token Unlocks</a>
-        <a href="exchanges.html" id="f-unlocks">📊 exchanges</a>
-        <li><a href="reward.html" style="color: #00ff88;">🎁 Reward</a></li>
+        <a href="exchanges.html">📊 Exchanges</a>
+        <a href="reward.html" style="color:#00ff88;">🎁 Reward</a>
       </div>
       <div class="footer-links">
-        <h4 id="footer-comm-h">contact</h4>
+        <h4 id="footer-comm-h">Contact</h4>
         <a href="https://x.com/xiobai06" target="_blank">Twitter / X</a>
         <a href="https://t.me/Xiobaiishikii" target="_blank">Telegram</a>
       </div>
@@ -264,6 +289,30 @@
     <button class="ai-send-btn" id="aiSendBtn" onclick="aiSend()">➤</button>
   </div>
 </div>
+
+<script>
+// ── Hamburger Menu ──
+function toggleMobileMenu() {
+  const menu = document.getElementById('mobileMenu');
+  const btn  = document.getElementById('hamburgerBtn');
+  menu.classList.toggle('open');
+  btn.classList.toggle('open');
+}
+
+function closeMobileMenu() {
+  document.getElementById('mobileMenu').classList.remove('open');
+  document.getElementById('hamburgerBtn').classList.remove('open');
+}
+
+// Tutup menu kalau klik di luar
+document.addEventListener('click', function(e) {
+  const menu = document.getElementById('mobileMenu');
+  const btn  = document.getElementById('hamburgerBtn');
+  if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
+    closeMobileMenu();
+  }
+});
+</script>
 
 <script src="js/app.js"></script>
 </body>
