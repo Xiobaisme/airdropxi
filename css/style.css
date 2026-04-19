@@ -857,6 +857,109 @@ footer {
   .hero-visual { transform: scale(.75); margin-top: -20px; }
   .float-card-1, .float-card-2 { display: none; }
 
+  /* Fix untuk semua teks yang kepotong */
+  .hero h1, 
+  .hero-sub,
+  .section-title,
+  .section-sub,
+  .acard-name,
+  .acard-status,
+  .atag,
+  .tasks-body,
+  .g-title,
+  .g-desc,
+  .g-list li,
+  .dash-label,
+  .nav-logo,
+  .fc-title,
+  .fc-val,
+  .fc-sub,
+  .st-item-text,
+  .footer-brand p,
+  .footer-links a {
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
+  /* Fix untuk ticker yang kepotong */
+  .pticker-wrap,
+  .nticker-wrap {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+  
+  .pticker-inner,
+  .nticker-inner {
+    animation: none;
+    white-space: nowrap;
+  }
+  
+  /* Fix untuk badge dan tag */
+  .atag,
+  .st-badge-wrap .st-item {
+    white-space: normal;
+    word-break: break-word;
+  }
+  
+  /* Fix untuk quick buttons AI */
+  .ai-quick-btns {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 8px;
+  }
+  
+  .ai-qbtn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  /* Fix untuk stat card */
+  .dash-card {
+    word-break: break-word;
+  }
+  
+  .dash-num {
+    font-size: 28px;
+    word-break: break-word;
+  }
+  
+  /* Fix untuk filter buttons */
+  .filter-btns {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 8px;
+  }
+  
+  .fbtn {
+    white-space: nowrap;
+    flex-shrink: 0;
+  }
+  
+  /* Fix untuk hero stats */
+  .hero-stats {
+    flex-wrap: wrap;
+    justify-content: center;
+  }
+  
+  .hstat {
+    min-width: 80px;
+  }
+  
+  .hstat-num {
+    font-size: 20px;
+    word-break: break-word;
+  }
+  
+  /* Fix untuk guide card list */
+  .g-list li {
+    flex-wrap: wrap;
+  }
+  
+  .g-list li strong {
+    min-width: auto;
+  }
+
   /* Grid adjustments */
   .dash-grid { grid-template-columns: 1fr 1fr; }
   .guide-grid { grid-template-columns: 1fr; }
@@ -882,4 +985,56 @@ footer {
   .hero-btns { flex-direction: column; }
   .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
   .hero-stats { gap: 16px; }
+  
+  /* Fix overflow untuk semua container */
+  body, html {
+    overflow-x: hidden;
+    width: 100%;
+  }
+  
+  .container, section, .hero, footer {
+    overflow-x: hidden;
+  }
+  
+  /* Fix untuk card airdrop */
+  .acard {
+    padding: 16px;
+  }
+  
+  .acard-top {
+    flex-wrap: wrap;
+    gap: 10px;
+  }
+  
+  .acard-status {
+    white-space: normal;
+    text-align: center;
+  }
+  
+  .acard-tags {
+    overflow-x: auto;
+    flex-wrap: nowrap;
+    padding-bottom: 6px;
+  }
+  
+  /* Fix untuk raised info */
+  .acard-raised {
+    flex-wrap: wrap;
+  }
+  
+  .raised-ico {
+    flex-shrink: 0;
+  }
+  
+  /* Fix untuk progress bar text */
+  .prog-meta {
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+  
+  /* Fix untuk tasks */
+  .tasks-body {
+    max-height: 100px;
+    overflow-y: auto;
+  }
 }
