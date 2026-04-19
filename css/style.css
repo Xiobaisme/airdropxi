@@ -301,10 +301,11 @@ nav {
    ========================================== */
 .mobile-menu {
   display: none;
-  position: fixed;
-  top: 100px; /* pticker(36) + nticker(32) + nav(60) = ~128px, gunakan 100px agar lebih rapat */
+  position: sticky;
+  top: 60px;
   left: 0;
   right: 0;
+  width: 100%;
   background: var(--bg2);
   border-bottom: 1px solid var(--border);
   flex-direction: column;
