@@ -72,31 +72,33 @@
   </div>
 
   <!-- Hamburger Button (mobile only) -->
-  <button class="hamburger" id="hamburgerBtn" onclick="toggleMobileMenu()" aria-label="Menu">
+  <button class="hamburger" id="hamburgerBtn" aria-label="Menu">
     <span></span>
     <span></span>
     <span></span>
   </button>
-
-  <!-- Mobile Dropdown Menu -->
-  <div class="mobile-menu" id="mobileMenu">
-    <a href="#airdrops" onclick="closeMobileMenu()">⚡ Explore</a>
-    <a href="#guide" onclick="closeMobileMenu()">📖 Guide</a>
-    <a href="unlocks.html" onclick="closeMobileMenu()">🔓 Token Unlocks</a>
-    <a href="reward.html" onclick="closeMobileMenu()" style="color:#4ade80">🎁 Reward</a>
-    <a href="docs.html" onclick="closeMobileMenu()" style="color:var(--c)">📚 Docs</a>
-    <a href="exchanges.html" onclick="closeMobileMenu()">📊 Exchanges</a>
-    <div class="mobile-menu-bottom">
-      <button class="lang-btn active" id="m-btn-id" onclick="setLang('id');closeMobileMenu()">🇮🇩 ID</button>
-      <button class="lang-btn" id="m-btn-en" onclick="setLang('en');closeMobileMenu()">🇬🇧 EN</button>
-      <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
-      <button class="ai-agent-btn" onclick="toggleAI();closeMobileMenu()" style="flex:1;">
-        <span class="ai-btn-dot"></span>
-        AI Agent
-      </button>
-    </div>
-  </div>
 </nav>
+
+<!-- =============================================
+     MOBILE MENU — di luar <nav>, langsung di body
+     ============================================= -->
+<div class="mobile-menu" id="mobileMenu">
+  <a href="#airdrops" onclick="closeMobileMenu()">⚡ Explore</a>
+  <a href="#guide" onclick="closeMobileMenu()">📖 Guide</a>
+  <a href="unlocks.html" onclick="closeMobileMenu()">🔓 Token Unlocks</a>
+  <a href="reward.html" onclick="closeMobileMenu()" style="color:#4ade80">🎁 Reward</a>
+  <a href="docs.html" onclick="closeMobileMenu()" style="color:var(--c)">📚 Docs</a>
+  <a href="exchanges.html" onclick="closeMobileMenu()">📊 Exchanges</a>
+  <div class="mobile-menu-bottom">
+    <button class="lang-btn active" id="m-btn-id" onclick="setLang('id');closeMobileMenu()">🇮🇩 ID</button>
+    <button class="lang-btn" id="m-btn-en" onclick="setLang('en');closeMobileMenu()">🇬🇧 EN</button>
+    <button class="theme-toggle" onclick="toggleTheme()">🌙</button>
+    <button class="ai-agent-btn" onclick="toggleAI();closeMobileMenu()" style="flex:1;justify-content:center;">
+      <span class="ai-btn-dot"></span>
+      AI Agent
+    </button>
+  </div>
+</div>
 
 <!-- Hero -->
 <div class="z1" style="border-bottom:1px solid var(--border)">
@@ -244,8 +246,8 @@
         <h4 id="footer-nav-h">Navigate</h4>
         <a href="#airdrops" id="f-explore">Explore Airdrops</a>
         <a href="#guide" id="f-guide">Guide & Tutorial</a>
-        <a href="docs.html" id="f-docs">📚 Documentation</a>
-        <a href="unlocks.html" id="f-unlocks">🔓 Token Unlocks</a>
+        <a href="docs.html">📚 Documentation</a>
+        <a href="unlocks.html">🔓 Token Unlocks</a>
         <a href="exchanges.html">📊 Exchanges</a>
         <a href="reward.html" style="color:#00ff88;">🎁 Reward</a>
       </div>
@@ -279,10 +281,10 @@
     </div>
   </div>
   <div class="ai-quick-btns" id="ai-quick-btns">
-    <button class="ai-qbtn" data-prompt="Apa Itu airdrop" onclick="aiSendQuick(this.dataset.prompt)">🔥 Apa Itu airdrop</button>
-    <button class="ai-qbtn" data-prompt="Cara ikut airdrop untuk pemula?" onclick="aiSendQuick(this.dataset.prompt)">📖 Cara ikut</button>
-    <button class="ai-qbtn" data-prompt="Apa itu Web3?" onclick="aiSendQuick(this.dataset.prompt)">🌐 Web3</button>
-    <button class="ai-qbtn" data-prompt="aku ganteng apa jelek?" onclick="aiSendQuick(this.dataset.prompt)">🗿 jangan diklik</button>
+    <button class="ai-qbtn" onclick="aiSendQuick('Apa Itu airdrop')">🔥 Apa Itu airdrop</button>
+    <button class="ai-qbtn" onclick="aiSendQuick('Cara ikut airdrop untuk pemula?')">📖 Cara ikut</button>
+    <button class="ai-qbtn" onclick="aiSendQuick('Apa itu Web3?')">🌐 Web3</button>
+    <button class="ai-qbtn" onclick="aiSendQuick('aku ganteng apa jelek?')">🗿 jangan diklik</button>
   </div>
   <div class="ai-input-row">
     <textarea class="ai-input" id="aiInput" placeholder="Tanya tentang airdrop, Web3, crypto..." rows="1" onkeydown="aiHandleKey(event)" oninput="aiAutoResize(this)"></textarea>
@@ -290,36 +292,30 @@
   </div>
 </div>
 
+<!-- Hamburger Script — simple vanilla, no dependencies -->
 <script>
-// ── Hamburger Menu ──
-function toggleMobileMenu() {
-  const menu = document.getElementById('mobileMenu');
-  const btn  = document.getElementById('hamburgerBtn');
-  const nav  = document.querySelector('nav');
+(function() {
+  var btn  = document.getElementById('hamburgerBtn');
+  var menu = document.getElementById('mobileMenu');
 
-  // Hitung posisi top secara dinamis berdasarkan posisi nav
-  if (!menu.classList.contains('open')) {
-    const navBottom = nav.getBoundingClientRect().bottom;
-    menu.style.top = navBottom + 'px';
-  }
+  btn.addEventListener('click', function(e) {
+    e.stopPropagation();
+    var isOpen = menu.classList.toggle('open');
+    btn.classList.toggle('open', isOpen);
+  });
 
-  menu.classList.toggle('open');
-  btn.classList.toggle('open');
-}
+  document.addEventListener('click', function(e) {
+    if (!menu.contains(e.target) && !btn.contains(e.target)) {
+      menu.classList.remove('open');
+      btn.classList.remove('open');
+    }
+  });
 
-function closeMobileMenu() {
-  document.getElementById('mobileMenu').classList.remove('open');
-  document.getElementById('hamburgerBtn').classList.remove('open');
-}
-
-// Tutup menu kalau klik di luar
-document.addEventListener('click', function(e) {
-  const menu = document.getElementById('mobileMenu');
-  const btn  = document.getElementById('hamburgerBtn');
-  if (menu && btn && !menu.contains(e.target) && !btn.contains(e.target)) {
-    closeMobileMenu();
-  }
-});
+  window.closeMobileMenu = function() {
+    menu.classList.remove('open');
+    btn.classList.remove('open');
+  };
+})();
 </script>
 
 <script src="js/app.js"></script>
