@@ -295,6 +295,14 @@
 function toggleMobileMenu() {
   const menu = document.getElementById('mobileMenu');
   const btn  = document.getElementById('hamburgerBtn');
+  const nav  = document.querySelector('nav');
+
+  // Hitung posisi top secara dinamis berdasarkan posisi nav
+  if (!menu.classList.contains('open')) {
+    const navBottom = nav.getBoundingClientRect().bottom;
+    menu.style.top = navBottom + 'px';
+  }
+
   menu.classList.toggle('open');
   btn.classList.toggle('open');
 }
