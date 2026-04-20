@@ -234,6 +234,7 @@ function filterCards() {
     const matchQ = !q || name.includes(q);
     let matchF = true;
     if (activeFilter === 'active')  matchF = status.includes('active');
+    if (activeFilter === 'waitlist') matchF = status.includes('waitlist');
     if (activeFilter === 'listing') matchF = status.includes('listing') || status.includes('end') || status.includes('selesai');
     card.style.display = (matchQ && matchF) ? '' : 'none';
   });
