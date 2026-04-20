@@ -172,10 +172,11 @@
   <div class="filter-bar reveal">
     <div class="search-box"><span class="search-ico">🔍</span><input type="text" id="search-input" placeholder="Search project..." oninput="filterCards()"></div>
     <div class="filter-btns">
-      <button class="fbtn active" data-filter="all" onclick="setFilter(this,'all')"><span class="fbtn-dot"></span><span id="fb-all">All</span></button>
-      <button class="fbtn" data-filter="active" onclick="setFilter(this,'active')"><span class="fbtn-dot" style="color:var(--g)"></span>Active</button>
-      <button class="fbtn" data-filter="listing" onclick="setFilter(this,'listing')"><span class="fbtn-dot" style="color:var(--accent)"></span>Listed</button>
-    </div>
+  <button class="fbtn active" data-filter="all" onclick="setFilter(this,'all')"><span class="fbtn-dot"></span><span id="fb-all">All</span></button>
+  <button class="fbtn" data-filter="active" onclick="setFilter(this,'active')"><span class="fbtn-dot" style="color:var(--g)"></span>Active</button>
+  <button class="fbtn" data-filter="waitlist" onclick="setFilter(this,'waitlist')"><span class="fbtn-dot" style="color:#f0b429"></span>Waitlist</button>
+  <button class="fbtn" data-filter="listing" onclick="setFilter(this,'listing')"><span class="fbtn-dot" style="color:var(--accent)"></span>Listed</button>
+</div>
   </div>
   <div id="loading-state"><div class="spinner"></div><p style="font-family:'JetBrains Mono',monospace;font-size:12px;color:var(--text2)" id="loading-text">Pulling data from the chain...</p></div>
   <div id="error-state"><p style="color:#ff2d55;font-weight:700;font-size:15px;margin-bottom:8px" id="error-title">Failed to load data</p><p id="error-msg" style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)"></p></div>
