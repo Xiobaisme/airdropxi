@@ -109,9 +109,9 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 // ==========================================
 const T = {
   id: {
-    badge:'🔥 20+ Airdrop Aktif Sekarang',
+    badge:'🔥Peluang Langsung',
     title:'Daftar Airdrop Crypto Terbaru & Potensial<br><span>Sebelum Semua Orang</span>',
-    sub:'Auto-filtered, verified, dan siap snapshot. Jangan sampai ketinggalan reward dari project Web3 terbaik.',
+    sub:'Peluang airdrop yang dikurasi dengan data terstruktur dan pengoptimalan snapshot.',
     btn1:'Explore Airdrops', btn2:'Guide & Tutorial',
     tDash:'DASHBOARD', tTitle:'Airdrop Radar',
     tSub:'Pantau status, total dana, dan tugas dari project-project potensial di ekosistem Web3.',
@@ -135,9 +135,9 @@ const T = {
     aiPlaceholder:'Tanya tentang airdrop, Web3, crypto...'
   },
   en: {
-    badge:'🔥 20+ Active Airdrops Right Now',
+    badge:'🔥 Live Opportunities',
     title:'Latest & Potential Crypto Airdrop List<br><span>Before Everyone Else</span>',
-    sub:'Auto-filtered, verified, and snapshot-ready. Never miss rewards from the best Web3 projects.',
+    sub:'Curated airdrop opportunities with structured data and snapshot optimization.',
     btn1:'Explore Airdrops', btn2:'Guide & Tutorial',
     tDash:'DASHBOARD', tTitle:'Airdrop Radar',
     tSub:'Monitor status, total raised, and tasks from potential projects in the Web3 ecosystem.',
