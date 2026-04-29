@@ -223,15 +223,241 @@ body{font-family:'Plus Jakarta Sans',sans-serif;background:var(--bg);color:var(-
 .reading-bar{position:fixed;top:64px;left:0;right:0;height:2px;background:var(--border);z-index:99}
 .reading-fill{height:100%;background:linear-gradient(90deg,var(--g),var(--c));width:0%;transition:width .1s}
 
-/* Responsive */
-@media(max-width:1024px){
-  .docs-layout{grid-template-columns:240px 1fr}
-  .docs-main{padding:40px 48px}
+/* ==========================================
+   DOCS MOBILE FIX
+   Tambahkan di dalam <style> docs.html
+   GANTI blok @media(max-width:768px) yang ada
+   ========================================== */
+
+/* ── GLOBAL ── */
+*, *::before, *::after { box-sizing: border-box; }
+html, body {
+  overflow-x: hidden !important;
+  max-width: 100vw !important;
+  width: 100% !important;
 }
+
+/* ==========================================
+   TABLET FIX (≤1024px)
+   ========================================== */
+@media(max-width:1024px){
+  .docs-layout { grid-template-columns: 240px 1fr; }
+  .docs-main   { padding: 40px 32px; }
+}
+
+/* ==========================================
+   MOBILE FIX (≤768px)
+   ========================================== */
 @media(max-width:768px){
-  .docs-layout{grid-template-columns:1fr}
-  .docs-sidebar{position:static;height:auto;border-right:none;border-bottom:1px solid var(--border);padding:20px}
-  .docs-main{padding:32px 24px}
+
+  /* ── NAV ── */
+  .docs-nav {
+    padding: 0 12px;
+    height: auto;
+    min-height: 56px;
+    flex-wrap: wrap;
+    gap: 8px;
+    padding-top: 8px;
+    padding-bottom: 8px;
+  }
+
+  .nav-logo {
+    font-size: 15px;
+    gap: 7px;
+    flex-shrink: 0;
+    max-width: 55%;
+    overflow: hidden;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+  }
+  .nav-logo img { width: 24px; height: 24px; }
+  .nav-logo .logo-sep { display: none; } /* sembunyikan "/ Docs" agar tidak overflow */
+
+  .nav-actions {
+    display: flex;
+    gap: 6px;
+    align-items: center;
+    flex-shrink: 0;
+  }
+
+  .nav-back {
+    padding: 6px 10px;
+    font-size: 11px;
+    gap: 4px;
+  }
+  .nav-back span { display: none; } /* hanya tampilkan icon arrow */
+
+  .lang-toggle-docs { display: flex; }
+  .lbtn { padding: 5px 8px; font-size: 10px; }
+
+  .icon-btn { width: 30px; height: 30px; font-size: 13px; }
+
+  /* ── LAYOUT: stack sidebar di atas content ── */
+  .docs-layout {
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: unset !important;
+    min-height: unset;
+  }
+
+  /* ── SIDEBAR ── */
+  .docs-sidebar {
+    position: static !important;
+    height: auto !important;
+    max-height: 320px;
+    overflow-y: auto;
+    border-right: none;
+    border-bottom: 1px solid var(--border);
+    padding: 16px 12px;
+    width: 100%;
+    box-sizing: border-box;
+  }
+
+  .sb-search { margin-bottom: 16px; }
+  .sb-search input { font-size: 13px; }
+
+  .sb-cat { font-size: 10px; padding: 5px 8px; }
+
+  .sb-link {
+    padding: 7px 10px;
+    font-size: 13px;
+  }
+
+  /* ── MAIN CONTENT ── */
+  .docs-main {
+    padding: 24px 16px !important;
+    max-width: 100% !important;
+    width: 100%;
+    box-sizing: border-box;
+    overflow-x: hidden;
+  }
+
+  /* ── TYPOGRAPHY ── */
+  .doc-hero h1 {
+    font-size: clamp(22px, 7vw, 32px) !important;
+    letter-spacing: -0.5px !important;
+    word-break: break-word;
+    overflow-wrap: break-word;
+    white-space: normal;
+  }
+
+  .doc-hero p {
+    font-size: 13px !important;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  .dh2 {
+    font-size: 18px !important;
+    word-break: break-word;
+  }
+
+  .dp {
+    font-size: 13px !important;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* ── BREADCRUMB ── */
+  .breadcrumb {
+    font-size: 11px;
+    flex-wrap: wrap;
+    gap: 4px;
+  }
+
+  /* ── BANNER IMAGE ── */
+  .section-banner {
+    height: 160px !important;
+    object-fit: cover;
+  }
+
+  /* ── CARDS ── */
+  .dcg {
+    grid-template-columns: 1fr !important;
+  }
+
+  .dc h4 {
+    font-size: 14px;
+    word-break: break-word;
+  }
+  .dc p {
+    font-size: 12px;
+    word-break: break-word;
+    overflow-wrap: break-word;
+  }
+
+  /* ── TABLE ── */
+  .dtable {
+    display: block;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+    font-size: 12px;
+  }
+  .dtable th, .dtable td {
+    padding: 10px 12px;
+    white-space: nowrap;
+  }
+
+  /* ── CALLOUT ── */
+  .callout { padding: 14px 14px; gap: 10px; }
+  .callout-icon { font-size: 17px; }
+  .callout-text { font-size: 12px; }
+
+  /* ── STEPS ── */
+  .step { gap: 12px; padding-bottom: 24px; }
+  .step-n { width: 36px; height: 36px; font-size: 13px; }
+  .step-title { font-size: 14px; }
+  .step-desc  { font-size: 12px; word-break: break-word; overflow-wrap: break-word; }
+
+  /* ── TIMELINE ── */
+  .tl-title { font-size: 14px; }
+  .tl-desc  { font-size: 12px; }
+
+  /* ── TAGS ── */
+  .tag-row { flex-wrap: wrap; }
+  .tp { font-size: 10px; padding: 5px 10px; }
+
+  /* ── GLOSSARY ── */
+  .gterm { font-size: 14px; word-break: break-word; }
+  .gdef  { font-size: 12px; word-break: break-word; overflow-wrap: break-word; }
+
+  /* ── CODE ── */
+  .dcode {
+    font-size: 11px;
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  /* ── READING BAR ── */
+  .reading-bar { top: 56px; }
+
+  /* ── FOOTER ── */
+  .docs-footer { padding: 40px 0 32px !important; }
+  .docs-footer > div { padding: 0 16px !important; }
+  .docs-footer > div > div:first-child {
+    grid-template-columns: 1fr !important;
+    gap: 24px;
+  }
+  .f-contact-btn span { display: none; }
+  .f-contact-btn { padding: 8px 12px; }
+}
+
+/* ==========================================
+   SMALL MOBILE (≤480px)
+   ========================================== */
+@media(max-width:480px){
+  .docs-main { padding: 16px 12px !important; }
+
+  .doc-hero h1 {
+    font-size: clamp(20px, 6.5vw, 28px) !important;
+    letter-spacing: -0.3px !important;
+  }
+
+  .docs-sidebar { max-height: 280px; }
+
+  .section-banner { height: 130px !important; }
+
+  .dh2 { font-size: 16px !important; margin: 32px 0 12px; }
 }
 </style>
 </head>
@@ -2630,14 +2856,138 @@ function show(id) {
   history.replaceState(null,'','#'+id);
 }
 
-// Sidebar Search
+/* =====================================================
+   GANTI fungsi searchSidebar() di docs.html
+   dengan script ini (paste sebelum </script> penutup)
+   ===================================================== */
+
+// ── DATA INDEX untuk search konten ──
+const searchIndex = [
+  { id:'intro',            keywords:['pengantar','introduction','mulai','start','welcome','selamat datang'] },
+  { id:'airdrop-basics',   keywords:['airdrop','dasar','basics','apa itu','what is','token','gratis','free'] },
+  { id:'airdrop-history',  keywords:['sejarah','history','uniswap','2020','2021','retroactive','uni'] },
+  { id:'airdrop-types',    keywords:['jenis','types','standard','retroactive','holder','testnet','points','referral','governance','staking airdrop'] },
+  { id:'farming',          keywords:['farming','cara','how to','strategi','strategy','activity','consistency','diversity','sybil','anti-sybil','wallet','daily'] },
+  { id:'web3',             keywords:['web3','web 3','internet','decentralized','terdesentralisasi','evolusi','evolution'] },
+  { id:'blockchain',       keywords:['blockchain','protocol','blok','block','konsensus','consensus','ledger','node'] },
+  { id:'wallet',           keywords:['wallet','dompet','seed phrase','private key','metamask','phantom','keamanan','security','hot','cold'] },
+  { id:'defi',             keywords:['defi','keuangan','finance','lending','borrowing','yield','smart contract','permissionless','aave','compound'] },
+  { id:'dex-cex',          keywords:['dex','cex','exchange','bursa','trading','swap','uniswap','binance','pancakeswap','amm','kyc'] },
+  { id:'staking',          keywords:['staking','stake','yield farming','liquidity','lp','passive income','apy','apr','lock','reward'] },
+  { id:'nft',              keywords:['nft','token non fungible','digital asset','minting','mint','opensea','koleksi','collectible'] },
+  { id:'gamefi',           keywords:['gamefi','game','p2e','play to earn','in-game','guild','metaverse'] },
+  { id:'dao',              keywords:['dao','governance','voting','vote','proposal','komunitas','community','tata kelola'] },
+  { id:'tokenomics',       keywords:['tokenomics','supply','distribusi','distribution','vesting','cliff','utility','burn','inflasi','inflation'] },
+  { id:'layer2',           keywords:['layer 2','l2','rollup','optimistic','zk','zkrollup','arbitrum','optimism','base','starknet','scaling','skalabilitas'] },
+  { id:'depin',            keywords:['depin','infrastruktur','infrastructure','helium','filecoin','render','hardware','node','wifi','storage','gpu'] },
+  { id:'socialfi',         keywords:['socialfi','social','media sosial','kreator','creator','friend.tech','lens','farcaster'] },
+  { id:'bridge-oracle',    keywords:['bridge','oracle','chainlink','cross chain','jembatan','linea','wormhole','price feed'] },
+  { id:'ai-crypto',        keywords:['ai','artificial intelligence','crypto','kecerdasan buatan','agent','data','model','ai agent'] },
+  { id:'rwa',              keywords:['rwa','real world asset','aset dunia nyata','properti','real estate','obligasi','bond','emas','gold','tokenisasi','tokenize'] },
+  { id:'restaking-lrt',    keywords:['restaking','lrt','liquid restaking','eigenlayer','etherfi','renzo','kelpDAO','shared security'] },
+  { id:'modular',          keywords:['modular','blockchain','monolithic','celestia','data availability','execution','settlement','consensus layer'] },
+  { id:'crosschain',       keywords:['cross chain','omnichain','linea','layerzero','interoperability','interoperabilitas','wormhole'] },
+  { id:'did',              keywords:['did','decentralized identity','ens','worldcoin','gitcoin passport','proof of humanity','sybil','galxe','reputasi'] },
+  { id:'security',         keywords:['keamanan','security','hack','phishing','burner wallet','hardware wallet','ledger','trezor','revoke','drainer','seed','approve'] },
+  { id:'scam',             keywords:['scam','rug pull','penipuan','fraud','honeypot','approval scam','red flag','bahaya'] },
+  { id:'tax',              keywords:['pajak','tax','regulasi','regulation','indonesia','bappebti','pph','ppn','legal'] },
+  { id:'glossary',         keywords:['glossary','glosarium','istilah','terms','kamus','dictionary'] },
+  { id:'ultra-pro',        keywords:['ultra pro','pro system','advanced','professional','smart money','arkham','nansen','multi wallet','on-chain identity'] },
+];
+
+// ── SEARCH DROPDOWN ELEMENT ──
+let dropdownEl = null;
+
+function getOrCreateDropdown() {
+  if (dropdownEl) return dropdownEl;
+  dropdownEl = document.createElement('div');
+  dropdownEl.id = 'search-dropdown';
+  dropdownEl.style.cssText = `
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    background: var(--bg2);
+    border: 1px solid var(--border-h, rgba(0,232,122,.3));
+    border-top: none;
+    border-radius: 0 0 8px 8px;
+    max-height: 260px;
+    overflow-y: auto;
+    z-index: 9999;
+    box-shadow: 0 8px 24px rgba(0,0,0,.3);
+  `;
+  const sbSearch = document.querySelector('.sb-search');
+  sbSearch.style.position = 'relative';
+  sbSearch.appendChild(dropdownEl);
+  return dropdownEl;
+}
+
+function closeDropdown() {
+  if (dropdownEl) dropdownEl.innerHTML = '';
+}
+
 function searchSidebar(q) {
   q = q.toLowerCase().trim();
+
+  // ── Filter sidebar links ──
   document.querySelectorAll('.sb-link').forEach(l => {
     const t = l.textContent.toLowerCase();
     l.style.display = (!q || t.includes(q)) ? 'flex' : 'none';
   });
+
+  if (!q) { closeDropdown(); return; }
+
+  // ── Search konten section ──
+  const results = searchIndex.filter(item =>
+    item.keywords.some(kw => kw.includes(q) || q.includes(kw.slice(0,4)))
+  );
+
+  const dd = getOrCreateDropdown();
+
+  if (results.length === 0) {
+    dd.innerHTML = `
+      <div style="padding:12px 14px;font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;">
+        Tidak ditemukan / Not found
+      </div>`;
+    return;
+  }
+
+  // Label yang cantik berdasarkan id
+  const labelMap = {
+    'intro':'Pengantar','airdrop-basics':'Apa Itu Airdrop','airdrop-history':'Sejarah Airdrop',
+    'airdrop-types':'Jenis Airdrop','farming':'Cara Farming','web3':'Web3',
+    'blockchain':'Blockchain','wallet':'Wallet','defi':'DeFi','dex-cex':'DEX vs CEX',
+    'staking':'Staking & Yield','nft':'NFT','gamefi':'GameFi','dao':'DAO',
+    'tokenomics':'Tokenomics','layer2':'Layer 2','depin':'DePIN','socialfi':'SocialFi',
+    'bridge-oracle':'Bridge & Oracle','ai-crypto':'AI x Crypto','rwa':'RWA',
+    'restaking-lrt':'Restaking & LRT','modular':'Modular Blockchain','crosschain':'Cross-chain',
+    'did':'DID','security':'Keamanan','scam':'Scam & Rug Pull','tax':'Pajak & Regulasi',
+    'glossary':'Glossary','ultra-pro':'Pro Hunter System',
+  };
+
+  dd.innerHTML = results.map(r => `
+    <div onclick="show('${r.id}');closeDropdown();document.getElementById('sbSearch').value=''" style="
+      padding: 10px 14px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text2);
+      border-bottom: 1px solid var(--border);
+      display: flex;
+      align-items: center;
+      gap: 8px;
+      transition: background .15s;
+    " onmouseover="this.style.background='rgba(0,232,122,.07)';this.style.color='var(--g)'"
+       onmouseout="this.style.background='';this.style.color='var(--text2)'">
+      <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--g)">→</span>
+      ${labelMap[r.id] || r.id}
+    </div>
+  `).join('');
 }
+
+// Tutup dropdown saat klik di luar
+document.addEventListener('click', e => {
+  if (!e.target.closest('.sb-search')) closeDropdown();
+});
 
 // Theme Toggle
 function toggleTheme() {
