@@ -2808,11 +2808,13 @@ function setDocLang(l) {
   if(btnId) btnId.className = 'lbtn' + (l==='id'?' active':'');
   if(btnEn) btnEn.className = 'lbtn' + (l==='en'?' active':'');
   
-  document.querySelectorAll('[data-'+l+']').forEach(el => {
+ document.querySelectorAll('[data-'+l+']').forEach(el => {
     const val = el.getAttribute('data-'+l);
-    if(val) {
-      if(el.tagName === 'INPUT') el.placeholder = val;
-      else el.innerHTML = val;
+    if(!val) return;
+    if(el.tagName === 'INPUT') {
+      el.placeholder = val;
+    } else if(el.tagName === 'SPAN' || el.tagName === 'P' || el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'DIV' || el.tagName === 'LI' || el.tagName === 'TD' || el.tagName === 'TH' || el.tagName === 'STRONG') {
+      el.innerHTML = val;
     }
   });
   renderGlossary();
