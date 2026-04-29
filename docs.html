@@ -2601,203 +2601,39 @@ html, body {
 </style>
 
 <script>
-/* ══════════════════════════════════════
-   GLOSSARY DATA & LOGIC (Tetap Sama)
-══════════════════════════════════════ */
 const glossaryData = [
-/* ================= A ================= */
-{term:'Airdrop',badge:'c',cat:'Web3',def:{
-id:'Distribusi token oleh proyek kepada wallet pengguna berdasarkan snapshot, aktivitas on-chain, atau kontribusi tertentu untuk bootstrap komunitas dan distribusi awal token.',
-en:'Token distribution to user wallets based on snapshots, on-chain activity, or contributions to bootstrap community and initial token distribution.'
-}},
-{term:'Account Abstraction',badge:'g',cat:'Web3',def:{
-id:'Model wallet berbasis smart contract yang memisahkan logika akun dari private key, memungkinkan fitur seperti gasless tx, social recovery, dan multi-sig.',
-en:'A smart contract-based wallet model decoupling account logic from private keys, enabling features like gasless transactions, social recovery, and multi-sig.'
-}},
-{term:'Address',badge:'g',cat:'Web3',def:{
-id:'Representasi hash dari public key yang digunakan sebagai identitas untuk menerima, mengirim aset, dan berinteraksi dengan smart contract.',
-en:'A hashed representation of a public key used as an identity to send/receive assets and interact with smart contracts.'
-}},
-{term:'Aggregator',badge:'g',cat:'Web3',def:{
-id:'Protokol yang menggabungkan likuiditas dari berbagai DEX untuk mengeksekusi trade dengan harga optimal dan slippage minimal.',
-en:'Protocol that aggregates liquidity from multiple DEXs to execute trades with optimal pricing and minimal slippage.'
-}},
-{term:'Allowance',badge:'g',cat:'Web3',def:{
-id:'Parameter dalam standar ERC-20 yang menentukan jumlah token yang diizinkan untuk digunakan oleh pihak ketiga melalui smart contract.',
-en:'An ERC-20 parameter defining how many tokens a third party is allowed to spend via smart contracts.'
-}},
-{term:'Arweave',badge:'g',cat:'Web3',def:{
-id:'Jaringan penyimpanan permanen berbasis blockchain dengan model ekonomi sekali bayar untuk penyimpanan data selamanya.',
-en:'A permanent blockchain-based storage network using a one-time payment model for permanent data storage.'
-}},
-
-/* ================= B ================= */
-{term:'Blockchain',badge:'g',cat:'Web3',def:{
-id:'Ledger terdistribusi yang menyimpan data transaksi dalam blok yang saling terhubung secara kriptografis dan divalidasi melalui konsensus.',
-en:'A distributed ledger storing transaction data in cryptographically linked blocks validated through consensus.'
-}},
-{term:'Bridge',badge:'g',cat:'Web3',def:{
-id:'Infrastruktur lintas-chain yang memungkinkan perpindahan aset/data antar blockchain menggunakan mekanisme lock-mint atau burn-release.',
-en:'Cross-chain infrastructure enabling asset/data transfers using lock-mint or burn-release mechanisms.'
-}},
-{term:'Blob Data',badge:'g',cat:'Web3',def:{
-id:'Format data dalam proto-danksharding (EIP-4844) yang digunakan untuk meningkatkan efisiensi rollup dengan biaya lebih rendah.',
-en:'Data format in proto-danksharding (EIP-4844) used to improve rollup efficiency at lower cost.'
-}},
-{term:'Burn',badge:'g',cat:'Web3',def:{
-id:'Proses menghapus token dari sirkulasi dengan mengirimnya ke address yang tidak dapat diakses.',
-en:'Process of removing tokens from circulation by sending them to an inaccessible address.'
-}},
-
-/* ================= C ================= */
-{term:'Consensus',badge:'g',cat:'Web3',def:{
-id:'Mekanisme yang memastikan semua node dalam jaringan sepakat terhadap state blockchain, seperti PoS atau PoW.',
-en:'Mechanism ensuring all nodes agree on blockchain state, such as PoS or PoW.'
-}},
-{term:'Cross-chain',badge:'g',cat:'Web3',def:{
-id:'Kemampuan sistem untuk beroperasi dan bertukar data atau aset antar blockchain berbeda.',
-en:'Capability to operate and exchange data/assets across different blockchains.'
-}},
-{term:'Cryptography',badge:'g',cat:'Web3',def:{
-id:'Teknik matematis untuk mengamankan data melalui enkripsi, hashing, dan signature digital.',
-en:'Mathematical techniques securing data through encryption, hashing, and digital signatures.'
-}},
-{term:'Composable',badge:'g',cat:'Web3',def:{
-id:'Sifat dApp yang memungkinkan integrasi dan interaksi antar protokol secara modular.',
-en:'Property of dApps allowing modular integration and interaction across protocols.'
-}},
-
-/* ================= D ================= */
-{term:'DApp',badge:'g',cat:'Web3',def:{
-id:'Aplikasi yang berjalan di atas blockchain dengan backend berupa smart contract dan tanpa server terpusat.',
-en:'Application running on blockchain with smart contracts as backend and no centralized server.'
-}},
-{term:'DAO',badge:'g',cat:'Web3',def:{
-id:'Organisasi otonom berbasis smart contract yang dikelola melalui voting token oleh komunitas.',
-en:'Autonomous organization governed by token-based voting via smart contracts.'
-}},
-{term:'Data Availability',badge:'g',cat:'Web3',def:{
-id:'Jaminan bahwa data transaksi tersedia untuk diverifikasi oleh node, krusial dalam desain rollup.',
-en:'Guarantee that transaction data is available for node verification, crucial in rollup design.'
-}},
-
-/* ================= E ================= */
-{term:'EVM',badge:'g',cat:'Web3',def:{
-id:'Lingkungan eksekusi virtual yang menjalankan smart contract di Ethereum dan chain kompatibel.',
-en:'Virtual execution environment running smart contracts on Ethereum and compatible chains.'
-}},
-{term:'ENS',badge:'g',cat:'Web3',def:{
-id:'Sistem domain terdesentralisasi yang mengubah address wallet menjadi nama yang mudah dibaca.',
-en:'Decentralized naming system mapping wallet addresses to human-readable names.'
-}},
-
-/* ================= F ================= */
-{term:'Finality',badge:'g',cat:'Web3',def:{
-id:'Kondisi dimana transaksi tidak dapat diubah setelah dikonfirmasi oleh jaringan.',
-en:'State where a transaction becomes irreversible after confirmation.'
-}},
-{term:'Flash Loan',badge:'g',cat:'Web3',def:{
-id:'Pinjaman tanpa jaminan yang harus dikembalikan dalam satu transaksi atomik.',
-en:'Uncollateralized loan that must be repaid within a single atomic transaction.'
-}},
-
-/* ================= G ================= */
-{term:'Gas',badge:'g',cat:'Web3',def:{
-id:'Unit biaya komputasi untuk menjalankan operasi dalam blockchain.',
-en:'Unit of computational cost for executing operations on blockchain.'
-}},
-{term:'Gwei',badge:'g',cat:'Web3',def:{
-id:'Sub-unit dari ETH (1e-9 ETH) yang digunakan untuk menghitung biaya gas.',
-en:'Sub-unit of ETH (1e-9 ETH) used to calculate gas fees.'
-}},
-
-/* ================= L ================= */
-{term:'Layer 2',badge:'g',cat:'Web3',def:{
-id:'Solusi scaling yang memproses transaksi di luar Layer 1 untuk meningkatkan throughput dan menurunkan biaya.',
-en:'Scaling solution processing transactions off Layer 1 to improve throughput and reduce cost.'
-}},
-{term:'Liquidity Pool',badge:'g',cat:'Web3',def:{
-id:'Kumpulan aset yang dikunci dalam smart contract untuk menyediakan likuiditas dalam protokol DeFi.',
-en:'Pool of assets locked in smart contracts to provide liquidity in DeFi protocols.'
-}},
-
-/* ================= M ================= */
-{term:'MEV',badge:'g',cat:'Web3',def:{
-id:'Nilai yang dapat diekstrak validator dari manipulasi urutan transaksi dalam block.',
-en:'Value extractable by validators from manipulating transaction ordering.'
-}},
-{term:'Merkle Tree',badge:'g',cat:'Web3',def:{
-id:'Struktur data berbasis hash untuk verifikasi data secara efisien.',
-en:'Hash-based data structure for efficient data verification.'
-}},
-
-/* ================= N ================= */
-{term:'NFT',badge:'g',cat:'Web3',def:{
-id:'Token unik yang merepresentasikan kepemilikan aset digital atau fisik.',
-en:'Unique token representing ownership of digital or physical assets.'
-}},
-
-/* ================= O ================= */
-{term:'Oracle',badge:'g',cat:'Web3',def:{
-id:'Layanan yang menyediakan data eksternal ke dalam blockchain untuk digunakan oleh smart contract.',
-en:'Service providing external data to blockchain for smart contract usage.'
-}},
-
-/* ================= R ================= */
-{term:'Rollup',badge:'g',cat:'Web3',def:{
-id:'Solusi Layer 2 yang menggabungkan banyak transaksi menjadi satu batch dan mempublikasikannya ke Layer 1.',
-en:'Layer 2 solution batching multiple transactions and publishing them to Layer 1.'
-}},
-{term:'RPC',badge:'g',cat:'Web3',def:{
-id:'Interface komunikasi antara aplikasi dan node blockchain.',
-en:'Interface for communication between applications and blockchain nodes.'
-}},
-
-/* ================= S ================= */
-{term:'Smart Contract',badge:'g',cat:'Web3',def:{
-id:'Program self-executing di blockchain yang berjalan sesuai kondisi yang telah ditentukan.',
-en:'Self-executing program on blockchain running based on predefined conditions.'
-}},
-{term:'Sybil',badge:'c',cat:'Web3',def:{
-id:'Serangan atau strategi menggunakan banyak identitas untuk memanipulasi sistem reward.',
-en:'Attack or strategy using multiple identities to manipulate reward systems.'
-}},
-
-/* ================= T ================= */
-{term:'Tokenomics',badge:'g',cat:'Web3',def:{
-id:'Struktur ekonomi token termasuk supply, distribusi, dan utilitas.',
-en:'Economic structure of a token including supply, distribution, and utility.'
-}},
-{term:'TVL',badge:'g',cat:'Web3',def:{
-id:'Total nilai aset yang terkunci dalam protokol DeFi.',
-en:'Total value of assets locked in DeFi protocols.'
-}},
-
-/* ================= Z ================= */
-{term:'ZK Proof',badge:'g',cat:'Web3',def:{
-id:'Metode kriptografi untuk membuktikan kebenaran tanpa mengungkapkan data asli.',
-en:'Cryptographic method proving truth without revealing underlying data.'
-}},
-{term:'ZK Rollup',badge:'g',cat:'Web3',def:{
-id:'Rollup berbasis zero-knowledge proof untuk validasi transaksi dengan efisiensi tinggi.',
-en:'Rollup using zero-knowledge proofs for efficient transaction validation.'
-}},
-
-/* ================= SLANG ================= */
-{term:'GM',badge:'r',cat:'Slang',def:{
-id:'Sapaan komunitas Web3 untuk membuka hari dan membangun engagement.',
-en:'Web3 community greeting to start the day and build engagement.'
-}},
-{term:'LFG',badge:'r',cat:'Slang',def:{
-id:'Ekspresi hype terhadap momentum positif dalam proyek atau market.',
-en:'Expression of hype toward positive project or market momentum.'
-}},
-{term:'WAGMI',badge:'r',cat:'Slang',def:{
-id:'Keyakinan kolektif bahwa komunitas/proyek akan sukses.',
-en:'Collective belief that the community/project will succeed.'
-}}
+{term:'Airdrop',badge:'c',cat:'Web3',def:{id:'Distribusi token oleh proyek kepada wallet pengguna berdasarkan snapshot, aktivitas on-chain, atau kontribusi tertentu.',en:'Token distribution to user wallets based on snapshots, on-chain activity, or contributions.'}},
+{term:'Account Abstraction',badge:'g',cat:'Web3',def:{id:'Model wallet berbasis smart contract yang memisahkan logika akun dari private key.',en:'A smart contract-based wallet model decoupling account logic from private keys.'}},
+{term:'Address',badge:'g',cat:'Web3',def:{id:'Representasi hash dari public key sebagai identitas untuk menerima/mengirim aset.',en:'A hashed representation of a public key used as an identity to send/receive assets.'}},
+{term:'Aggregator',badge:'g',cat:'Web3',def:{id:'Protokol yang menggabungkan likuiditas dari berbagai DEX untuk harga optimal.',en:'Protocol aggregating liquidity from multiple DEXs for optimal pricing.'}},
+{term:'Allowance',badge:'g',cat:'Web3',def:{id:'Parameter ERC-20 yang menentukan jumlah token yang bisa digunakan pihak ketiga.',en:'An ERC-20 parameter defining how many tokens a third party can spend.'}},
+{term:'Blockchain',badge:'g',cat:'Web3',def:{id:'Ledger terdistribusi yang menyimpan transaksi dalam blok terhubung secara kriptografis.',en:'A distributed ledger storing transactions in cryptographically linked blocks.'}},
+{term:'Bridge',badge:'g',cat:'Web3',def:{id:'Infrastruktur lintas-chain untuk perpindahan aset/data antar blockchain.',en:'Cross-chain infrastructure enabling asset/data transfers between blockchains.'}},
+{term:'Burn',badge:'g',cat:'Web3',def:{id:'Proses menghapus token dari sirkulasi dengan mengirimnya ke address yang tidak dapat diakses.',en:'Process of removing tokens from circulation by sending to an inaccessible address.'}},
+{term:'Consensus',badge:'g',cat:'Web3',def:{id:'Mekanisme agar semua node sepakat terhadap state blockchain, seperti PoS atau PoW.',en:'Mechanism ensuring all nodes agree on blockchain state, such as PoS or PoW.'}},
+{term:'Cross-chain',badge:'g',cat:'Web3',def:{id:'Kemampuan beroperasi dan bertukar data/aset antar blockchain berbeda.',en:'Capability to operate and exchange data/assets across different blockchains.'}},
+{term:'DApp',badge:'g',cat:'Web3',def:{id:'Aplikasi di atas blockchain dengan backend smart contract tanpa server terpusat.',en:'Application running on blockchain with smart contracts as backend.'}},
+{term:'DAO',badge:'g',cat:'Web3',def:{id:'Organisasi otonom berbasis smart contract yang dikelola melalui voting token.',en:'Autonomous organization governed by token-based voting via smart contracts.'}},
+{term:'EVM',badge:'g',cat:'Web3',def:{id:'Lingkungan eksekusi virtual yang menjalankan smart contract di Ethereum.',en:'Virtual execution environment running smart contracts on Ethereum.'}},
+{term:'ENS',badge:'g',cat:'Web3',def:{id:'Sistem domain terdesentralisasi yang mengubah address wallet menjadi nama yang mudah dibaca.',en:'Decentralized naming system mapping wallet addresses to human-readable names.'}},
+{term:'Flash Loan',badge:'g',cat:'Web3',def:{id:'Pinjaman tanpa jaminan yang harus dikembalikan dalam satu transaksi atomik.',en:'Uncollateralized loan that must be repaid within a single atomic transaction.'}},
+{term:'Gas',badge:'g',cat:'Web3',def:{id:'Unit biaya komputasi untuk menjalankan operasi dalam blockchain.',en:'Unit of computational cost for executing operations on blockchain.'}},
+{term:'Layer 2',badge:'g',cat:'Web3',def:{id:'Solusi scaling yang memproses transaksi di luar Layer 1.',en:'Scaling solution processing transactions off Layer 1.'}},
+{term:'Liquidity Pool',badge:'g',cat:'Web3',def:{id:'Kumpulan aset dikunci dalam smart contract untuk likuiditas DeFi.',en:'Pool of assets locked in smart contracts to provide DeFi liquidity.'}},
+{term:'MEV',badge:'g',cat:'Web3',def:{id:'Nilai yang dapat diekstrak validator dari manipulasi urutan transaksi.',en:'Value extractable by validators from manipulating transaction ordering.'}},
+{term:'NFT',badge:'g',cat:'Web3',def:{id:'Token unik yang merepresentasikan kepemilikan aset digital atau fisik.',en:'Unique token representing ownership of digital or physical assets.'}},
+{term:'Oracle',badge:'g',cat:'Web3',def:{id:'Layanan yang menyediakan data eksternal ke dalam blockchain untuk smart contract.',en:'Service providing external data to blockchain for smart contract usage.'}},
+{term:'Rollup',badge:'g',cat:'Web3',def:{id:'Solusi Layer 2 yang menggabungkan banyak transaksi menjadi satu batch ke Layer 1.',en:'Layer 2 solution batching multiple transactions and publishing them to Layer 1.'}},
+{term:'Smart Contract',badge:'g',cat:'Web3',def:{id:'Program self-executing di blockchain yang berjalan sesuai kondisi yang telah ditentukan.',en:'Self-executing program on blockchain running based on predefined conditions.'}},
+{term:'Sybil',badge:'c',cat:'Web3',def:{id:'Serangan menggunakan banyak identitas untuk memanipulasi sistem reward.',en:'Attack using multiple identities to manipulate reward systems.'}},
+{term:'Tokenomics',badge:'g',cat:'Web3',def:{id:'Struktur ekonomi token termasuk supply, distribusi, dan utilitas.',en:'Economic structure of a token including supply, distribution, and utility.'}},
+{term:'TVL',badge:'g',cat:'Web3',def:{id:'Total nilai aset yang terkunci dalam protokol DeFi.',en:'Total value of assets locked in DeFi protocols.'}},
+{term:'ZK Proof',badge:'g',cat:'Web3',def:{id:'Metode kriptografi untuk membuktikan kebenaran tanpa mengungkapkan data asli.',en:'Cryptographic method proving truth without revealing underlying data.'}},
+{term:'GM',badge:'r',cat:'Slang',def:{id:'Sapaan komunitas Web3 untuk membuka hari.',en:'Web3 community greeting to start the day.'}},
+{term:'LFG',badge:'r',cat:'Slang',def:{id:'Ekspresi hype terhadap momentum positif.',en:'Expression of hype toward positive momentum.'}},
+{term:'WAGMI',badge:'r',cat:'Slang',def:{id:'Keyakinan kolektif bahwa komunitas/proyek akan sukses.',en:'Collective belief that the community/project will succeed.'}}
 ];
-  
+
 let docLang = localStorage.getItem('axi-doc-lang') || 'id';
 
 function setDocLang(l) {
@@ -2807,15 +2643,11 @@ function setDocLang(l) {
   const btnEn = document.getElementById('d-btn-en');
   if(btnId) btnId.className = 'lbtn' + (l==='id'?' active':'');
   if(btnEn) btnEn.className = 'lbtn' + (l==='en'?' active':'');
-  
- document.querySelectorAll('[data-'+l+']').forEach(el => {
+  document.querySelectorAll('[data-'+l+']').forEach(el => {
     const val = el.getAttribute('data-'+l);
     if(!val) return;
-    if(el.tagName === 'INPUT') {
-      el.placeholder = val;
-    } else if(el.tagName === 'SPAN' || el.tagName === 'P' || el.tagName === 'H1' || el.tagName === 'H2' || el.tagName === 'DIV' || el.tagName === 'LI' || el.tagName === 'TD' || el.tagName === 'TH' || el.tagName === 'STRONG') {
-      el.innerHTML = val;
-    }
+    if(el.tagName === 'INPUT') el.placeholder = val;
+    else el.innerHTML = val;
   });
   renderGlossary();
 }
@@ -2836,16 +2668,11 @@ function toggleGroup(el) {
 }
 
 function show(id) {
-  // Sembunyikan semua section
   document.querySelectorAll('.doc-section').forEach(s => s.classList.remove('active'));
-  // Nonaktifkan semua link di sidebar
   document.querySelectorAll('.sb-link').forEach(l => l.classList.remove('active'));
-  
-  // Tampilkan section target (pakai prefix sec- sesuai id di konten lu)
   const sec = document.getElementById('sec-' + id);
   if(sec) {
     sec.classList.add('active');
-    // Aktifkan link sidebar yang sesuai
     const activeLink = document.querySelector(`.sb-link[onclick*="show('${id}')"]`);
     if(activeLink) {
       activeLink.classList.add('active');
@@ -2853,71 +2680,50 @@ function show(id) {
       if(group) group.classList.add('open');
     }
   }
-  
   window.scrollTo({top:0, behavior:'smooth'});
   history.replaceState(null,'','#'+id);
 }
 
-/* =====================================================
-   GANTI fungsi searchSidebar() di docs.html
-   dengan script ini (paste sebelum </script> penutup)
-   ===================================================== */
-
-// ── DATA INDEX untuk search konten ──
 const searchIndex = [
-  { id:'intro',            keywords:['pengantar','introduction','mulai','start','welcome','selamat datang'] },
-  { id:'airdrop-basics',   keywords:['airdrop','dasar','basics','apa itu','what is','token','gratis','free'] },
-  { id:'airdrop-history',  keywords:['sejarah','history','uniswap','2020','2021','retroactive','uni'] },
-  { id:'airdrop-types',    keywords:['jenis','types','standard','retroactive','holder','testnet','points','referral','governance','staking airdrop'] },
-  { id:'farming',          keywords:['farming','cara','how to','strategi','strategy','activity','consistency','diversity','sybil','anti-sybil','wallet','daily'] },
-  { id:'web3',             keywords:['web3','web 3','internet','decentralized','terdesentralisasi','evolusi','evolution'] },
-  { id:'blockchain',       keywords:['blockchain','protocol','blok','block','konsensus','consensus','ledger','node'] },
-  { id:'wallet',           keywords:['wallet','dompet','seed phrase','private key','metamask','phantom','keamanan','security','hot','cold'] },
-  { id:'defi',             keywords:['defi','keuangan','finance','lending','borrowing','yield','smart contract','permissionless','aave','compound'] },
-  { id:'dex-cex',          keywords:['dex','cex','exchange','bursa','trading','swap','uniswap','binance','pancakeswap','amm','kyc'] },
-  { id:'staking',          keywords:['staking','stake','yield farming','liquidity','lp','passive income','apy','apr','lock','reward'] },
-  { id:'nft',              keywords:['nft','token non fungible','digital asset','minting','mint','opensea','koleksi','collectible'] },
-  { id:'gamefi',           keywords:['gamefi','game','p2e','play to earn','in-game','guild','metaverse'] },
-  { id:'dao',              keywords:['dao','governance','voting','vote','proposal','komunitas','community','tata kelola'] },
-  { id:'tokenomics',       keywords:['tokenomics','supply','distribusi','distribution','vesting','cliff','utility','burn','inflasi','inflation'] },
-  { id:'layer2',           keywords:['layer 2','l2','rollup','optimistic','zk','zkrollup','arbitrum','optimism','base','starknet','scaling','skalabilitas'] },
-  { id:'depin',            keywords:['depin','infrastruktur','infrastructure','helium','filecoin','render','hardware','node','wifi','storage','gpu'] },
-  { id:'socialfi',         keywords:['socialfi','social','media sosial','kreator','creator','friend.tech','lens','farcaster'] },
-  { id:'bridge-oracle',    keywords:['bridge','oracle','chainlink','cross chain','jembatan','linea','wormhole','price feed'] },
-  { id:'ai-crypto',        keywords:['ai','artificial intelligence','crypto','kecerdasan buatan','agent','data','model','ai agent'] },
-  { id:'rwa',              keywords:['rwa','real world asset','aset dunia nyata','properti','real estate','obligasi','bond','emas','gold','tokenisasi','tokenize'] },
-  { id:'restaking-lrt',    keywords:['restaking','lrt','liquid restaking','eigenlayer','etherfi','renzo','kelpDAO','shared security'] },
-  { id:'modular',          keywords:['modular','blockchain','monolithic','celestia','data availability','execution','settlement','consensus layer'] },
-  { id:'crosschain',       keywords:['cross chain','omnichain','linea','layerzero','interoperability','interoperabilitas','wormhole'] },
-  { id:'did',              keywords:['did','decentralized identity','ens','worldcoin','gitcoin passport','proof of humanity','sybil','galxe','reputasi'] },
-  { id:'security',         keywords:['keamanan','security','hack','phishing','burner wallet','hardware wallet','ledger','trezor','revoke','drainer','seed','approve'] },
-  { id:'scam',             keywords:['scam','rug pull','penipuan','fraud','honeypot','approval scam','red flag','bahaya'] },
-  { id:'tax',              keywords:['pajak','tax','regulasi','regulation','indonesia','bappebti','pph','ppn','legal'] },
-  { id:'glossary',         keywords:['glossary','glosarium','istilah','terms','kamus','dictionary'] },
-  { id:'ultra-pro',        keywords:['ultra pro','pro system','advanced','professional','smart money','arkham','nansen','multi wallet','on-chain identity'] },
+  {id:'intro', keywords:['pengantar','introduction','mulai','start','welcome']},
+  {id:'airdrop-basics', keywords:['airdrop','dasar','basics','apa itu','token','gratis']},
+  {id:'airdrop-history', keywords:['sejarah','history','uniswap','2020','2021','retroactive']},
+  {id:'airdrop-types', keywords:['jenis','types','standard','holder','testnet','points','referral']},
+  {id:'farming', keywords:['farming','cara','strategi','strategy','sybil','wallet','daily']},
+  {id:'web3', keywords:['web3','internet','decentralized','terdesentralisasi']},
+  {id:'blockchain', keywords:['blockchain','protocol','blok','konsensus','node']},
+  {id:'wallet', keywords:['wallet','dompet','seed phrase','private key','metamask','phantom']},
+  {id:'defi', keywords:['defi','keuangan','lending','borrowing','yield','aave']},
+  {id:'dex-cex', keywords:['dex','cex','exchange','bursa','trading','swap','uniswap','binance']},
+  {id:'staking', keywords:['staking','stake','yield farming','liquidity','lp','passive income']},
+  {id:'nft', keywords:['nft','digital asset','minting','mint','opensea']},
+  {id:'gamefi', keywords:['gamefi','game','p2e','play to earn','metaverse']},
+  {id:'dao', keywords:['dao','governance','voting','proposal','komunitas']},
+  {id:'tokenomics', keywords:['tokenomics','supply','distribusi','vesting','burn']},
+  {id:'layer2', keywords:['layer 2','l2','rollup','optimistic','zk','arbitrum','scaling']},
+  {id:'depin', keywords:['depin','infrastruktur','helium','filecoin','hardware','gpu']},
+  {id:'socialfi', keywords:['socialfi','social','media sosial','kreator']},
+  {id:'bridge-oracle', keywords:['bridge','oracle','chainlink','cross chain','jembatan']},
+  {id:'ai-crypto', keywords:['ai','artificial intelligence','kecerdasan buatan','agent']},
+  {id:'rwa', keywords:['rwa','real world asset','properti','obligasi','emas','tokenisasi']},
+  {id:'restaking-lrt', keywords:['restaking','lrt','liquid restaking','eigenlayer']},
+  {id:'modular', keywords:['modular','monolithic','celestia','data availability']},
+  {id:'crosschain', keywords:['cross chain','omnichain','layerzero','interoperability']},
+  {id:'did', keywords:['did','decentralized identity','worldcoin','gitcoin','proof of humanity']},
+  {id:'security', keywords:['keamanan','security','hack','phishing','burner wallet','revoke','seed']},
+  {id:'scam', keywords:['scam','rug pull','penipuan','honeypot','red flag']},
+  {id:'tax', keywords:['pajak','tax','regulasi','indonesia','bappebti','legal']},
+  {id:'glossary', keywords:['glossary','glosarium','istilah','kamus']},
+  {id:'ultra-pro', keywords:['ultra pro','pro system','advanced','smart money','arkham','nansen']},
 ];
 
-// ── SEARCH DROPDOWN ELEMENT ──
 let dropdownEl = null;
 
 function getOrCreateDropdown() {
-  if (dropdownEl) return dropdownEl;
+  if(dropdownEl) return dropdownEl;
   dropdownEl = document.createElement('div');
   dropdownEl.id = 'search-dropdown';
-  dropdownEl.style.cssText = `
-    position: absolute;
-    top: 100%;
-    left: 0;
-    right: 0;
-    background: var(--bg2);
-    border: 1px solid var(--border-h, rgba(0,232,122,.3));
-    border-top: none;
-    border-radius: 0 0 8px 8px;
-    max-height: 260px;
-    overflow-y: auto;
-    z-index: 9999;
-    box-shadow: 0 8px 24px rgba(0,0,0,.3);
-  `;
+  dropdownEl.style.cssText = 'position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid rgba(0,232,122,.3);border-top:none;border-radius:0 0 8px 8px;max-height:260px;overflow-y:auto;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.3);';
   const sbSearch = document.querySelector('.sb-search');
   sbSearch.style.position = 'relative';
   sbSearch.appendChild(dropdownEl);
@@ -2925,36 +2731,20 @@ function getOrCreateDropdown() {
 }
 
 function closeDropdown() {
-  if (dropdownEl) dropdownEl.innerHTML = '';
+  if(dropdownEl) dropdownEl.innerHTML = '';
 }
 
 function searchSidebar(q) {
   q = q.toLowerCase().trim();
-
-  // ── Filter sidebar links ──
   document.querySelectorAll('.sb-link').forEach(l => {
     const t = l.textContent.toLowerCase();
     l.style.display = (!q || t.includes(q)) ? 'flex' : 'none';
   });
-
-  if (!q) { closeDropdown(); return; }
-
-  // ── Search konten section ──
+  if(!q) { closeDropdown(); return; }
   const results = searchIndex.filter(item =>
     item.keywords.some(kw => kw.includes(q) || q.includes(kw.slice(0,4)))
   );
-
   const dd = getOrCreateDropdown();
-
-  if (results.length === 0) {
-    dd.innerHTML = `
-      <div style="padding:12px 14px;font-size:12px;color:var(--text3);font-family:'JetBrains Mono',monospace;">
-        Tidak ditemukan / Not found
-      </div>`;
-    return;
-  }
-
-  // Label yang cantik berdasarkan id
   const labelMap = {
     'intro':'Pengantar','airdrop-basics':'Apa Itu Airdrop','airdrop-history':'Sejarah Airdrop',
     'airdrop-types':'Jenis Airdrop','farming':'Cara Farming','web3':'Web3',
@@ -2966,32 +2756,23 @@ function searchSidebar(q) {
     'did':'DID','security':'Keamanan','scam':'Scam & Rug Pull','tax':'Pajak & Regulasi',
     'glossary':'Glossary','ultra-pro':'Pro Hunter System',
   };
-
+  if(results.length === 0) {
+    dd.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:var(--text3);font-family:\'JetBrains Mono\',monospace;">Tidak ditemukan</div>';
+    return;
+  }
   dd.innerHTML = results.map(r => `
-    <div onclick="show('${r.id}');closeDropdown();document.getElementById('sbSearch').value=''" style="
-      padding: 10px 14px;
-      cursor: pointer;
-      font-size: 13px;
-      color: var(--text2);
-      border-bottom: 1px solid var(--border);
-      display: flex;
-      align-items: center;
-      gap: 8px;
-      transition: background .15s;
-    " onmouseover="this.style.background='rgba(0,232,122,.07)';this.style.color='var(--g)'"
-       onmouseout="this.style.background='';this.style.color='var(--text2)'">
-      <span style="font-size:10px;font-family:'JetBrains Mono',monospace;color:var(--g)">→</span>
-      ${labelMap[r.id] || r.id}
-    </div>
-  `).join('');
+    <div onclick="show('${r.id}');closeDropdown();document.getElementById('sbSearch').value=''"
+      style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;"
+      onmouseover="this.style.background='rgba(0,232,122,.07)';this.style.color='var(--g)'"
+      onmouseout="this.style.background='';this.style.color='var(--text2)'">
+      <span style="font-size:10px;color:var(--g)">→</span>${labelMap[r.id]||r.id}
+    </div>`).join('');
 }
 
-// Tutup dropdown saat klik di luar
 document.addEventListener('click', e => {
-  if (!e.target.closest('.sb-search')) closeDropdown();
+  if(!e.target.closest('.sb-search')) closeDropdown();
 });
 
-// Theme Toggle
 function toggleTheme() {
   const html = document.documentElement;
   const isDark = html.getAttribute('data-theme') === 'dark';
