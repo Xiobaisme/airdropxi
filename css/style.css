@@ -820,46 +820,107 @@ footer {
    ========================================== */
 @media (max-width: 768px) {
   /* Navbar mobile */
-  nav {
-    padding: 0 16px;
-  }
+  nav { padding: 0 16px; }
   .nav-links { display: none; }
-  .nav-right { display: none; }
-  .hamburger { display: flex; }
+  .nav-right  { display: none; }
+  .hamburger  { display: flex; }
 
   /* Sections */
   section { padding: 44px 16px; }
 
-  /* Hero — fix text overflow */
+  /* ── HERO: override grid jadi flex ── */
   .hero {
-    padding: 36px 16px 32px;
-    overflow: hidden;
+    display: flex !important;
+    flex-direction: column !important;
+    grid-template-columns: unset !important;
+    padding: 36px 16px 32px !important;
+    width: 100% !important;
+    max-width: 100vw !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+    text-align: center;
+    gap: 32px;
+    min-height: auto;
   }
+
+  .hero > div:first-child {
+    width: 100% !important;
+    max-width: 100% !important;
+    overflow: hidden !important;
+    box-sizing: border-box !important;
+  }
+
+  /* ── H1: font kecil aman untuk 360-430px ── */
   .hero h1 {
-    font-size: clamp(28px, 8vw, 42px);
-    letter-spacing: -1px;
-    word-break: break-word;
-    overflow-wrap: break-word;
+    font-size: clamp(22px, 6.5vw, 34px) !important;
+    letter-spacing: -0.5px !important;
+    line-height: 1.15 !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+    width: 100% !important;
+    max-width: 100% !important;
   }
+
   .hero-sub {
-    font-size: 13px;
-    word-break: break-word;
-    overflow-wrap: break-word;
+    font-size: 12px !important;
+    word-break: break-word !important;
+    overflow-wrap: break-word !important;
+    white-space: normal !important;
+    max-width: 100% !important;
+    margin-left: auto;
+    margin-right: auto;
   }
+
   .hero-btns {
     flex-direction: column;
     width: 100%;
+    justify-content: center;
   }
+
   .btn-primary, .btn-ghost {
     width: 100%;
     justify-content: center;
   }
+
+  #hero-docs-banner {
+    width: 100% !important;
+    box-sizing: border-box !important;
+    overflow: hidden !important;
+    flex-wrap: wrap;
+  }
+
+  .hero-badge {
+    max-width: 90%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
   .hero-visual { transform: scale(.75); margin-top: -20px; }
   .float-card-1, .float-card-2 { display: none; }
 
-  /* Fix untuk semua teks yang kepotong */
-  .hero h1, 
-  .hero-sub,
+  /* Hero stats */
+  .hero-stats {
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 16px;
+    margin-top: 24px;
+  }
+  .hstat { min-width: 80px; }
+  .hstat-num { font-size: 20px; word-break: break-word; }
+
+  /* ── TICKER: tetap animasi, hanya di-clip ── */
+  .pticker-wrap,
+  .nticker-wrap {
+    overflow: hidden !important;
+    max-width: 100vw !important;
+  }
+  /* TIDAK matikan animasi scrollX */
+  .pticker-inner { animation: scrollX 220s linear infinite !important; }
+  .nticker-inner { animation: scrollX 38s linear infinite !important; }
+
+  /* Fix semua teks overflow */
   .section-title,
   .section-sub,
   .acard-name,
@@ -882,94 +943,55 @@ footer {
     white-space: normal;
   }
 
-  /* Fix untuk ticker yang kepotong */
-  .pticker-wrap,
-  .nticker-wrap {
-    overflow-x: auto;
-    -webkit-overflow-scrolling: touch;
-  }
-  
-  .pticker-inner,
-  .nticker-inner {
-    animation: none;
-    white-space: nowrap;
-  }
-  
-  /* Fix untuk badge dan tag */
+  /* Badge dan tag */
   .atag,
   .st-badge-wrap .st-item {
     white-space: normal;
     word-break: break-word;
   }
-  
-  /* Fix untuk quick buttons AI */
+
+  /* AI quick buttons */
   .ai-quick-btns {
     overflow-x: auto;
     flex-wrap: nowrap;
     padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
   }
-  
   .ai-qbtn {
     white-space: nowrap;
     flex-shrink: 0;
   }
-  
-  /* Fix untuk stat card */
-  .dash-card {
-    word-break: break-word;
-  }
-  
-  .dash-num {
-    font-size: 28px;
-    word-break: break-word;
-  }
-  
-  /* Fix untuk filter buttons */
+
+  /* Stat card */
+  .dash-card { word-break: break-word; }
+  .dash-num  { font-size: 28px; word-break: break-word; }
+
+  /* Filter buttons */
   .filter-btns {
     overflow-x: auto;
     flex-wrap: nowrap;
     padding-bottom: 8px;
+    -webkit-overflow-scrolling: touch;
   }
-  
   .fbtn {
     white-space: nowrap;
     flex-shrink: 0;
   }
-  
-  /* Fix untuk hero stats */
-  .hero-stats {
-    flex-wrap: wrap;
-    justify-content: center;
-  }
-  
-  .hstat {
-    min-width: 80px;
-  }
-  
-  .hstat-num {
-    font-size: 20px;
-    word-break: break-word;
-  }
-  
-  /* Fix untuk guide card list */
-  .g-list li {
-    flex-wrap: wrap;
-  }
-  
-  .g-list li strong {
-    min-width: auto;
-  }
+
+  /* Guide card */
+  .g-list li      { flex-wrap: wrap; }
+  .g-list li strong { min-width: auto; }
 
   /* Grid adjustments */
-  .dash-grid { grid-template-columns: 1fr 1fr; }
-  .guide-grid { grid-template-columns: 1fr; }
-  #airdrop-container { grid-template-columns: 1fr; }
-  .filter-bar { flex-direction: column; align-items: stretch; }
-  .search-box { min-width: unset; }
+  .dash-grid          { grid-template-columns: 1fr 1fr; }
+  .guide-grid         { grid-template-columns: 1fr; }
+  #airdrop-container  { grid-template-columns: 1fr; }
+  .filter-bar         { flex-direction: column; align-items: stretch; }
+  .search-box         { min-width: unset; }
 
   /* Footer */
-  .footer-top { grid-template-columns: 1fr; gap: 28px; }
-  footer { padding: 32px 16px 20px; }
+  .footer-top    { grid-template-columns: 1fr; gap: 28px; }
+  footer         { padding: 32px 16px 20px; }
   .footer-bottom { flex-direction: column; text-align: center; gap: 6px; }
 
   /* AI Panel */
@@ -981,62 +1003,39 @@ footer {
    ========================================== */
 @media (max-width: 480px) {
   .dash-grid { grid-template-columns: 1fr; }
-  .hero h1 { font-size: 32px; letter-spacing: -1px; }
+
+  .hero h1 {
+    font-size: clamp(20px, 6vw, 28px) !important;
+    letter-spacing: -0.3px !important;
+  }
+
   .hero-btns { flex-direction: column; }
   .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
-  .hero-stats { gap: 16px; }
-  
-  /* Fix overflow untuk semua container */
+  .hero-stats { gap: 12px; }
+
+  /* Overflow lock */
   body, html {
     overflow-x: hidden;
     width: 100%;
   }
-  
   .container, section, .hero, footer {
     overflow-x: hidden;
   }
-  
-  /* Fix untuk card airdrop */
-  .acard {
-    padding: 16px;
-  }
-  
-  .acard-top {
-    flex-wrap: wrap;
-    gap: 10px;
-  }
-  
-  .acard-status {
-    white-space: normal;
-    text-align: center;
-  }
-  
-  .acard-tags {
+
+  /* Airdrop cards */
+  .acard         { padding: 16px; }
+  .acard-top     { flex-wrap: wrap; gap: 10px; }
+  .acard-status  { white-space: normal; text-align: center; }
+  .acard-tags    {
     overflow-x: auto;
     flex-wrap: nowrap;
     padding-bottom: 6px;
+    -webkit-overflow-scrolling: touch;
   }
-  
-  /* Fix untuk raised info */
-  .acard-raised {
-    flex-wrap: wrap;
-  }
-  
-  .raised-ico {
-    flex-shrink: 0;
-  }
-  
-  /* Fix untuk progress bar text */
-  .prog-meta {
-    flex-wrap: wrap;
-    gap: 4px;
-  }
-  
-  /* Fix untuk tasks */
-  .tasks-body {
-    max-height: 100px;
-    overflow-y: auto;
-  }
+  .acard-raised  { flex-wrap: wrap; }
+  .raised-ico    { flex-shrink: 0; }
+  .prog-meta     { flex-wrap: wrap; gap: 4px; }
+  .tasks-body    { max-height: 100px; overflow-y: auto; }
 }
 
 /* ==========================================
