@@ -2717,33 +2717,54 @@ const searchIndex = [
   {id:'ultra-pro', keywords:['ultra pro','pro system','advanced','smart money','arkham','nansen']},
 ];
 
+// ── SEARCH SYSTEM FIXED ──
 let dropdownEl = null;
+let isMouseDownOnDD = false;
 
 function getOrCreateDropdown() {
-  if(dropdownEl) return dropdownEl;
+  if (dropdownEl) return dropdownEl;
   dropdownEl = document.createElement('div');
   dropdownEl.id = 'search-dropdown';
-  dropdownEl.style.cssText = 'position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid rgba(0,232,122,.3);border-top:none;border-radius:0 0 8px 8px;max-height:260px;overflow-y:auto;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.3);';
+  dropdownEl.style.cssText = 'position:absolute;top:100%;left:0;right:0;background:var(--bg2);border:1px solid rgba(0,232,122,.3);border-top:none;border-radius:0 0 8px 8px;max-height:260px;overflow-y:auto;z-index:9999;box-shadow:0 8px 24px rgba(0,0,0,.3);display:none;';
   const sbSearch = document.querySelector('.sb-search');
   sbSearch.style.position = 'relative';
   sbSearch.appendChild(dropdownEl);
+
+  // Tangkap mousedown sebelum blur input
+  dropdownEl.addEventListener('mousedown', () => { isMouseDownOnDD = true; });
+  dropdownEl.addEventListener('mouseup', () => { isMouseDownOnDD = false; });
   return dropdownEl;
 }
 
 function closeDropdown() {
-  if(dropdownEl) dropdownEl.innerHTML = '';
+  if (!dropdownEl) return;
+  dropdownEl.style.display = 'none';
+  dropdownEl.innerHTML = '';
+}
+
+function resetLinks() {
+  document.querySelectorAll('.sb-link').forEach(l => l.style.display = '');
 }
 
 function searchSidebar(q) {
   q = q.toLowerCase().trim();
+
+  if (!q) {
+    resetLinks();
+    closeDropdown();
+    return;
+  }
+
+  // Filter sidebar links
   document.querySelectorAll('.sb-link').forEach(l => {
     const t = l.textContent.toLowerCase();
-    l.style.display = (!q || t.includes(q)) ? 'flex' : 'none';
+    l.style.display = t.includes(q) ? '' : 'none';
   });
-  if(!q) { closeDropdown(); return; }
+
   const results = searchIndex.filter(item =>
-    item.keywords.some(kw => kw.includes(q) || q.includes(kw.slice(0,4)))
+    item.keywords.some(kw => kw.includes(q) || q.includes(kw.slice(0, 4)))
   );
+
   const dd = getOrCreateDropdown();
   const labelMap = {
     'intro':'Pengantar','airdrop-basics':'Apa Itu Airdrop','airdrop-history':'Sejarah Airdrop',
@@ -2756,21 +2777,42 @@ function searchSidebar(q) {
     'did':'DID','security':'Keamanan','scam':'Scam & Rug Pull','tax':'Pajak & Regulasi',
     'glossary':'Glossary','ultra-pro':'Pro Hunter System',
   };
-  if(results.length === 0) {
+
+  dd.style.display = 'block';
+
+  if (results.length === 0) {
     dd.innerHTML = '<div style="padding:12px 14px;font-size:12px;color:var(--text3);font-family:\'JetBrains Mono\',monospace;">Tidak ditemukan</div>';
     return;
   }
+
   dd.innerHTML = results.map(r => `
-    <div onclick="show('${r.id}');closeDropdown();document.getElementById('sbSearch').value=''"
+    <div
+      data-target="${r.id}"
       style="padding:10px 14px;cursor:pointer;font-size:13px;color:var(--text2);border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;"
       onmouseover="this.style.background='rgba(0,232,122,.07)';this.style.color='var(--g)'"
       onmouseout="this.style.background='';this.style.color='var(--text2)'">
-      <span style="font-size:10px;color:var(--g)">→</span>${labelMap[r.id]||r.id}
+      <span style="font-size:10px;color:var(--g)">→</span>${labelMap[r.id] || r.id}
     </div>`).join('');
 }
 
-document.addEventListener('click', e => {
-  if(!e.target.closest('.sb-search')) closeDropdown();
+// Event delegation — mousedown bukan onclick agar tidak kalah vs blur
+document.addEventListener('mousedown', e => {
+  const item = e.target.closest('#search-dropdown [data-target]');
+  if (item) {
+    const id = item.getAttribute('data-target');
+    show(id);
+    closeDropdown();
+    resetLinks();
+    const inp = document.getElementById('sbSearch');
+    inp.value = '';
+    inp.blur();
+    return;
+  }
+  // Klik di luar search area
+  if (!e.target.closest('.sb-search')) {
+    closeDropdown();
+    resetLinks();
+  }
 });
 
 function toggleTheme() {
