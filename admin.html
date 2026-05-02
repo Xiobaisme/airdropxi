@@ -1,0 +1,748 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+  <meta charset="UTF-8"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Admin Panel — AirdropXI</title>
+  <link rel="icon" type="image/png" href="logo.png">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --bg: #07090b;
+      --surface: #0d1117;
+      --surface2: #111820;
+      --surface3: #161e28;
+      --border: #1c2733;
+      --border2: #243040;
+      --accent: #00e5a0;
+      --accent-dim: rgba(0,229,160,0.08);
+      --accent-border: rgba(0,229,160,0.2);
+      --blue: #3b82f6;
+      --warn: #f59e0b;
+      --red: #ef4444;
+      --red-dim: rgba(239,68,68,0.08);
+      --text: #dce8f0;
+      --text2: #8aa0b4;
+      --text3: #4a6070;
+      --mono: 'Space Mono', monospace;
+      --sans: 'Syne', sans-serif;
+      --radius: 10px;
+    }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      min-height: 100vh;
+    }
+
+    body::before {
+      content: '';
+      position: fixed; inset: 0;
+      background-image:
+        linear-gradient(rgba(0,229,160,0.02) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(0,229,160,0.02) 1px, transparent 1px);
+      background-size: 48px 48px;
+      pointer-events: none; z-index: 0;
+    }
+
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(7,9,11,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 52px;
+      display: flex; align-items: center;
+      justify-content: space-between;
+    }
+    .nav-left { display: flex; align-items: center; gap: 0.75rem; }
+    .nav-logo {
+      font-family: var(--mono); font-size: 0.8rem;
+      color: var(--accent); font-weight: 700;
+      text-decoration: none; letter-spacing: 0.05em;
+    }
+    .nav-badge {
+      padding: 0.2rem 0.6rem;
+      background: rgba(239,68,68,0.1);
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 4px;
+      font-family: var(--mono); font-size: 0.6rem;
+      color: var(--red); letter-spacing: 0.08em;
+    }
+    .nav-back {
+      display: flex; align-items: center; gap: 0.4rem;
+      color: var(--text3); text-decoration: none;
+      font-family: var(--mono); font-size: 0.68rem;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--accent); }
+
+    /* LAYOUT */
+    .wrap {
+      position: relative; z-index: 1;
+      max-width: 1100px;
+      margin: 0 auto;
+      padding: 2rem 1.25rem 6rem;
+      display: grid;
+      grid-template-columns: 280px 1fr;
+      gap: 1.5rem;
+    }
+    @media (max-width: 768px) {
+      .wrap { grid-template-columns: 1fr; }
+    }
+
+    /* SIDEBAR: project list */
+    .sidebar { display: flex; flex-direction: column; gap: 1rem; }
+
+    .panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+    .panel-head {
+      display: flex; align-items: center; gap: 0.5rem;
+      padding: 0.875rem 1rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .ph-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: var(--accent);
+      box-shadow: 0 0 6px var(--accent);
+    }
+    .ph-title {
+      font-family: var(--mono); font-size: 0.65rem;
+      color: var(--text3); letter-spacing: 0.1em;
+      text-transform: uppercase; flex: 1;
+    }
+    .ph-count {
+      font-family: var(--mono); font-size: 0.65rem;
+      color: var(--accent);
+    }
+
+    /* Project list */
+    .proj-list { max-height: 520px; overflow-y: auto; }
+    .proj-list::-webkit-scrollbar { width: 4px; }
+    .proj-list::-webkit-scrollbar-track { background: var(--surface2); }
+    .proj-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+    .proj-item {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+      transition: background 0.15s;
+      gap: 0.5rem;
+    }
+    .proj-item:last-child { border-bottom: none; }
+    .proj-item:hover { background: var(--surface2); }
+    .proj-item.active { background: var(--accent-dim); }
+
+    .proj-item-name {
+      font-size: 0.82rem; font-weight: 700;
+      white-space: nowrap; overflow: hidden;
+      text-overflow: ellipsis;
+    }
+    .proj-item-status {
+      font-family: var(--mono); font-size: 0.55rem;
+      padding: 0.15rem 0.4rem;
+      border-radius: 3px;
+      white-space: nowrap; flex-shrink: 0;
+    }
+    .st-active  { background: rgba(0,229,160,0.1); color: var(--accent); }
+    .st-waitlist{ background: rgba(245,158,11,0.1); color: var(--warn); }
+    .st-default { background: var(--surface3); color: var(--text3); }
+
+    .btn-new {
+      width: 100%;
+      padding: 0.7rem;
+      background: var(--accent-dim);
+      border: 1px dashed var(--accent-border);
+      border-radius: 8px;
+      color: var(--accent);
+      font-family: var(--mono); font-size: 0.7rem;
+      cursor: pointer; letter-spacing: 0.05em;
+      transition: all 0.2s;
+    }
+    .btn-new:hover { background: rgba(0,229,160,0.14); }
+
+    /* FORM AREA */
+    .form-area { display: flex; flex-direction: column; gap: 1.25rem; }
+
+    .form-panel {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      overflow: hidden;
+    }
+
+    .form-section {
+      padding: 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .form-section:last-child { border-bottom: none; }
+
+    .section-label {
+      font-family: var(--mono); font-size: 0.6rem;
+      color: var(--text3); letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-bottom: 1rem;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .section-label::after {
+      content: ''; flex: 1; height: 1px;
+      background: var(--border);
+    }
+
+    .form-grid {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 0.875rem;
+    }
+    .form-grid.cols-3 { grid-template-columns: 1fr 1fr 1fr; }
+    .form-grid.cols-1 { grid-template-columns: 1fr; }
+
+    @media (max-width: 600px) {
+      .form-grid, .form-grid.cols-3 { grid-template-columns: 1fr; }
+    }
+
+    .field { display: flex; flex-direction: column; gap: 0.4rem; }
+    .field.span-2 { grid-column: span 2; }
+    .field.span-3 { grid-column: span 3; }
+
+    label {
+      font-family: var(--mono); font-size: 0.62rem;
+      color: var(--text2); letter-spacing: 0.06em;
+      text-transform: uppercase;
+    }
+    label .req { color: var(--red); margin-left: 2px; }
+    label .hint { color: var(--text3); font-size: 0.55rem; margin-left: 0.3rem; text-transform: none; letter-spacing: 0; }
+
+    input[type="text"],
+    input[type="url"],
+    select,
+    textarea {
+      width: 100%;
+      background: var(--surface2);
+      border: 1px solid var(--border2);
+      border-radius: 6px;
+      color: var(--text);
+      font-family: var(--mono);
+      font-size: 0.78rem;
+      padding: 0.6rem 0.75rem;
+      outline: none;
+      transition: border-color 0.2s;
+      resize: vertical;
+    }
+    input:focus, select:focus, textarea:focus {
+      border-color: var(--accent);
+    }
+    input::placeholder, textarea::placeholder { color: var(--text3); }
+    select option { background: var(--surface2); }
+
+    textarea { min-height: 90px; line-height: 1.5; }
+    textarea.tall { min-height: 130px; }
+
+    /* STATUS INDICATOR */
+    .form-header {
+      display: flex; align-items: center;
+      justify-content: space-between;
+      padding: 1rem 1.25rem;
+      border-bottom: 1px solid var(--border);
+    }
+    .form-title {
+      font-size: 1rem; font-weight: 800;
+      display: flex; align-items: center; gap: 0.5rem;
+    }
+    .editing-badge {
+      font-family: var(--mono); font-size: 0.6rem;
+      padding: 0.2rem 0.5rem;
+      background: rgba(59,130,246,0.1);
+      border: 1px solid rgba(59,130,246,0.25);
+      border-radius: 4px;
+      color: var(--blue);
+    }
+
+    /* ACTIONS */
+    .form-actions {
+      display: flex; gap: 0.75rem;
+      flex-wrap: wrap;
+    }
+
+    .btn-save {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.65rem 1.4rem;
+      background: var(--accent); color: #000;
+      font-family: var(--mono); font-size: 0.72rem;
+      font-weight: 700; letter-spacing: 0.06em;
+      border: none; border-radius: 6px; cursor: pointer;
+      transition: opacity 0.2s, transform 0.15s;
+    }
+    .btn-save:hover { opacity: 0.85; transform: translateY(-1px); }
+    .btn-save:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
+
+    .btn-delete {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.65rem 1rem;
+      background: var(--red-dim); color: var(--red);
+      font-family: var(--mono); font-size: 0.7rem;
+      border: 1px solid rgba(239,68,68,0.25);
+      border-radius: 6px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-delete:hover { background: rgba(239,68,68,0.15); }
+
+    .btn-cancel {
+      display: inline-flex; align-items: center; gap: 0.4rem;
+      padding: 0.65rem 1rem;
+      background: transparent; color: var(--text2);
+      font-family: var(--mono); font-size: 0.7rem;
+      border: 1px solid var(--border2);
+      border-radius: 6px; cursor: pointer;
+      transition: all 0.2s;
+    }
+    .btn-cancel:hover { border-color: var(--text2); color: var(--text); }
+
+    /* TOAST */
+    .toast {
+      position: fixed; bottom: 2rem; right: 2rem;
+      padding: 0.75rem 1.25rem;
+      border-radius: 8px;
+      font-family: var(--mono); font-size: 0.72rem;
+      font-weight: 700; letter-spacing: 0.04em;
+      z-index: 999;
+      transform: translateY(80px); opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+    }
+    .toast.show { transform: translateY(0); opacity: 1; }
+    .toast.success { background: var(--accent); color: #000; }
+    .toast.error { background: var(--red); color: #fff; }
+
+    /* EMPTY STATE */
+    .empty-form {
+      display: flex; flex-direction: column;
+      align-items: center; justify-content: center;
+      min-height: 400px; gap: 1rem; text-align: center;
+    }
+    .empty-form-icon { font-size: 2.5rem; }
+    .empty-form-text { color: var(--text3); font-family: var(--mono); font-size: 0.75rem; }
+
+    /* LOADER */
+    .spinner {
+      width: 18px; height: 18px;
+      border: 2px solid var(--border2);
+      border-top-color: var(--accent);
+      border-radius: 50%;
+      animation: spin 0.6s linear infinite;
+      display: inline-block;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    .list-loading {
+      padding: 2rem; text-align: center;
+      font-family: var(--mono); font-size: 0.7rem; color: var(--text3);
+      display: flex; flex-direction: column; align-items: center; gap: 0.75rem;
+    }
+  </style>
+</head>
+<body>
+
+<nav>
+  <div class="nav-left">
+    <a href="index.html" class="nav-logo">⚡ AirdropXI</a>
+    <span class="nav-badge">ADMIN</span>
+  </div>
+  <a href="index.html" class="nav-back">← Kembali ke Dashboard</a>
+</nav>
+
+<div class="wrap">
+
+  <!-- ═══ SIDEBAR: LIST PROYEK ═══ -->
+  <div class="sidebar">
+    <button class="btn-new" onclick="newForm()">＋ Tambah Airdrop Baru</button>
+
+    <div class="panel">
+      <div class="panel-head">
+        <div class="ph-dot"></div>
+        <span class="ph-title">Semua Proyek</span>
+        <span class="ph-count" id="proj-count">—</span>
+      </div>
+      <div class="proj-list" id="proj-list">
+        <div class="list-loading">
+          <div class="spinner"></div>
+          <span>Memuat proyek...</span>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ FORM AREA ═══ -->
+  <div class="form-area" id="form-area">
+    <div class="panel">
+      <div class="empty-form">
+        <div class="empty-form-icon">📋</div>
+        <div class="empty-form-text">Pilih proyek di kiri untuk edit,<br>atau klik "Tambah Airdrop Baru"</div>
+      </div>
+    </div>
+  </div>
+
+</div>
+
+<!-- TOAST -->
+<div class="toast" id="toast"></div>
+
+<script>
+  let projects = [];
+  let editingId = null;
+
+  // ── Load semua proyek ────────────────────────────────────────────────────────
+  async function loadProjects() {
+    try {
+      const res = await fetch('/api/admin-airdrop');
+      if (!res.ok) throw new Error('Gagal fetch');
+      projects = await res.json();
+      renderList();
+    } catch(e) {
+      document.getElementById('proj-list').innerHTML =
+        `<div class="list-loading" style="color:var(--red)">${e.message}</div>`;
+    }
+  }
+
+  function renderList() {
+    const list = document.getElementById('proj-list');
+    document.getElementById('proj-count').textContent = projects.length;
+
+    if (!projects.length) {
+      list.innerHTML = '<div class="list-loading">Belum ada proyek.</div>';
+      return;
+    }
+
+    list.innerHTML = projects.map(p => {
+      const stCls = getStCls(p.status);
+      return `<div class="proj-item ${editingId === p.id ? 'active' : ''}"
+                   onclick="loadEdit('${p.id}')">
+        <span class="proj-item-name">${esc(p.name)}</span>
+        <span class="proj-item-status ${stCls}">${esc(p.status || 'TBA')}</span>
+      </div>`;
+    }).join('');
+  }
+
+  function getStCls(s) {
+    if (!s) return 'st-default';
+    const l = s.toLowerCase();
+    if (l.includes('active')) return 'st-active';
+    if (l.includes('wait'))   return 'st-waitlist';
+    return 'st-default';
+  }
+
+  // ── NEW FORM ─────────────────────────────────────────────────────────────────
+  function newForm() {
+    editingId = null;
+    renderList();
+    renderForm(null);
+  }
+
+  // ── LOAD EDIT ────────────────────────────────────────────────────────────────
+  function loadEdit(id) {
+    editingId = id;
+    renderList();
+    const p = projects.find(x => x.id === id);
+    renderForm(p);
+  }
+
+  // ── RENDER FORM ──────────────────────────────────────────────────────────────
+  function renderForm(data) {
+    const d = data || {};
+    const isEdit = !!data;
+
+    document.getElementById('form-area').innerHTML = `
+      <div class="form-panel">
+        <div class="form-header">
+          <div class="form-title">
+            ${isEdit ? `Edit: ${esc(d.name)}` : 'Tambah Airdrop Baru'}
+            ${isEdit ? '<span class="editing-badge">EDITING</span>' : ''}
+          </div>
+          <div class="form-actions">
+            ${isEdit ? `<button class="btn-delete" onclick="deleteProject('${d.id}')">🗑 Hapus</button>` : ''}
+            <button class="btn-cancel" onclick="newForm(); document.getElementById('form-area').innerHTML='<div class=\\'panel\\'><div class=\\'empty-form\\'><div class=\\'empty-form-icon\\'>📋</div><div class=\\'empty-form-text\\'>Pilih proyek di kiri untuk edit,<br>atau klik \\"Tambah Airdrop Baru\\"</div></div></div>'; editingId=null; renderList();">✕ Batal</button>
+            <button class="btn-save" onclick="saveForm()" id="btn-save">
+              ${isEdit ? '💾 Simpan Perubahan' : '➕ Tambah Proyek'}
+            </button>
+          </div>
+        </div>
+
+        <!-- INFO DASAR -->
+        <div class="form-section">
+          <div class="section-label">Info Dasar</div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Nama Proyek <span class="req">*</span></label>
+              <input type="text" id="f-name" placeholder="e.g. Blockchain.com" value="${esc(d.name||'')}">
+            </div>
+            <div class="field">
+              <label>Status <span class="req">*</span></label>
+              <select id="f-status">
+                ${['Active','Waitlist','Seed Round','Potential','Confirmed','Listing / Selesai'].map(s =>
+                  `<option value="${s}" ${d.status===s?'selected':''}>${s}</option>`
+                ).join('')}
+              </select>
+            </div>
+            <div class="field">
+              <label>Link Official <span class="hint">(URL proyek)</span></label>
+              <input type="url" id="f-link" placeholder="https://..." value="${esc(d.link||'')}">
+            </div>
+            <div class="field">
+              <label>Tags <span class="hint">(pisah koma)</span></label>
+              <input type="text" id="f-tags" placeholder="DeFi, AI, Layer2" value="${esc(d.tags||'')}">
+            </div>
+          </div>
+        </div>
+
+        <!-- FUNDING -->
+        <div class="form-section">
+          <div class="section-label">Funding</div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Total Raised (ID) <span class="hint">e.g. $600 Juta</span></label>
+              <input type="text" id="f-raisedid" placeholder="$600 Juta" value="${esc(d.RaisedID||'')}">
+            </div>
+            <div class="field">
+              <label>Total Raised (EN) <span class="hint">e.g. $600M</span></label>
+              <input type="text" id="f-raiseden" placeholder="$600M" value="${esc(d.RaisedEN||'')}">
+            </div>
+          </div>
+        </div>
+
+        <!-- TUGAS -->
+        <div class="form-section">
+          <div class="section-label">Tugas / Tasks</div>
+          <div class="form-grid cols-1">
+            <div class="field">
+              <label>Tugas (Bahasa Indonesia)</label>
+              <textarea id="f-tasksid" class="tall" placeholder="1. Daftar di website&#10;2. Connect wallet&#10;3. Selesaikan quest harian">${esc(d.tasksID||'')}</textarea>
+            </div>
+            <div class="field">
+              <label>Tugas (English)</label>
+              <textarea id="f-tasksen" class="tall" placeholder="1. Register on website&#10;2. Connect wallet&#10;3. Complete daily quests">${esc(d.tasksEN||'')}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- DESKRIPSI -->
+        <div class="form-section">
+          <div class="section-label">Deskripsi Proyek</div>
+          <div class="form-grid cols-1">
+            <div class="field">
+              <label>Deskripsi (Bahasa Indonesia)</label>
+              <textarea id="f-descid" class="tall" placeholder="Jelaskan proyek ini dalam Bahasa Indonesia...">${esc(d.descriptionID||'')}</textarea>
+            </div>
+            <div class="field">
+              <label>Description (English)</label>
+              <textarea id="f-descen" class="tall" placeholder="Describe this project in English...">${esc(d.descriptionEN||'')}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- TOKENOMICS -->
+        <div class="form-section">
+          <div class="section-label">Tokenomics</div>
+          <div class="form-grid cols-3">
+            <div class="field">
+              <label>Ticker <span class="hint">e.g. $BLC</span></label>
+              <input type="text" id="f-ticker" placeholder="$BLC" value="${esc(d.ticker||'')}">
+            </div>
+            <div class="field">
+              <label>Total Supply</label>
+              <input type="text" id="f-supply" placeholder="1,000,000,000" value="${esc(d.total_supply||'')}">
+            </div>
+            <div class="field">
+              <label>Network</label>
+              <input type="text" id="f-network" placeholder="Ethereum / Solana" value="${esc(d.network||'')}">
+            </div>
+            <div class="field">
+              <label>TGE / Listing Date</label>
+              <input type="text" id="f-tge" placeholder="Q3 2025 / TBA" value="${esc(d.tge_date||'')}">
+            </div>
+            <div class="field">
+              <label>Logo URL</label>
+              <input type="url" id="f-logo" placeholder="https://..." value="${esc(d.logo_url||'')}">
+            </div>
+          </div>
+        </div>
+
+        <!-- SOSIAL -->
+        <div class="form-section">
+          <div class="section-label">Sosial Media</div>
+          <div class="form-grid">
+            <div class="field">
+              <label>Twitter / X</label>
+              <input type="url" id="f-twitter" placeholder="https://x.com/..." value="${esc(d.twitter||'')}">
+            </div>
+            <div class="field">
+              <label>Discord</label>
+              <input type="url" id="f-discord" placeholder="https://discord.gg/..." value="${esc(d.discord||'')}">
+            </div>
+            <div class="field">
+              <label>Telegram</label>
+              <input type="url" id="f-telegram" placeholder="https://t.me/..." value="${esc(d.telegram||'')}">
+            </div>
+          </div>
+        </div>
+
+        <!-- FAQ -->
+        <div class="form-section">
+          <div class="section-label">FAQ <span style="font-weight:400;color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0">— Format: Q: pertanyaan | A: jawaban (per baris)</span></div>
+          <div class="form-grid cols-1">
+            <div class="field">
+              <label>FAQ (Bahasa Indonesia)</label>
+              <textarea id="f-faqid" class="tall" placeholder="Q: Apa itu airdrop ini? | A: Ini adalah program distribusi token gratis.&#10;Q: Kapan token dibagikan? | A: Setelah TGE di Q3 2025.">${esc(d.faqID||'')}</textarea>
+            </div>
+            <div class="field">
+              <label>FAQ (English)</label>
+              <textarea id="f-faqen" class="tall" placeholder="Q: What is this airdrop? | A: This is a free token distribution program.&#10;Q: When will tokens be distributed? | A: After TGE in Q3 2025.">${esc(d.faqEN||'')}</textarea>
+            </div>
+          </div>
+        </div>
+
+        <!-- SAVE BOTTOM -->
+        <div class="form-section">
+          <div class="form-actions">
+            <button class="btn-save" onclick="saveForm()" id="btn-save-bottom">
+              ${isEdit ? '💾 Simpan Perubahan' : '➕ Tambah Proyek'}
+            </button>
+            ${isEdit ? `<button class="btn-delete" onclick="deleteProject('${d.id}')">🗑 Hapus Proyek</button>` : ''}
+          </div>
+        </div>
+
+      </div>
+    `;
+  }
+
+  // ── SAVE ─────────────────────────────────────────────────────────────────────
+  async function saveForm() {
+    const name = document.getElementById('f-name').value.trim();
+    if (!name) { showToast('Nama proyek wajib diisi!', 'error'); return; }
+
+    const payload = {
+      name,
+      status:        document.getElementById('f-status').value,
+      link:          document.getElementById('f-link').value.trim() || null,
+      tags:          document.getElementById('f-tags').value.trim() || null,
+      RaisedID:      document.getElementById('f-raisedid').value.trim() || null,
+      RaisedEN:      document.getElementById('f-raiseden').value.trim() || null,
+      tasksID:       document.getElementById('f-tasksid').value.trim() || null,
+      tasksEN:       document.getElementById('f-tasksen').value.trim() || null,
+      descriptionID: document.getElementById('f-descid').value.trim() || null,
+      descriptionEN: document.getElementById('f-descen').value.trim() || null,
+      ticker:        document.getElementById('f-ticker').value.trim() || null,
+      total_supply:  document.getElementById('f-supply').value.trim() || null,
+      network:       document.getElementById('f-network').value.trim() || null,
+      tge_date:      document.getElementById('f-tge').value.trim() || null,
+      logo_url:      document.getElementById('f-logo').value.trim() || null,
+      twitter:       document.getElementById('f-twitter').value.trim() || null,
+      discord:       document.getElementById('f-discord').value.trim() || null,
+      telegram:      document.getElementById('f-telegram').value.trim() || null,
+      faqID:         document.getElementById('f-faqid').value.trim() || null,
+      faqEN:         document.getElementById('f-faqen').value.trim() || null,
+    };
+
+    // Disable tombol
+    ['btn-save','btn-save-bottom'].forEach(id => {
+      const el = document.getElementById(id);
+      if (el) { el.disabled = true; el.innerHTML = '<span class="spinner"></span> Menyimpan...'; }
+    });
+
+    try {
+      let res;
+      if (editingId) {
+        res = await fetch(`/api/admin-airdrop?id=${editingId}`, {
+          method: 'PATCH',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      } else {
+        res = await fetch('/api/admin-airdrop', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify(payload)
+        });
+      }
+
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || result.message || 'Gagal menyimpan');
+
+      showToast(editingId ? '✓ Berhasil diupdate!' : '✓ Proyek baru ditambahkan!', 'success');
+
+      // Refresh list & set editing ke proyek yang baru/diedit
+      await loadProjects();
+      if (!editingId && Array.isArray(result) && result[0]) {
+        editingId = result[0].id;
+        renderList();
+        renderForm(result[0]);
+      } else if (editingId) {
+        const updated = projects.find(p => p.id === editingId);
+        if (updated) renderForm(updated);
+      }
+
+    } catch(e) {
+      showToast('Error: ' + e.message, 'error');
+      ['btn-save','btn-save-bottom'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.disabled = false; el.innerHTML = editingId ? '💾 Simpan Perubahan' : '➕ Tambah Proyek'; }
+      });
+    }
+  }
+
+  // ── DELETE ───────────────────────────────────────────────────────────────────
+  async function deleteProject(id) {
+    const p = projects.find(x => x.id === id);
+    if (!confirm(`Hapus "${p?.name || id}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+
+    try {
+      const res = await fetch(`/api/admin-airdrop?id=${id}`, { method: 'DELETE' });
+      if (!res.ok) {
+        const err = await res.json();
+        throw new Error(err.error || 'Gagal hapus');
+      }
+      showToast('✓ Proyek dihapus', 'success');
+      editingId = null;
+      await loadProjects();
+      document.getElementById('form-area').innerHTML = `
+        <div class="panel">
+          <div class="empty-form">
+            <div class="empty-form-icon">📋</div>
+            <div class="empty-form-text">Pilih proyek di kiri untuk edit,<br>atau klik "Tambah Airdrop Baru"</div>
+          </div>
+        </div>`;
+    } catch(e) {
+      showToast('Error: ' + e.message, 'error');
+    }
+  }
+
+  // ── TOAST ────────────────────────────────────────────────────────────────────
+  function showToast(msg, type = 'success') {
+    const t = document.getElementById('toast');
+    t.textContent = msg;
+    t.className = `toast ${type} show`;
+    setTimeout(() => { t.classList.remove('show'); }, 3000);
+  }
+
+  function esc(s) {
+    return String(s || '')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+
+  // INIT
+  loadProjects();
+</script>
+</body>
+</html>
