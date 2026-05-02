@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="id" data-theme="dark">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="logo.png">
+  <title>Panduan Airdrop - AirdropXI</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+      --bg: #07090b;
+      --surface: #0d1117;
+      --surface2: #111820;
+      --border: #1c2733;
+      --border2: #243040;
+      --accent: #00e5a0;
+      --accent-dim: rgba(0,229,160,0.08);
+      --blue: #3b82f6;
+      --warn: #f59e0b;
+      --text: #dce8f0;
+      --text2: #8aa0b4;
+      --text3: #4a6070;
+      --mono: 'JetBrains Mono', monospace;
+      --sans: 'Plus Jakarta Sans', sans-serif;
+      --radius: 12px;
+    }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: var(--sans);
+      line-height: 1.5;
+    }
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(7,9,11,0.92);
+      backdrop-filter: blur(16px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 1.5rem;
+      height: 52px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    .nav-logo {
+      font-family: var(--mono);
+      font-size: 0.8rem;
+      color: var(--accent);
+      text-decoration: none;
+      font-weight: 700;
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+    .nav-logo img {
+      width: 24px;
+      height: 24px;
+    }
+    .nav-back {
+      color: var(--text2);
+      text-decoration: none;
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      transition: color 0.2s;
+    }
+    .nav-back:hover { color: var(--accent); }
+    .container {
+      max-width: 1000px;
+      margin: 2rem auto;
+      padding: 0 1.5rem;
+    }
+    .guide-card {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 2rem;
+      margin-bottom: 2rem;
+    }
+    h1 {
+      font-size: 1.8rem;
+      margin-bottom: 0.5rem;
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .status-badge {
+      display: inline-block;
+      padding: 0.2rem 0.8rem;
+      border-radius: 20px;
+      font-family: var(--mono);
+      font-size: 0.7rem;
+      font-weight: 500;
+    }
+    .status-active { background: rgba(0,229,160,0.15); color: var(--accent); border: 1px solid var(--accent); }
+    .status-waitlist { background: rgba(245,158,11,0.15); color: var(--warn); border: 1px solid var(--warn); }
+    .status-default { background: var(--surface2); color: var(--text3); border: 1px solid var(--border2); }
+    .section-title {
+      font-family: var(--mono);
+      font-size: 0.75rem;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      color: var(--accent);
+      margin: 1.8rem 0 1rem 0;
+      border-left: 3px solid var(--accent);
+      padding-left: 0.8rem;
+    }
+    .tasks-box, .faq-box {
+      background: var(--surface2);
+      border-radius: 12px;
+      padding: 1.2rem;
+      margin: 1rem 0;
+    }
+    .task-item, .faq-item {
+      margin-bottom: 0.8rem;
+      padding-bottom: 0.8rem;
+      border-bottom: 1px solid var(--border);
+      font-size: 0.9rem;
+    }
+    .task-item:last-child, .faq-item:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+    .faq-question { color: var(--accent); font-weight: 700; margin-bottom: 0.2rem; }
+    .social-links {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 1rem;
+      margin: 1.5rem 0;
+    }
+    .social-link {
+      display: inline-flex;
+      align-items: center;
+      gap: 0.5rem;
+      background: var(--surface2);
+      padding: 0.5rem 1rem;
+      border-radius: 40px;
+      text-decoration: none;
+      color: var(--text);
+      font-size: 0.8rem;
+      transition: all 0.2s;
+      border: 1px solid var(--border);
+    }
+    .social-link:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); }
+    .btn-back {
+      display: inline-block;
+      background: var(--accent);
+      color: #000;
+      padding: 0.7rem 1.5rem;
+      border-radius: 40px;
+      text-decoration: none;
+      font-weight: 700;
+      font-size: 0.8rem;
+      transition: opacity 0.2s;
+      margin-top: 1rem;
+    }
+    .btn-back:hover { opacity: 0.8; }
+    .loading, .error {
+      text-align: center;
+      padding: 4rem 2rem;
+      font-family: var(--mono);
+      color: var(--text2);
+    }
+    .error { color: #ff2d55; }
+  </style>
+</head>
+<body>
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="logo.png" alt="AirdropXI"> AirdropXI
+  </a>
+  <a href="index.html" class="nav-back">← Kembali ke Daftar</a>
+</nav>
+
+<div class="container" id="guide-content">
+  <div class="loading">⏳ Memuat panduan...</div>
+</div>
+
+<script>
+  const urlParams = new URLSearchParams(window.location.search);
+  const projectId = urlParams.get('id');
+
+  if (!projectId) {
+    document.getElementById('guide-content').innerHTML = '<div class="error">❌ ID proyek tidak ditemukan.</div>';
+  } else {
+    fetch(`/api/admin-airdrop?id=${projectId}`)
+      .then(res => {
+        if (!res.ok) throw new Error(`HTTP ${res.status}`);
+        return res.json();
+      })
+      .then(project => {
+        if (!project || !project.name) throw new Error('Proyek tidak ditemukan');
+        renderGuide(project);
+      })
+      .catch(err => {
+        document.getElementById('guide-content').innerHTML = `<div class="error">❌ Gagal memuat data: ${err.message}</div>`;
+      });
+  }
+
+  function renderGuide(p) {
+    // Tentukan kelas status
+    let statusClass = 'status-default';
+    if (p.status === 'Active') statusClass = 'status-active';
+    else if (p.status === 'Waitlist') statusClass = 'status-waitlist';
+
+    // Format tasks (teks biasa, bisa dipecah per baris)
+    const tasksHtml = p.tasksID
+      ? p.tasksID.split('\n').map(line => line.trim()).filter(l => l).map(line => `<div class="task-item">📌 ${escapeHtml(line)}</div>`).join('')
+      : '<div class="task-item">Tidak ada tugas tersedia.</div>';
+
+    // Format FAQ (asumsikan format "Q: ..." dan "A: ..." per baris)
+    let faqHtml = '';
+    if (p.faqID) {
+      const lines = p.faqID.split('\n');
+      let currentQ = '';
+      for (let line of lines) {
+        line = line.trim();
+        if (!line) continue;
+        if (line.startsWith('Q:')) {
+          if (currentQ) faqHtml += `</div>`;
+          faqHtml += `<div class="faq-item"><div class="faq-question">❓ ${escapeHtml(line.substring(2).trim())}</div>`;
+          currentQ = 'open';
+        } else if (line.startsWith('A:') && currentQ) {
+          faqHtml += `<div>📝 ${escapeHtml(line.substring(2).trim())}</div></div>`;
+          currentQ = '';
+        } else {
+          // treat as biasa
+          faqHtml += `<div class="task-item">${escapeHtml(line)}</div>`;
+        }
+      }
+      if (currentQ) faqHtml += `</div>`;
+    } else {
+      faqHtml = '<div class="task-item">Belum ada FAQ.</div>';
+    }
+
+    // Sosial media
+    const socials = [
+      { name: '🌐 Website', url: p.link, icon: '🔗' },
+      { name: '🐦 Twitter', url: p.twitter, icon: '𝕏' },
+      { name: '💬 Discord', url: p.discord, icon: '🎙️' },
+      { name: '📢 Telegram', url: p.telegram, icon: '✈️' }
+    ].filter(s => s.url);
+
+    const socialHtml = socials.length ? `
+      <div class="social-links">
+        ${socials.map(s => `<a href="${escapeHtml(s.url)}" target="_blank" rel="noopener noreferrer" class="social-link">${s.icon} ${s.name}</a>`).join('')}
+      </div>
+    ` : '<p>Tidak ada tautan sosial tersedia.</p>';
+
+    const descHtml = p.descriptionID
+      ? `<p style="margin: 1rem 0; font-size: 1rem;">${escapeHtml(p.descriptionID)}</p>`
+      : '';
+
+    const html = `
+      <div class="guide-card">
+        <h1>
+          ${escapeHtml(p.name)}
+          <span class="status-badge ${statusClass}">${escapeHtml(p.status || 'Upcoming')}</span>
+        </h1>
+        ${descHtml}
+        
+        <div class="section-title">📋 Langkah-Langkah / Tugas</div>
+        <div class="tasks-box">${tasksHtml}</div>
+
+        ${p.ticker || p.network ? `
+          <div class="section-title">💰 Info Token</div>
+          <div style="background:var(--surface2); border-radius:12px; padding:1rem; display:flex; gap:1rem; flex-wrap:wrap; margin-bottom:1rem;">
+            ${p.ticker ? `<div><strong>Ticker:</strong> ${escapeHtml(p.ticker)}</div>` : ''}
+            ${p.network ? `<div><strong>Network:</strong> ${escapeHtml(p.network)}</div>` : ''}
+            ${p.total_supply ? `<div><strong>Total Supply:</strong> ${escapeHtml(p.total_supply)}</div>` : ''}
+            ${p.tge_date ? `<div><strong>TGE / Listing:</strong> ${escapeHtml(p.tge_date)}</div>` : ''}
+          </div>
+        ` : ''}
+
+        <div class="section-title">❓ Pertanyaan Umum (FAQ)</div>
+        <div class="faq-box">${faqHtml}</div>
+
+        <div class="section-title">🔗 Sumber Daya Eksternal</div>
+        ${socialHtml}
+
+        <a href="index.html" class="btn-back">← Kembali ke Daftar Airdrop</a>
+      </div>
+    `;
+
+    document.getElementById('guide-content').innerHTML = html;
+  }
+
+  function escapeHtml(str) {
+    if (!str) return '';
+    return str.replace(/[&<>]/g, function(m) {
+      if (m === '&') return '&amp;';
+      if (m === '<') return '&lt;';
+      if (m === '>') return '&gt;';
+      return m;
+    });
+  }
+</script>
+</body>
+</html>
