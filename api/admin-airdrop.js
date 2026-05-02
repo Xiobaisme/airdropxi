@@ -19,7 +19,7 @@ module.exports = async function handler(req, res) {
 
   const { id } = req.query;
 
-  // ── GET ───────────────────────────────────────────────────
+  // ── GET ──────────────────────────────────────────────────
   if (req.method === 'GET') {
     try {
       const endpoint = id
@@ -31,7 +31,6 @@ module.exports = async function handler(req, res) {
 
       if (!r.ok) return res.status(r.status).json({ error: data });
 
-      // GET by ID → return object tunggal, bukan array
       if (id) {
         if (!data || data.length === 0) {
           return res.status(404).json({ error: 'Project tidak ditemukan' });
@@ -45,7 +44,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // ── POST ──────────────────────────────────────────────────
+  // ── POST ─────────────────────────────────────────────────
   if (req.method === 'POST') {
     if (!req.body?.name) {
       return res.status(400).json({ error: 'Field "name" wajib diisi' });
@@ -63,19 +62,20 @@ module.exports = async function handler(req, res) {
       const newId = Array.isArray(result) ? result[0]?.id : result?.id;
       if (!newId) throw new Error('Gagal dapat ID setelah insert');
 
-      // Sync ke tabel proyek (best-effort, tidak block response)
+      // Sync ke tabel proyek (best-effort)
       fetch(`${BASE}/proyek`, {
         method: 'POST', headers: H,
         body: JSON.stringify({ ...data, id: newId }),
       }).catch(e => console.warn('Sync proyek gagal:', e.message));
 
+      // Selalu return array agar admin.js bisa baca result[0]
       return res.status(201).json(Array.isArray(result) ? result : [result]);
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
 
-  // ── PATCH ─────────────────────────────────────────────────
+  // ── PATCH ────────────────────────────────────────────────
   if (req.method === 'PATCH') {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
     if (!req.body || !Object.keys(req.body).length) {
@@ -88,21 +88,32 @@ module.exports = async function handler(req, res) {
       const r1 = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, {
         method: 'PATCH', headers: H, body: JSON.stringify(data),
       });
-      const result = await r1.json();
-      if (!r1.ok) return res.status(r1.status).json({ error: result });
+
+      // Tangani response body — Supabase PATCH bisa return kosong atau array
+      let result = null;
+      const text = await r1.text();
+      if (text) {
+        try { result = JSON.parse(text); } catch(e) { result = null; }
+      }
+
+      if (!r1.ok) {
+        return res.status(r1.status).json({ error: result || text });
+      }
 
       // Sync ke tabel proyek (best-effort)
       fetch(`${BASE}/proyek?id=eq.${encodeURIComponent(id)}`, {
         method: 'PATCH', headers: H, body: JSON.stringify(data),
       }).catch(e => console.warn('Sync PATCH proyek gagal:', e.message));
 
-      return res.status(200).json({ success: true });
+      // Return data yang diupdate (array) agar admin.js bisa render ulang
+      const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...data }]);
+      return res.status(200).json(updated);
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
 
-  // ── DELETE ────────────────────────────────────────────────
+  // ── DELETE ───────────────────────────────────────────────
   if (req.method === 'DELETE') {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
@@ -127,7 +138,6 @@ module.exports = async function handler(req, res) {
   return res.status(405).json({ error: `Method ${req.method} tidak diizinkan` });
 };
 
-// ── Helper: normalisasi payload ───────────────────────────
 function buildPayload(p) {
   return {
     name:           p.name           || null,
@@ -150,7 +160,6 @@ function buildPayload(p) {
     telegram:       p.telegram       || null,
     faqID:          p.faqID          || null,
     faqEN:          p.faqEN          || null,
-    // Testnet links — disimpan sebagai JSON string array of {label,url}
     testnet_links:  p.testnet_links  || null,
   };
 }
