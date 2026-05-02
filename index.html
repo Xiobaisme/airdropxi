@@ -320,5 +320,109 @@
 </script>
 
 <script src="js/app.js"></script>
+
+<script>
+// Hentikan fungsi bawaan jika ada konflik, tapi kita akan overwrite konten container
+(async function initPublicAirdrops() {
+  const container = document.getElementById('airdrop-container');
+  const loadingDiv = document.getElementById('loading-state');
+  const errorDiv = document.getElementById('error-state');
+
+  try {
+    const res = await fetch('/api/admin-airdrop');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const projects = await res.json();
+
+    if (!projects.length) {
+      loadingDiv.style.display = 'none';
+      container.style.display = 'block';
+      container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text2)">Belum ada airdrop. Cek lagi nanti.</div>';
+      return;
+    }
+
+    // Update statistik hero & dashboard jika diperlukan (optional)
+    const total = projects.length;
+    const active = projects.filter(p => p.status === 'Active').length;
+    const waitlist = projects.filter(p => p.status === 'Waitlist').length;
+    const listing = projects.filter(p => p.status === 'Listing / Selesai').length;
+
+    const totalEl = document.getElementById('hs-total');
+    if (totalEl) totalEl.innerText = total;
+    const activeEl = document.getElementById('hs-active');
+    if (activeEl) activeEl.innerText = active;
+    const dashTotal = document.getElementById('dash-total');
+    if (dashTotal) dashTotal.innerText = total;
+    const dashActive = document.getElementById('dash-active');
+    if (dashActive) dashActive.innerText = active;
+    const dashWaitlist = document.getElementById('dash-waitlist');
+    if (dashWaitlist) dashWaitlist.innerText = waitlist;
+    const dashListing = document.getElementById('dash-listing');
+    if (dashListing) dashListing.innerText = listing;
+
+    // Render cards
+    renderCards(projects);
+
+    loadingDiv.style.display = 'none';
+    container.style.display = 'grid';
+    container.classList.add('dash-grid'); // supaya styling mirip
+
+    // Simpan data untuk filter & search
+    window.allAirdropData = projects;
+    window.currentFilter = 'all';
+    window.currentSearch = '';
+    // Trigger filter jika sudah ada event listener
+    if (typeof filterCards === 'function') filterCards();
+    else console.warn('filterCards not defined yet, you may need to define it');
+  } catch (err) {
+    console.error(err);
+    loadingDiv.style.display = 'none';
+    errorDiv.style.display = 'block';
+    const errMsgDiv = document.getElementById('error-msg');
+    if (errMsgDiv) errMsgDiv.innerText = err.message;
+    container.style.display = 'none';
+  }
+})();
+
+function renderCards(projects) {
+  const container = document.getElementById('airdrop-container');
+  if (!container) return;
+  // Gunakan class yang sudah ada di CSS misal .dash-grid atau buat sendiri
+  container.className = 'dash-grid';
+  container.innerHTML = projects.map(proj => {
+    // Tentukan kelas status untuk badge
+    let statusClass = '';
+    let statusText = proj.status || 'Unknown';
+    if (statusText === 'Active') statusClass = 'st-active';
+    else if (statusText === 'Waitlist') statusClass = 'st-waitlist';
+    else statusClass = 'st-default';
+
+    // Potong deskripsi max 120 karakter
+    const desc = (proj.descriptionID || proj.descriptionEN || 'Tidak ada deskripsi').substring(0, 120);
+    return `
+      <div class="dash-card" data-id="${proj.id}" data-status="${statusText.toLowerCase()}">
+        <div class="dash-label">${escapeHtml(proj.name)}</div>
+        <div class="dash-num" style="font-size:0.8rem; display:flex; justify-content:space-between; align-items:center;">
+          <span class="status-badge ${statusClass}">${escapeHtml(statusText)}</span>
+          <span class="funds">${proj.RaisedID ? '💰 '+escapeHtml(proj.RaisedID) : ''}</span>
+        </div>
+        <div class="dash-ico" style="background:rgba(0,232,122,.07); font-size:12px; color:var(--text2); margin-top:10px;">
+          ${escapeHtml(desc)}...
+        </div>
+        <a href="guide.html?id=${proj.id}" class="btn-garap" style="display:inline-block; margin-top:16px; background:var(--accent); color:#000; padding:6px 14px; border-radius:20px; font-weight:bold; text-decoration:none; font-size:12px;">📘 Garap Sekarang →</a>
+      </div>
+    `;
+  }).join('');
+}
+
+function escapeHtml(str) {
+  if (!str) return '';
+  return str.replace(/[&<>]/g, function(m) {
+    if (m === '&') return '&amp;';
+    if (m === '<') return '&lt;';
+    if (m === '>') return '&gt;';
+    return m;
+  });
+}
+</script>
 </body>
 </html>
