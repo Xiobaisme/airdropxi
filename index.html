@@ -320,27 +320,34 @@
 </script>
 
 <script src="js/app.js"></script>
-
 <script>
 // Hentikan fungsi bawaan jika ada konflik, tapi kita akan overwrite konten container
 (async function initPublicAirdrops() {
   const container = document.getElementById('airdrop-container');
   const loadingDiv = document.getElementById('loading-state');
   const errorDiv = document.getElementById('error-state');
+  const errorMsgDiv = document.getElementById('error-msg');
 
   try {
     const res = await fetch('/api/admin-airdrop');
-    if (!res.ok) throw new Error(`HTTP ${res.status}`);
-    const projects = await res.json();
+    if (!res.ok) throw new Error(`HTTP ${res.status}: ${res.statusText}`);
+    
+    let projects = await res.json();
+    
+    // Validasi: pastikan projects adalah array
+    if (!Array.isArray(projects)) {
+      console.error('Data bukan array:', projects);
+      throw new Error('Data yang diterima dari server tidak valid (bukan daftar airdrop)');
+    }
 
-    if (!projects.length) {
+    if (projects.length === 0) {
       loadingDiv.style.display = 'none';
       container.style.display = 'block';
-      container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text2)">Belum ada airdrop. Cek lagi nanti.</div>';
+      container.innerHTML = '<div style="text-align:center;padding:3rem;color:var(--text2)">Belum ada airdrop. Silakan tambahkan via admin panel.</div>';
       return;
     }
 
-    // Update statistik hero & dashboard jika diperlukan (optional)
+    // Update statistik hero & dashboard
     const total = projects.length;
     const active = projects.filter(p => p.status === 'Active').length;
     const waitlist = projects.filter(p => p.status === 'Waitlist').length;
@@ -364,21 +371,20 @@
 
     loadingDiv.style.display = 'none';
     container.style.display = 'grid';
-    container.classList.add('dash-grid'); // supaya styling mirip
+    container.classList.add('dash-grid');
 
     // Simpan data untuk filter & search
     window.allAirdropData = projects;
     window.currentFilter = 'all';
     window.currentSearch = '';
-    // Trigger filter jika sudah ada event listener
     if (typeof filterCards === 'function') filterCards();
-    else console.warn('filterCards not defined yet, you may need to define it');
+    else console.log('filterCards belum didefinisikan, skip');
+    
   } catch (err) {
-    console.error(err);
+    console.error('Error detail:', err);
     loadingDiv.style.display = 'none';
     errorDiv.style.display = 'block';
-    const errMsgDiv = document.getElementById('error-msg');
-    if (errMsgDiv) errMsgDiv.innerText = err.message;
+    if (errorMsgDiv) errorMsgDiv.innerText = err.message;
     container.style.display = 'none';
   }
 })();
@@ -386,17 +392,22 @@
 function renderCards(projects) {
   const container = document.getElementById('airdrop-container');
   if (!container) return;
-  // Gunakan class yang sudah ada di CSS misal .dash-grid atau buat sendiri
+  
+  // Pastikan projects adalah array (double check)
+  if (!Array.isArray(projects)) {
+    console.error('renderCards menerima non-array:', projects);
+    container.innerHTML = '<div style="text-align:center;color:red;">Terjadi kesalahan data.</div>';
+    return;
+  }
+  
   container.className = 'dash-grid';
   container.innerHTML = projects.map(proj => {
-    // Tentukan kelas status untuk badge
     let statusClass = '';
     let statusText = proj.status || 'Unknown';
     if (statusText === 'Active') statusClass = 'st-active';
     else if (statusText === 'Waitlist') statusClass = 'st-waitlist';
     else statusClass = 'st-default';
 
-    // Potong deskripsi max 120 karakter
     const desc = (proj.descriptionID || proj.descriptionEN || 'Tidak ada deskripsi').substring(0, 120);
     return `
       <div class="dash-card" data-id="${proj.id}" data-status="${statusText.toLowerCase()}">
@@ -423,6 +434,7 @@ function escapeHtml(str) {
     return m;
   });
 }
+</script>
 </script>
 </body>
 </html>
