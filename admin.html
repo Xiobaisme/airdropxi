@@ -7,7 +7,9 @@
   <link rel="icon" type="image/png" href="logo.png">
   <link rel="preconnect" href="https://fonts.googleapis.com">
   <link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=Syne:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <script src="https://accounts.google.com/gsi/client" async defer></script>
   <style>
+    .hidden { display: none; }
     :root {
       --bg: #07090b;
       --surface: #0d1117;
@@ -353,396 +355,335 @@
 </head>
 <body>
 
-<nav>
-  <div class="nav-left">
-    <a href="index.html" class="nav-logo">⚡ AirdropXI</a>
-    <span class="nav-badge">ADMIN</span>
+<!-- LAYAR LOGIN (muncul pertama) -->
+<div id="login-section" style="display: flex; justify-content: center; align-items: center; min-height: 100vh; background: var(--bg); z-index: 999; position: fixed; top:0; left:0; right:0; bottom:0;">
+  <div style="background: var(--surface); padding: 2rem; border-radius: var(--radius); text-align: center; max-width: 400px;">
+    <h1 style="color: var(--accent);">🔐 Admin Access</h1>
+    <p>Silakan login dengan akun Google yang diizinkan.</p>
+    <div id="g_id_onload"></div>
   </div>
-  <a href="index.html" class="nav-back">← Kembali ke Dashboard</a>
-</nav>
-
-<div class="wrap">
-
-  <!-- ═══ SIDEBAR: LIST PROYEK ═══ -->
-  <div class="sidebar">
-    <button class="btn-new" onclick="newForm()">＋ Tambah Airdrop Baru</button>
-
-    <div class="panel">
-      <div class="panel-head">
-        <div class="ph-dot"></div>
-        <span class="ph-title">Semua Proyek</span>
-        <span class="ph-count" id="proj-count">—</span>
-      </div>
-      <div class="proj-list" id="proj-list">
-        <div class="list-loading">
-          <div class="spinner"></div>
-          <span>Memuat proyek...</span>
-        </div>
-      </div>
-    </div>
-  </div>
-
-  <!-- ═══ FORM AREA ═══ -->
-  <div class="form-area" id="form-area">
-    <div class="panel">
-      <div class="empty-form">
-        <div class="empty-form-icon">📋</div>
-        <div class="empty-form-text">Pilih proyek di kiri untuk edit,<br>atau klik "Tambah Airdrop Baru"</div>
-      </div>
-    </div>
-  </div>
-
 </div>
 
-<!-- TOAST -->
-<div class="toast" id="toast"></div>
+<!-- KONTEN ADMIN (disembunyikan sampai login sukses) -->
+<div id="admin-content" class="hidden">
+  <nav>
+    <div class="nav-left">
+      <a href="index.html" class="nav-logo">⚡ AirdropXI</a>
+      <span class="nav-badge">ADMIN</span>
+    </div>
+    <a href="index.html" class="nav-back">← Kembali ke Dashboard</a>
+  </nav>
 
-<script>
-  let projects = [];
-  let editingId = null;
-
-  // ── Load semua proyek ────────────────────────────────────────────────────────
-  async function loadProjects() {
-    try {
-      const res = await fetch('/api/admin-airdrop');
-      if (!res.ok) throw new Error('Gagal fetch');
-      projects = await res.json();
-      renderList();
-    } catch(e) {
-      document.getElementById('proj-list').innerHTML =
-        `<div class="list-loading" style="color:var(--red)">${e.message}</div>`;
-    }
-  }
-
-  function renderList() {
-    const list = document.getElementById('proj-list');
-    document.getElementById('proj-count').textContent = projects.length;
-
-    if (!projects.length) {
-      list.innerHTML = '<div class="list-loading">Belum ada proyek.</div>';
-      return;
-    }
-
-    list.innerHTML = projects.map(p => {
-      const stCls = getStCls(p.status);
-      return `<div class="proj-item ${editingId === p.id ? 'active' : ''}"
-                   onclick="loadEdit('${p.id}')">
-        <span class="proj-item-name">${esc(p.name)}</span>
-        <span class="proj-item-status ${stCls}">${esc(p.status || 'TBA')}</span>
-      </div>`;
-    }).join('');
-  }
-
-  function getStCls(s) {
-    if (!s) return 'st-default';
-    const l = s.toLowerCase();
-    if (l.includes('active')) return 'st-active';
-    if (l.includes('wait'))   return 'st-waitlist';
-    return 'st-default';
-  }
-
-  // ── NEW FORM ─────────────────────────────────────────────────────────────────
-  function newForm() {
-    editingId = null;
-    renderList();
-    renderForm(null);
-  }
-
-  // ── LOAD EDIT ────────────────────────────────────────────────────────────────
-  function loadEdit(id) {
-    editingId = id;
-    renderList();
-    const p = projects.find(x => x.id === id);
-    renderForm(p);
-  }
-
-  // ── RENDER FORM ──────────────────────────────────────────────────────────────
-  function renderForm(data) {
-    const d = data || {};
-    const isEdit = !!data;
-
-    document.getElementById('form-area').innerHTML = `
-      <div class="form-panel">
-        <div class="form-header">
-          <div class="form-title">
-            ${isEdit ? `Edit: ${esc(d.name)}` : 'Tambah Airdrop Baru'}
-            ${isEdit ? '<span class="editing-badge">EDITING</span>' : ''}
-          </div>
-          <div class="form-actions">
-            ${isEdit ? `<button class="btn-delete" onclick="deleteProject('${d.id}')">🗑 Hapus</button>` : ''}
-            <button class="btn-cancel" onclick="newForm(); document.getElementById('form-area').innerHTML='<div class=\\'panel\\'><div class=\\'empty-form\\'><div class=\\'empty-form-icon\\'>📋</div><div class=\\'empty-form-text\\'>Pilih proyek di kiri untuk edit,<br>atau klik \\"Tambah Airdrop Baru\\"</div></div></div>'; editingId=null; renderList();">✕ Batal</button>
-            <button class="btn-save" onclick="saveForm()" id="btn-save">
-              ${isEdit ? '💾 Simpan Perubahan' : '➕ Tambah Proyek'}
-            </button>
+  <div class="wrap">
+    <!-- SIDEBAR: LIST PROYEK -->
+    <div class="sidebar">
+      <button class="btn-new" onclick="newForm()">＋ Tambah Airdrop Baru</button>
+      <div class="panel">
+        <div class="panel-head">
+          <div class="ph-dot"></div>
+          <span class="ph-title">Semua Proyek</span>
+          <span class="ph-count" id="proj-count">—</span>
+        </div>
+        <div class="proj-list" id="proj-list">
+          <div class="list-loading">
+            <div class="spinner"></div>
+            <span>Memuat proyek...</span>
           </div>
         </div>
-
-        <!-- INFO DASAR -->
-        <div class="form-section">
-          <div class="section-label">Info Dasar</div>
-          <div class="form-grid">
-            <div class="field">
-              <label>Nama Proyek <span class="req">*</span></label>
-              <input type="text" id="f-name" placeholder="e.g. Blockchain.com" value="${esc(d.name||'')}">
-            </div>
-            <div class="field">
-              <label>Status <span class="req">*</span></label>
-              <select id="f-status">
-                ${['Active','Waitlist','Seed Round','Potential','Confirmed','Listing / Selesai'].map(s =>
-                  `<option value="${s}" ${d.status===s?'selected':''}>${s}</option>`
-                ).join('')}
-              </select>
-            </div>
-            <div class="field">
-              <label>Link Official <span class="hint">(URL proyek)</span></label>
-              <input type="url" id="f-link" placeholder="https://..." value="${esc(d.link||'')}">
-            </div>
-            <div class="field">
-              <label>Tags <span class="hint">(pisah koma)</span></label>
-              <input type="text" id="f-tags" placeholder="DeFi, AI, Layer2" value="${esc(d.tags||'')}">
-            </div>
-          </div>
-        </div>
-
-        <!-- FUNDING -->
-        <div class="form-section">
-          <div class="section-label">Funding</div>
-          <div class="form-grid">
-            <div class="field">
-              <label>Total Raised (ID) <span class="hint">e.g. $600 Juta</span></label>
-              <input type="text" id="f-raisedid" placeholder="$600 Juta" value="${esc(d.RaisedID||'')}">
-            </div>
-            <div class="field">
-              <label>Total Raised (EN) <span class="hint">e.g. $600M</span></label>
-              <input type="text" id="f-raiseden" placeholder="$600M" value="${esc(d.RaisedEN||'')}">
-            </div>
-          </div>
-        </div>
-
-        <!-- TUGAS -->
-        <div class="form-section">
-          <div class="section-label">Tugas / Tasks</div>
-          <div class="form-grid cols-1">
-            <div class="field">
-              <label>Tugas (Bahasa Indonesia)</label>
-              <textarea id="f-tasksid" class="tall" placeholder="1. Daftar di website&#10;2. Connect wallet&#10;3. Selesaikan quest harian">${esc(d.tasksID||'')}</textarea>
-            </div>
-            <div class="field">
-              <label>Tugas (English)</label>
-              <textarea id="f-tasksen" class="tall" placeholder="1. Register on website&#10;2. Connect wallet&#10;3. Complete daily quests">${esc(d.tasksEN||'')}</textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- DESKRIPSI -->
-        <div class="form-section">
-          <div class="section-label">Deskripsi Proyek</div>
-          <div class="form-grid cols-1">
-            <div class="field">
-              <label>Deskripsi (Bahasa Indonesia)</label>
-              <textarea id="f-descid" class="tall" placeholder="Jelaskan proyek ini dalam Bahasa Indonesia...">${esc(d.descriptionID||'')}</textarea>
-            </div>
-            <div class="field">
-              <label>Description (English)</label>
-              <textarea id="f-descen" class="tall" placeholder="Describe this project in English...">${esc(d.descriptionEN||'')}</textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- TOKENOMICS -->
-        <div class="form-section">
-          <div class="section-label">Tokenomics</div>
-          <div class="form-grid cols-3">
-            <div class="field">
-              <label>Ticker <span class="hint">e.g. $BLC</span></label>
-              <input type="text" id="f-ticker" placeholder="$BLC" value="${esc(d.ticker||'')}">
-            </div>
-            <div class="field">
-              <label>Total Supply</label>
-              <input type="text" id="f-supply" placeholder="1,000,000,000" value="${esc(d.total_supply||'')}">
-            </div>
-            <div class="field">
-              <label>Network</label>
-              <input type="text" id="f-network" placeholder="Ethereum / Solana" value="${esc(d.network||'')}">
-            </div>
-            <div class="field">
-              <label>TGE / Listing Date</label>
-              <input type="text" id="f-tge" placeholder="Q3 2025 / TBA" value="${esc(d.tge_date||'')}">
-            </div>
-            <div class="field">
-              <label>Logo URL</label>
-              <input type="url" id="f-logo" placeholder="https://..." value="${esc(d.logo_url||'')}">
-            </div>
-          </div>
-        </div>
-
-        <!-- SOSIAL -->
-        <div class="form-section">
-          <div class="section-label">Sosial Media</div>
-          <div class="form-grid">
-            <div class="field">
-              <label>Twitter / X</label>
-              <input type="url" id="f-twitter" placeholder="https://x.com/..." value="${esc(d.twitter||'')}">
-            </div>
-            <div class="field">
-              <label>Discord</label>
-              <input type="url" id="f-discord" placeholder="https://discord.gg/..." value="${esc(d.discord||'')}">
-            </div>
-            <div class="field">
-              <label>Telegram</label>
-              <input type="url" id="f-telegram" placeholder="https://t.me/..." value="${esc(d.telegram||'')}">
-            </div>
-          </div>
-        </div>
-
-        <!-- FAQ -->
-        <div class="form-section">
-          <div class="section-label">FAQ <span style="font-weight:400;color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0">— Format: Q: pertanyaan | A: jawaban (per baris)</span></div>
-          <div class="form-grid cols-1">
-            <div class="field">
-              <label>FAQ (Bahasa Indonesia)</label>
-              <textarea id="f-faqid" class="tall" placeholder="Q: Apa itu airdrop ini? | A: Ini adalah program distribusi token gratis.&#10;Q: Kapan token dibagikan? | A: Setelah TGE di Q3 2025.">${esc(d.faqID||'')}</textarea>
-            </div>
-            <div class="field">
-              <label>FAQ (English)</label>
-              <textarea id="f-faqen" class="tall" placeholder="Q: What is this airdrop? | A: This is a free token distribution program.&#10;Q: When will tokens be distributed? | A: After TGE in Q3 2025.">${esc(d.faqEN||'')}</textarea>
-            </div>
-          </div>
-        </div>
-
-        <!-- SAVE BOTTOM -->
-        <div class="form-section">
-          <div class="form-actions">
-            <button class="btn-save" onclick="saveForm()" id="btn-save-bottom">
-              ${isEdit ? '💾 Simpan Perubahan' : '➕ Tambah Proyek'}
-            </button>
-            ${isEdit ? `<button class="btn-delete" onclick="deleteProject('${d.id}')">🗑 Hapus Proyek</button>` : ''}
-          </div>
-        </div>
-
       </div>
-    `;
-  }
+    </div>
 
-  // ── SAVE ─────────────────────────────────────────────────────────────────────
-  async function saveForm() {
-    const name = document.getElementById('f-name').value.trim();
-    if (!name) { showToast('Nama proyek wajib diisi!', 'error'); return; }
+    <!-- FORM AREA -->
+    <div class="form-area" id="form-area">
+      <div class="panel">
+        <div class="empty-form">
+          <div class="empty-form-icon">📋</div>
+          <div class="empty-form-text">Pilih proyek di kiri untuk edit,<br>atau klik "Tambah Airdrop Baru"</div>
+        </div>
+      </div>
+    </div>
+  </div>
 
-    const payload = {
-      name,
-      status:        document.getElementById('f-status').value,
-      link:          document.getElementById('f-link').value.trim() || null,
-      tags:          document.getElementById('f-tags').value.trim() || null,
-      RaisedID:      document.getElementById('f-raisedid').value.trim() || null,
-      RaisedEN:      document.getElementById('f-raiseden').value.trim() || null,
-      tasksID:       document.getElementById('f-tasksid').value.trim() || null,
-      tasksEN:       document.getElementById('f-tasksen').value.trim() || null,
-      descriptionID: document.getElementById('f-descid').value.trim() || null,
-      descriptionEN: document.getElementById('f-descen').value.trim() || null,
-      ticker:        document.getElementById('f-ticker').value.trim() || null,
-      total_supply:  document.getElementById('f-supply').value.trim() || null,
-      network:       document.getElementById('f-network').value.trim() || null,
-      tge_date:      document.getElementById('f-tge').value.trim() || null,
-      logo_url:      document.getElementById('f-logo').value.trim() || null,
-      twitter:       document.getElementById('f-twitter').value.trim() || null,
-      discord:       document.getElementById('f-discord').value.trim() || null,
-      telegram:      document.getElementById('f-telegram').value.trim() || null,
-      faqID:         document.getElementById('f-faqid').value.trim() || null,
-      faqEN:         document.getElementById('f-faqen').value.trim() || null,
-    };
+  <!-- TOAST NOTIFICATION -->
+  <div class="toast" id="toast"></div>
 
-    // Disable tombol
-    ['btn-save','btn-save-bottom'].forEach(id => {
-      const el = document.getElementById(id);
-      if (el) { el.disabled = true; el.innerHTML = '<span class="spinner"></span> Menyimpan...'; }
-    });
+  <!-- SCRIPT UTAMA UNTUK ADMIN CRUD -->
+  <script>
+    let projects = [];
+    let editingId = null;
 
-    try {
-      let res;
-      if (editingId) {
-        res = await fetch(`/api/admin-airdrop?id=${editingId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      } else {
-        res = await fetch('/api/admin-airdrop', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload)
-        });
-      }
-
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || result.message || 'Gagal menyimpan');
-
-      showToast(editingId ? '✓ Berhasil diupdate!' : '✓ Proyek baru ditambahkan!', 'success');
-
-      // Refresh list & set editing ke proyek yang baru/diedit
-      await loadProjects();
-      if (!editingId && Array.isArray(result) && result[0]) {
-        editingId = result[0].id;
+    async function loadProjects() {
+      try {
+        const res = await fetch('/api/admin-airdrop');
+        if (!res.ok) throw new Error('Gagal fetch');
+        projects = await res.json();
         renderList();
-        renderForm(result[0]);
-      } else if (editingId) {
-        const updated = projects.find(p => p.id === editingId);
-        if (updated) renderForm(updated);
+      } catch(e) {
+        document.getElementById('proj-list').innerHTML =
+          `<div class="list-loading" style="color:var(--red)">${e.message}</div>`;
       }
+    }
 
-    } catch(e) {
-      showToast('Error: ' + e.message, 'error');
+    function renderList() {
+      const list = document.getElementById('proj-list');
+      document.getElementById('proj-count').textContent = projects.length;
+      if (!projects.length) {
+        list.innerHTML = '<div class="list-loading">Belum ada proyek.</div>';
+        return;
+      }
+      list.innerHTML = projects.map(p => {
+        const stCls = getStCls(p.status);
+        return `<div class="proj-item ${editingId === p.id ? 'active' : ''}"
+                     onclick="loadEdit('${p.id}')">
+          <span class="proj-item-name">${esc(p.name)}</span>
+          <span class="proj-item-status ${stCls}">${esc(p.status || 'TBA')}</span>
+        </div>`;
+      }).join('');
+    }
+
+    function getStCls(s) {
+      if (!s) return 'st-default';
+      const l = s.toLowerCase();
+      if (l.includes('active')) return 'st-active';
+      if (l.includes('wait'))   return 'st-waitlist';
+      return 'st-default';
+    }
+
+    function newForm() {
+      editingId = null;
+      renderList();
+      renderForm(null);
+    }
+
+    function loadEdit(id) {
+      editingId = id;
+      renderList();
+      const p = projects.find(x => x.id === id);
+      renderForm(p);
+    }
+
+    function renderForm(data) {
+      const d = data || {};
+      const isEdit = !!data;
+      document.getElementById('form-area').innerHTML = `
+        <div class="form-panel">
+          <div class="form-header">
+            <div class="form-title">
+              ${isEdit ? `Edit: ${esc(d.name)}` : 'Tambah Airdrop Baru'}
+              ${isEdit ? '<span class="editing-badge">EDITING</span>' : ''}
+            </div>
+            <div class="form-actions">
+              ${isEdit ? `<button class="btn-delete" onclick="deleteProject('${d.id}')">🗑 Hapus</button>` : ''}
+              <button class="btn-cancel" onclick="newForm(); document.getElementById('form-area').innerHTML='<div class=\\'panel\\'><div class=\\'empty-form\\'><div class=\\'empty-form-icon\\'>📋</div><div class=\\'empty-form-text\\'>Pilih proyek di kiri untuk edit,<br>atau klik \\"Tambah Airdrop Baru\\"</div></div></div>'; editingId=null; renderList();">✕ Batal</button>
+              <button class="btn-save" onclick="saveForm()" id="btn-save">
+                ${isEdit ? '💾 Simpan Perubahan' : '➕ Tambah Proyek'}
+              </button>
+            </div>
+          </div>
+
+          <!-- INFO DASAR -->
+          <div class="form-section">
+            <div class="section-label">Info Dasar</div>
+            <div class="form-grid">
+              <div class="field"><label>Nama Proyek <span class="req">*</span></label><input type="text" id="f-name" placeholder="e.g. Blockchain.com" value="${esc(d.name||'')}"></div>
+              <div class="field"><label>Status <span class="req">*</span></label><select id="f-status">${['Active','Waitlist','Seed Round','Potential','Confirmed','Listing / Selesai'].map(s => `<option value="${s}" ${d.status===s?'selected':''}>${s}</option>`).join('')}</select></div>
+              <div class="field"><label>Link Official <span class="hint">(URL proyek)</span></label><input type="url" id="f-link" placeholder="https://..." value="${esc(d.link||'')}"></div>
+              <div class="field"><label>Tags <span class="hint">(pisah koma)</span></label><input type="text" id="f-tags" placeholder="DeFi, AI, Layer2" value="${esc(d.tags||'')}"></div>
+            </div>
+          </div>
+
+          <!-- FUNDING -->
+          <div class="form-section">
+            <div class="section-label">Funding</div>
+            <div class="form-grid">
+              <div class="field"><label>Total Raised (ID) <span class="hint">e.g. $600 Juta</span></label><input type="text" id="f-raisedid" placeholder="$600 Juta" value="${esc(d.RaisedID||'')}"></div>
+              <div class="field"><label>Total Raised (EN) <span class="hint">e.g. $600M</span></label><input type="text" id="f-raiseden" placeholder="$600M" value="${esc(d.RaisedEN||'')}"></div>
+            </div>
+          </div>
+
+          <!-- TUGAS -->
+          <div class="form-section">
+            <div class="section-label">Tugas / Tasks</div>
+            <div class="form-grid cols-1">
+              <div class="field"><label>Tugas (Bahasa Indonesia)</label><textarea id="f-tasksid" class="tall" placeholder="1. Daftar di website&#10;2. Connect wallet&#10;3. Selesaikan quest harian">${esc(d.tasksID||'')}</textarea></div>
+              <div class="field"><label>Tugas (English)</label><textarea id="f-tasksen" class="tall" placeholder="1. Register on website&#10;2. Connect wallet&#10;3. Complete daily quests">${esc(d.tasksEN||'')}</textarea></div>
+            </div>
+          </div>
+
+          <!-- DESKRIPSI -->
+          <div class="form-section">
+            <div class="section-label">Deskripsi Proyek</div>
+            <div class="form-grid cols-1">
+              <div class="field"><label>Deskripsi (Bahasa Indonesia)</label><textarea id="f-descid" class="tall" placeholder="Jelaskan proyek ini dalam Bahasa Indonesia...">${esc(d.descriptionID||'')}</textarea></div>
+              <div class="field"><label>Description (English)</label><textarea id="f-descen" class="tall" placeholder="Describe this project in English...">${esc(d.descriptionEN||'')}</textarea></div>
+            </div>
+          </div>
+
+          <!-- TOKENOMICS -->
+          <div class="form-section">
+            <div class="section-label">Tokenomics</div>
+            <div class="form-grid cols-3">
+              <div class="field"><label>Ticker <span class="hint">e.g. $BLC</span></label><input type="text" id="f-ticker" placeholder="$BLC" value="${esc(d.ticker||'')}"></div>
+              <div class="field"><label>Total Supply</label><input type="text" id="f-supply" placeholder="1,000,000,000" value="${esc(d.total_supply||'')}"></div>
+              <div class="field"><label>Network</label><input type="text" id="f-network" placeholder="Ethereum / Solana" value="${esc(d.network||'')}"></div>
+              <div class="field"><label>TGE / Listing Date</label><input type="text" id="f-tge" placeholder="Q3 2025 / TBA" value="${esc(d.tge_date||'')}"></div>
+              <div class="field"><label>Logo URL</label><input type="url" id="f-logo" placeholder="https://..." value="${esc(d.logo_url||'')}"></div>
+            </div>
+          </div>
+
+          <!-- SOSIAL -->
+          <div class="form-section">
+            <div class="section-label">Sosial Media</div>
+            <div class="form-grid">
+              <div class="field"><label>Twitter / X</label><input type="url" id="f-twitter" placeholder="https://x.com/..." value="${esc(d.twitter||'')}"></div>
+              <div class="field"><label>Discord</label><input type="url" id="f-discord" placeholder="https://discord.gg/..." value="${esc(d.discord||'')}"></div>
+              <div class="field"><label>Telegram</label><input type="url" id="f-telegram" placeholder="https://t.me/..." value="${esc(d.telegram||'')}"></div>
+            </div>
+          </div>
+
+          <!-- FAQ -->
+          <div class="form-section">
+            <div class="section-label">FAQ <span style="font-weight:400;color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0">— Format: Q: pertanyaan | A: jawaban (per baris)</span></div>
+            <div class="form-grid cols-1">
+              <div class="field"><label>FAQ (Bahasa Indonesia)</label><textarea id="f-faqid" class="tall" placeholder="Q: Apa itu airdrop ini? | A: Ini adalah program distribusi token gratis.&#10;Q: Kapan token dibagikan? | A: Setelah TGE di Q3 2025.">${esc(d.faqID||'')}</textarea></div>
+              <div class="field"><label>FAQ (English)</label><textarea id="f-faqen" class="tall" placeholder="Q: What is this airdrop? | A: This is a free token distribution program.&#10;Q: When will tokens be distributed? | A: After TGE in Q3 2025.">${esc(d.faqEN||'')}</textarea></div>
+            </div>
+          </div>
+
+          <div class="form-section">
+            <div class="form-actions">
+              <button class="btn-save" onclick="saveForm()" id="btn-save-bottom">${isEdit ? '💾 Simpan Perubahan' : '➕ Tambah Proyek'}</button>
+              ${isEdit ? `<button class="btn-delete" onclick="deleteProject('${d.id}')">🗑 Hapus Proyek</button>` : ''}
+            </div>
+          </div>
+        </div>
+      `;
+    }
+
+    async function saveForm() {
+      const name = document.getElementById('f-name').value.trim();
+      if (!name) { showToast('Nama proyek wajib diisi!', 'error'); return; }
+      const payload = {
+        name,
+        status: document.getElementById('f-status').value,
+        link: document.getElementById('f-link').value.trim() || null,
+        tags: document.getElementById('f-tags').value.trim() || null,
+        RaisedID: document.getElementById('f-raisedid').value.trim() || null,
+        RaisedEN: document.getElementById('f-raiseden').value.trim() || null,
+        tasksID: document.getElementById('f-tasksid').value.trim() || null,
+        tasksEN: document.getElementById('f-tasksen').value.trim() || null,
+        descriptionID: document.getElementById('f-descid').value.trim() || null,
+        descriptionEN: document.getElementById('f-descen').value.trim() || null,
+        ticker: document.getElementById('f-ticker').value.trim() || null,
+        total_supply: document.getElementById('f-supply').value.trim() || null,
+        network: document.getElementById('f-network').value.trim() || null,
+        tge_date: document.getElementById('f-tge').value.trim() || null,
+        logo_url: document.getElementById('f-logo').value.trim() || null,
+        twitter: document.getElementById('f-twitter').value.trim() || null,
+        discord: document.getElementById('f-discord').value.trim() || null,
+        telegram: document.getElementById('f-telegram').value.trim() || null,
+        faqID: document.getElementById('f-faqid').value.trim() || null,
+        faqEN: document.getElementById('f-faqen').value.trim() || null,
+      };
       ['btn-save','btn-save-bottom'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) { el.disabled = false; el.innerHTML = editingId ? '💾 Simpan Perubahan' : '➕ Tambah Proyek'; }
+        if (el) { el.disabled = true; el.innerHTML = '<span class="spinner"></span> Menyimpan...'; }
       });
-    }
-  }
-
-  // ── DELETE ───────────────────────────────────────────────────────────────────
-  async function deleteProject(id) {
-    const p = projects.find(x => x.id === id);
-    if (!confirm(`Hapus "${p?.name || id}"? Tindakan ini tidak bisa dibatalkan.`)) return;
-
-    try {
-      const res = await fetch(`/api/admin-airdrop?id=${id}`, { method: 'DELETE' });
-      if (!res.ok) {
-        const err = await res.json();
-        throw new Error(err.error || 'Gagal hapus');
+      try {
+        let res;
+        if (editingId) {
+          res = await fetch(`/api/admin-airdrop?id=${editingId}`, { method: 'PATCH', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        } else {
+          res = await fetch('/api/admin-airdrop', { method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) });
+        }
+        const result = await res.json();
+        if (!res.ok) throw new Error(result.error || result.message || 'Gagal menyimpan');
+        showToast(editingId ? '✓ Berhasil diupdate!' : '✓ Proyek baru ditambahkan!', 'success');
+        await loadProjects();
+        if (!editingId && Array.isArray(result) && result[0]) {
+          editingId = result[0].id;
+          renderList();
+          renderForm(result[0]);
+        } else if (editingId) {
+          const updated = projects.find(p => p.id === editingId);
+          if (updated) renderForm(updated);
+        }
+      } catch(e) {
+        showToast('Error: ' + e.message, 'error');
+        ['btn-save','btn-save-bottom'].forEach(id => {
+          const el = document.getElementById(id);
+          if (el) { el.disabled = false; el.innerHTML = editingId ? '💾 Simpan Perubahan' : '➕ Tambah Proyek'; }
+        });
       }
-      showToast('✓ Proyek dihapus', 'success');
-      editingId = null;
-      await loadProjects();
-      document.getElementById('form-area').innerHTML = `
-        <div class="panel">
-          <div class="empty-form">
-            <div class="empty-form-icon">📋</div>
-            <div class="empty-form-text">Pilih proyek di kiri untuk edit,<br>atau klik "Tambah Airdrop Baru"</div>
-          </div>
-        </div>`;
-    } catch(e) {
-      showToast('Error: ' + e.message, 'error');
+    }
+
+    async function deleteProject(id) {
+      const p = projects.find(x => x.id === id);
+      if (!confirm(`Hapus "${p?.name || id}"? Tindakan ini tidak bisa dibatalkan.`)) return;
+      try {
+        const res = await fetch(`/api/admin-airdrop?id=${id}`, { method: 'DELETE' });
+        if (!res.ok) throw new Error('Gagal hapus');
+        showToast('✓ Proyek dihapus', 'success');
+        editingId = null;
+        await loadProjects();
+        document.getElementById('form-area').innerHTML = `<div class="panel"><div class="empty-form"><div class="empty-form-icon">📋</div><div class="empty-form-text">Pilih proyek di kiri untuk edit,<br>atau klik "Tambah Airdrop Baru"</div></div></div>`;
+      } catch(e) { showToast('Error: ' + e.message, 'error'); }
+    }
+
+    function showToast(msg, type = 'success') {
+      const t = document.getElementById('toast');
+      t.textContent = msg;
+      t.className = `toast ${type} show`;
+      setTimeout(() => t.classList.remove('show'), 3000);
+    }
+
+    function esc(s) {
+      return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+
+    loadProjects();
+  </script>
+</div>
+
+<!-- SCRIPT GOOGLE LOGIN (ditempatkan di luar admin-content, setelah konten admin) -->
+<script>
+  const YOUR_CLIENT_ID = '1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com';
+
+  async function handleCredentialResponse(response) {
+    const token = response.credential;
+    try {
+      const res = await fetch('/api/verify-token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ token })
+      });
+      const result = await res.json();
+
+      if (res.ok && result.success) {
+        document.getElementById('login-section').style.display = 'none';
+        document.getElementById('admin-content').classList.remove('hidden');
+      } else {
+        alert(`Akses ditolak: ${result.message || 'Unauthorized'}`);
+        google.accounts.id.disableAutoSelect();
+      }
+    } catch (err) {
+      console.error(err);
+      alert('Verifikasi gagal. Coba lagi nanti.');
     }
   }
 
-  // ── TOAST ────────────────────────────────────────────────────────────────────
-  function showToast(msg, type = 'success') {
-    const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = `toast ${type} show`;
-    setTimeout(() => { t.classList.remove('show'); }, 3000);
-  }
-
-  function esc(s) {
-    return String(s || '')
-      .replace(/&/g,'&amp;')
-      .replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;');
-  }
-
-  // INIT
-  loadProjects();
+  window.onload = function() {
+    google.accounts.id.initialize({
+      client_id: YOUR_CLIENT_ID,
+      callback: handleCredentialResponse,
+    });
+    google.accounts.id.renderButton(
+      document.getElementById('g_id_onload'),
+      { theme: "outline", size: "large" }
+    );
+    google.accounts.id.prompt();
+  };
 </script>
+
 </body>
 </html>
