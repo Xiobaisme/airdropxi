@@ -56,42 +56,27 @@
       border-radius: 16px; padding: 2.5rem 2rem; text-align: center;
       max-width: 380px; width: 90%;
     }
-    .login-logo {
-      font-family: var(--mono); font-size: 1.4rem;
-      color: var(--accent); font-weight: 700;
-      margin-bottom: 0.5rem;
-    }
-    .login-title {
-      font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem;
-    }
-    .login-sub {
-      font-size: 0.82rem; color: var(--text2); margin-bottom: 1.5rem;
-    }
+    .login-logo { font-family: var(--mono); font-size: 1.4rem; color: var(--accent); font-weight: 700; margin-bottom: 0.5rem; }
+    .login-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
+    .login-sub { font-size: 0.82rem; color: var(--text2); margin-bottom: 1.5rem; }
 
     /* ── NAV ── */
     nav {
       position: sticky; top: 0; z-index: 100;
-      background: rgba(7,9,11,0.92);
-      backdrop-filter: blur(20px);
+      background: rgba(7,9,11,0.92); backdrop-filter: blur(20px);
       border-bottom: 1px solid var(--border);
       height: 52px; padding: 0 1.5rem;
       display: flex; align-items: center; justify-content: space-between;
     }
     .nav-left { display: flex; align-items: center; gap: 10px; }
-    .nav-logo {
-      font-family: var(--mono); font-size: 0.82rem; font-weight: 700;
-      color: var(--accent); text-decoration: none;
-    }
+    .nav-logo { font-family: var(--mono); font-size: 0.82rem; font-weight: 700; color: var(--accent); text-decoration: none; }
     .nav-badge {
       font-family: var(--mono); font-size: 0.58rem; font-weight: 700;
       padding: 0.2rem 0.55rem;
       background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
       border-radius: 4px; color: var(--red); letter-spacing: 0.08em;
     }
-    .nav-back {
-      font-family: var(--mono); font-size: 0.68rem;
-      color: var(--text2); text-decoration: none; transition: color 0.2s;
-    }
+    .nav-back { font-family: var(--mono); font-size: 0.68rem; color: var(--text2); text-decoration: none; transition: color 0.2s; }
     .nav-back:hover { color: var(--accent); }
 
     /* ── LAYOUT ── */
@@ -105,22 +90,10 @@
 
     /* ── SIDEBAR ── */
     .sidebar { display: flex; flex-direction: column; gap: 1rem; }
-    .panel {
-      background: var(--s1); border: 1px solid var(--border);
-      border-radius: var(--r); overflow: hidden;
-    }
-    .panel-head {
-      display: flex; align-items: center; gap: 8px;
-      padding: 0.8rem 1rem; border-bottom: 1px solid var(--border);
-    }
-    .ph-dot {
-      width: 6px; height: 6px; border-radius: 50%;
-      background: var(--accent); box-shadow: 0 0 6px var(--accent);
-    }
-    .ph-title {
-      font-family: var(--mono); font-size: 0.62rem; color: var(--text3);
-      letter-spacing: 0.1em; text-transform: uppercase; flex: 1;
-    }
+    .panel { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+    .panel-head { display: flex; align-items: center; gap: 8px; padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); }
+    .ph-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
+    .ph-title { font-family: var(--mono); font-size: 0.62rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; flex: 1; }
     .ph-count { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); }
 
     .proj-list { max-height: 500px; overflow-y: auto; }
@@ -128,17 +101,14 @@
     .proj-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
     .proj-item {
-      display: flex; align-items: center; justify-content: space-between;
+      display: flex; align-items: flex-start; justify-content: space-between;
       padding: 0.7rem 1rem; border-bottom: 1px solid var(--border);
       cursor: pointer; transition: background 0.15s; gap: 8px;
     }
     .proj-item:last-child { border-bottom: none; }
     .proj-item:hover { background: var(--s2); }
     .proj-item.active { background: var(--adim); }
-    .proj-item-name {
-      font-size: 0.82rem; font-weight: 600;
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-    }
+    .proj-item-name { font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .proj-item-status {
       font-family: var(--mono); font-size: 0.52rem;
       padding: 0.15rem 0.4rem; border-radius: 3px;
@@ -159,21 +129,14 @@
 
     /* ── FORM ── */
     .form-area { display: flex; flex-direction: column; gap: 1rem; }
-    .form-panel {
-      background: var(--s1); border: 1px solid var(--border);
-      border-radius: var(--r); overflow: hidden;
-    }
+    .form-panel { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
     .form-header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px;
     }
-    .form-title {
-      font-size: 0.95rem; font-weight: 700;
-      display: flex; align-items: center; gap: 8px;
-    }
+    .form-title { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
     .edit-badge {
-      font-family: var(--mono); font-size: 0.58rem;
-      padding: 0.2rem 0.5rem;
+      font-family: var(--mono); font-size: 0.58rem; padding: 0.2rem 0.5rem;
       background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25);
       border-radius: 4px; color: var(--blue);
     }
@@ -184,8 +147,7 @@
     .sec-lbl {
       font-family: var(--mono); font-size: 0.58rem; color: var(--text3);
       letter-spacing: 0.12em; text-transform: uppercase;
-      margin-bottom: 1rem;
-      display: flex; align-items: center; gap: 8px;
+      margin-bottom: 1rem; display: flex; align-items: center; gap: 8px;
     }
     .sec-lbl::after { content: ''; flex: 1; height: 1px; background: var(--border); }
 
@@ -198,10 +160,7 @@
     .field.s2 { grid-column: span 2; }
     .field.s3 { grid-column: span 3; }
 
-    label {
-      font-family: var(--mono); font-size: 0.6rem; color: var(--text2);
-      letter-spacing: 0.06em; text-transform: uppercase;
-    }
+    label { font-family: var(--mono); font-size: 0.6rem; color: var(--text2); letter-spacing: 0.06em; text-transform: uppercase; }
     label .req { color: var(--red); margin-left: 2px; }
     label .hint { color: var(--text3); font-size: 0.54rem; margin-left: 4px; text-transform: none; letter-spacing: 0; }
 
@@ -220,10 +179,7 @@
 
     /* Testnet links builder */
     .testnet-builder { display: flex; flex-direction: column; gap: 8px; }
-    .testnet-row {
-      display: grid; grid-template-columns: 1fr 2fr auto;
-      gap: 8px; align-items: center;
-    }
+    .testnet-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; align-items: center; }
     .testnet-row input { margin: 0; }
     .btn-remove-testnet {
       width: 30px; height: 30px; border-radius: 6px;
@@ -234,44 +190,51 @@
     }
     .btn-remove-testnet:hover { background: rgba(239,68,68,0.15); }
     .btn-add-testnet {
-      padding: 0.5rem 1rem;
-      background: transparent; border: 1px dashed var(--border2);
-      border-radius: 6px; color: var(--text2);
-      font-family: var(--mono); font-size: 0.65rem;
+      padding: 0.5rem 1rem; background: transparent; border: 1px dashed var(--border2);
+      border-radius: 6px; color: var(--text2); font-family: var(--mono); font-size: 0.65rem;
       cursor: pointer; transition: all 0.2s; align-self: flex-start;
     }
     .btn-add-testnet:hover { border-color: var(--accent); color: var(--accent); }
 
     /* Buttons */
     .btn-save {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 0.62rem 1.4rem;
-      background: var(--accent); color: #000;
-      font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
-      letter-spacing: 0.06em; border: none; border-radius: 6px;
+      display: inline-flex; align-items: center; gap: 6px; padding: 0.62rem 1.4rem;
+      background: var(--accent); color: #000; font-family: var(--mono); font-size: 0.7rem;
+      font-weight: 700; letter-spacing: 0.06em; border: none; border-radius: 6px;
       cursor: pointer; transition: opacity 0.2s, transform 0.15s;
     }
     .btn-save:hover { opacity: 0.85; transform: translateY(-1px); }
     .btn-save:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-
     .btn-delete {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 0.62rem 1rem;
-      background: var(--rdim); color: var(--red);
-      font-family: var(--mono); font-size: 0.68rem;
-      border: 1px solid rgba(239,68,68,0.25);
-      border-radius: 6px; cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 6px; padding: 0.62rem 1rem;
+      background: var(--rdim); color: var(--red); font-family: var(--mono); font-size: 0.68rem;
+      border: 1px solid rgba(239,68,68,0.25); border-radius: 6px; cursor: pointer; transition: all 0.2s;
     }
     .btn-delete:hover { background: rgba(239,68,68,0.15); }
-
     .btn-cancel {
-      display: inline-flex; align-items: center; gap: 6px;
-      padding: 0.62rem 1rem; background: transparent; color: var(--text2);
-      font-family: var(--mono); font-size: 0.68rem;
-      border: 1px solid var(--border2); border-radius: 6px;
-      cursor: pointer; transition: all 0.2s;
+      display: inline-flex; align-items: center; gap: 6px; padding: 0.62rem 1rem;
+      background: transparent; color: var(--text2); font-family: var(--mono); font-size: 0.68rem;
+      border: 1px solid var(--border2); border-radius: 6px; cursor: pointer; transition: all 0.2s;
     }
     .btn-cancel:hover { border-color: var(--text2); color: var(--text); }
+
+    /* Publish toggle */
+    .publish-section {
+      padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
+    }
+    .publish-toggle-wrap { display: flex; align-items: center; gap: 12px; }
+    .toggle-track {
+      position: relative; width: 44px; height: 24px;
+      border-radius: 12px; cursor: pointer; transition: background 0.25s;
+      flex-shrink: 0;
+    }
+    .toggle-thumb {
+      position: absolute; top: 3px; width: 18px; height: 18px;
+      border-radius: 50%; background: #fff; transition: left 0.25s; pointer-events: none;
+    }
+    .publish-label { font-size: 0.82rem; font-weight: 600; transition: color 0.25s; }
+    .publish-note { font-family: var(--mono); font-size: 0.62rem; color: var(--text3); }
 
     /* Toast */
     .toast {
@@ -279,8 +242,7 @@
       padding: 0.75rem 1.25rem; border-radius: 8px;
       font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
       z-index: 999; pointer-events: none;
-      transform: translateY(80px); opacity: 0;
-      transition: all 0.3s ease;
+      transform: translateY(80px); opacity: 0; transition: all 0.3s ease;
     }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { background: var(--accent); color: #000; }
@@ -288,23 +250,18 @@
 
     /* Empty & loading */
     .empty-form {
-      display: flex; flex-direction: column;
-      align-items: center; justify-content: center;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
       min-height: 380px; gap: 1rem; text-align: center;
     }
     .empty-icon { font-size: 2.5rem; }
     .empty-text { color: var(--text3); font-family: var(--mono); font-size: 0.72rem; line-height: 1.6; }
-
     .spinner {
-      width: 18px; height: 18px;
-      border: 2px solid var(--border2); border-top-color: var(--accent);
-      border-radius: 50%; animation: spin 0.6s linear infinite;
-      display: inline-block;
+      width: 18px; height: 18px; border: 2px solid var(--border2); border-top-color: var(--accent);
+      border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block;
     }
     @keyframes spin { to { transform: rotate(360deg); } }
     .list-loading {
-      padding: 2rem; text-align: center;
-      font-family: var(--mono); font-size: 0.68rem; color: var(--text3);
+      padding: 2rem; text-align: center; font-family: var(--mono); font-size: 0.68rem; color: var(--text3);
       display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
   </style>
@@ -385,12 +342,24 @@
       list.innerHTML = '<div class="list-loading">Belum ada proyek.</div>';
       return;
     }
-    list.innerHTML = projects.map(p => `
-      <div class="proj-item ${editingId === p.id ? 'active' : ''}" onclick="loadEdit('${p.id}')">
-        <span class="proj-item-name">${esc(p.name)}</span>
-        <span class="proj-item-status ${getStCls(p.status)}">${esc(p.status || 'TBA')}</span>
-      </div>
-    `).join('');
+    list.innerHTML = projects.map(p => {
+      const isLive = p.published === true;
+      return `
+        <div class="proj-item ${editingId === p.id ? 'active' : ''}" onclick="loadEdit('${p.id}')">
+          <div style="flex:1;min-width:0">
+            <div class="proj-item-name">${esc(p.name)}</div>
+            <div style="margin-top:4px;display:flex;gap:4px;align-items:center">
+              <span class="proj-item-status ${getStCls(p.status)}">${esc(p.status || 'TBA')}</span>
+              <span style="font-family:var(--mono);font-size:0.48rem;padding:0.12rem 0.38rem;border-radius:3px;
+                background:${isLive ? 'rgba(0,229,160,0.12)' : 'rgba(100,100,100,0.12)'};
+                color:${isLive ? 'var(--accent)' : 'var(--text3)'}">
+                ${isLive ? '● LIVE' : '○ DRAFT'}
+              </span>
+            </div>
+          </div>
+        </div>
+      `;
+    }).join('');
   }
 
   function getStCls(s) {
@@ -400,15 +369,15 @@
     return 'st-d';
   }
 
-  function newForm()      { editingId = null; renderList(); renderForm(null); }
-  function loadEdit(id)   { editingId = id;   renderList(); renderForm(projects.find(p => p.id === id)); }
+  function newForm()    { editingId = null; renderList(); renderForm(null); }
+  function loadEdit(id) { editingId = id;   renderList(); renderForm(projects.find(p => p.id === id)); }
 
   // ── RENDER FORM ───────────────────────────────────────
   function renderForm(data) {
     const d = data || {};
     const isEdit = !!data;
+    const isLive = d.published === true;
 
-    // Parse testnet_links
     let testnetLinks = [];
     if (d.testnet_links) {
       try {
@@ -420,6 +389,8 @@
 
     document.getElementById('form-area').innerHTML = `
       <div class="form-panel">
+
+        <!-- HEADER -->
         <div class="form-header">
           <div class="form-title">
             ${isEdit ? `✏️ Edit: ${esc(d.name)}` : '➕ Tambah Airdrop Baru'}
@@ -434,20 +405,56 @@
           </div>
         </div>
 
+        <!-- PUBLISHED TOGGLE -->
+        <div class="publish-section" style="background:${isLive ? 'rgba(0,229,160,0.04)' : 'rgba(245,158,11,0.03)'}">
+          <div class="publish-toggle-wrap">
+            <div class="toggle-track" id="toggle-track"
+              style="background:${isLive ? 'var(--accent)' : 'var(--border2)'}"
+              onclick="togglePublish()">
+              <div class="toggle-thumb" id="toggle-thumb"
+                style="left:${isLive ? '23px' : '3px'}"></div>
+            </div>
+            <input type="checkbox" id="f-published" ${isLive ? 'checked' : ''}
+              style="display:none">
+            <div>
+              <div class="publish-label" id="publish-label"
+                style="color:${isLive ? 'var(--accent)' : 'var(--warn)'}">
+                ${isLive ? '✓ Published — Tampil di index publik' : '○ Draft — Tidak tampil di index'}
+              </div>
+              <div class="publish-note">
+                ${isLive ? 'Proyek ini bisa dilihat semua pengunjung' : 'Hanya admin yang bisa melihat proyek ini'}
+              </div>
+            </div>
+          </div>
+          <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);max-width:260px;line-height:1.5">
+            ⚠️ Index publik hanya menampilkan proyek berstatus <strong style="color:var(--accent)">Published</strong>
+          </div>
+        </div>
+
         <!-- INFO DASAR -->
         <div class="form-sec">
           <div class="sec-lbl">Info Dasar</div>
           <div class="fg">
-            <div class="field"><label>Nama Proyek <span class="req">*</span></label><input id="f-name" type="text" placeholder="e.g. Blockchain.com" value="${esc(d.name||'')}"></div>
-            <div class="field"><label>Status <span class="req">*</span></label>
+            <div class="field">
+              <label>Nama Proyek <span class="req">*</span></label>
+              <input id="f-name" type="text" placeholder="e.g. Blockchain.com" value="${esc(d.name||'')}">
+            </div>
+            <div class="field">
+              <label>Status <span class="req">*</span></label>
               <select id="f-status">
                 ${['Active','Waitlist','Seed Round','Potential','Confirmed','Listing / Selesai'].map(s =>
                   `<option value="${s}" ${d.status===s?'selected':''}>${s}</option>`
                 ).join('')}
               </select>
             </div>
-            <div class="field"><label>Link Official</label><input id="f-link" type="url" placeholder="https://..." value="${esc(d.link||'')}"></div>
-            <div class="field"><label>Tags <span class="hint">pisah koma</span></label><input id="f-tags" type="text" placeholder="DeFi, AI, Layer2" value="${esc(d.tags||'')}"></div>
+            <div class="field">
+              <label>Link Official</label>
+              <input id="f-link" type="url" placeholder="https://..." value="${esc(d.link||'')}">
+            </div>
+            <div class="field">
+              <label>Tags <span class="hint">pisah koma</span></label>
+              <input id="f-tags" type="text" placeholder="DeFi, AI, Layer2" value="${esc(d.tags||'')}">
+            </div>
           </div>
         </div>
 
@@ -455,8 +462,14 @@
         <div class="form-sec">
           <div class="sec-lbl">Funding</div>
           <div class="fg">
-            <div class="field"><label>Total Raised (ID) <span class="hint">e.g. $600 Juta</span></label><input id="f-raisedid" type="text" placeholder="$600 Juta" value="${esc(d.RaisedID||'')}"></div>
-            <div class="field"><label>Total Raised (EN) <span class="hint">e.g. $600M</span></label><input id="f-raiseden" type="text" placeholder="$600M" value="${esc(d.RaisedEN||'')}"></div>
+            <div class="field">
+              <label>Total Raised (ID) <span class="hint">e.g. $600 Juta</span></label>
+              <input id="f-raisedid" type="text" placeholder="$600 Juta" value="${esc(d.RaisedID||'')}">
+            </div>
+            <div class="field">
+              <label>Total Raised (EN) <span class="hint">e.g. $600M</span></label>
+              <input id="f-raiseden" type="text" placeholder="$600M" value="${esc(d.RaisedEN||'')}">
+            </div>
           </div>
         </div>
 
@@ -464,36 +477,72 @@
         <div class="form-sec">
           <div class="sec-lbl">Deskripsi Proyek</div>
           <div class="fg c1">
-            <div class="field"><label>Deskripsi (ID)</label><textarea id="f-descid" class="tall" placeholder="Jelaskan proyek ini...">${esc(d.descriptionID||'')}</textarea></div>
-            <div class="field"><label>Description (EN)</label><textarea id="f-descen" class="tall" placeholder="Describe this project...">${esc(d.descriptionEN||'')}</textarea></div>
+            <div class="field">
+              <label>Deskripsi (ID)</label>
+              <textarea id="f-descid" class="tall" placeholder="Jelaskan proyek ini...">${esc(d.descriptionID||'')}</textarea>
+            </div>
+            <div class="field">
+              <label>Description (EN)</label>
+              <textarea id="f-descen" class="tall" placeholder="Describe this project...">${esc(d.descriptionEN||'')}</textarea>
+            </div>
           </div>
         </div>
 
         <!-- TUGAS / GUIDE STEPS -->
         <div class="form-sec">
-          <div class="sec-lbl">Tugas / Guide Steps <span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400">— Format: "1. Judul | Deskripsi" per baris. Tips: mulai dengan "💡 teks tip"</span></div>
+          <div class="sec-lbl">
+            Tugas / Guide Steps
+            <span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400">
+              — Format: "1. Judul | Deskripsi" per baris. Tips: "💡 teks tip"
+            </span>
+          </div>
           <div class="fg c1">
-            <div class="field"><label>Tugas (ID)</label><textarea id="f-tasksid" class="tall" placeholder="1. Daftar di website | Kunjungi https://... dan klik Sign Up&#10;2. Connect wallet | Hubungkan MetaMask kamu&#10;💡 Gunakan burner wallet untuk keamanan">${esc(d.tasksID||'')}</textarea></div>
-            <div class="field"><label>Tasks (EN)</label><textarea id="f-tasksen" class="tall" placeholder="1. Register | Visit https://... and click Sign Up&#10;2. Connect wallet | Connect your MetaMask">${esc(d.tasksEN||'')}</textarea></div>
+            <div class="field">
+              <label>Tugas (ID)</label>
+              <textarea id="f-tasksid" class="tall"
+                placeholder="1. Daftar di website | Kunjungi https://... dan klik Sign Up&#10;2. Connect wallet | Hubungkan MetaMask kamu&#10;💡 Gunakan burner wallet untuk keamanan">${esc(d.tasksID||'')}</textarea>
+            </div>
+            <div class="field">
+              <label>Tasks (EN)</label>
+              <textarea id="f-tasksen" class="tall"
+                placeholder="1. Register | Visit https://... and click Sign Up&#10;2. Connect wallet | Connect your MetaMask">${esc(d.tasksEN||'')}</textarea>
+            </div>
           </div>
         </div>
 
         <!-- TESTNET LINKS -->
         <div class="form-sec">
-          <div class="sec-lbl">Testnet / Link Penting <span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400">— Maksimal 5 link. Akan tampil biru & clickable di halaman guide.</span></div>
+          <div class="sec-lbl">
+            Testnet / Link Penting
+            <span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400">
+              — Maksimal 5 link. Tampil biru & clickable di halaman guide.
+            </span>
+          </div>
           <div class="testnet-builder" id="testnet-builder">
             ${testnetLinks.map((t,i) => testnetRow(i, t.label||'', t.url||'')).join('')}
           </div>
-          ${testnetLinks.length < 5 ? `<button class="btn-add-testnet" onclick="addTestnetRow()" style="margin-top:8px">＋ Tambah Link</button>` : ''}
-          <div id="testnet-add-wrap" style="${testnetLinks.length >= 5 ? 'display:none' : 'display:block'}"></div>
+          <button class="btn-add-testnet" onclick="addTestnetRow()" style="margin-top:8px">＋ Tambah Link</button>
         </div>
 
         <!-- FAQ -->
         <div class="form-sec">
-          <div class="sec-lbl">FAQ <span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400">— Format: "Q: pertanyaan | A: jawaban" (satu baris per Q&A)</span></div>
+          <div class="sec-lbl">
+            FAQ
+            <span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400">
+              — Format: "Q: pertanyaan | A: jawaban" (satu baris per Q&A)
+            </span>
+          </div>
           <div class="fg c1">
-            <div class="field"><label>FAQ (ID)</label><textarea id="f-faqid" class="tall" placeholder="Q: Apa itu airdrop ini? | A: Program distribusi token gratis.&#10;Q: Kapan token dibagikan? | A: Setelah TGE di Q3 2025.">${esc(d.faqID||'')}</textarea></div>
-            <div class="field"><label>FAQ (EN)</label><textarea id="f-faqen" class="tall" placeholder="Q: What is this? | A: A free token distribution program.">${esc(d.faqEN||'')}</textarea></div>
+            <div class="field">
+              <label>FAQ (ID)</label>
+              <textarea id="f-faqid" class="tall"
+                placeholder="Q: Apa itu airdrop ini? | A: Program distribusi token gratis.&#10;Q: Kapan token dibagikan? | A: Setelah TGE di Q3 2025.">${esc(d.faqID||'')}</textarea>
+            </div>
+            <div class="field">
+              <label>FAQ (EN)</label>
+              <textarea id="f-faqen" class="tall"
+                placeholder="Q: What is this? | A: A free token distribution program.">${esc(d.faqEN||'')}</textarea>
+            </div>
           </div>
         </div>
 
@@ -501,11 +550,26 @@
         <div class="form-sec">
           <div class="sec-lbl">Tokenomics</div>
           <div class="fg c3">
-            <div class="field"><label>Ticker</label><input id="f-ticker" type="text" placeholder="$BLC" value="${esc(d.ticker||'')}"></div>
-            <div class="field"><label>Total Supply</label><input id="f-supply" type="text" placeholder="1,000,000,000" value="${esc(d.total_supply||'')}"></div>
-            <div class="field"><label>Network</label><input id="f-network" type="text" placeholder="Ethereum / Solana" value="${esc(d.network||'')}"></div>
-            <div class="field"><label>TGE / Listing Date</label><input id="f-tge" type="text" placeholder="Q3 2026 / TBA" value="${esc(d.tge_date||'')}"></div>
-            <div class="field"><label>Logo URL</label><input id="f-logo" type="url" placeholder="https://..." value="${esc(d.logo_url||'')}"></div>
+            <div class="field">
+              <label>Ticker</label>
+              <input id="f-ticker" type="text" placeholder="$BLC" value="${esc(d.ticker||'')}">
+            </div>
+            <div class="field">
+              <label>Total Supply</label>
+              <input id="f-supply" type="text" placeholder="1,000,000,000" value="${esc(d.total_supply||'')}">
+            </div>
+            <div class="field">
+              <label>Network</label>
+              <input id="f-network" type="text" placeholder="Ethereum / Solana" value="${esc(d.network||'')}">
+            </div>
+            <div class="field">
+              <label>TGE / Listing Date</label>
+              <input id="f-tge" type="text" placeholder="Q3 2026 / TBA" value="${esc(d.tge_date||'')}">
+            </div>
+            <div class="field">
+              <label>Logo URL</label>
+              <input id="f-logo" type="url" placeholder="https://..." value="${esc(d.logo_url||'')}">
+            </div>
           </div>
         </div>
 
@@ -513,9 +577,18 @@
         <div class="form-sec">
           <div class="sec-lbl">Sosial Media</div>
           <div class="fg">
-            <div class="field"><label>Twitter / X</label><input id="f-twitter" type="url" placeholder="https://x.com/..." value="${esc(d.twitter||'')}"></div>
-            <div class="field"><label>Discord</label><input id="f-discord" type="url" placeholder="https://discord.gg/..." value="${esc(d.discord||'')}"></div>
-            <div class="field"><label>Telegram</label><input id="f-telegram" type="url" placeholder="https://t.me/..." value="${esc(d.telegram||'')}"></div>
+            <div class="field">
+              <label>Twitter / X</label>
+              <input id="f-twitter" type="url" placeholder="https://x.com/..." value="${esc(d.twitter||'')}">
+            </div>
+            <div class="field">
+              <label>Discord</label>
+              <input id="f-discord" type="url" placeholder="https://discord.gg/..." value="${esc(d.discord||'')}">
+            </div>
+            <div class="field">
+              <label>Telegram</label>
+              <input id="f-telegram" type="url" placeholder="https://t.me/..." value="${esc(d.telegram||'')}">
+            </div>
           </div>
         </div>
 
@@ -528,33 +601,51 @@
             ${isEdit ? `<button class="btn-delete" onclick="deleteProject('${d.id}')">🗑 Hapus Proyek</button>` : ''}
           </div>
         </div>
+
       </div>
     `;
 
-    // Tambah row pertama kalau kosong
+    // Tambah row pertama kalau testnet kosong
     if (!testnetLinks.length) {
       const builder = document.getElementById('testnet-builder');
       if (builder) builder.innerHTML = testnetRow(0,'','');
     }
   }
 
+  // ── PUBLISH TOGGLE ────────────────────────────────────
+  function togglePublish() {
+    const cb    = document.getElementById('f-published');
+    const track = document.getElementById('toggle-track');
+    const thumb = document.getElementById('toggle-thumb');
+    const label = document.getElementById('publish-label');
+    if (!cb) return;
+    cb.checked = !cb.checked;
+    const on = cb.checked;
+    track.style.background = on ? 'var(--accent)' : 'var(--border2)';
+    thumb.style.left        = on ? '23px' : '3px';
+    label.style.color       = on ? 'var(--accent)' : 'var(--warn)';
+    label.textContent       = on
+      ? '✓ Published — Tampil di index publik'
+      : '○ Draft — Tidak tampil di index';
+  }
+
+  // ── TESTNET ROWS ──────────────────────────────────────
   function testnetRow(i, label, url) {
     return `
       <div class="testnet-row" id="trow-${i}">
         <input type="text" placeholder="Label (e.g. Testnet App)" value="${esc(label)}" class="tnet-label">
         <input type="url"  placeholder="https://..." value="${esc(url)}" class="tnet-url">
         <button class="btn-remove-testnet" onclick="removeTestnetRow(${i})" title="Hapus">✕</button>
-      </div>
-    `;
+      </div>`;
   }
 
   function addTestnetRow() {
     const builder = document.getElementById('testnet-builder');
     if (!builder) return;
-    const rows = builder.querySelectorAll('.testnet-row');
-    if (rows.length >= 5) return;
-    const i = Date.now(); // unique id
-    builder.insertAdjacentHTML('beforeend', testnetRow(i,'',''));
+    if (builder.querySelectorAll('.testnet-row').length >= 5) {
+      showToast('Maksimal 5 link', 'error'); return;
+    }
+    builder.insertAdjacentHTML('beforeend', testnetRow(Date.now(),'',''));
   }
 
   function removeTestnetRow(i) {
@@ -565,9 +656,8 @@
   function getTestnetLinks() {
     const builder = document.getElementById('testnet-builder');
     if (!builder) return null;
-    const rows = builder.querySelectorAll('.testnet-row');
     const links = [];
-    rows.forEach(row => {
+    builder.querySelectorAll('.testnet-row').forEach(row => {
       const label = row.querySelector('.tnet-label')?.value?.trim() || '';
       const url   = row.querySelector('.tnet-url')?.value?.trim()   || '';
       if (url) links.push({ label: label || url, url });
@@ -576,8 +666,7 @@
   }
 
   function cancelForm() {
-    editingId = null;
-    renderList();
+    editingId = null; renderList();
     document.getElementById('form-area').innerHTML = `
       <div class="panel">
         <div class="empty-form">
@@ -592,9 +681,13 @@
     const name = document.getElementById('f-name')?.value?.trim();
     if (!name) { showToast('Nama proyek wajib diisi!', 'error'); return; }
 
+    const publishedEl = document.getElementById('f-published');
+    const isPublished = publishedEl ? publishedEl.checked : false;
+
     const payload = {
       name,
-      status:        document.getElementById('f-status')?.value,
+      status:        document.getElementById('f-status')?.value         || null,
+      published:     isPublished,
       link:          document.getElementById('f-link')?.value?.trim()    || null,
       tags:          document.getElementById('f-tags')?.value?.trim()    || null,
       RaisedID:      document.getElementById('f-raisedid')?.value?.trim()|| null,
@@ -616,7 +709,6 @@
       testnet_links: getTestnetLinks(),
     };
 
-    // Disable buttons
     ['btn-save','btn-save-bottom'].forEach(id => {
       const el = document.getElementById(id);
       if (el) { el.disabled = true; el.innerHTML = '<span class="spinner"></span> Menyimpan...'; }
@@ -639,7 +731,9 @@
       }
 
       const result = await res.json();
-      if (!res.ok) throw new Error(result.error || JSON.stringify(result));
+
+      // FIX: result.error sekarang selalu string (bukan object) dari API yang sudah difix
+      if (!res.ok) throw new Error(result.error || `HTTP ${res.status}`);
 
       showToast(editingId ? '✓ Berhasil diupdate!' : '✓ Proyek ditambahkan!', 'success');
       await loadProjects();
@@ -656,10 +750,7 @@
       showToast('Error: ' + e.message, 'error');
       ['btn-save','btn-save-bottom'].forEach(id => {
         const el = document.getElementById(id);
-        if (el) {
-          el.disabled = false;
-          el.innerHTML = editingId ? '💾 Simpan' : '➕ Tambah';
-        }
+        if (el) { el.disabled = false; el.innerHTML = editingId ? '💾 Simpan' : '➕ Tambah'; }
       });
     }
   }
@@ -670,7 +761,10 @@
     if (!confirm(`Hapus "${p?.name || id}"?\nTindakan ini tidak bisa dibatalkan.`)) return;
     try {
       const res = await fetch(`/api/admin-airdrop?id=${id}`, { method: 'DELETE' });
-      if (!res.ok) throw new Error('Gagal hapus');
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Gagal hapus');
+      }
       showToast('✓ Proyek dihapus', 'success');
       editingId = null;
       await loadProjects();
