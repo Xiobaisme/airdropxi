@@ -233,9 +233,9 @@ function filterCards() {
     const status = (card.dataset.status || '').toLowerCase();
     const matchQ = !q || name.includes(q);
     let matchF = true;
-    if (activeFilter === 'active')  matchF = status.includes('active');
+    if (activeFilter === 'active')   matchF = status.includes('active');
     if (activeFilter === 'waitlist') matchF = status.includes('waitlist');
-    if (activeFilter === 'listing') matchF = status.includes('listing') || status.includes('end') || status.includes('selesai');
+    if (activeFilter === 'listing')  matchF = status.includes('listing') || status.includes('end') || status.includes('selesai');
     card.style.display = (matchQ && matchF) ? '' : 'none';
   });
 }
@@ -245,35 +245,61 @@ function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt
 function getStatusClass(s) {
   if (!s) return 'st-default';
   const l = s.toLowerCase();
-  if (l.includes('active'))  return 'st-active';
-  if (l.includes('waitlist'))return 'st-waitlist';
-  if (l.includes('mint'))    return 'st-mint';
+  if (l.includes('active'))   return 'st-active';
+  if (l.includes('waitlist')) return 'st-waitlist';
+  if (l.includes('mint'))     return 'st-mint';
   if (l.includes('listing') || l.includes('end') || l.includes('selesai')) return 'st-listing';
   return 'st-default';
 }
 
+// ==========================================
+// ✅ PERUBAHAN UTAMA: renderCards
+// Card klik → project-detail.html?id=xxx
+// Tombol "Garap" tetap ke external link
+// ==========================================
 function renderCards() {
   const cont = document.getElementById('airdrop-container');
   const t = T[currentLang];
   cont.innerHTML = '';
+
   if (!allData.length) {
     cont.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;border:1px dashed var(--border);border-radius:var(--radius);color:var(--text2);font-family:'JetBrains Mono',monospace">${t.empty}</div>`;
     return;
   }
+
   const first = allData[0];
   if (first) {
     document.getElementById('fc-latest').textContent = first.name || '—';
     document.getElementById('fc-raised').textContent = first.RaisedEN || first.RaisedID || 'N/A';
   }
+
   allData.forEach((item, i) => {
-    const raised = currentLang === 'id' ? (item.RaisedID || t.unknown) : (item.RaisedEN || t.unknown);
-    const tasks  = currentLang === 'id' ? (item.tasksID  || t.unknown) : (item.tasksEN  || t.unknown);
-    const stCls  = getStatusClass(item.status);
+    const raised  = currentLang === 'id' ? (item.RaisedID || t.unknown) : (item.RaisedEN || t.unknown);
+    const tasks   = currentLang === 'id' ? (item.tasksID  || t.unknown) : (item.tasksEN  || t.unknown);
+    const stCls   = getStatusClass(item.status);
+
     let tagsHTML = '';
-    if (item.tags) try { tagsHTML = String(item.tags).split(',').map(x => `<span class="atag">${x.trim()}</span>`).join(''); } catch(e) {}
+    if (item.tags) {
+      try {
+        tagsHTML = String(item.tags).split(',').map(x => `<span class="atag">${x.trim()}</span>`).join('');
+      } catch(e) {}
+    }
+
     const prog = 20 + Math.floor(Math.random() * 75);
+
+    // Gunakan id jika ada, fallback ke name untuk query param
+    const detailParam = item.id
+      ? `id=${encodeURIComponent(item.id)}`
+      : `name=${encodeURIComponent(item.name || '')}`;
+    const detailUrl = `project-detail.html?${detailParam}`;
+
     cont.insertAdjacentHTML('beforeend', `
-      <div class="acard reveal" data-name="${esc(item.name)}" data-status="${esc(item.status)}" style="animation-delay:${i * .05}s">
+      <div class="acard reveal" 
+           data-name="${esc(item.name)}" 
+           data-status="${esc(item.status)}"
+           style="animation-delay:${i * .05}s;cursor:pointer"
+           onclick="window.location.href='${detailUrl}'">
+
         <div class="acard-top">
           <div>
             <div class="acard-name">${esc(item.name) || 'Unknown'}</div>
@@ -284,21 +310,35 @@ function renderCards() {
             <span class="acard-status ${stCls}">${esc(item.status) || 'TBA'}</span>
           </div>
         </div>
+
         <div class="acard-raised">
           <div class="raised-ico">$</div>
-          <div><div class="raised-lbl">${t.raised}</div><div class="raised-val">${esc(raised)}</div></div>
+          <div>
+            <div class="raised-lbl">${t.raised}</div>
+            <div class="raised-val">${esc(raised)}</div>
+          </div>
         </div>
+
         <div class="prog-wrap">
           <div class="prog-meta"><span>${t.tasks}</span><span>${prog}%</span></div>
           <div class="prog-bar"><div class="prog-fill" style="width:${prog}%"></div></div>
         </div>
+
         <div class="acard-tasks">
           <div class="tasks-lbl">${t.tasks}</div>
           <div class="tasks-body">${esc(tasks)}</div>
         </div>
-        <a href="${esc(item.link || '#')}" target="_blank" rel="noopener noreferrer" class="acard-btn">⚡ ${t.cta}</a>
+
+        <!-- Tombol garap: stopPropagation supaya tidak trigger onclick card -->
+        <a href="${esc(item.link || '#')}" 
+           target="_blank" 
+           rel="noopener noreferrer" 
+           class="acard-btn"
+           onclick="event.stopPropagation()">⚡ ${t.cta}</a>
+
       </div>`);
   });
+
   document.querySelectorAll('.acard.reveal').forEach(el => observer.observe(el));
   bindHoverEffects();
 }
@@ -504,19 +544,15 @@ IMPORTANT: Always respond in English. Remind users to only use official AirdropX
   };
 })();
 
-// js/app.js
+// ==========================================
+// H. TOKEN UNLOCKS
+// ==========================================
 async function loadTokenUnlocks() {
   const tableBody = document.getElementById('unlock-table-body');
-  
   try {
     const response = await fetch('/api/unlocks');
     const data = await response.json();
-
-    // Bersihkan loading jika ada
     tableBody.innerHTML = '';
-
-    // Misalkan kita ambil data token (logika tergantung struktur API DefiLlama)
-    // Di sini kita buat simulasi baris tabelnya
     const row = `
       <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
         <td style="padding: 15px;">${data.name || 'Ethereum'}</td>
@@ -525,13 +561,11 @@ async function loadTokenUnlocks() {
       </tr>
     `;
     tableBody.innerHTML = row;
-
   } catch (err) {
     console.error("Gagal Render:", err);
   }
 }
 
-// Jalankan fungsi saat halaman dimuat
-if(window.location.pathname.includes('unlocks.html')) {
+if (window.location.pathname.includes('unlocks.html')) {
   loadTokenUnlocks();
 }
