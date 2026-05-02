@@ -321,96 +321,205 @@
 
 <script src="js/app.js"></script>
 <script>
-<script>
 (function() {
-  const container = document.getElementById('airdrop-container');
-  const loadingDiv = document.getElementById('loading-state');
-  const errorDiv = document.getElementById('error-state');
+  const container   = document.getElementById('airdrop-container');
+  const loadingDiv  = document.getElementById('loading-state');
+  const errorDiv    = document.getElementById('error-state');
   const searchInput = document.getElementById('search-input');
-  const filterBtns = document.querySelectorAll('.fbtn');
-  let allProjects = [];
+  let allProjects   = [];
   let currentFilter = 'all';
   let currentSearch = '';
-
+ 
+  // ── FETCH DATA ──────────────────────────────────────────
   async function fetchData() {
     try {
       const res = await fetch('/api/admin-airdrop');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
-      let data = await res.json();
+      const data = await res.json();
       if (!Array.isArray(data)) throw new Error('Data tidak valid');
       allProjects = data;
-      updateStatsAndRender();
-      if (loadingDiv) loadingDiv.style.display = 'none';
-      if (container) container.style.display = 'grid';
-      if (errorDiv) errorDiv.style.display = 'none';
+      updateStats();
+      renderCards();
+      if (loadingDiv)  loadingDiv.style.display  = 'none';
+      if (container)   container.style.display   = 'grid';
+      if (errorDiv)    errorDiv.style.display     = 'none';
     } catch (err) {
-      if (loadingDiv) loadingDiv.style.display = 'none';
-      if (errorDiv) errorDiv.style.display = 'block';
-      if (container) container.style.display = 'none';
-      console.error(err);
+      if (loadingDiv)  loadingDiv.style.display   = 'none';
+      if (errorDiv)    errorDiv.style.display      = 'block';
+      if (container)   container.style.display     = 'none';
+      const msgEl = document.getElementById('error-msg');
+      if (msgEl) msgEl.textContent = err.message;
+      console.error('fetchData error:', err);
     }
   }
-
-  function updateStatsAndRender() {
-    updateStats();
-    renderCards();
-  }
-
+ 
+  // ── STATS ───────────────────────────────────────────────
   function updateStats() {
-    const total = allProjects.length;
-    const active = allProjects.filter(p => p.status === 'Active').length;
-    const waitlist = allProjects.filter(p => p.status === 'Waitlist').length;
-    const listing = allProjects.filter(p => p.status === 'Listing / Selesai').length;
-    if (document.getElementById('hs-total')) document.getElementById('hs-total').innerText = total;
-    if (document.getElementById('hs-active')) document.getElementById('hs-active').innerText = active;
-    if (document.getElementById('dash-total')) document.getElementById('dash-total').innerText = total;
-    if (document.getElementById('dash-active')) document.getElementById('dash-active').innerText = active;
-    if (document.getElementById('dash-waitlist')) document.getElementById('dash-waitlist').innerText = waitlist;
-    if (document.getElementById('dash-listing')) document.getElementById('dash-listing').innerText = listing;
+    const total    = allProjects.length;
+    const active   = allProjects.filter(p => (p.status||'').toLowerCase().includes('active')).length;
+    const waitlist = allProjects.filter(p => (p.status||'').toLowerCase().includes('wait')).length;
+    const listing  = allProjects.filter(p =>
+      (p.status||'').toLowerCase().includes('listing') ||
+      (p.status||'').toLowerCase().includes('selesai')
+    ).length;
+ 
+    // Hero stats
+    setEl('hs-total',    total);
+    setEl('hs-active',   active);
+    // Dashboard stats
+    setEl('dash-total',   total);
+    setEl('dash-active',  active);
+    setEl('dash-waitlist',waitlist);
+    setEl('dash-listing', listing);
+ 
+    // Float cards di hero visual
+    if (allProjects.length > 0) {
+      setEl('fc-latest', allProjects[0].name || '—');
+    }
+ 
+    // Raised total (kalkulasi simpel)
+    setEl('fc-raised', `${allProjects.length} Projects`);
   }
-
+ 
+  function setEl(id, val) {
+    const el = document.getElementById(id);
+    if (el) el.textContent = val;
+  }
+ 
+  // ── RENDER CARDS ────────────────────────────────────────
   function renderCards() {
     if (!container) return;
-    let filtered = allProjects.filter(p => {
+ 
+    let list = allProjects.filter(p => {
+      // Filter by status
       if (currentFilter !== 'all') {
-        if (currentFilter === 'active' && p.status !== 'Active') return false;
-        if (currentFilter === 'waitlist' && p.status !== 'Waitlist') return false;
-        if (currentFilter === 'listing' && p.status !== 'Listing / Selesai') return false;
+        const s = (p.status||'').toLowerCase();
+        if (currentFilter === 'active'   && !s.includes('active'))  return false;
+        if (currentFilter === 'waitlist' && !s.includes('wait'))     return false;
+        if (currentFilter === 'listing'  && !s.includes('listing') && !s.includes('selesai')) return false;
       }
-      if (currentSearch && !p.name.toLowerCase().includes(currentSearch.toLowerCase())) return false;
+      // Filter by search
+      if (currentSearch) {
+        const q = currentSearch.toLowerCase();
+        const match =
+          (p.name||'').toLowerCase().includes(q) ||
+          (p.tags||'').toLowerCase().includes(q)  ||
+          (p.ticker||'').toLowerCase().includes(q);
+        if (!match) return false;
+      }
       return true;
     });
-    if (filtered.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:2rem;">Tidak ada airdrop</div>';
+ 
+    if (!list.length) {
+      container.innerHTML = '<div style="grid-column:1/-1;text-align:center;padding:3rem;font-family:var(--mono);color:var(--text2);font-size:0.78rem">Tidak ada airdrop ditemukan.</div>';
       return;
     }
-    container.innerHTML = filtered.map(p => `
-      <div class="dash-card">
-        <div class="dash-label">${escapeHtml(p.name)}</div>
-        <div class="dash-num">
-          <span class="status-badge ${p.status === 'Active' ? 'st-active' : (p.status === 'Waitlist' ? 'st-waitlist' : 'st-default')}">${escapeHtml(p.status || 'Unknown')}</span>
-          ${p.RaisedID ? `<span>💰 ${escapeHtml(p.RaisedID)}</span>` : ''}
-        </div>
-        <div class="dash-ico">${escapeHtml((p.descriptionID || p.descriptionEN || '').substring(0, 100))}...</div>
-        <a href="guide.html?id=${p.id}" class="btn-garap">📘 Garap Sekarang →</a>
-      </div>
-    `).join('');
+ 
+    container.innerHTML = list.map(p => {
+      const stCls  = getStCls(p.status);
+      const fund   = p.RaisedID || p.RaisedEN || '—';
+      const tags   = (p.tags||'').split(',').map(t=>t.trim()).filter(Boolean);
+ 
+      // Tasks preview: 2 baris pertama
+      const taskPreview = (p.tasksID || p.tasksEN || '')
+        .split('\n').map(l=>l.trim()).filter(Boolean)
+        .filter(l => !/^(tip:|💡|Q:|A:)/i.test(l))
+        .slice(0,2)
+        .map(l => l.replace(/^(\d+[\.\)]\s*)/,''))
+        .join(' · ');
+ 
+      // Logo
+      const logo = p.logo_url
+        ? `<img src="${esc(p.logo_url)}" alt="${esc(p.name)}" style="width:40px;height:40px;border-radius:10px;object-fit:cover;border:1px solid var(--border);background:var(--s2)" onerror="this.style.display='none'">`
+        : `<div style="width:40px;height:40px;border-radius:10px;background:var(--adim);border:1px solid var(--aborder);display:flex;align-items:center;justify-content:center;font-size:1.2rem">🪂</div>`;
+ 
+      return `
+        <a href="/guide/${esc(p.id)}" class="airdrop-card" style="text-decoration:none;color:inherit;display:flex;flex-direction:column;background:var(--s1);border:1px solid var(--border);border-radius:14px;overflow:hidden;transition:border-color .2s,transform .15s,box-shadow .2s;cursor:pointer"
+           onmouseover="this.style.borderColor='rgba(0,229,160,0.35)';this.style.transform='translateY(-3px)';this.style.boxShadow='0 14px 40px rgba(0,0,0,.45)'"
+           onmouseout="this.style.borderColor='var(--border)';this.style.transform='';this.style.boxShadow=''">
+          <div style="padding:1.1rem 1.1rem 0.9rem;flex:1">
+            <!-- Header -->
+            <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:10px;margin-bottom:10px">
+              <div>
+                <div style="font-size:0.98rem;font-weight:700;margin-bottom:4px">${esc(p.name)}</div>
+                <div style="display:flex;gap:4px;flex-wrap:wrap">
+                  ${tags.map(t=>`<span style="font-family:var(--mono);font-size:0.55rem;padding:2px 7px;background:var(--s2);border:1px solid var(--border2);border-radius:4px;color:var(--text3)">${esc(t)}</span>`).join('')}
+                </div>
+              </div>
+              <div style="display:flex;align-items:flex-start;gap:8px;flex-shrink:0">
+                ${logo}
+                <span style="font-family:var(--mono);font-size:0.58rem;padding:3px 8px;border-radius:20px" class="${stCls}">${esc(p.status||'TBA')}</span>
+              </div>
+            </div>
+            <!-- Fund -->
+            <div style="display:flex;align-items:center;gap:8px;background:var(--s2);border:1px solid var(--border);border-radius:8px;padding:8px 11px;margin-bottom:10px">
+              <div style="width:26px;height:26px;border-radius:6px;background:var(--adim);border:1px solid var(--aborder);display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-size:0.7rem;color:var(--accent);font-weight:700;flex-shrink:0">$</div>
+              <div>
+                <div style="font-family:var(--mono);font-size:0.55rem;color:var(--text3);letter-spacing:.1em">DANA TERKUMPUL</div>
+                <div style="font-family:var(--mono);font-size:0.9rem;font-weight:700;color:var(--accent)">${esc(fund)}</div>
+              </div>
+            </div>
+            <!-- Task preview -->
+            ${taskPreview ? `<div style="font-size:0.78rem;color:var(--text2);line-height:1.5;padding-top:8px;border-top:1px solid var(--border);display:-webkit-box;-webkit-line-clamp:2;-webkit-box-orient:vertical;overflow:hidden">📌 ${esc(taskPreview)}</div>` : ''}
+          </div>
+          <!-- CTA -->
+          <div style="padding:0.75rem 1.1rem;background:var(--s2);border-top:1px solid var(--border);font-family:var(--mono);font-size:0.68rem;color:var(--accent);font-weight:700;letter-spacing:.06em;display:flex;justify-content:space-between;align-items:center">
+            <span>⚡ GARAP SEKARANG</span><span>→</span>
+          </div>
+        </a>
+      `;
+    }).join('');
   }
-
-  if (searchInput) searchInput.addEventListener('input', () => { currentSearch = searchInput.value; renderCards(); });
-  if (filterBtns.length) filterBtns.forEach(btn => {
+ 
+  // ── STATUS CLASS ────────────────────────────────────────
+  function getStCls(s) {
+    const l = (s||'').toLowerCase();
+    if (l.includes('active')) return 'st-active';
+    if (l.includes('wait'))   return 'st-waitlist';
+    return 'st-default';
+  }
+ 
+  // ── FILTER & SEARCH ─────────────────────────────────────
+  // Expose global functions yang dipanggil dari HTML
+  window.setFilter = function(btn, filter) {
+    currentFilter = filter;
+    document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
+    btn.classList.add('active');
+    renderCards();
+  };
+ 
+  window.filterCards = function() {
+    currentSearch = (searchInput?.value || '').trim();
+    renderCards();
+  };
+ 
+  if (searchInput) {
+    searchInput.addEventListener('input', () => {
+      currentSearch = searchInput.value.trim();
+      renderCards();
+    });
+  }
+ 
+  // Listen filter buttons via data-filter attribute
+  document.querySelectorAll('.fbtn').forEach(btn => {
     btn.addEventListener('click', () => {
-      currentFilter = btn.getAttribute('data-filter');
-      filterBtns.forEach(b => b.classList.remove('active'));
+      currentFilter = btn.getAttribute('data-filter') || 'all';
+      document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
       btn.classList.add('active');
       renderCards();
     });
   });
-
-  function escapeHtml(str) { return String(str || '').replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
+ 
+  function esc(s) {
+    return String(s||'')
+      .replace(/&/g,'&amp;')
+      .replace(/</g,'&lt;')
+      .replace(/>/g,'&gt;')
+      .replace(/"/g,'&quot;');
+  }
+ 
   fetchData();
 })();
-</script>
 </script>
 </body>
 </html>
