@@ -1,114 +1,156 @@
-module.exports = async function handler(req, res) {
-  const url = process.env.NEXT_PUBLIC_SUPABASE_URL;
-  const key = process.env.SUPABASE_SERVICE_ROLE_KEY;
-  if (!url || !key) return res.status(500).json({ error: 'Missing env' });
+// api/admin-airdrop.js
+// CRUD handler untuk tabel airdrops + proyek di Supabase
 
-  const headers = {
-    'apikey': key,
-    'Authorization': `Bearer ${key}`,
+module.exports = async function handler(req, res) {
+  const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
+  const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
+
+  if (!SUPA_URL || !SUPA_KEY) {
+    return res.status(500).json({ error: 'Missing env: NEXT_PUBLIC_SUPABASE_URL atau SUPABASE_SERVICE_ROLE_KEY' });
+  }
+
+  const BASE = `${SUPA_URL}/rest/v1`;
+  const H = {
+    'apikey': SUPA_KEY,
+    'Authorization': `Bearer ${SUPA_KEY}`,
     'Content-Type': 'application/json',
-    'Prefer': 'return=representation'
+    'Prefer': 'return=representation',
   };
 
-  // GET: bisa dari tabel airdrops (untuk index) atau proyek (untuk guide)
+  const { id } = req.query;
+
+  // ── GET ───────────────────────────────────────────────────
   if (req.method === 'GET') {
-    const { id, table = 'airdrops' } = req.query; // default tabel airdrops
-    const tableName = table === 'proyek' ? 'proyek' : 'airdrops';
-    const endpoint = id
-      ? `${url}/rest/v1/${tableName}?id=eq.${id}&limit=1`
-      : `${url}/rest/v1/${tableName}?select=*&order=created_at.desc`;
     try {
-      const r = await fetch(endpoint, { headers });
+      const endpoint = id
+        ? `${BASE}/airdrops?id=eq.${encodeURIComponent(id)}&limit=1`
+        : `${BASE}/airdrops?select=*&order=created_at.desc`;
+
+      const r = await fetch(endpoint, { headers: H });
       const data = await r.json();
-      return res.status(200).json(data);
+
+      if (!r.ok) return res.status(r.status).json({ error: data });
+
+      // GET by ID → return object tunggal, bukan array
+      if (id) {
+        if (!data || data.length === 0) {
+          return res.status(404).json({ error: 'Project tidak ditemukan' });
+        }
+        return res.status(200).json(data[0]);
+      }
+
+      return res.status(200).json(Array.isArray(data) ? data : []);
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
 
-  // POST: simpan ke kedua tabel
+  // ── POST ──────────────────────────────────────────────────
   if (req.method === 'POST') {
-    const payload = req.body;
-    const commonData = {
-      name: payload.name,
-      status: payload.status,
-      link: payload.link,
-      tags: payload.tags,
-      RaisedID: payload.RaisedID,
-      RaisedEN: payload.RaisedEN,
-      tasksID: payload.tasksID,
-      tasksEN: payload.tasksEN,
-      descriptionID: payload.descriptionID,
-      descriptionEN: payload.descriptionEN,
-      ticker: payload.ticker,
-      total_supply: payload.total_supply,
-      network: payload.network,
-      tge_date: payload.tge_date,
-      logo_url: payload.logo_url,
-      twitter: payload.twitter,
-      discord: payload.discord,
-      telegram: payload.telegram,
-      faqID: payload.faqID,
-      faqEN: payload.faqEN
-    };
-    try {
-      // Insert ke tabel airdrops
-      const r1 = await fetch(`${url}/rest/v1/airdrops`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify(commonData)
-      });
-      const data1 = await r1.json();
-      if (!r1.ok) return res.status(r1.status).json(data1);
-      const newId = data1[0]?.id;
-      if (!newId) throw new Error('Gagal dapat ID dari airdrops');
+    if (!req.body?.name) {
+      return res.status(400).json({ error: 'Field "name" wajib diisi' });
+    }
 
-      // Insert ke tabel proyek dengan ID yang sama
-      await fetch(`${url}/rest/v1/proyek`, {
-        method: 'POST',
-        headers,
-        body: JSON.stringify({ ...commonData, id: newId })
+    const data = buildPayload(req.body);
+
+    try {
+      const r1 = await fetch(`${BASE}/airdrops`, {
+        method: 'POST', headers: H, body: JSON.stringify(data),
       });
-      return res.status(201).json(data1);
+      const result = await r1.json();
+      if (!r1.ok) return res.status(r1.status).json({ error: result });
+
+      const newId = Array.isArray(result) ? result[0]?.id : result?.id;
+      if (!newId) throw new Error('Gagal dapat ID setelah insert');
+
+      // Sync ke tabel proyek (best-effort, tidak block response)
+      fetch(`${BASE}/proyek`, {
+        method: 'POST', headers: H,
+        body: JSON.stringify({ ...data, id: newId }),
+      }).catch(e => console.warn('Sync proyek gagal:', e.message));
+
+      return res.status(201).json(Array.isArray(result) ? result : [result]);
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
 
-  // PATCH: update kedua tabel
+  // ── PATCH ─────────────────────────────────────────────────
   if (req.method === 'PATCH') {
-    const { id } = req.query;
-    if (!id) return res.status(400).json({ error: 'Missing id' });
-    const payload = req.body;
+    if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
+    if (!req.body || !Object.keys(req.body).length) {
+      return res.status(400).json({ error: 'Request body kosong' });
+    }
+
+    const data = buildPayload(req.body);
+
     try {
-      await fetch(`${url}/rest/v1/airdrops?id=eq.${id}`, {
-        method: 'PATCH',
-        headers,
-        body: JSON.stringify(payload)
+      const r1 = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, {
+        method: 'PATCH', headers: H, body: JSON.stringify(data),
       });
-      await fetch(`${url}/rest/v1/proyek?id=eq.${id}`, {
-        method: 'PATCH',
-        headers,
-        body: JSON.stringify(payload)
-      });
+      const result = await r1.json();
+      if (!r1.ok) return res.status(r1.status).json({ error: result });
+
+      // Sync ke tabel proyek (best-effort)
+      fetch(`${BASE}/proyek?id=eq.${encodeURIComponent(id)}`, {
+        method: 'PATCH', headers: H, body: JSON.stringify(data),
+      }).catch(e => console.warn('Sync PATCH proyek gagal:', e.message));
+
       return res.status(200).json({ success: true });
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
 
-  // DELETE: hapus dari kedua tabel
+  // ── DELETE ────────────────────────────────────────────────
   if (req.method === 'DELETE') {
-    const { id } = req.query;
-    if (!id) return res.status(400).json({ error: 'Missing id' });
+    if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
+
     try {
-      await fetch(`${url}/rest/v1/airdrops?id=eq.${id}`, { method: 'DELETE', headers });
-      await fetch(`${url}/rest/v1/proyek?id=eq.${id}`, { method: 'DELETE', headers });
+      const [r1, r2] = await Promise.all([
+        fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: H }),
+        fetch(`${BASE}/proyek?id=eq.${encodeURIComponent(id)}`,   { method: 'DELETE', headers: H }),
+      ]);
+
+      if (!r1.ok) {
+        const err = await r1.json().catch(() => ({}));
+        return res.status(r1.status).json({ error: err });
+      }
+
       return res.status(200).json({ success: true });
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
 
-  return res.status(405).json({ error: 'Method not allowed' });
+  res.setHeader('Allow', ['GET','POST','PATCH','DELETE']);
+  return res.status(405).json({ error: `Method ${req.method} tidak diizinkan` });
 };
+
+// ── Helper: normalisasi payload ───────────────────────────
+function buildPayload(p) {
+  return {
+    name:           p.name           || null,
+    status:         p.status         || null,
+    link:           p.link           || null,
+    tags:           p.tags           || null,
+    RaisedID:       p.RaisedID       || null,
+    RaisedEN:       p.RaisedEN       || null,
+    tasksID:        p.tasksID        || null,
+    tasksEN:        p.tasksEN        || null,
+    descriptionID:  p.descriptionID  || null,
+    descriptionEN:  p.descriptionEN  || null,
+    ticker:         p.ticker         || null,
+    total_supply:   p.total_supply   || null,
+    network:        p.network        || null,
+    tge_date:       p.tge_date       || null,
+    logo_url:       p.logo_url       || null,
+    twitter:        p.twitter        || null,
+    discord:        p.discord        || null,
+    telegram:       p.telegram       || null,
+    faqID:          p.faqID          || null,
+    faqEN:          p.faqEN          || null,
+    // Testnet links — disimpan sebagai JSON string array of {label,url}
+    testnet_links:  p.testnet_links  || null,
+  };
+}
