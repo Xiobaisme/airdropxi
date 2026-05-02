@@ -163,7 +163,7 @@ const T = {
     tDash:'DASHBOARD', tTitle:'Airdrop Radar',
     tSub:'Monitor status, total raised, and tasks from potential projects in the Web3 ecosystem.',
     raised:'Total Raised', tasks:'Tasks', cta:'Start Task', unknown:'TBA', empty:'No airdrops listed yet, bro.',
-    totalL:'Total Airdrops', activeL:'Active Now', endedL:'Listed / Ended', fbAll:'All',
+    totalL:'Total Airdrops', activeL:'Active Now', endedL:'Ended', fbAll:'All',
     gTag:'BEGINNER', gTitle:'Guide & Tutorial',
     gSub:'Welcome to the AirdropXI info center. Comprehensive guides to maximize your Crypto gains.',
     gPrepT:'Preparation', gPrepD:'What do you need before starting?',
@@ -328,24 +328,27 @@ function esc(s) {
     .replace(/"/g,'&quot;');
 }
 
-// Cover semua variasi status "listed" dari Supabase:
-// "Listing / Selesai", "Listed", "Ended", "listing", "end", "selesai"
+// Exact match semua kemungkinan nilai status "ended/listed" di Supabase
+const LISTED_STATUSES = [
+  'listing / selesai',
+  'listing/selesai',
+  'listed',
+  'ended',
+  'end',
+  'selesai',
+];
+
 function isListed(s) {
-  return s.includes('listing') ||
-         s.includes('listed')  ||
-         s.includes('selesai') ||
-         s.includes('ended')   ||
-         s.includes('end');
+  const clean = s.trim().toLowerCase();
+  return LISTED_STATUSES.some(v => clean === v || clean.includes(v));
 }
 
-// Cover variasi "active" — TIDAK termasuk waitlist & listed
+// Aktif = bukan waitlist, bukan listed
 function isActive(s) {
-  if (s.includes('waitlist')) return false;
-  if (isListed(s))            return false;
-  return s.includes('active')    ||
-         s.includes('confirmed') ||
-         s.includes('potential') ||
-         s.includes('seed');
+  const clean = s.trim().toLowerCase();
+  if (clean.includes('waitlist')) return false;
+  if (isListed(clean))            return false;
+  return true; // semua status lain dianggap active
 }
 
 function getStatusClass(s) {
@@ -353,9 +356,15 @@ function getStatusClass(s) {
   const l = s.toLowerCase();
   if (l.includes('waitlist'))  return 'st-waitlist';
   if (isListed(l))             return 'st-listing';
-  if (l.includes('active') || l.includes('confirmed') || l.includes('potential') || l.includes('seed')) return 'st-active';
   if (l.includes('mint'))      return 'st-mint';
-  return 'st-default';
+  return 'st-active'; // active, confirmed, potential, seed, dll
+}
+
+// Tampilkan status yang lebih bersih di badge card
+function getStatusLabel(s) {
+  if (!s) return 'TBA';
+  if (isListed(s.toLowerCase())) return 'Ended';
+  return s;
 }
 
 function renderCards() {
@@ -416,6 +425,7 @@ function renderCards() {
       .join(' · ');
 
     const stCls = getStatusClass(item.status);
+    const stLabel = getStatusLabel(item.status);
 
     let tagsHTML = '';
     if (item.tags) {
@@ -452,7 +462,7 @@ function renderCards() {
           </div>
           <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0">
             ${logoHtml}
-            <span class="acard-status ${stCls}">${esc(item.status) || 'TBA'}</span>
+            <span class="acard-status ${stCls}">${stLabel}</span>
           </div>
         </div>
 
