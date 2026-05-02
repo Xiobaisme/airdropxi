@@ -493,12 +493,9 @@ function renderCards() {
           <div class="tasks-body">${esc(taskPreview || tasks.substring(0, 120))}</div>
         </div>
 
-        <a href="${esc(item.link || '#')}"
-           target="_blank"
-           rel="noopener noreferrer"
-           class="acard-btn"
-           onclick="event.stopPropagation()">⚡ ${t.cta}</a>
-
+        <a href="/guide/${encodeURIComponent(item.id)}"
+   class="acard-btn"
+   onclick="event.stopPropagation()">⚡ ${t.cta}</a>
       </div>`;
   }).join('');
 
