@@ -322,14 +322,12 @@
 <script src="js/app.js"></script>
 <script>
 <script>
-(async function() {
-  // Elemen-elemen yang diperlukan
+(function() {
   const container = document.getElementById('airdrop-container');
   const loadingDiv = document.getElementById('loading-state');
   const errorDiv = document.getElementById('error-state');
   const searchInput = document.getElementById('search-input');
   const filterBtns = document.querySelectorAll('.fbtn');
-
   let allProjects = [];
   let currentFilter = 'all';
   let currentSearch = '';
@@ -339,21 +337,17 @@
       const res = await fetch('/api/admin-airdrop');
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       let data = await res.json();
-      if (!Array.isArray(data)) throw new Error('Data bukan array');
+      if (!Array.isArray(data)) throw new Error('Data tidak valid');
       allProjects = data;
       updateStatsAndRender();
       if (loadingDiv) loadingDiv.style.display = 'none';
       if (container) container.style.display = 'grid';
       if (errorDiv) errorDiv.style.display = 'none';
     } catch (err) {
-      console.error(err);
       if (loadingDiv) loadingDiv.style.display = 'none';
-      if (errorDiv) {
-        errorDiv.style.display = 'block';
-        const errMsg = document.getElementById('error-msg');
-        if (errMsg) errMsg.innerText = err.message;
-      }
+      if (errorDiv) errorDiv.style.display = 'block';
       if (container) container.style.display = 'none';
+      console.error(err);
     }
   }
 
@@ -367,98 +361,53 @@
     const active = allProjects.filter(p => p.status === 'Active').length;
     const waitlist = allProjects.filter(p => p.status === 'Waitlist').length;
     const listing = allProjects.filter(p => p.status === 'Listing / Selesai').length;
-
-    const totalEl = document.getElementById('hs-total');
-    if (totalEl) totalEl.innerText = total;
-    const activeEl = document.getElementById('hs-active');
-    if (activeEl) activeEl.innerText = active;
-    const dashTotal = document.getElementById('dash-total');
-    if (dashTotal) dashTotal.innerText = total;
-    const dashActive = document.getElementById('dash-active');
-    if (dashActive) dashActive.innerText = active;
-    const dashWaitlist = document.getElementById('dash-waitlist');
-    if (dashWaitlist) dashWaitlist.innerText = waitlist;
-    const dashListing = document.getElementById('dash-listing');
-    if (dashListing) dashListing.innerText = listing;
+    if (document.getElementById('hs-total')) document.getElementById('hs-total').innerText = total;
+    if (document.getElementById('hs-active')) document.getElementById('hs-active').innerText = active;
+    if (document.getElementById('dash-total')) document.getElementById('dash-total').innerText = total;
+    if (document.getElementById('dash-active')) document.getElementById('dash-active').innerText = active;
+    if (document.getElementById('dash-waitlist')) document.getElementById('dash-waitlist').innerText = waitlist;
+    if (document.getElementById('dash-listing')) document.getElementById('dash-listing').innerText = listing;
   }
 
   function renderCards() {
     if (!container) return;
-    let filtered = allProjects.filter(proj => {
-      // Filter status
+    let filtered = allProjects.filter(p => {
       if (currentFilter !== 'all') {
-        if (currentFilter === 'active' && proj.status !== 'Active') return false;
-        if (currentFilter === 'waitlist' && proj.status !== 'Waitlist') return false;
-        if (currentFilter === 'listing' && proj.status !== 'Listing / Selesai') return false;
+        if (currentFilter === 'active' && p.status !== 'Active') return false;
+        if (currentFilter === 'waitlist' && p.status !== 'Waitlist') return false;
+        if (currentFilter === 'listing' && p.status !== 'Listing / Selesai') return false;
       }
-      // Search
-      if (currentSearch) {
-        const searchLower = currentSearch.toLowerCase();
-        return (proj.name || '').toLowerCase().includes(searchLower);
-      }
+      if (currentSearch && !p.name.toLowerCase().includes(currentSearch.toLowerCase())) return false;
       return true;
     });
-
     if (filtered.length === 0) {
-      container.innerHTML = '<div style="text-align:center;padding:2rem;">Tidak ada airdrop sesuai filter.</div>';
+      container.innerHTML = '<div style="text-align:center;padding:2rem;">Tidak ada airdrop</div>';
       return;
     }
-
-    container.innerHTML = filtered.map(proj => {
-      let statusClass = '';
-      if (proj.status === 'Active') statusClass = 'st-active';
-      else if (proj.status === 'Waitlist') statusClass = 'st-waitlist';
-      else statusClass = 'st-default';
-      const desc = (proj.descriptionID || proj.descriptionEN || 'Tidak ada deskripsi').substring(0, 100);
-      return `
-        <div class="dash-card" data-id="${proj.id}" data-status="${(proj.status || '').toLowerCase()}">
-          <div class="dash-label">${escapeHtml(proj.name)}</div>
-          <div class="dash-num" style="font-size:0.8rem; display:flex; justify-content:space-between; align-items:center;">
-            <span class="status-badge ${statusClass}">${escapeHtml(proj.status || 'Unknown')}</span>
-            <span class="funds">${proj.RaisedID ? '💰 '+escapeHtml(proj.RaisedID) : ''}</span>
-          </div>
-          <div class="dash-ico" style="background:rgba(0,232,122,.07); font-size:12px; color:var(--text2); margin-top:10px;">
-            ${escapeHtml(desc)}...
-          </div>
-          <a href="guide.html?id=${proj.id}" class="btn-garap" style="display:inline-block; margin-top:16px; background:var(--accent); color:#000; padding:6px 14px; border-radius:20px; font-weight:bold; text-decoration:none; font-size:12px;">📘 Garap Sekarang →</a>
+    container.innerHTML = filtered.map(p => `
+      <div class="dash-card">
+        <div class="dash-label">${escapeHtml(p.name)}</div>
+        <div class="dash-num">
+          <span class="status-badge ${p.status === 'Active' ? 'st-active' : (p.status === 'Waitlist' ? 'st-waitlist' : 'st-default')}">${escapeHtml(p.status || 'Unknown')}</span>
+          ${p.RaisedID ? `<span>💰 ${escapeHtml(p.RaisedID)}</span>` : ''}
         </div>
-      `;
-    }).join('');
+        <div class="dash-ico">${escapeHtml((p.descriptionID || p.descriptionEN || '').substring(0, 100))}...</div>
+        <a href="guide.html?id=${p.id}" class="btn-garap">📘 Garap Sekarang →</a>
+      </div>
+    `).join('');
   }
 
-  function setFilter(btn, filter) {
-    currentFilter = filter;
-    filterBtns.forEach(b => b.classList.remove('active'));
-    btn.classList.add('active');
-    renderCards();
-  }
-
-  function handleSearch() {
-    currentSearch = searchInput.value;
-    renderCards();
-  }
-
-  // Event listeners
-  if (searchInput) searchInput.addEventListener('input', handleSearch);
-  if (filterBtns.length) {
-    filterBtns.forEach(btn => {
-      btn.addEventListener('click', (e) => {
-        const filter = btn.getAttribute('data-filter');
-        if (filter) setFilter(btn, filter);
-      });
+  if (searchInput) searchInput.addEventListener('input', () => { currentSearch = searchInput.value; renderCards(); });
+  if (filterBtns.length) filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      currentFilter = btn.getAttribute('data-filter');
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      renderCards();
     });
-  }
+  });
 
-  function escapeHtml(str) {
-    if (!str) return '';
-    return str.replace(/[&<>]/g, function(m) {
-      if (m === '&') return '&amp;';
-      if (m === '<') return '&lt;';
-      if (m === '>') return '&gt;';
-      return m;
-    });
-  }
-
+  function escapeHtml(str) { return String(str || '').replace(/[&<>]/g, m => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;' }[m])); }
   fetchData();
 })();
 </script>
