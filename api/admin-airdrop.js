@@ -1,6 +1,6 @@
 // api/admin-airdrop.js
-// CRUD handler untuk tabel airdrops — khusus ADMIN
-// FIX: error handling object, published flag, error serialization
+// airdrops = data simpel (index)
+// proyek   = data lengkap (guide/detail)
 
 module.exports = async function handler(req, res) {
   const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
@@ -20,11 +20,9 @@ module.exports = async function handler(req, res) {
 
   const { id } = req.query;
 
-  // Helper: serialize error Supabase ke string yang readable
   function serializeError(val) {
     if (!val) return 'Unknown error';
     if (typeof val === 'string') return val;
-    // Supabase error object punya .message, .details, .hint, .code
     if (val.message) {
       let msg = val.message;
       if (val.details) msg += ` | ${val.details}`;
@@ -35,12 +33,58 @@ module.exports = async function handler(req, res) {
     return JSON.stringify(val);
   }
 
-  // ── GET (admin: semua data, tanpa filter published) ───────
+  // Payload simpel untuk tabel airdrops (index)
+  function buildAirdropsPayload(p) {
+    return {
+      name:          p.name          || null,
+      status:        p.status        || null,
+      published:     p.published !== undefined ? Boolean(p.published) : false,
+      link:          p.link          || null,
+      tags:          p.tags          || null,
+      RaisedID:      p.RaisedID      || null,
+      RaisedEN:      p.RaisedEN      || null,
+      tasksID:       p.tasksID       || null,
+      tasksEN:       p.tasksEN       || null,
+      logo_url:      p.logo_url      || null,
+      testnet_links: p.testnet_links || null,
+    };
+  }
+
+  // Payload lengkap untuk tabel proyek (guide/detail)
+  function buildProyekPayload(p) {
+    return {
+      name:          p.name          || null,
+      status:        p.status        || null,
+      published:     p.published !== undefined ? Boolean(p.published) : false,
+      link:          p.link          || null,
+      tags:          p.tags          || null,
+      RaisedID:      p.RaisedID      || null,
+      RaisedEN:      p.RaisedEN      || null,
+      tasksID:       p.tasksID       || null,
+      tasksEN:       p.tasksEN       || null,
+      descriptionID: p.descriptionID || null,
+      descriptionEN: p.descriptionEN || null,
+      ticker:        p.ticker        || null,
+      total_supply:  p.total_supply  || null,
+      network:       p.network       || null,
+      tge_date:      p.tge_date      || null,
+      logo_url:      p.logo_url      || null,
+      twitter:       p.twitter       || null,
+      discord:       p.discord       || null,
+      telegram:      p.telegram      || null,
+      faqID:         p.faqID         || null,
+      faqEN:         p.faqEN         || null,
+      testnet_links: p.testnet_links || null,
+    };
+  }
+
+  // ── GET ──────────────────────────────────────────────
   if (req.method === 'GET') {
     try {
+      // Admin GET baca dari proyek (data lengkap) untuk form edit
       const endpoint = id
-        ? `${BASE}/airdrops?id=eq.${encodeURIComponent(id)}&limit=1`
-        : `${BASE}/airdrops?select=*&order=created_at.desc`;
+        ? `${BASE}/proyek?id=eq.${encodeURIComponent(id)}&limit=1`
+        : `${BASE}/proyek?select=*&order=created_at.desc`;
 
       const r = await fetch(endpoint, { headers: H });
       const data = await r.json();
@@ -59,72 +103,80 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // ── POST ─────────────────────────────────────────────────
+  // ── POST ─────────────────────────────────────────────
   if (req.method === 'POST') {
     if (!req.body?.name)
       return res.status(400).json({ error: 'Field "name" wajib diisi' });
 
-    const data = buildPayload(req.body);
-
     try {
-      const r1 = await fetch(`${BASE}/airdrops`, {
-        method: 'POST', headers: H, body: JSON.stringify(data),
+      // 1. Insert ke proyek dulu (data lengkap) — dapat ID
+      const r1 = await fetch(`${BASE}/proyek`, {
+        method: 'POST', headers: H,
+        body: JSON.stringify(buildProyekPayload(req.body)),
       });
-      const result = await r1.json();
+      const result1 = await r1.json();
+      if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result1) });
 
-      if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result) });
+      const newId = Array.isArray(result1) ? result1[0]?.id : result1?.id;
+      if (!newId) throw new Error('Gagal dapat ID setelah insert ke proyek');
 
-      const newId = Array.isArray(result) ? result[0]?.id : result?.id;
-      if (!newId) throw new Error('Gagal dapat ID setelah insert');
+      // 2. Insert ke airdrops (data simpel) pakai ID yang sama
+      const airdropsPayload = { ...buildAirdropsPayload(req.body), id: newId };
+      fetch(`${BASE}/airdrops`, {
+        method: 'POST', headers: H,
+        body: JSON.stringify(airdropsPayload),
+      }).catch(e => console.warn('Sync airdrops gagal:', e.message));
 
-      return res.status(201).json(Array.isArray(result) ? result : [result]);
+      return res.status(201).json(Array.isArray(result1) ? result1 : [result1]);
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
 
-  // ── PATCH ────────────────────────────────────────────────
+  // ── PATCH ────────────────────────────────────────────
   if (req.method === 'PATCH') {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
-    if (!req.body || !Object.keys(req.body).length)
-      return res.status(400).json({ error: 'Request body kosong' });
-
-    const data = buildPayload(req.body);
 
     try {
-      const r1 = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, {
-        method: 'PATCH', headers: H, body: JSON.stringify(data),
+      // 1. Update proyek (data lengkap)
+      const r1 = await fetch(`${BASE}/proyek?id=eq.${encodeURIComponent(id)}`, {
+        method: 'PATCH', headers: H,
+        body: JSON.stringify(buildProyekPayload(req.body)),
       });
 
       let result = null;
       const text = await r1.text();
-      if (text) {
-        try { result = JSON.parse(text); } catch(e) { result = null; }
-      }
+      if (text) { try { result = JSON.parse(text); } catch(e) { result = null; } }
 
-      if (!r1.ok) {
-        return res.status(r1.status).json({ error: serializeError(result || text) });
-      }
+      if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result || text) });
 
-      const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...data }]);
+      // 2. Update airdrops (data simpel) — best effort
+      fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, {
+        method: 'PATCH', headers: H,
+        body: JSON.stringify(buildAirdropsPayload(req.body)),
+      }).catch(e => console.warn('Sync airdrops PATCH gagal:', e.message));
+
+      const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...buildProyekPayload(req.body) }]);
       return res.status(200).json(updated);
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
 
-  // ── DELETE ───────────────────────────────────────────────
+  // ── DELETE ───────────────────────────────────────────
   if (req.method === 'DELETE') {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
     try {
-      const r1 = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, {
-        method: 'DELETE', headers: H,
-      });
+      // Hapus dari kedua tabel sekaligus
+      const [r1, r2] = await Promise.all([
+        fetch(`${BASE}/proyek?id=eq.${encodeURIComponent(id)}`,   { method: 'DELETE', headers: H }),
+        fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: H }),
+      ]);
 
       if (!r1.ok) {
-        const errData = await r1.json().catch(() => ({}));
-        return res.status(r1.status).json({ error: serializeError(errData) });
+        const err = await r1.json().catch(() => ({}));
+        return res.status(r1.status).json({ error: serializeError(err) });
       }
 
       return res.status(200).json({ success: true });
@@ -136,30 +188,3 @@ module.exports = async function handler(req, res) {
   res.setHeader('Allow', ['GET','POST','PATCH','DELETE']);
   return res.status(405).json({ error: `Method ${req.method} tidak diizinkan` });
 };
-
-function buildPayload(p) {
-  return {
-    name:           p.name           || null,
-    status:         p.status         || null,
-    published:      p.published !== undefined ? Boolean(p.published) : false,
-    link:           p.link           || null,
-    tags:           p.tags           || null,
-    RaisedID:       p.RaisedID       || null,
-    RaisedEN:       p.RaisedEN       || null,
-    tasksID:        p.tasksID        || null,
-    tasksEN:        p.tasksEN        || null,
-    descriptionID:  p.descriptionID  || null,
-    descriptionEN:  p.descriptionEN  || null,
-    ticker:         p.ticker         || null,
-    total_supply:   p.total_supply   || null,
-    network:        p.network        || null,
-    tge_date:       p.tge_date       || null,
-    logo_url:       p.logo_url       || null,
-    twitter:        p.twitter        || null,
-    discord:        p.discord        || null,
-    telegram:       p.telegram       || null,
-    faqID:          p.faqID          || null,
-    faqEN:          p.faqEN          || null,
-    testnet_links:  p.testnet_links  || null,
-  };
-}
