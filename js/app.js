@@ -12,7 +12,7 @@ let allData = [], currentLang = 'id', activeFilter = 'all';
 
 async function init() {
   try {
-    const res = await fetch('/api/admin-airdrop');
+    const res = await fetch('/api/airdrops');
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
     if (!Array.isArray(data)) throw new Error('Data tidak valid');
