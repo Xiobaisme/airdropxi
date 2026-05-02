@@ -2,34 +2,44 @@
 // A. CORE CONFIG & INIT
 // ==========================================
 
-let sb, allData = [], currentLang = 'id', currentFilter = 'all', activeFilter = 'all';
+let allData = [], currentLang = 'id', activeFilter = 'all';
+
+// Restore bahasa dari localStorage sebelum apapun
+(function () {
+  const saved = localStorage.getItem('axi-lang');
+  if (saved === 'en' || saved === 'id') currentLang = saved;
+})();
 
 async function init() {
   try {
     const res = await fetch('/api/airdrops');
     if (!res.ok) throw new Error('Failed to fetch data');
     const data = await res.json();
-    allData = data || [];
+    allData = Array.isArray(data) ? data : [];
     updateDash();
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('airdrop-container').style.display = 'grid';
+    // Set bahasa dari saved state — TIDAK reset ke 'id' setiap kali
     setLang(currentLang);
   } catch (e) {
     document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('error-state').style.display = 'block';
-    document.getElementById('error-msg').textContent = e.message;
+    const errState = document.getElementById('error-state');
+    if (errState) errState.style.display = 'block';
+    const errMsg = document.getElementById('error-msg');
+    if (errMsg) errMsg.textContent = e.message;
   }
 }
 
 // ==========================================
-// B. THEME TOGGLE (DARK / LIGHT)
+// B. THEME TOGGLE
 // ==========================================
 function toggleTheme() {
   const html = document.documentElement;
   const isDark = html.getAttribute('data-theme') === 'dark';
-  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-  document.getElementById('themeToggle').textContent = isDark ? '🌙' : '☀️';
-  localStorage.setItem('axi-theme', isDark ? 'light' : 'dark');
+  const next = isDark ? 'light' : 'dark';
+  html.setAttribute('data-theme', next);
+  document.getElementById('themeToggle').textContent = next === 'dark' ? '☀️' : '🌙';
+  localStorage.setItem('axi-theme', next);
 }
 
 (function () {
@@ -42,14 +52,12 @@ function toggleTheme() {
 // ==========================================
 // C. VISUAL EFFECTS (CANVAS & CURSOR)
 // ==========================================
-const cur = document.getElementById('cursor');
+const cur  = document.getElementById('cursor');
 const ring = document.getElementById('cursor-ring');
 
 document.addEventListener('mousemove', e => {
-  cur.style.left = e.clientX + 'px';
-  cur.style.top  = e.clientY + 'px';
-  ring.style.left = e.clientX + 'px';
-  ring.style.top  = e.clientY + 'px';
+  if (cur)  { cur.style.left  = e.clientX + 'px'; cur.style.top  = e.clientY + 'px'; }
+  if (ring) { ring.style.left = e.clientX + 'px'; ring.style.top = e.clientY + 'px'; }
 });
 
 function bindHoverEffects() {
@@ -63,13 +71,15 @@ bindHoverEffects();
 document.addEventListener('mousemove', e => {
   document.querySelectorAll('.acard').forEach(card => {
     const r = card.getBoundingClientRect();
-    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width * 100) + '%');
-    card.style.setProperty('--my', ((e.clientY - r.top) / r.height * 100) + '%');
+    card.style.setProperty('--mx', ((e.clientX - r.left) / r.width  * 100) + '%');
+    card.style.setProperty('--my', ((e.clientY - r.top)  / r.height * 100) + '%');
   });
 });
 
 (function () {
-  const c = document.getElementById('bg-canvas'), ctx = c.getContext('2d');
+  const c = document.getElementById('bg-canvas');
+  if (!c) return;
+  const ctx = c.getContext('2d');
   let W, H, t = 0;
   const CELL = 64;
   function resize() { W = c.width = innerWidth; H = c.height = innerHeight; }
@@ -100,7 +110,9 @@ document.addEventListener('mousemove', e => {
 })();
 
 const observer = new IntersectionObserver(entries => {
-  entries.forEach(e => { if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); } });
+  entries.forEach(e => {
+    if (e.isIntersecting) { e.target.classList.add('visible'); observer.unobserve(e.target); }
+  });
 }, { threshold: .1 });
 document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 
@@ -109,7 +121,7 @@ document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
 // ==========================================
 const T = {
   id: {
-    badge:'🔥Peluang Langsung',
+    badge:'🔥 Peluang Langsung',
     title:'Daftar Airdrop Crypto Terbaru & Potensial<br><span>Sebelum Semua Orang</span>',
     sub:'Peluang airdrop yang dikurasi dengan data terstruktur dan pengoptimalan snapshot.',
     btn1:'Explore Airdrops', btn2:'Guide & Tutorial',
@@ -132,7 +144,16 @@ const T = {
     aiGreet:'Halo! Saya <strong>AirdropXI Bot</strong> 👋<br><br>Tanya apa aja soal airdrop, Web3, atau crypto. Saya siap bantu! (AI, bisa salah ya 🙏)',
     aiQ1:'🔥 Apa Itu airdrop', aiQ2:'📖 Cara ikut', aiQ3:'🌐 Web3', aiQ4:'🗿 jangan diklik',
     aiP1:'Apa Itu airdrop', aiP2:'Cara ikut airdrop untuk pemula?', aiP3:'Apa itu Web3?', aiP4:'aku ganteng apa jelek?',
-    aiPlaceholder:'Tanya tentang airdrop, Web3, crypto...'
+    aiPlaceholder:'Tanya tentang airdrop, Web3, crypto...',
+    docsLabel:'BARU! Web3 Docs Lengkap →', docsSub:'DeFi · GameFi · Staking · NFT · Airdrop Guide',
+    docsCta:'Dokumentasi Lengkap', docsTitle:'Mau Belajar Lebih Dalam?',
+    docsDesc:'Web3 · DeFi · GameFi · NFT · Staking · DEX · CEX · Keamanan · Glosarium', docsBtnTxt:'Buka Docs →',
+    footerDyor:'⚠️ DYOR — Semua informasi hanya untuk edukasi. Selalu lakukan riset sendiri sebelum berinvestasi.',
+    footerDesc:'Peluang airdrop yang dikurasi dengan data terstruktur.',
+    footerNav:'Navigate', footerContact:'Contact', footerCopy:'© 2025 AirdropXI — Stay Safe & Keep Grinding',
+    aiLabel:'AI Agent', fcLatestTitle:'DROP TERBARU', fcActiveNow:'Aktif Sekarang',
+    fcRaisedTitle:'TOTAL DANA', fcAcross:'Dari semua proyek',
+    hsTotalL:'Total Airdrops', hsActiveL:'Aktif Sekarang',
   },
   en: {
     badge:'🔥 Live Opportunities',
@@ -158,46 +179,114 @@ const T = {
     aiGreet:'Hello! I\'m <strong>AirdropXI Bot</strong> 👋<br><br>Ask me anything about airdrops, Web3, or crypto. I\'m here to help! (AI, can make mistakes 🙏)',
     aiQ1:'🔥 What is airdrop', aiQ2:'📖 How to join', aiQ3:'🌐 Web3', aiQ4:'🗿 don\'t click',
     aiP1:'What is an airdrop?', aiP2:'How to join an airdrop for beginners?', aiP3:'What is Web3?', aiP4:'am I handsome or ugly?',
-    aiPlaceholder:'Ask about airdrops, Web3, crypto...'
+    aiPlaceholder:'Ask about airdrops, Web3, crypto...',
+    docsLabel:'NEW! Complete Web3 Docs →', docsSub:'DeFi · GameFi · Staking · NFT · Airdrop Guide',
+    docsCta:'Full Documentation', docsTitle:'Want to Learn More?',
+    docsDesc:'Web3 · DeFi · GameFi · NFT · Staking · DEX · CEX · Security · Glossary', docsBtnTxt:'Open Docs →',
+    footerDyor:'⚠️ DYOR — All information is for educational purposes only. Always do your own research.',
+    footerDesc:'Curated airdrop opportunities with structured data and snapshot optimization.',
+    footerNav:'Navigate', footerContact:'Contact', footerCopy:'© 2025 AirdropXI — Stay Safe & Keep Grinding',
+    aiLabel:'AI Agent', fcLatestTitle:'LATEST DROP', fcActiveNow:'Active Now',
+    fcRaisedTitle:'TOTAL RAISED', fcAcross:'Across all projects',
+    hsTotalL:'Total Airdrops', hsActiveL:'Active Now',
   }
 };
 
 function setLang(l) {
+  if (l !== 'id' && l !== 'en') l = 'id';
   currentLang = l;
-  document.getElementById('btn-id').className = 'lang-btn' + (l === 'id' ? ' active' : '');
-  document.getElementById('btn-en').className = 'lang-btn' + (l === 'en' ? ' active' : '');
+
+  // Simpan ke localStorage supaya persist saat klik card/navigasi
+  localStorage.setItem('axi-lang', l);
+
+  // Update tombol aktif (desktop + mobile)
+  ['btn-id','btn-en','m-btn-id','m-btn-en'].forEach(id => {
+    const el = document.getElementById(id);
+    if (!el) return;
+    const isActive = (id.includes('-id') && l === 'id') || (id.includes('-en') && l === 'en');
+    el.className = 'lang-btn' + (isActive ? ' active' : '');
+  });
+
   const t = T[l];
-  document.getElementById('h-badge').textContent    = t.badge;
-  document.getElementById('h-title').innerHTML      = t.title;
-  document.getElementById('h-sub').textContent      = t.sub;
-  document.getElementById('h-btn1').textContent     = t.btn1;
-  document.getElementById('h-btn2').textContent     = t.btn2;
-  document.getElementById('t-dash').textContent     = t.tDash;
-  document.getElementById('t-title').textContent    = t.tTitle;
-  document.getElementById('t-sub').textContent      = t.tSub;
-  document.getElementById('lbl-total').textContent  = t.totalL;
-  document.getElementById('lbl-active').textContent = t.activeL;
-  document.getElementById('lbl-ended').textContent  = t.endedL;
-  document.getElementById('fb-all').textContent     = t.fbAll;
-  document.getElementById('g-tag').textContent      = t.gTag;
-  document.getElementById('g-title').textContent    = t.gTitle;
-  document.getElementById('g-sub').textContent      = t.gSub;
-  document.getElementById('g-prep-title').textContent = t.gPrepT;
-  document.getElementById('g-prep-desc').textContent  = t.gPrepD;
-  document.getElementById('g-prep-1').textContent = t.gP1;
-  document.getElementById('g-prep-2').textContent = t.gP2;
-  document.getElementById('g-prep-3').textContent = t.gP3;
-  document.getElementById('g-prep-4').textContent = t.gP4;
-  document.getElementById('g-rule-title').textContent = t.gRuleT;
-  document.getElementById('g-rule-desc').textContent  = t.gRuleD;
-  document.getElementById('g-rule-1').textContent = t.gR1;
-  document.getElementById('g-rule-2').textContent = t.gR2;
-  document.getElementById('g-rule-3').textContent = t.gR3;
-  document.getElementById('g-st-1').textContent   = t.gS1;
-  document.getElementById('g-st-2').textContent   = t.gS2;
-  document.getElementById('g-st-3').textContent   = t.gS3;
+
+  // Hero
+  setEl('h-badge',   t.badge);
+  setElHTML('h-title', t.title);
+  setEl('h-sub',     t.sub);
+  setEl('h-btn1',    t.btn1);
+  setEl('h-btn2',    t.btn2);
+  setEl('h-docs-label', t.docsLabel);
+  setEl('h-docs-sub',   t.docsSub);
+
+  // Float cards
+  setEl('fc-latest-title', t.fcLatestTitle);
+  setEl('fc-active-now',   t.fcActiveNow);
+  setEl('fc-raised-title', t.fcRaisedTitle);
+  setEl('fc-across',       t.fcAcross);
+
+  // Hero stats labels
+  setEl('hs-total-l', t.hsTotalL);
+  setEl('hs-active-l', t.hsActiveL);
+
+  // Dashboard
+  setEl('t-dash',      t.tDash);
+  setEl('t-title',     t.tTitle);
+  setEl('t-sub',       t.tSub);
+  setEl('lbl-total',   t.totalL);
+  setEl('lbl-active',  t.activeL);
+  setEl('lbl-ended',   t.endedL);
+  setEl('fb-all',      t.fbAll);
+
+  // Guide
+  setEl('g-tag',        t.gTag);
+  setEl('g-title',      t.gTitle);
+  setEl('g-sub',        t.gSub);
+  setEl('g-prep-title', t.gPrepT);
+  setEl('g-prep-desc',  t.gPrepD);
+  setEl('g-prep-1',     t.gP1);
+  setEl('g-prep-2',     t.gP2);
+  setEl('g-prep-3',     t.gP3);
+  setEl('g-prep-4',     t.gP4);
+  setEl('g-rule-title', t.gRuleT);
+  setEl('g-rule-desc',  t.gRuleD);
+  setEl('g-rule-1',     t.gR1);
+  setEl('g-rule-2',     t.gR2);
+  setEl('g-rule-3',     t.gR3);
+  setEl('g-st-1',       t.gS1);
+  setEl('g-st-2',       t.gS2);
+  setEl('g-st-3',       t.gS3);
+
+  // Docs CTA
+  setEl('docs-cta-tag',   t.docsCta);
+  setEl('docs-cta-title', t.docsTitle);
+  setEl('docs-cta-desc',  t.docsDesc);
+  setEl('docs-cta-btn',   t.docsBtnTxt);
+
+  // Footer
+  setEl('footer-dyor',   t.footerDyor);
+  setEl('footer-desc',   t.footerDesc);
+  setEl('footer-nav-h',  t.footerNav);
+  setEl('footer-comm-h', t.footerContact);
+  setEl('footer-copy',   t.footerCopy);
+  setEl('f-explore',     t.btn1);
+  setEl('f-guide',       t.btn2);
+
+  // AI
+  setEl('nav-ai-label',  t.aiLabel);
   applyAILang(l);
+
+  // Re-render cards dengan bahasa yang benar
   renderCards();
+}
+
+function setEl(id, val) {
+  const el = document.getElementById(id);
+  if (el && val !== undefined) el.textContent = val;
+}
+
+function setElHTML(id, val) {
+  const el = document.getElementById(id);
+  if (el && val !== undefined) el.innerHTML = val;
 }
 
 function applyAILang(l) {
@@ -209,7 +298,7 @@ function applyAILang(l) {
   const qKeys = ['aiQ1','aiQ2','aiQ3','aiQ4'];
   const pKeys = ['aiP1','aiP2','aiP3','aiP4'];
   qbtns.forEach((btn, i) => {
-    if (qKeys[i]) btn.innerHTML = t[qKeys[i]];
+    if (qKeys[i]) btn.innerHTML  = t[qKeys[i]];
     if (pKeys[i]) btn.dataset.prompt = t[pKeys[i]];
   });
   const input = document.getElementById('aiInput');
@@ -223,90 +312,126 @@ function setFilter(el, f) {
   document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   activeFilter = f;
-  filterCards();
+  renderCards();
 }
 
+// Dipanggil dari oninput di search box
 function filterCards() {
-  const q = document.getElementById('search-input').value.toLowerCase();
-  document.querySelectorAll('.acard').forEach(card => {
-    const name   = (card.dataset.name   || '').toLowerCase();
-    const status = (card.dataset.status || '').toLowerCase();
-    const matchQ = !q || name.includes(q);
-    let matchF = true;
-    if (activeFilter === 'active')   matchF = status.includes('active');
-    if (activeFilter === 'waitlist') matchF = status.includes('waitlist');
-    if (activeFilter === 'listing')  matchF = status.includes('listing') || status.includes('end') || status.includes('selesai');
-    card.style.display = (matchQ && matchF) ? '' : 'none';
-  });
+  renderCards();
 }
 
-function esc(s) { return String(s || '').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;'); }
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
 
 function getStatusClass(s) {
   if (!s) return 'st-default';
   const l = s.toLowerCase();
-  if (l.includes('active'))   return 'st-active';
-  if (l.includes('waitlist')) return 'st-waitlist';
-  if (l.includes('mint'))     return 'st-mint';
+  if (l.includes('active'))                                         return 'st-active';
+  if (l.includes('waitlist'))                                       return 'st-waitlist';
+  if (l.includes('mint'))                                           return 'st-mint';
   if (l.includes('listing') || l.includes('end') || l.includes('selesai')) return 'st-listing';
   return 'st-default';
 }
 
-// ==========================================
-// ✅ PERUBAHAN UTAMA: renderCards
-// Card klik → project-detail.html?id=xxx
-// Tombol "Garap" tetap ke external link
-// ==========================================
 function renderCards() {
   const cont = document.getElementById('airdrop-container');
+  if (!cont) return;
   const t = T[currentLang];
-  cont.innerHTML = '';
+  const q = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
 
-  if (!allData.length) {
+  // Filter data
+  const filtered = allData.filter(item => {
+    // Filter pencarian
+    if (q) {
+      const name   = (item.name   || '').toLowerCase();
+      const tags   = (item.tags   || '').toLowerCase();
+      const ticker = (item.ticker || '').toLowerCase();
+      if (!name.includes(q) && !tags.includes(q) && !ticker.includes(q)) return false;
+    }
+    // Filter status
+    if (activeFilter !== 'all') {
+      const s = (item.status || '').toLowerCase();
+      if (activeFilter === 'active'   && !s.includes('active'))                                         return false;
+      if (activeFilter === 'waitlist' && !s.includes('waitlist'))                                       return false;
+      if (activeFilter === 'listing'  && !s.includes('listing') && !s.includes('end') && !s.includes('selesai')) return false;
+    }
+    return true;
+  });
+
+  if (!filtered.length) {
     cont.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;border:1px dashed var(--border);border-radius:var(--radius);color:var(--text2);font-family:'JetBrains Mono',monospace">${t.empty}</div>`;
     return;
   }
 
+  // Update float cards dari data pertama
   const first = allData[0];
   if (first) {
-    document.getElementById('fc-latest').textContent = first.name || '—';
-    document.getElementById('fc-raised').textContent = first.RaisedEN || first.RaisedID || 'N/A';
+    const fcLatest = document.getElementById('fc-latest');
+    const fcRaised = document.getElementById('fc-raised');
+    if (fcLatest) fcLatest.textContent = first.name || '—';
+    if (fcRaised) fcRaised.textContent = first.RaisedEN || first.RaisedID || 'N/A';
   }
 
-  allData.forEach((item, i) => {
-    const raised  = currentLang === 'id' ? (item.RaisedID || t.unknown) : (item.RaisedEN || t.unknown);
-    const tasks   = currentLang === 'id' ? (item.tasksID  || t.unknown) : (item.tasksEN  || t.unknown);
-    const stCls   = getStatusClass(item.status);
+  cont.innerHTML = filtered.map((item, i) => {
+    const raised = currentLang === 'id'
+      ? (item.RaisedID || item.RaisedEN || t.unknown)
+      : (item.RaisedEN || item.RaisedID || t.unknown);
+
+    const tasks = currentLang === 'id'
+      ? (item.tasksID || item.tasksEN || t.unknown)
+      : (item.tasksEN || item.tasksID || t.unknown);
+
+    // Preview tasks: 2 baris pertama, buang prefix angka & separator
+    const taskPreview = tasks
+      .split('\n')
+      .map(l => l.trim())
+      .filter(l => l && !/^(tip:|💡|Q:|A:)/i.test(l))
+      .slice(0, 2)
+      .map(l => l.replace(/^(\d+[\.\)]\s*)/, '').split(' | ')[0])
+      .join(' · ');
+
+    const stCls = getStatusClass(item.status);
 
     let tagsHTML = '';
     if (item.tags) {
-      try {
-        tagsHTML = String(item.tags).split(',').map(x => `<span class="atag">${x.trim()}</span>`).join('');
-      } catch(e) {}
+      tagsHTML = String(item.tags)
+        .split(',')
+        .map(x => `<span class="atag">${esc(x.trim())}</span>`)
+        .join('');
     }
 
-    const prog = 20 + Math.floor(Math.random() * 75);
+    const prog = item._prog || (item._prog = 20 + Math.floor(Math.random() * 75));
 
-    // Gunakan id jika ada, fallback ke name untuk query param
-    const detailParam = item.id
-      ? `id=${encodeURIComponent(item.id)}`
-      : `name=${encodeURIComponent(item.name || '')}`;
-    const detailUrl = `project-detail.html?${detailParam}`;
+    // ── URL ke guide — pakai /guide/[id] ──
+    const guideUrl = `/guide/${encodeURIComponent(item.id)}`;
 
-    cont.insertAdjacentHTML('beforeend', `
-      <div class="acard reveal" 
-           data-name="${esc(item.name)}" 
+    // Logo
+    const logoHtml = item.logo_url
+      ? `<img src="${esc(item.logo_url)}" alt="${esc(item.name)}"
+              style="width:38px;height:38px;border-radius:9px;object-fit:cover;border:1px solid var(--border);background:var(--surface2)"
+              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
+        + `<div style="display:none;width:38px;height:38px;border-radius:9px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.18);align-items:center;justify-content:center;font-size:1.1rem">${getIcon(item.tags)}</div>`
+      : `<div style="width:38px;height:38px;border-radius:9px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.18);display:flex;align-items:center;justify-content:center;font-size:1.1rem">${getIcon(item.tags)}</div>`;
+
+    return `
+      <div class="acard reveal"
+           data-name="${esc(item.name)}"
            data-status="${esc(item.status)}"
            style="animation-delay:${i * .05}s;cursor:pointer"
-           onclick="window.location.href='${detailUrl}'">
+           onclick="window.location.href='${guideUrl}'">
 
         <div class="acard-top">
-          <div>
+          <div style="flex:1;min-width:0">
             <div class="acard-name">${esc(item.name) || 'Unknown'}</div>
             <div class="acard-tags" style="margin-top:7px">${tagsHTML}</div>
           </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px">
-            <div class="acard-icon">${getIcon(item.tags)}</div>
+          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0">
+            ${logoHtml}
             <span class="acard-status ${stCls}">${esc(item.status) || 'TBA'}</span>
           </div>
         </div>
@@ -325,19 +450,19 @@ function renderCards() {
         </div>
 
         <div class="acard-tasks">
-          <div class="tasks-lbl">${t.tasks}</div>
-          <div class="tasks-body">${esc(tasks)}</div>
+          <div class="tasks-lbl">TASKS</div>
+          <div class="tasks-body">${esc(taskPreview || tasks.substring(0, 120))}</div>
         </div>
 
         <!-- Tombol garap: stopPropagation supaya tidak trigger onclick card -->
-        <a href="${esc(item.link || '#')}" 
-           target="_blank" 
-           rel="noopener noreferrer" 
+        <a href="${esc(item.link || '#')}"
+           target="_blank"
+           rel="noopener noreferrer"
            class="acard-btn"
            onclick="event.stopPropagation()">⚡ ${t.cta}</a>
 
-      </div>`);
-  });
+      </div>`;
+  }).join('');
 
   document.querySelectorAll('.acard.reveal').forEach(el => observer.observe(el));
   bindHoverEffects();
@@ -346,12 +471,12 @@ function renderCards() {
 function getIcon(tags) {
   if (!tags) return '🪂';
   const t = String(tags).toLowerCase();
-  if (t.includes('gaming'))    return '🎮';
-  if (t.includes('defi'))      return '💰';
-  if (t.includes('nft'))       return '🖼';
-  if (t.includes('social'))    return '💬';
-  if (t.includes('blockchain'))return '⛓';
-  if (t.includes('ai'))        return '🤖';
+  if (t.includes('gaming'))     return '🎮';
+  if (t.includes('defi'))       return '💰';
+  if (t.includes('nft'))        return '🖼';
+  if (t.includes('social'))     return '💬';
+  if (t.includes('blockchain')) return '⛓';
+  if (t.includes('ai'))         return '🤖';
   return '⚡';
 }
 
@@ -373,7 +498,9 @@ function updateDash() {
 
 function animateNum(id, target) {
   const el = document.getElementById(id);
-  let cur = 0, step = Math.ceil(target / 30);
+  if (!el) return;
+  let cur = 0;
+  const step = Math.max(1, Math.ceil(target / 30));
   const timer = setInterval(() => {
     cur = Math.min(cur + step, target);
     el.textContent = cur;
@@ -390,27 +517,40 @@ async function loadNews() {
       'https://hmjjujirktpqviayfehe.supabase.co',
       'sb_publishable_Q0wdrJl_H0VIV-XpE8eiVQ_ziLgpMVx'
     );
-    const { data, error } = await client.from('ticker_news').select('*').order('created_at', { ascending: false });
+    const { data, error } = await client
+      .from('ticker_news')
+      .select('*')
+      .order('created_at', { ascending: false });
     if (error) throw error;
     const el = document.getElementById('news-ticker');
-    if (!data || !data.length) { el.innerHTML = '<span class="ni"><span class="ni-dot">◆</span>Belum ada berita terbaru.</span>'; return; }
+    if (!el) return;
+    if (!data || !data.length) {
+      el.innerHTML = '<span class="ni"><span class="ni-dot">◆</span>Belum ada berita terbaru.</span>';
+      return;
+    }
     const all = [...data, ...data];
-    el.innerHTML = all.map(b => `<span class="ni"><span class="ni-dot">◆</span><span class="ni-tag tag-${esc(b.tag)}">${esc(b.tag).toUpperCase()}</span>${esc(b.text)}</span>`).join('');
+    el.innerHTML = all.map(b =>
+      `<span class="ni"><span class="ni-dot">◆</span><span class="ni-tag tag-${esc(b.tag)}">${esc(b.tag).toUpperCase()}</span>${esc(b.text)}</span>`
+    ).join('');
     const dur = Math.max(25, Math.round(el.scrollWidth / 90));
     el.style.animationDuration = dur + 's';
-  } catch(e) { console.warn('News:', e.message); }
+  } catch(e) { console.warn('News ticker:', e.message); }
 }
 loadNews(); setInterval(loadNews, 60000);
 
 async function loadPrices() {
   const el = document.getElementById('price-ticker');
+  if (!el) return;
   try {
     const r = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false');
     if (!r.ok) throw new Error('rate limit');
     const data = await r.json();
     let html = '';
     data.forEach(c => {
-      const price = new Intl.NumberFormat('en-US', { style:'currency', currency:'USD', maximumFractionDigits: c.current_price > 1 ? 2 : 6 }).format(c.current_price);
+      const price = new Intl.NumberFormat('en-US', {
+        style: 'currency', currency: 'USD',
+        maximumFractionDigits: c.current_price > 1 ? 2 : 6
+      }).format(c.current_price);
       const ch  = c.price_change_percentage_24h ? c.price_change_percentage_24h.toFixed(2) : 0;
       const cls = ch >= 0 ? 'ptick-up' : 'ptick-dn';
       const sign = ch >= 0 ? '+' : '';
@@ -422,8 +562,6 @@ async function loadPrices() {
   }
 }
 loadPrices(); setInterval(loadPrices, 300000);
-
-init();
 
 // ==========================================
 // G. AI AGENT CHATBOT
@@ -453,16 +591,19 @@ init();
 
   function aiAddMsg(role, html) {
     const box = document.getElementById('aiMessages');
-    const d = document.createElement('div');
+    const d   = document.createElement('div');
     d.className = 'ai-msg ' + (role === 'user' ? 'ai-msg-user' : 'ai-msg-bot');
-    d.innerHTML = `<div class="ai-msg-avatar">${role === 'user' ? '👤' : '<img src="logo.png" style="width:20px;height:20px;object-fit:contain;border-radius:4px;">'}</div><div class="ai-msg-bubble">${html}</div>`;
+    d.innerHTML = `<div class="ai-msg-avatar">${role === 'user'
+      ? '👤'
+      : '<img src="logo.png" style="width:20px;height:20px;object-fit:contain;border-radius:4px;">'
+    }</div><div class="ai-msg-bubble">${html}</div>`;
     box.appendChild(d);
     box.scrollTop = box.scrollHeight;
   }
 
   function aiShowTyping() {
     const box = document.getElementById('aiMessages');
-    const d = document.createElement('div');
+    const d   = document.createElement('div');
     d.className = 'ai-msg ai-msg-bot'; d.id = 'aiTyping';
     d.innerHTML = `<div class="ai-msg-avatar"><img src="logo.png" style="width:20px;height:20px;object-fit:contain;border-radius:4px;"></div><div class="ai-msg-bubble"><div class="ai-typing"><div class="ai-tdot"></div><div class="ai-tdot"></div><div class="ai-tdot"></div></div></div>`;
     box.appendChild(d);
@@ -475,28 +616,21 @@ init();
   }
 
   function detectLang(text) {
-    const idWords = /\b(apa|itu|cara|untuk|dan|yang|ini|ada|bisa|saya|kamu|bagaimana|kenapa|mengapa|gimana|gak|tidak|ya|iya|dong|nih|loh|sih|juga|atau|dari|dengan|di|ke|nya|nya|mau|harus|perlu|buat|bikin|pakai|kalau|kapan|siapa)\b/i;
+    const idWords = /\b(apa|itu|cara|untuk|dan|yang|ini|ada|bisa|saya|kamu|bagaimana|kenapa|mengapa|gimana|gak|tidak|ya|iya|dong|nih|loh|sih|juga|atau|dari|dengan|di|ke|mau|harus|perlu|buat|bikin|pakai|kalau|kapan|siapa)\b/i;
     return idWords.test(text) ? 'id' : 'en';
   }
 
   function getSystemPrompt(lang) {
     if (lang === 'id') {
       return `Kamu adalah AirdropXI Bot, asisten AI resmi dari AirdropXI — platform tracker airdrop crypto terpercaya di Indonesia.
-
-Kepribadian: Friendly, santai, informatif, antusias soal crypto & Web3. Gunakan Bahasa Indonesia yang natural dan mudah dipahami. Selalu ingatkan soal keamanan & scam.
-
+Kepribadian: Friendly, santai, informatif, antusias soal crypto & Web3. Bahasa Indonesia natural dan mudah dipahami. Selalu ingatkan soal keamanan & scam.
 Keahlian: Airdrop crypto, Web3, DeFi, NFT, GameFi, blockchain, keamanan crypto, wallet, gas fee, DEX, CEX, tokenomics.
-
-PENTING: Selalu jawab dalam Bahasa Indonesia. Ingatkan user untuk hanya gunakan link resmi AirdropXI dan jangan share private key / seed phrase.`;
-    } else {
-      return `You are AirdropXI Bot, the official AI assistant from AirdropXI — a trusted crypto airdrop tracker platform.
-
-Personality: Friendly, informative, enthusiastic about crypto & Web3. Use clear, natural English. Always remind users about security and scams.
-
-Expertise: Crypto airdrops, Web3, DeFi, NFT, GameFi, blockchain, crypto security, wallets, gas fees, DEX, CEX, tokenomics.
-
-IMPORTANT: Always respond in English. Remind users to only use official AirdropXI links and never share their private key or seed phrase.`;
+PENTING: Jawab dalam Bahasa Indonesia. Ingatkan user hanya gunakan link resmi AirdropXI dan jangan share private key / seed phrase.`;
     }
+    return `You are AirdropXI Bot, the official AI assistant from AirdropXI — a trusted crypto airdrop tracker platform.
+Personality: Friendly, informative, enthusiastic about crypto & Web3. Clear natural English. Always remind users about security and scams.
+Expertise: Crypto airdrops, Web3, DeFi, NFT, GameFi, blockchain, crypto security, wallets, gas fees, DEX, CEX, tokenomics.
+IMPORTANT: Respond in English. Remind users to only use official AirdropXI links and never share their private key or seed phrase.`;
   }
 
   window.aiSend = async function () {
@@ -506,9 +640,7 @@ IMPORTANT: Always respond in English. Remind users to only use official AirdropX
     if (!text) return;
     input.value = ''; input.style.height = '36px';
     aiAddMsg('user', text.replace(/</g,'&lt;').replace(/>/g,'&gt;'));
-
     const msgLang = detectLang(text);
-
     aiHistory.push({ role:'user', content:text });
     aiLoading = true;
     document.getElementById('aiSendBtn').disabled = true;
@@ -518,26 +650,25 @@ IMPORTANT: Always respond in English. Remind users to only use official AirdropX
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: text,
-          lang: msgLang,
+          message: text, lang: msgLang,
           system: getSystemPrompt(msgLang),
-          history: aiHistory.slice(-10)
-        })
+          history: aiHistory.slice(-10),
+        }),
       });
       const data = await res.json();
       aiRemoveTyping();
       if (data.choices && data.choices[0]) {
         const reply = data.choices[0].message.content;
         aiHistory.push({ role:'assistant', content:reply });
-        aiAddMsg('bot', reply.replace(/\n/g,'<br>').replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>'));
+        aiAddMsg('bot', reply
+          .replace(/\n/g,'<br>')
+          .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>'));
       } else {
-        const errMsg = msgLang === 'id' ? 'AI tidak merespon, coba lagi ya 🙏' : 'AI did not respond, please try again 🙏';
-        aiAddMsg('bot', errMsg);
+        aiAddMsg('bot', msgLang === 'id' ? 'AI tidak merespon, coba lagi ya 🙏' : 'AI did not respond, please try again 🙏');
       }
     } catch(e) {
       aiRemoveTyping();
-      const errMsg = msgLang === 'id' ? 'Koneksi error, coba lagi 🔌' : 'Connection error, please retry 🔌';
-      aiAddMsg('bot', errMsg);
+      aiAddMsg('bot', 'Koneksi error, coba lagi 🔌');
     }
     aiLoading = false;
     document.getElementById('aiSendBtn').disabled = false;
@@ -549,23 +680,26 @@ IMPORTANT: Always respond in English. Remind users to only use official AirdropX
 // ==========================================
 async function loadTokenUnlocks() {
   const tableBody = document.getElementById('unlock-table-body');
+  if (!tableBody) return;
   try {
     const response = await fetch('/api/unlocks');
     const data = await response.json();
-    tableBody.innerHTML = '';
-    const row = `
-      <tr style="border-bottom: 1px solid rgba(255,255,255,0.1);">
-        <td style="padding: 15px;">${data.name || 'Ethereum'}</td>
-        <td style="padding: 15px; color: #10b981;">${data.unlocked || 'Loading...'}</td>
-        <td style="padding: 15px;">Real-time Data</td>
-      </tr>
-    `;
-    tableBody.innerHTML = row;
+    tableBody.innerHTML = `
+      <tr style="border-bottom:1px solid rgba(255,255,255,0.1);">
+        <td style="padding:15px">${data.name || 'Ethereum'}</td>
+        <td style="padding:15px;color:#10b981">${data.unlocked || 'Loading...'}</td>
+        <td style="padding:15px">Real-time Data</td>
+      </tr>`;
   } catch (err) {
-    console.error("Gagal Render:", err);
+    console.error('Gagal render token unlocks:', err);
   }
 }
 
 if (window.location.pathname.includes('unlocks.html')) {
   loadTokenUnlocks();
 }
+
+// ==========================================
+// INIT
+// ==========================================
+init();
