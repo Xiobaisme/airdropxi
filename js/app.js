@@ -328,13 +328,33 @@ function esc(s) {
     .replace(/"/g,'&quot;');
 }
 
+// Cover semua variasi status "listed" dari Supabase:
+// "Listing / Selesai", "Listed", "Ended", "listing", "end", "selesai"
+function isListed(s) {
+  return s.includes('listing') ||
+         s.includes('listed')  ||
+         s.includes('selesai') ||
+         s.includes('ended')   ||
+         s.includes('end');
+}
+
+// Cover variasi "active" — TIDAK termasuk waitlist & listed
+function isActive(s) {
+  if (s.includes('waitlist')) return false;
+  if (isListed(s))            return false;
+  return s.includes('active')    ||
+         s.includes('confirmed') ||
+         s.includes('potential') ||
+         s.includes('seed');
+}
+
 function getStatusClass(s) {
   if (!s) return 'st-default';
   const l = s.toLowerCase();
-  if (l.includes('active'))                                         return 'st-active';
-  if (l.includes('waitlist'))                                       return 'st-waitlist';
-  if (l.includes('mint'))                                           return 'st-mint';
-  if (l.includes('listing') || l.includes('end') || l.includes('selesai')) return 'st-listing';
+  if (l.includes('waitlist'))  return 'st-waitlist';
+  if (isListed(l))             return 'st-listing';
+  if (l.includes('active') || l.includes('confirmed') || l.includes('potential') || l.includes('seed')) return 'st-active';
+  if (l.includes('mint'))      return 'st-mint';
   return 'st-default';
 }
 
@@ -355,10 +375,10 @@ function renderCards() {
     }
     // Filter status
     if (activeFilter !== 'all') {
-      const s = (item.status || '').toLowerCase();
-      if (activeFilter === 'active'   && !s.includes('active'))                                         return false;
-      if (activeFilter === 'waitlist' && !s.includes('waitlist'))                                       return false;
-      if (activeFilter === 'listing'  && !s.includes('listing') && !s.includes('end') && !s.includes('selesai')) return false;
+      const s = (item.status || '').toLowerCase().trim();
+      if (activeFilter === 'active' && !isActive(s))   return false;
+      if (activeFilter === 'waitlist' && !s.includes('waitlist')) return false;
+      if (activeFilter === 'listing' && !isListed(s))  return false;
     }
     return true;
   });
@@ -484,9 +504,9 @@ function updateDash() {
   let active = 0, listing = 0, waitlist = 0;
   allData.forEach(i => {
     const s = (i.status || '').toLowerCase();
-    if (s.includes('listing') || s.includes('end') || s.includes('selesai')) listing++;
+    if (isListed(s))           listing++;
     else if (s.includes('waitlist')) waitlist++;
-    else active++;
+    else                             active++;
   });
   animateNum('dash-total',    allData.length);
   animateNum('dash-active',   active);
