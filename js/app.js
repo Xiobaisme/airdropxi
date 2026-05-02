@@ -12,21 +12,26 @@ let allData = [], currentLang = 'id', activeFilter = 'all';
 
 async function init() {
   try {
-    const res = await fetch('/api/airdrops');
-    if (!res.ok) throw new Error('Failed to fetch data');
+    const res = await fetch('/api/admin-airdrop');
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const data = await res.json();
-    allData = Array.isArray(data) ? data : [];
+    if (!Array.isArray(data)) throw new Error('Data tidak valid');
+
+    allData = data;
+
     updateDash();
+    setLang(currentLang); // render cards + terjemahan sekaligus
+
     document.getElementById('loading-state').style.display = 'none';
     document.getElementById('airdrop-container').style.display = 'grid';
-    // Set bahasa dari saved state — TIDAK reset ke 'id' setiap kali
-    setLang(currentLang);
+
   } catch (e) {
     document.getElementById('loading-state').style.display = 'none';
     const errState = document.getElementById('error-state');
     if (errState) errState.style.display = 'block';
     const errMsg = document.getElementById('error-msg');
     if (errMsg) errMsg.textContent = e.message;
+    console.error('init error:', e);
   }
 }
 
@@ -195,11 +200,8 @@ const T = {
 function setLang(l) {
   if (l !== 'id' && l !== 'en') l = 'id';
   currentLang = l;
-
-  // Simpan ke localStorage supaya persist saat klik card/navigasi
   localStorage.setItem('axi-lang', l);
 
-  // Update tombol aktif (desktop + mobile)
   ['btn-id','btn-en','m-btn-id','m-btn-en'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -210,11 +212,11 @@ function setLang(l) {
   const t = T[l];
 
   // Hero
-  setEl('h-badge',   t.badge);
-  setElHTML('h-title', t.title);
-  setEl('h-sub',     t.sub);
-  setEl('h-btn1',    t.btn1);
-  setEl('h-btn2',    t.btn2);
+  setEl('h-badge',      t.badge);
+  setElHTML('h-title',  t.title);
+  setEl('h-sub',        t.sub);
+  setEl('h-btn1',       t.btn1);
+  setEl('h-btn2',       t.btn2);
   setEl('h-docs-label', t.docsLabel);
   setEl('h-docs-sub',   t.docsSub);
 
@@ -225,17 +227,17 @@ function setLang(l) {
   setEl('fc-across',       t.fcAcross);
 
   // Hero stats labels
-  setEl('hs-total-l', t.hsTotalL);
+  setEl('hs-total-l',  t.hsTotalL);
   setEl('hs-active-l', t.hsActiveL);
 
   // Dashboard
-  setEl('t-dash',      t.tDash);
-  setEl('t-title',     t.tTitle);
-  setEl('t-sub',       t.tSub);
-  setEl('lbl-total',   t.totalL);
-  setEl('lbl-active',  t.activeL);
-  setEl('lbl-ended',   t.endedL);
-  setEl('fb-all',      t.fbAll);
+  setEl('t-dash',     t.tDash);
+  setEl('t-title',    t.tTitle);
+  setEl('t-sub',      t.tSub);
+  setEl('lbl-total',  t.totalL);
+  setEl('lbl-active', t.activeL);
+  setEl('lbl-ended',  t.endedL);
+  setEl('fb-all',     t.fbAll);
 
   // Guide
   setEl('g-tag',        t.gTag);
@@ -272,10 +274,9 @@ function setLang(l) {
   setEl('f-guide',       t.btn2);
 
   // AI
-  setEl('nav-ai-label',  t.aiLabel);
+  setEl('nav-ai-label', t.aiLabel);
   applyAILang(l);
 
-  // Re-render cards dengan bahasa yang benar
   renderCards();
 }
 
@@ -298,7 +299,7 @@ function applyAILang(l) {
   const qKeys = ['aiQ1','aiQ2','aiQ3','aiQ4'];
   const pKeys = ['aiP1','aiP2','aiP3','aiP4'];
   qbtns.forEach((btn, i) => {
-    if (qKeys[i]) btn.innerHTML  = t[qKeys[i]];
+    if (qKeys[i]) btn.innerHTML     = t[qKeys[i]];
     if (pKeys[i]) btn.dataset.prompt = t[pKeys[i]];
   });
   const input = document.getElementById('aiInput');
@@ -315,7 +316,6 @@ function setFilter(el, f) {
   renderCards();
 }
 
-// Dipanggil dari oninput di search box
 function filterCards() {
   renderCards();
 }
@@ -328,7 +328,7 @@ function esc(s) {
     .replace(/"/g,'&quot;');
 }
 
-// Exact match semua kemungkinan nilai status "ended/listed" di Supabase
+// Semua kemungkinan nilai status "ended/listed" dari Supabase
 const LISTED_STATUSES = [
   'listing / selesai',
   'listing/selesai',
@@ -339,55 +339,63 @@ const LISTED_STATUSES = [
 ];
 
 function isListed(s) {
-  const clean = s.trim().toLowerCase();
+  const clean = (s || '').trim().toLowerCase();
   return LISTED_STATUSES.some(v => clean === v || clean.includes(v));
 }
 
-// Aktif = bukan waitlist, bukan listed
 function isActive(s) {
-  const clean = s.trim().toLowerCase();
+  const clean = (s || '').trim().toLowerCase();
   if (clean.includes('waitlist')) return false;
   if (isListed(clean))            return false;
-  return true; // semua status lain dianggap active
+  return true;
 }
 
 function getStatusClass(s) {
   if (!s) return 'st-default';
   const l = s.toLowerCase();
-  if (l.includes('waitlist'))  return 'st-waitlist';
-  if (isListed(l))             return 'st-listing';
-  if (l.includes('mint'))      return 'st-mint';
-  return 'st-active'; // active, confirmed, potential, seed, dll
+  if (l.includes('waitlist')) return 'st-waitlist';
+  if (isListed(l))            return 'st-listing';
+  if (l.includes('mint'))     return 'st-mint';
+  return 'st-active';
 }
 
-// Tampilkan status yang lebih bersih di badge card
 function getStatusLabel(s) {
   if (!s) return 'TBA';
   if (isListed(s.toLowerCase())) return 'Ended';
   return s;
 }
 
+function getIcon(tags) {
+  if (!tags) return '🪂';
+  const t = String(tags).toLowerCase();
+  if (t.includes('gaming'))     return '🎮';
+  if (t.includes('defi'))       return '💰';
+  if (t.includes('nft'))        return '🖼';
+  if (t.includes('social'))     return '💬';
+  if (t.includes('blockchain')) return '⛓';
+  if (t.includes('ai'))         return '🤖';
+  return '⚡';
+}
+
 function renderCards() {
   const cont = document.getElementById('airdrop-container');
   if (!cont) return;
+
   const t = T[currentLang];
   const q = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
 
-  // Filter data
   const filtered = allData.filter(item => {
-    // Filter pencarian
     if (q) {
       const name   = (item.name   || '').toLowerCase();
       const tags   = (item.tags   || '').toLowerCase();
       const ticker = (item.ticker || '').toLowerCase();
       if (!name.includes(q) && !tags.includes(q) && !ticker.includes(q)) return false;
     }
-    // Filter status
     if (activeFilter !== 'all') {
       const s = (item.status || '').toLowerCase().trim();
-      if (activeFilter === 'active' && !isActive(s))   return false;
+      if (activeFilter === 'active'   && !isActive(s))            return false;
       if (activeFilter === 'waitlist' && !s.includes('waitlist')) return false;
-      if (activeFilter === 'listing' && !isListed(s))  return false;
+      if (activeFilter === 'listing'  && !isListed(s))            return false;
     }
     return true;
   });
@@ -415,7 +423,6 @@ function renderCards() {
       ? (item.tasksID || item.tasksEN || t.unknown)
       : (item.tasksEN || item.tasksID || t.unknown);
 
-    // Preview tasks: 2 baris pertama, buang prefix angka & separator
     const taskPreview = tasks
       .split('\n')
       .map(l => l.trim())
@@ -424,7 +431,7 @@ function renderCards() {
       .map(l => l.replace(/^(\d+[\.\)]\s*)/, '').split(' | ')[0])
       .join(' · ');
 
-    const stCls = getStatusClass(item.status);
+    const stCls   = getStatusClass(item.status);
     const stLabel = getStatusLabel(item.status);
 
     let tagsHTML = '';
@@ -435,12 +442,14 @@ function renderCards() {
         .join('');
     }
 
-    const prog = item._prog || (item._prog = 20 + Math.floor(Math.random() * 75));
+    // Progress random tapi stabil per item (pakai idx sebagai seed)
+    if (item._prog === undefined) {
+      item._prog = 20 + ((item.idx || item.id || i) * 37) % 75;
+    }
+    const prog = item._prog;
 
-    // ── URL ke guide — pakai /guide/[id] ──
     const guideUrl = `/guide/${encodeURIComponent(item.id)}`;
 
-    // Logo
     const logoHtml = item.logo_url
       ? `<img src="${esc(item.logo_url)}" alt="${esc(item.name)}"
               style="width:38px;height:38px;border-radius:9px;object-fit:cover;border:1px solid var(--border);background:var(--surface2)"
@@ -484,7 +493,6 @@ function renderCards() {
           <div class="tasks-body">${esc(taskPreview || tasks.substring(0, 120))}</div>
         </div>
 
-        <!-- Tombol garap: stopPropagation supaya tidak trigger onclick card -->
         <a href="${esc(item.link || '#')}"
            target="_blank"
            rel="noopener noreferrer"
@@ -498,48 +506,49 @@ function renderCards() {
   bindHoverEffects();
 }
 
-function getIcon(tags) {
-  if (!tags) return '🪂';
-  const t = String(tags).toLowerCase();
-  if (t.includes('gaming'))     return '🎮';
-  if (t.includes('defi'))       return '💰';
-  if (t.includes('nft'))        return '🖼';
-  if (t.includes('social'))     return '💬';
-  if (t.includes('blockchain')) return '⛓';
-  if (t.includes('ai'))         return '🤖';
-  return '⚡';
-}
-
+// ==========================================
+// F. DASHBOARD STATS
+// ==========================================
 function updateDash() {
   let active = 0, listing = 0, waitlist = 0;
-  allData.forEach(i => {
-    const s = (i.status || '').toLowerCase();
-    if (isListed(s))           listing++;
+  allData.forEach(item => {
+    const s = (item.status || '').toLowerCase().trim();
+    if (isListed(s))            listing++;
     else if (s.includes('waitlist')) waitlist++;
     else                             active++;
   });
+
   animateNum('dash-total',    allData.length);
   animateNum('dash-active',   active);
   animateNum('dash-listing',  listing);
   animateNum('dash-waitlist', waitlist);
   animateNum('hs-total',      allData.length);
   animateNum('hs-active',     active);
+
+  // Float card stats
+  setElText('fc-raised', `${allData.length} Projects`);
+  if (allData[0]) setElText('fc-latest', allData[0].name || '—');
 }
 
 function animateNum(id, target) {
   const el = document.getElementById(id);
   if (!el) return;
-  let cur = 0;
+  let current = 0;
   const step = Math.max(1, Math.ceil(target / 30));
   const timer = setInterval(() => {
-    cur = Math.min(cur + step, target);
-    el.textContent = cur;
-    if (cur >= target) clearInterval(timer);
+    current = Math.min(current + step, target);
+    el.textContent = current;
+    if (current >= target) clearInterval(timer);
   }, 40);
 }
 
+function setElText(id, val) {
+  const el = document.getElementById(id);
+  if (el && val !== undefined) el.textContent = val;
+}
+
 // ==========================================
-// F. TICKERS
+// G. TICKERS
 // ==========================================
 async function loadNews() {
   try {
@@ -581,8 +590,8 @@ async function loadPrices() {
         style: 'currency', currency: 'USD',
         maximumFractionDigits: c.current_price > 1 ? 2 : 6
       }).format(c.current_price);
-      const ch  = c.price_change_percentage_24h ? c.price_change_percentage_24h.toFixed(2) : 0;
-      const cls = ch >= 0 ? 'ptick-up' : 'ptick-dn';
+      const ch   = c.price_change_percentage_24h ? c.price_change_percentage_24h.toFixed(2) : 0;
+      const cls  = ch >= 0 ? 'ptick-up' : 'ptick-dn';
       const sign = ch >= 0 ? '+' : '';
       html += `<div class="ptick"><img src="${c.image}" alt="${c.symbol}" onerror="this.style.display='none'"><span class="ptick-sym">${c.symbol}</span><span class="ptick-price">${price}</span><span class="${cls}">${sign}${ch}%</span></div>`;
     });
@@ -594,7 +603,7 @@ async function loadPrices() {
 loadPrices(); setInterval(loadPrices, 300000);
 
 // ==========================================
-// G. AI AGENT CHATBOT
+// H. AI AGENT CHATBOT
 // ==========================================
 (function () {
   let aiOpen = false, aiLoading = false;
@@ -671,7 +680,7 @@ IMPORTANT: Respond in English. Remind users to only use official AirdropXI links
     input.value = ''; input.style.height = '36px';
     aiAddMsg('user', text.replace(/</g,'&lt;').replace(/>/g,'&gt;'));
     const msgLang = detectLang(text);
-    aiHistory.push({ role:'user', content:text });
+    aiHistory.push({ role: 'user', content: text });
     aiLoading = true;
     document.getElementById('aiSendBtn').disabled = true;
     aiShowTyping();
@@ -680,7 +689,8 @@ IMPORTANT: Respond in English. Remind users to only use official AirdropXI links
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({
-          message: text, lang: msgLang,
+          message: text,
+          lang: msgLang,
           system: getSystemPrompt(msgLang),
           history: aiHistory.slice(-10),
         }),
@@ -689,7 +699,7 @@ IMPORTANT: Respond in English. Remind users to only use official AirdropXI links
       aiRemoveTyping();
       if (data.choices && data.choices[0]) {
         const reply = data.choices[0].message.content;
-        aiHistory.push({ role:'assistant', content:reply });
+        aiHistory.push({ role: 'assistant', content: reply });
         aiAddMsg('bot', reply
           .replace(/\n/g,'<br>')
           .replace(/\*\*(.*?)\*\*/g,'<strong>$1</strong>'));
@@ -706,7 +716,7 @@ IMPORTANT: Respond in English. Remind users to only use official AirdropXI links
 })();
 
 // ==========================================
-// H. TOKEN UNLOCKS
+// I. TOKEN UNLOCKS
 // ==========================================
 async function loadTokenUnlocks() {
   const tableBody = document.getElementById('unlock-table-body');
@@ -730,6 +740,6 @@ if (window.location.pathname.includes('unlocks.html')) {
 }
 
 // ==========================================
-// INIT
+// INIT — satu entry point, tidak ada duplikat
 // ==========================================
 init();
