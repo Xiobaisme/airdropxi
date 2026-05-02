@@ -1,664 +1,804 @@
 <!DOCTYPE html>
-<html lang="id">
+<html lang="id" data-theme="dark">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Panduan — AirdropXI</title>
-  <link rel="icon" type="image/png" href="../logo.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    :root {
-      --bg:      #07090b;
-      --s1:      #0d1117;
-      --s2:      #111820;
-      --s3:      #161e28;
-      --border:  #1c2733;
-      --border2: #243040;
-      --accent:  #00e5a0;
-      --adim:    rgba(0,229,160,0.08);
-      --aborder: rgba(0,229,160,0.18);
-      --warn:    #f59e0b;
-      --blue:    #3b82f6;
-      --bdim:    rgba(59,130,246,0.10);
-      --bborder: rgba(59,130,246,0.25);
-      --text:    #dce8f0;
-      --text2:   #8aa0b4;
-      --text3:   #4a6070;
-      --mono:    'JetBrains Mono', monospace;
-      --sans:    'Plus Jakarta Sans', sans-serif;
-      --r:       12px;
-    }
-    body {
-      background: var(--bg);
-      color: var(--text);
-      font-family: var(--sans);
-      min-height: 100vh;
-    }
-    body::before {
-      content: '';
-      position: fixed; inset: 0; z-index: 0;
-      background-image:
-        linear-gradient(rgba(0,229,160,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,229,160,0.02) 1px, transparent 1px);
-      background-size: 48px 48px;
-      pointer-events: none;
-    }
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<link rel="icon" type="image/png" href="/logo.png">
+<title>Guide — AirdropXI</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="/css/style.css">
+<style>
+  /* ── RESET & BASE ── */
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-    /* ── NAV ── */
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(7,9,11,0.9);
-      backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      height: 52px; padding: 0 1.5rem;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .nav-logo {
-      font-family: var(--mono); font-size: 0.8rem; font-weight: 700;
-      color: var(--accent); text-decoration: none;
-      display: flex; align-items: center; gap: 8px;
-    }
-    .nav-logo img { width: 22px; height: 22px; border-radius: 5px; }
-    .nav-back {
-      font-family: var(--mono); font-size: 0.7rem;
-      color: var(--text2); text-decoration: none;
-      padding: 0.35rem 0.9rem;
-      border: 1px solid var(--border2);
-      border-radius: 6px;
-      transition: all 0.2s;
-    }
-    .nav-back:hover { color: var(--accent); border-color: var(--aborder); }
+  :root {
+    --g: #00e87a;
+    --c: #00c8f0;
+    --accent: #7c6dfa;
+    --bg: #080e14;
+    --surface: #0d1520;
+    --surface2: #111e2c;
+    --border: rgba(255,255,255,0.07);
+    --border2: rgba(255,255,255,0.12);
+    --text: #e8f0f8;
+    --text2: #6b8499;
+    --text3: #4a6070;
+    --radius: 14px;
+    --mono: 'JetBrains Mono', monospace;
+  }
 
-    /* ── LAYOUT ── */
-    .wrap {
-      position: relative; z-index: 1;
-      max-width: 1060px; margin: 0 auto;
-      padding: 2rem 1.5rem 5rem;
-    }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Plus Jakarta Sans', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
 
-    /* ── HERO ── */
-    .hero {
-      display: flex; gap: 1.5rem; align-items: flex-start;
-      padding-bottom: 2rem;
-      border-bottom: 1px solid var(--border);
-      margin-bottom: 2rem;
-    }
-    .hero-logo {
-      width: 76px; height: 76px; border-radius: 18px;
-      object-fit: cover;
-      background: var(--adim);
-      border: 1px solid var(--aborder);
-      flex-shrink: 0;
-      display: flex; align-items: center; justify-content: center;
-      font-size: 2.2rem;
-    }
-    .hero-logo img {
-      width: 76px; height: 76px; border-radius: 18px;
-      object-fit: cover;
-    }
-    .hero-info { flex: 1; }
-    .ongoing-pill {
-      display: inline-flex; align-items: center; gap: 6px;
-      font-family: var(--mono); font-size: 0.6rem; font-weight: 700;
-      color: var(--accent); letter-spacing: 0.1em;
-      margin-bottom: 0.6rem;
-    }
-    .ongoing-dot {
-      width: 7px; height: 7px; border-radius: 50%;
-      background: var(--accent); box-shadow: 0 0 8px var(--accent);
-      animation: blink 2s infinite;
-    }
-    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.3} }
+  /* ── BACK NAV ── */
+  .guide-nav {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: rgba(8,14,20,0.85);
+    backdrop-filter: blur(16px);
+    border-bottom: 1px solid var(--border);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 16px;
+  }
 
-    .hero-name {
-      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
-      font-weight: 800; letter-spacing: -0.03em; line-height: 1.1;
-      margin-bottom: 0.75rem;
-    }
-    .hero-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 0.75rem; }
-    .badge {
-      font-family: var(--mono); font-size: 0.6rem; font-weight: 700;
-      padding: 0.25rem 0.7rem; border-radius: 20px;
-      letter-spacing: 0.04em;
-    }
-    .b-active   { background: rgba(0,229,160,0.12); color: var(--accent);  border: 1px solid rgba(0,229,160,0.3); }
-    .b-waitlist { background: rgba(245,158,11,0.12); color: var(--warn);   border: 1px solid rgba(245,158,11,0.3); }
-    .b-default  { background: var(--s2); color: var(--text3); border: 1px solid var(--border); }
-    .b-blue     { background: var(--bdim); color: var(--blue); border: 1px solid var(--bborder); }
+  .back-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    color: var(--text2);
+    text-decoration: none;
+    font-family: var(--mono);
+    font-size: 12px;
+    font-weight: 500;
+    letter-spacing: .05em;
+    transition: color .2s;
+  }
+  .back-btn:hover { color: var(--g); }
+  .back-btn svg { transition: transform .2s; }
+  .back-btn:hover svg { transform: translateX(-3px); }
 
-    .hero-meta {
-      display: flex; gap: 1.5rem; flex-wrap: wrap;
-      font-family: var(--mono); font-size: 0.68rem; color: var(--text2);
-      margin-bottom: 1rem;
-    }
-    .hero-meta-val { color: var(--accent); font-weight: 700; }
+  .nav-logo-sm {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    text-decoration: none;
+    color: var(--text);
+    font-weight: 800;
+    font-size: 15px;
+  }
+  .nav-logo-sm img { width: 24px; height: 24px; border-radius: 6px; }
+  .nav-logo-sm span { color: var(--g); }
 
-    .hero-links { display: flex; gap: 0.5rem; flex-wrap: wrap; }
-    .ext-link {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 0.45rem 0.9rem;
-      background: var(--s2); border: 1px solid var(--border2);
-      border-radius: 6px;
-      font-family: var(--mono); font-size: 0.65rem; color: var(--text2);
-      text-decoration: none; transition: all 0.2s;
-    }
-    .ext-link:hover { border-color: var(--aborder); color: var(--accent); }
+  /* ── MAIN LAYOUT ── */
+  .guide-wrap {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 40px 24px 80px;
+  }
 
-    /* ── BODY GRID ── */
-    .body-grid {
-      display: grid;
-      grid-template-columns: 1fr 290px;
-      gap: 1.5rem;
-      align-items: start;
-    }
+  /* ── LOADING / ERROR ── */
+  .state-center {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    min-height: 60vh;
+    gap: 16px;
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 13px;
+  }
+  .spinner {
+    width: 36px; height: 36px;
+    border: 2px solid var(--border2);
+    border-top-color: var(--g);
+    border-radius: 50%;
+    animation: spin .8s linear infinite;
+  }
+  @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── SECTIONS ── */
-    .sec {
-      background: var(--s1);
-      border: 1px solid var(--border);
-      border-radius: var(--r);
-      overflow: hidden;
-      margin-bottom: 1rem;
-    }
-    .sec-head {
-      padding: 0.875rem 1.25rem;
-      border-bottom: 1px solid var(--border);
-      display: flex; align-items: center; gap: 8px;
-    }
-    .sec-bar { width: 3px; height: 14px; border-radius: 2px; background: var(--accent); flex-shrink: 0; }
-    .sec-title {
-      font-family: var(--mono); font-size: 0.65rem; font-weight: 700;
-      color: var(--accent); letter-spacing: 0.1em; text-transform: uppercase;
-    }
-    .sec-body { padding: 1.25rem; }
+  /* ── HEADER CARD ── */
+  .project-header {
+    display: flex;
+    align-items: flex-start;
+    gap: 20px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: var(--radius);
+    padding: 28px;
+    margin-bottom: 20px;
+    position: relative;
+    overflow: hidden;
+  }
+  .project-header::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: radial-gradient(ellipse at top left, rgba(0,232,122,.06), transparent 60%);
+    pointer-events: none;
+  }
 
-    /* Description */
-    .desc-text { font-size: 0.9rem; color: var(--text2); line-height: 1.8; }
-    .desc-text p + p { margin-top: 0.875rem; }
+  .project-logo {
+    width: 64px; height: 64px;
+    border-radius: 14px;
+    object-fit: cover;
+    border: 1px solid var(--border2);
+    background: var(--surface2);
+    flex-shrink: 0;
+  }
+  .project-logo-fallback {
+    width: 64px; height: 64px;
+    border-radius: 14px;
+    background: rgba(0,232,122,.08);
+    border: 1px solid rgba(0,232,122,.2);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 28px;
+    flex-shrink: 0;
+  }
 
-    /* Testnet links */
-    .testnet-links { display: flex; flex-direction: column; gap: 0.6rem; }
-    .testnet-link {
-      display: flex; align-items: center; gap: 10px;
-      padding: 0.75rem 1rem;
-      background: var(--bdim);
-      border: 1px solid var(--bborder);
-      border-radius: 8px;
-      text-decoration: none;
-      transition: all 0.2s;
-    }
-    .testnet-link:hover {
-      background: rgba(59,130,246,0.15);
-      border-color: var(--blue);
-      transform: translateX(3px);
-    }
-    .testnet-link-icon {
-      width: 28px; height: 28px; border-radius: 6px;
-      background: rgba(59,130,246,0.15);
-      display: flex; align-items: center; justify-content: center;
-      font-size: 13px; flex-shrink: 0;
-    }
-    .testnet-link-label { font-family: var(--mono); font-size: 0.72rem; color: var(--blue); font-weight: 700; }
-    .testnet-link-url { font-size: 0.7rem; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .testnet-link-arrow { margin-left: auto; color: var(--blue); font-size: 0.8rem; flex-shrink: 0; }
+  .project-meta { flex: 1; min-width: 0; }
+  .project-name {
+    font-size: 26px;
+    font-weight: 800;
+    letter-spacing: -.5px;
+    color: var(--text);
+    margin-bottom: 8px;
+    line-height: 1.2;
+  }
 
-    /* Key params */
-    .kp-item {
-      display: flex; align-items: flex-start;
-      gap: 10px; padding: 0.7rem 0;
-      border-bottom: 1px solid var(--border);
-      font-size: 0.85rem;
-    }
-    .kp-item:last-child { border-bottom: none; padding-bottom: 0; }
-    .kp-dot { width: 5px; height: 5px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 6px; }
-    .kp-key { color: var(--text2); min-width: 140px; }
-    .kp-val { color: var(--text); font-weight: 600; }
+  .badge-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 7px;
+    margin-bottom: 14px;
+  }
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 4px 10px;
+    border-radius: 20px;
+    letter-spacing: .04em;
+    text-transform: uppercase;
+  }
+  .badge-active   { background: rgba(0,229,160,.12); color: #00e5a0; border: 1px solid rgba(0,229,160,.3); }
+  .badge-waitlist { background: rgba(245,158,11,.12); color: #f59e0b; border: 1px solid rgba(245,158,11,.3); }
+  .badge-listing  { background: rgba(124,109,250,.12); color: #7c6dfa; border: 1px solid rgba(124,109,250,.3); }
+  .badge-default  { background: rgba(255,255,255,.06); color: var(--text2); border: 1px solid var(--border); }
+  .badge-tag      { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
 
-    /* Steps */
-    .steps { display: flex; flex-direction: column; }
-    .step {
-      display: flex; gap: 1rem;
-      padding-bottom: 1.25rem; position: relative;
-    }
-    .step:not(:last-child)::after {
-      content: ''; position: absolute;
-      left: 12px; top: 26px; bottom: 0;
-      width: 1px; background: var(--border2);
-    }
-    .step-num {
-      width: 26px; height: 26px; border-radius: 7px;
-      background: var(--adim); border: 1px solid var(--aborder);
-      display: flex; align-items: center; justify-content: center;
-      font-family: var(--mono); font-size: 0.65rem; color: var(--accent); font-weight: 700;
-      flex-shrink: 0; z-index: 1;
-    }
-    .step-title { font-size: 0.9rem; font-weight: 700; margin-bottom: 4px; }
-    .step-desc { font-size: 0.82rem; color: var(--text2); line-height: 1.6; }
-    /* link biru di dalam step desc */
-    .step-desc a { color: var(--blue); text-decoration: underline; }
+  .social-row {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+  }
+  .social-btn {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 6px 12px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    color: var(--text2);
+    font-family: var(--mono);
+    font-size: 11px;
+    text-decoration: none;
+    transition: all .2s;
+  }
+  .social-btn:hover { border-color: var(--g); color: var(--g); }
 
-    /* Tips */
-    .tips { display: flex; flex-direction: column; gap: 0.6rem; }
-    .tip {
-      display: flex; gap: 10px;
-      padding: 0.875rem 1rem;
-      background: var(--s2); border: 1px solid var(--border);
-      border-radius: 8px;
-    }
-    .tip-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); flex-shrink: 0; margin-top: 5px; }
-    .tip-text { font-size: 0.83rem; color: var(--text2); line-height: 1.6; }
+  /* ── INFO GRID ── */
+  .info-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .info-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .info-label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: .1em;
+    text-transform: uppercase;
+    margin-bottom: 6px;
+  }
+  .info-value {
+    font-family: var(--mono);
+    font-size: 15px;
+    font-weight: 700;
+    color: var(--accent);
+  }
+  .info-value.green { color: var(--g); }
+  .info-value.cyan  { color: var(--c); }
 
-    /* FAQ */
-    .faqs { display: flex; flex-direction: column; gap: 0.6rem; }
-    .faq {
-      padding: 1rem 1.1rem;
-      background: var(--s2); border: 1px solid var(--border);
-      border-radius: 8px;
-    }
-    .faq-q { font-size: 0.88rem; font-weight: 700; color: var(--accent); margin-bottom: 5px; }
-    .faq-a { font-size: 0.82rem; color: var(--text2); line-height: 1.6; }
+  /* ── SECTION BLOCK ── */
+  .section-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 24px;
+    margin-bottom: 16px;
+  }
+  .section-block-title {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--g);
+    letter-spacing: .12em;
+    text-transform: uppercase;
+    margin-bottom: 16px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+  }
+  .section-block-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
 
-    /* ── SIDEBAR ── */
-    .sidebar { position: sticky; top: 68px; }
-    .sdb-card {
-      background: var(--s1); border: 1px solid var(--border);
-      border-radius: var(--r); overflow: hidden; margin-bottom: 1rem;
-    }
-    .sdb-head {
-      padding: 0.75rem 1rem; border-bottom: 1px solid var(--border);
-      font-family: var(--mono); font-size: 0.6rem; font-weight: 700;
-      color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase;
-    }
-    .sdb-body { padding: 0.875rem 1rem; }
-    .param-row {
-      display: flex; justify-content: space-between; align-items: flex-start;
-      gap: 0.5rem; padding: 0.6rem 0;
-      border-bottom: 1px solid var(--border); font-size: 0.78rem;
-    }
-    .param-row:last-child { border-bottom: none; padding-bottom: 0; }
-    .param-key { color: var(--text3); }
-    .param-val { font-family: var(--mono); font-weight: 700; text-align: right; }
-    .param-val.g { color: var(--accent); }
-    .param-val.y { color: var(--warn); }
+  /* ── DESCRIPTION ── */
+  .desc-text {
+    font-size: 14px;
+    color: var(--text2);
+    line-height: 1.8;
+  }
 
-    .cta-btn {
-      display: block; width: 100%;
-      padding: 0.9rem; text-align: center;
-      background: var(--adim); border: 1px solid var(--aborder);
-      border-radius: 10px;
-      font-family: var(--mono); font-size: 0.72rem; font-weight: 700;
-      color: var(--accent); letter-spacing: 0.06em;
-      text-decoration: none; transition: all 0.2s;
-    }
-    .cta-btn:hover { background: rgba(0,229,160,0.15); border-color: rgba(0,229,160,0.4); }
+  /* ── TASKS ── */
+  .task-list {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+  }
+  .task-item {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 12px 14px;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    font-size: 13px;
+    color: var(--text);
+    line-height: 1.5;
+    transition: border-color .2s;
+  }
+  .task-item:hover { border-color: rgba(0,232,122,.25); }
+  .task-num {
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 700;
+    color: var(--g);
+    background: rgba(0,232,122,.1);
+    border: 1px solid rgba(0,232,122,.2);
+    border-radius: 6px;
+    padding: 2px 7px;
+    flex-shrink: 0;
+    margin-top: 1px;
+  }
 
-    /* ── STATE ── */
-    .state-msg {
-      text-align: center; padding: 6rem 2rem;
-      font-family: var(--mono); color: var(--text3); font-size: 0.78rem;
-    }
-    .state-msg.err { color: #ff2d55; }
-    .spinner-wrap { display: flex; flex-direction: column; align-items: center; gap: 1rem; }
-    .spinner {
-      width: 24px; height: 24px;
-      border: 2px solid var(--border2);
-      border-top-color: var(--accent);
-      border-radius: 50%;
-      animation: spin 0.7s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+  /* ── FAQ ── */
+  .faq-list { display: flex; flex-direction: column; gap: 10px; }
+  .faq-item {
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    overflow: hidden;
+  }
+  .faq-q {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 14px 16px;
+    cursor: pointer;
+    font-size: 13px;
+    font-weight: 600;
+    color: var(--text);
+    background: var(--surface2);
+    user-select: none;
+    gap: 12px;
+    transition: background .2s;
+  }
+  .faq-q:hover { background: rgba(0,232,122,.05); }
+  .faq-arrow {
+    font-family: var(--mono);
+    font-size: 12px;
+    color: var(--g);
+    transition: transform .25s;
+    flex-shrink: 0;
+  }
+  .faq-item.open .faq-arrow { transform: rotate(180deg); }
+  .faq-a {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height .3s ease, padding .3s;
+    font-size: 13px;
+    color: var(--text2);
+    line-height: 1.7;
+    background: var(--surface);
+    padding: 0 16px;
+  }
+  .faq-item.open .faq-a {
+    max-height: 400px;
+    padding: 14px 16px;
+  }
 
-    @media (max-width: 800px) {
-      .body-grid { grid-template-columns: 1fr; }
-      .sidebar { position: static; }
-    }
-    @media (max-width: 600px) {
-      .wrap { padding: 1.25rem 1rem 4rem; }
-      .hero { flex-direction: column; }
-    }
-  </style>
+  /* ── CTA BUTTONS ── */
+  .cta-wrap {
+    position: sticky;
+    bottom: 0;
+    background: rgba(8,14,20,0.92);
+    backdrop-filter: blur(16px);
+    border-top: 1px solid var(--border);
+    padding: 16px 24px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    flex-wrap: wrap;
+    z-index: 90;
+  }
+
+  .btn-main {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: linear-gradient(135deg, var(--g), var(--c));
+    color: #000;
+    font-weight: 800;
+    font-size: 13px;
+    font-family: var(--mono);
+    border-radius: 10px;
+    text-decoration: none;
+    letter-spacing: .04em;
+    transition: opacity .2s, transform .15s;
+    border: none;
+    cursor: pointer;
+    position: relative;
+  }
+  .btn-main:hover { opacity: .9; transform: translateY(-1px); }
+
+  /* Dropdown multi-link */
+  .btn-dropdown-wrap {
+    position: relative;
+  }
+  .btn-dropdown-toggle {
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    padding: 12px 22px;
+    background: linear-gradient(135deg, var(--g), var(--c));
+    color: #000;
+    font-weight: 800;
+    font-size: 13px;
+    font-family: var(--mono);
+    border-radius: 10px;
+    cursor: pointer;
+    border: none;
+    letter-spacing: .04em;
+    transition: opacity .2s;
+    user-select: none;
+  }
+  .btn-dropdown-toggle:hover { opacity: .9; }
+  .btn-arrow-ico {
+    font-size: 10px;
+    transition: transform .2s;
+  }
+  .btn-dropdown-wrap.open .btn-arrow-ico { transform: rotate(180deg); }
+
+  .btn-dropdown-menu {
+    position: absolute;
+    bottom: calc(100% + 8px);
+    left: 0;
+    min-width: 260px;
+    background: var(--surface);
+    border: 1px solid var(--border2);
+    border-radius: 12px;
+    overflow: hidden;
+    display: none;
+    box-shadow: 0 -8px 32px rgba(0,0,0,.5);
+    z-index: 200;
+  }
+  .btn-dropdown-wrap.open .btn-dropdown-menu { display: block; }
+
+  .dropdown-item {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 12px 16px;
+    text-decoration: none;
+    color: var(--text);
+    font-size: 13px;
+    border-bottom: 1px solid var(--border);
+    transition: background .15s;
+  }
+  .dropdown-item:last-child { border-bottom: none; }
+  .dropdown-item:hover { background: rgba(0,232,122,.07); }
+  .dropdown-item-icon {
+    width: 28px; height: 28px;
+    border-radius: 7px;
+    background: rgba(0,232,122,.1);
+    border: 1px solid rgba(0,232,122,.2);
+    display: flex; align-items: center; justify-content: center;
+    font-size: 13px;
+    flex-shrink: 0;
+  }
+  .dropdown-item-label { font-weight: 600; font-size: 12px; }
+  .dropdown-item-url {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    max-width: 160px;
+  }
+
+  .btn-ghost-sm {
+    display: inline-flex;
+    align-items: center;
+    gap: 6px;
+    padding: 10px 16px;
+    background: transparent;
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    color: var(--text2);
+    font-size: 12px;
+    font-family: var(--mono);
+    text-decoration: none;
+    transition: all .2s;
+    cursor: pointer;
+  }
+  .btn-ghost-sm:hover { border-color: var(--g); color: var(--g); }
+
+  /* ── FADE IN ── */
+  .fade-in {
+    opacity: 0;
+    transform: translateY(12px);
+    animation: fadeUp .4s ease forwards;
+  }
+  @keyframes fadeUp {
+    to { opacity: 1; transform: translateY(0); }
+  }
+  .fade-in:nth-child(1) { animation-delay: .05s; }
+  .fade-in:nth-child(2) { animation-delay: .1s; }
+  .fade-in:nth-child(3) { animation-delay: .15s; }
+  .fade-in:nth-child(4) { animation-delay: .2s; }
+  .fade-in:nth-child(5) { animation-delay: .25s; }
+  .fade-in:nth-child(6) { animation-delay: .3s; }
+
+  @media (max-width: 600px) {
+    .project-header { flex-direction: column; gap: 14px; }
+    .project-name { font-size: 20px; }
+    .guide-wrap { padding: 24px 16px 100px; }
+    .info-grid { grid-template-columns: 1fr 1fr; }
+    .cta-wrap { padding: 12px 16px; }
+  }
+</style>
 </head>
 <body>
 
-<nav>
-  <a href="../index.html" class="nav-logo">
-    <img src="../logo.png" alt="AirdropXI" onerror="this.style.display='none'">
-    ⚡ AirdropXI
+<!-- Nav -->
+<nav class="guide-nav">
+  <a href="/" class="back-btn">
+    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Kembali
   </a>
-  <a href="../index.html" class="nav-back">← Kembali ke Daftar</a>
+  <a href="/" class="nav-logo-sm">
+    <img src="/logo.png" alt="AirdropXI">
+    Airdrop<span>XI</span>
+  </a>
 </nav>
 
-<div class="wrap" id="wrap">
-  <div class="state-msg">
-    <div class="spinner-wrap">
-      <div class="spinner"></div>
-      <span>Memuat panduan...</span>
-    </div>
+<!-- Content -->
+<div class="guide-wrap" id="guide-wrap">
+  <div class="state-center" id="loading-state">
+    <div class="spinner"></div>
+    <span>Memuat data project...</span>
   </div>
+  <div class="state-center" id="error-state" style="display:none">
+    <span style="font-size:32px">⚠️</span>
+    <span id="error-msg" style="color:#ff2d55">Project tidak ditemukan</span>
+    <a href="/" style="color:var(--g);font-size:12px">← Kembali ke daftar</a>
+  </div>
+  <div id="project-content" style="display:none"></div>
+</div>
+
+<!-- CTA Bar (sticky bottom) -->
+<div class="cta-wrap" id="cta-wrap" style="display:none">
+  <div id="cta-buttons"></div>
+  <a href="/" class="btn-ghost-sm">
+    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
+    Lihat Airdrop Lain
+  </a>
 </div>
 
 <script>
-  // Ambil ID dari URL: /guide/blockchain-com ATAU guide.html?id=xxx
-  function getProjectId() {
-    // Coba dari path: /guide/SLUG
-    const pathParts = window.location.pathname.split('/').filter(Boolean);
-    const guideIdx = pathParts.indexOf('guide');
-    if (guideIdx !== -1 && pathParts[guideIdx + 1]) {
-      return pathParts[guideIdx + 1];
-    }
-    // Fallback dari query param
-    return new URLSearchParams(window.location.search).get('id');
+// ── UTILS ──────────────────────────────────────────────────
+function esc(s) {
+  return String(s || '')
+    .replace(/&/g,'&amp;')
+    .replace(/</g,'&lt;')
+    .replace(/>/g,'&gt;')
+    .replace(/"/g,'&quot;');
+}
+
+function getStatusClass(s) {
+  if (!s) return 'badge-default';
+  const l = s.toLowerCase();
+  if (l.includes('waitlist')) return 'badge-waitlist';
+  if (l.includes('listed') || l.includes('ended') || l.includes('selesai')) return 'badge-listing';
+  return 'badge-active';
+}
+
+// ── GET ID FROM URL ────────────────────────────────────────
+// URL: /guide/32  → pathname = /guide/32
+const pathId = window.location.pathname.split('/').filter(Boolean).pop();
+
+// ── FETCH ─────────────────────────────────────────────────
+async function loadProject() {
+  if (!pathId) return showError('ID project tidak ditemukan');
+
+  try {
+    const res = await fetch(`/api/guide?id=${encodeURIComponent(pathId)}`);
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    const p = await res.json();
+    if (!p || !p.name) throw new Error('Data kosong');
+    render(p);
+  } catch(e) {
+    showError(e.message);
   }
+}
 
-  const projectId = getProjectId();
+function showError(msg) {
+  document.getElementById('loading-state').style.display = 'none';
+  const err = document.getElementById('error-state');
+  err.style.display = 'flex';
+  document.getElementById('error-msg').textContent = msg;
+}
 
-  if (!projectId) {
-    showError('ID project tidak ditemukan di URL.');
-  } else {
-    fetch(`/api/admin-airdrop?id=${encodeURIComponent(projectId)}`)
-      .then(r => {
-        if (!r.ok) throw new Error(`HTTP ${r.status}`);
-        return r.json();
-      })
-      .then(p => {
-        if (!p || !p.name) throw new Error('Data project tidak ditemukan');
-        document.title = `${p.name} — AirdropXI`;
-        render(p);
-      })
-      .catch(e => showError(e.message));
-  }
+// ── RENDER ────────────────────────────────────────────────
+function render(p) {
+  document.title = `${p.name} — AirdropXI`;
+  document.getElementById('loading-state').style.display = 'none';
 
-  function render(p) {
-    const stCls = getStCls(p.status);
+  const lang = localStorage.getItem('axi-lang') || 'id';
+  const isID = lang === 'id';
 
-    // ── Logo ──
-    const logoHtml = p.logo_url
-      ? `<div class="hero-logo"><img src="${x(p.logo_url)}" alt="${x(p.name)}" onerror="this.parentElement.innerHTML='🪂'"></div>`
-      : `<div class="hero-logo">🪂</div>`;
+  // Description
+  const desc = isID
+    ? (p.descriptionID || p.descriptionEN || '')
+    : (p.descriptionEN || p.descriptionID || '');
 
-    // ── Ext links ──
-    const extLinks = [
-      p.link     && `<a class="ext-link" href="${x(p.link)}" target="_blank" rel="noopener">🌐 Website</a>`,
-      p.twitter  && `<a class="ext-link" href="${x(p.twitter)}" target="_blank" rel="noopener">𝕏 Twitter</a>`,
-      p.discord  && `<a class="ext-link" href="${x(p.discord)}" target="_blank" rel="noopener">💬 Discord</a>`,
-      p.telegram && `<a class="ext-link" href="${x(p.telegram)}" target="_blank" rel="noopener">✈️ Telegram</a>`,
-    ].filter(Boolean).join('');
+  // Tasks
+  const tasksRaw = isID
+    ? (p.tasksID || p.tasksEN || '')
+    : (p.tasksEN || p.tasksID || '');
 
-    // ── Description ──
-    const desc = (p.descriptionID || p.descriptionEN || 'Deskripsi belum tersedia.');
-    const descHtml = desc.split('\n\n')
-      .map(para => `<p>${autoLink(x(para.trim()))}</p>`)
-      .join('');
+  const tasks = tasksRaw
+    .split('\n')
+    .map(l => l.trim())
+    .filter(l => l && !/^(tip:|💡|Q:|A:)/i.test(l))
+    .map(l => l.replace(/^(\d+[\.\)]\s*)/, ''));
 
-    // ── Testnet links ──
-    // Bisa dari kolom testnet_links (JSON string) atau parse dari tasksID
-    let testnetLinks = [];
-    if (p.testnet_links) {
-      try {
-        testnetLinks = typeof p.testnet_links === 'string'
-          ? JSON.parse(p.testnet_links)
-          : p.testnet_links;
-      } catch(e) { testnetLinks = []; }
-    }
+  // FAQ
+  const faqRaw = isID
+    ? (p.faqID || p.faqEN || '')
+    : (p.faqEN || p.faqID || '');
 
-    // ── Steps (parse dari tasksID) ──
-    const steps = parseSteps(p.tasksID || p.tasksEN || '');
+  const faqs = parseFaq(faqRaw);
 
-    // ── Tips (baris dimulai TIP: atau 💡) ──
-    const tips = parseTips(p.tasksID || p.tasksEN || '');
+  // Tags
+  const tags = (p.tags || '').split(',').map(t => t.trim()).filter(Boolean);
 
-    // ── FAQ ──
-    const faqs = parseFaq(p.faqID || p.faqEN || '');
+  // Logo
+  const logoHtml = p.logo_url
+    ? `<img src="${esc(p.logo_url)}" class="project-logo" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="${esc(p.name)}">
+       <div class="project-logo-fallback" style="display:none">🪂</div>`
+    : `<div class="project-logo-fallback">🪂</div>`;
 
-    // ── Key params ──
-    const kpRows = [
-      p.ticker       && ['Ticker',        p.ticker],
-      p.network      && ['Network/Chain',  p.network],
-      p.total_supply && ['Total Supply',   p.total_supply],
-      p.tge_date     && ['TGE / Listing',  p.tge_date],
-      p.RaisedID     && ['Dana Terkumpul', p.RaisedID],
-    ].filter(Boolean);
+  // Social links
+  const socials = [];
+  if (p.twitter)  socials.push(`<a href="${esc(p.twitter)}" target="_blank" rel="noopener" class="social-btn">𝕏 Twitter</a>`);
+  if (p.discord)  socials.push(`<a href="${esc(p.discord)}" target="_blank" rel="noopener" class="social-btn">💬 Discord</a>`);
+  if (p.telegram) socials.push(`<a href="${esc(p.telegram)}" target="_blank" rel="noopener" class="social-btn">✈️ Telegram</a>`);
 
-    document.getElementById('wrap').innerHTML = `
+  // Info grid items
+  const infoItems = [];
+  if (p.RaisedID || p.RaisedEN) infoItems.push({ label: 'Dana Terkumpul', value: isID ? (p.RaisedID || p.RaisedEN) : (p.RaisedEN || p.RaisedID), cls: 'green' });
+  if (p.ticker)       infoItems.push({ label: 'Ticker', value: '$' + p.ticker, cls: 'cyan' });
+  if (p.network)      infoItems.push({ label: 'Network', value: p.network, cls: '' });
+  if (p.total_supply) infoItems.push({ label: 'Total Supply', value: p.total_supply, cls: '' });
+  if (p.tge_date)     infoItems.push({ label: 'TGE Date', value: p.tge_date, cls: 'green' });
 
-      <!-- HERO -->
-      <div class="hero">
-        ${logoHtml}
-        <div class="hero-info">
-          <div class="ongoing-pill"><div class="ongoing-dot"></div>ONGOING</div>
-          <div class="hero-name">${x(p.name)}</div>
-          <div class="hero-badges">
-            <span class="badge ${stCls}">${x(p.status || 'TBA')}</span>
-            ${p.ticker  ? `<span class="badge b-blue">${x(p.ticker)}</span>` : ''}
-            ${p.network ? `<span class="badge b-default">${x(p.network)}</span>` : ''}
-          </div>
-          <div class="hero-meta">
-            ${p.tge_date  ? `<span>TGE: <span class="hero-meta-val">${x(p.tge_date)}</span></span>` : ''}
-            ${p.RaisedID  ? `<span>Raised: <span class="hero-meta-val">${x(p.RaisedID)}</span></span>` : ''}
-            ${p.network   ? `<span>Chain: <span class="hero-meta-val">${x(p.network)}</span></span>` : ''}
-          </div>
-          ${extLinks ? `<div class="hero-links">${extLinks}</div>` : ''}
+  const infoHTML = infoItems.length ? `
+    <div class="info-grid fade-in">
+      ${infoItems.map(i => `
+        <div class="info-card">
+          <div class="info-label">${esc(i.label)}</div>
+          <div class="info-value ${i.cls}">${esc(i.value)}</div>
         </div>
+      `).join('')}
+    </div>` : '';
+
+  // Description block
+  const descHTML = desc ? `
+    <div class="section-block fade-in">
+      <div class="section-block-title">📋 Tentang Project</div>
+      <p class="desc-text">${esc(desc).replace(/\n/g,'<br>')}</p>
+    </div>` : '';
+
+  // Tasks block
+  const tasksHTML = tasks.length ? `
+    <div class="section-block fade-in">
+      <div class="section-block-title">⚡ Langkah-langkah</div>
+      <div class="task-list">
+        ${tasks.map((t, i) => `
+          <div class="task-item">
+            <span class="task-num">${String(i+1).padStart(2,'0')}</span>
+            <span>${esc(t)}</span>
+          </div>
+        `).join('')}
       </div>
+    </div>` : '';
 
-      <div class="body-grid">
-        <div>
-
-          <!-- DESKRIPSI -->
-          <div class="sec">
-            <div class="sec-head"><div class="sec-bar"></div><div class="sec-title">Tentang Project</div></div>
-            <div class="sec-body"><div class="desc-text">${descHtml}</div></div>
+  // FAQ block
+  const faqHTML = faqs.length ? `
+    <div class="section-block fade-in">
+      <div class="section-block-title">❓ FAQ</div>
+      <div class="faq-list">
+        ${faqs.map((f, i) => `
+          <div class="faq-item" id="faq-${i}">
+            <div class="faq-q" onclick="toggleFaq(${i})">
+              <span>${esc(f.q)}</span>
+              <span class="faq-arrow">▼</span>
+            </div>
+            <div class="faq-a">${esc(f.a).replace(/\n/g,'<br>')}</div>
           </div>
+        `).join('')}
+      </div>
+    </div>` : '';
 
-          ${testnetLinks.length ? `
-          <!-- TESTNET LINKS -->
-          <div class="sec">
-            <div class="sec-head"><div class="sec-bar"></div><div class="sec-title">🔗 Testnet / Link Penting</div></div>
-            <div class="sec-body">
-              <div class="testnet-links">
-                ${testnetLinks.map((t,i) => `
-                  <a class="testnet-link" href="${x(t.url)}" target="_blank" rel="noopener">
-                    <div class="testnet-link-icon">🔗</div>
-                    <div>
-                      <div class="testnet-link-label">${x(t.label || `Link ${i+1}`)}</div>
-                      <div class="testnet-link-url">${x(t.url)}</div>
-                    </div>
-                    <div class="testnet-link-arrow">↗</div>
-                  </a>
-                `).join('')}
-              </div>
-            </div>
-          </div>` : ''}
-
-          ${kpRows.length ? `
-          <!-- KEY PARAMETERS -->
-          <div class="sec">
-            <div class="sec-head"><div class="sec-bar"></div><div class="sec-title">Key Parameters</div></div>
-            <div class="sec-body">
-              ${kpRows.map(([k,v]) => `
-                <div class="kp-item">
-                  <div class="kp-dot"></div>
-                  <div class="kp-key">${x(k)}</div>
-                  <div class="kp-val">${x(v)}</div>
-                </div>
-              `).join('')}
-            </div>
-          </div>` : ''}
-
-          ${steps.length ? `
-          <!-- GUIDE STEPS -->
-          <div class="sec">
-            <div class="sec-head"><div class="sec-bar"></div><div class="sec-title">📋 Cara Berpartisipasi</div></div>
-            <div class="sec-body">
-              <div class="steps">
-                ${steps.map((s,i) => `
-                  <div class="step">
-                    <div class="step-num">${i+1}</div>
-                    <div>
-                      <div class="step-title">${x(s.title)}</div>
-                      ${s.desc ? `<div class="step-desc">${autoLink(x(s.desc))}</div>` : ''}
-                    </div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </div>` : ''}
-
-          ${tips.length ? `
-          <!-- TIPS -->
-          <div class="sec">
-            <div class="sec-head"><div class="sec-bar"></div><div class="sec-title">💡 Tips & Strategi</div></div>
-            <div class="sec-body">
-              <div class="tips">
-                ${tips.map(t => `
-                  <div class="tip">
-                    <div class="tip-dot"></div>
-                    <div class="tip-text">${autoLink(x(t))}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </div>` : ''}
-
-          ${faqs.length ? `
-          <!-- FAQ -->
-          <div class="sec">
-            <div class="sec-head"><div class="sec-bar"></div><div class="sec-title">❓ FAQ</div></div>
-            <div class="sec-body">
-              <div class="faqs">
-                ${faqs.map(f => `
-                  <div class="faq">
-                    <div class="faq-q">${x(f.q)}</div>
-                    <div class="faq-a">${autoLink(x(f.a))}</div>
-                  </div>
-                `).join('')}
-              </div>
-            </div>
-          </div>` : ''}
-
+  // Render content
+  const content = document.getElementById('project-content');
+  content.innerHTML = `
+    <!-- Header -->
+    <div class="project-header fade-in">
+      ${logoHtml}
+      <div class="project-meta">
+        <div class="project-name">${esc(p.name)}</div>
+        <div class="badge-row">
+          <span class="badge ${getStatusClass(p.status)}">${esc(p.status || 'TBA')}</span>
+          ${tags.map(t => `<span class="badge badge-tag">${esc(t)}</span>`).join('')}
         </div>
+        ${socials.length ? `<div class="social-row">${socials.join('')}</div>` : ''}
+      </div>
+    </div>
 
-        <!-- SIDEBAR -->
-        <div class="sidebar">
-          ${kpRows.length ? `
-          <div class="sdb-card">
-            <div class="sdb-head">Parameter Airdrop</div>
-            <div class="sdb-body">
-              <div class="param-row"><span class="param-key">Status</span><span class="param-val g">${x(p.status||'TBA')}</span></div>
-              ${p.ticker       ? `<div class="param-row"><span class="param-key">Ticker</span><span class="param-val g">${x(p.ticker)}</span></div>` : ''}
-              ${p.network      ? `<div class="param-row"><span class="param-key">Network</span><span class="param-val">${x(p.network)}</span></div>` : ''}
-              ${p.tge_date     ? `<div class="param-row"><span class="param-key">TGE / Listing</span><span class="param-val y">${x(p.tge_date)}</span></div>` : ''}
-              ${p.total_supply ? `<div class="param-row"><span class="param-key">Total Supply</span><span class="param-val">${x(p.total_supply)}</span></div>` : ''}
-              ${p.RaisedID     ? `<div class="param-row"><span class="param-key">Dana Terkumpul</span><span class="param-val g">${x(p.RaisedID)}</span></div>` : ''}
-            </div>
-          </div>` : ''}
+    ${infoHTML}
+    ${descHTML}
+    ${tasksHTML}
+    ${faqHTML}
+  `;
+  content.style.display = 'block';
 
-          ${testnetLinks.length ? `
-          <div class="sdb-card">
-            <div class="sdb-head">Testnet Links (${testnetLinks.length})</div>
-            <div class="sdb-body" style="display:flex;flex-direction:column;gap:6px">
-              ${testnetLinks.map((t,i) => `
-                <a href="${x(t.url)}" target="_blank" rel="noopener"
-                   style="display:flex;align-items:center;gap:8px;padding:8px 10px;background:var(--bdim);border:1px solid var(--bborder);border-radius:7px;text-decoration:none;font-family:var(--mono);font-size:0.65rem;color:var(--blue);font-weight:700;transition:all .2s"
-                   onmouseover="this.style.background='rgba(59,130,246,.15)'"
-                   onmouseout="this.style.background='var(--bdim)'">
-                  🔗 ${x(t.label || `Link ${i+1}`)} ↗
-                </a>
-              `).join('')}
-            </div>
-          </div>` : ''}
+  // ── CTA BUTTONS ────────────────────────────────────────
+  renderCTA(p);
+}
 
-          ${p.link ? `<a class="cta-btn" href="${x(p.link)}" target="_blank" rel="noopener">⚡ GARAP SEKARANG</a>` : ''}
+function renderCTA(p) {
+  const ctaWrap = document.getElementById('cta-wrap');
+  const ctaBtns = document.getElementById('cta-buttons');
+  ctaWrap.style.display = 'flex';
+
+  // Parse testnet_links
+  let links = [];
+  if (p.testnet_links) {
+    try {
+      const parsed = typeof p.testnet_links === 'string'
+        ? JSON.parse(p.testnet_links)
+        : p.testnet_links;
+      if (Array.isArray(parsed) && parsed.length > 0) links = parsed;
+    } catch(e) {
+      // testnet_links bukan JSON valid, skip
+    }
+  }
+
+  if (links.length > 0) {
+    // Multi-link dropdown
+    const dropdownItems = links.map((l, i) => `
+      <a href="${esc(l.url)}" target="_blank" rel="noopener noreferrer" class="dropdown-item">
+        <div class="dropdown-item-icon">⚡</div>
+        <div>
+          <div class="dropdown-item-label">${esc(l.label || 'Link ' + (i+1))}</div>
+          <div class="dropdown-item-url">${esc(l.url)}</div>
+        </div>
+      </a>
+    `).join('');
+
+    ctaBtns.innerHTML = `
+      <div class="btn-dropdown-wrap" id="dropdown-wrap">
+        <button class="btn-dropdown-toggle" onclick="toggleDropdown()">
+          ⚡ Garap Sekarang
+          <span class="btn-arrow-ico">▲</span>
+        </button>
+        <div class="btn-dropdown-menu">
+          ${dropdownItems}
         </div>
       </div>
     `;
+  } else if (p.link) {
+    // Single link
+    ctaBtns.innerHTML = `
+      <a href="${esc(p.link)}" target="_blank" rel="noopener noreferrer" class="btn-main">
+        ⚡ Garap Sekarang
+      </a>
+    `;
+  } else {
+    ctaBtns.innerHTML = `
+      <button class="btn-main" style="opacity:.5;cursor:not-allowed" disabled>
+        ⚡ Link belum tersedia
+      </button>
+    `;
   }
 
-  // ── PARSERS ──────────────────────────────────────────────
-
-  // Format tasksID:
-  // "1. Judul | Deskripsi panjang"
-  // "1. Teks biasa"
-  function parseSteps(raw) {
-    if (!raw) return [];
-    return raw.split('\n')
-      .map(l => l.trim())
-      .filter(l => l && !/^(tip:|💡|Q:|A:)/i.test(l))
-      .map(l => {
-        const clean = l.replace(/^(\d+[\.\)]\s*|step\s*\d+[:\s]*)/i, '').trim();
-        if (!clean) return null;
-        if (clean.includes(' | ')) {
-          const [title, ...rest] = clean.split(' | ');
-          return { title: title.trim(), desc: rest.join(' | ').trim() };
-        }
-        return { title: clean, desc: '' };
-      })
-      .filter(Boolean);
-  }
-
-  // Format faqID:
-  // "Q: pertanyaan | A: jawaban"
-  // "Q: pertanyaan\nA: jawaban"
-  function parseFaq(raw) {
-    if (!raw) return [];
-    const faqs = [];
-    let q = '';
-    for (const line of raw.split('\n').map(l => l.trim()).filter(Boolean)) {
-      if (/^Q:/i.test(line)) {
-        // Inline: "Q: ... | A: ..."
-        if (/ \| A:/i.test(line)) {
-          const [qp, ap] = line.split(/ \| A:/i);
-          faqs.push({ q: qp.replace(/^Q:\s*/i,'').trim(), a: ap.trim() });
-        } else {
-          q = line.replace(/^Q:\s*/i,'').trim();
-        }
-      } else if (/^A:/i.test(line) && q) {
-        faqs.push({ q, a: line.replace(/^A:\s*/i,'').trim() });
-        q = '';
-      }
+  // Close dropdown kalau klik di luar
+  document.addEventListener('click', function(e) {
+    const wrap = document.getElementById('dropdown-wrap');
+    if (wrap && !wrap.contains(e.target)) {
+      wrap.classList.remove('open');
     }
-    return faqs;
-  }
+  });
+}
 
-  // Tips: baris dimulai "TIP:", "💡"
-  function parseTips(raw) {
-    if (!raw) return [];
-    return raw.split('\n')
-      .map(l => l.trim())
-      .filter(l => /^(tip:|💡)/i.test(l))
-      .map(l => l.replace(/^(tip:\s*|💡\s*)/i,'').trim())
-      .filter(Boolean);
-  }
+function toggleDropdown() {
+  const wrap = document.getElementById('dropdown-wrap');
+  if (wrap) wrap.classList.toggle('open');
+}
 
-  // Auto-link URL di teks jadi clickable biru
-  function autoLink(text) {
-    return text.replace(
-      /(https?:\/\/[^\s<"']+)/g,
-      '<a href="$1" target="_blank" rel="noopener" style="color:var(--blue);text-decoration:underline">$1</a>'
-    );
-  }
+// ── FAQ TOGGLE ────────────────────────────────────────────
+function toggleFaq(i) {
+  const item = document.getElementById('faq-' + i);
+  if (item) item.classList.toggle('open');
+}
 
-  function getStCls(s) {
-    const l = (s||'').toLowerCase();
-    if (l.includes('active')) return 'b-active';
-    if (l.includes('wait'))   return 'b-waitlist';
-    return 'b-default';
+// ── FAQ PARSER ────────────────────────────────────────────
+// Format: "Q: pertanyaan\nA: jawaban\n\nQ: ..."
+function parseFaq(raw) {
+  if (!raw || !raw.trim()) return [];
+  const result = [];
+  const blocks = raw.split(/\n{2,}/);
+  for (const block of blocks) {
+    const qMatch = block.match(/Q:\s*(.+)/i);
+    const aMatch = block.match(/A:\s*([\s\S]+)/i);
+    if (qMatch && aMatch) {
+      result.push({ q: qMatch[1].trim(), a: aMatch[1].trim() });
+    }
   }
+  return result;
+}
 
-  function x(s) {
-    return String(s||'')
-      .replace(/&/g,'&amp;')
-      .replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;')
-      .replace(/"/g,'&quot;');
-  }
-
-  function showError(msg) {
-    document.getElementById('wrap').innerHTML =
-      `<div class="state-msg err">❌ ${msg}<br><br><a href="../index.html" style="color:var(--accent)">← Kembali ke dashboard</a></div>`;
-  }
+// ── INIT ──────────────────────────────────────────────────
+loadProject();
 </script>
 </body>
 </html>
