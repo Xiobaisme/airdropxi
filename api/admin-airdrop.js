@@ -82,30 +82,36 @@ module.exports = async function handler(req, res) {
   }
 
   // ── GET ──────────────────────────────────────────────
-  if (req.method === 'GET') {
-    try {
-      // Baca dari proyek untuk form edit (data lengkap)
-      // Kalau ada id, cari by airdrop_id (integer)
-      const endpoint = id
-        ? `${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}&limit=1`
-        : `${BASE}/airdrops?select=*&order=created_at.desc`;
-
-      const r = await fetch(endpoint, { headers: H });
+if (req.method === 'GET') {
+  try {
+    if (!id) {
+      const r = await fetch(`${BASE}/airdrops?select=*&order=created_at.desc`, { headers: H });
       const data = await r.json();
-
       if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
-
-      if (id) {
-        if (!data || data.length === 0)
-          return res.status(404).json({ error: 'Project tidak ditemukan' });
-        return res.status(200).json(data[0]);
-      }
-
       return res.status(200).json(Array.isArray(data) ? data : []);
-    } catch (e) {
-      return res.status(500).json({ error: e.message });
     }
+
+    const [r1, r2] = await Promise.all([
+      fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}&limit=1`, { headers: H }),
+      fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}&limit=1`, { headers: H }),
+    ]);
+
+    const airdropsData = await r1.json();
+    const proyekData   = await r2.json();
+
+    if (!r1.ok) return res.status(r1.status).json({ error: serializeError(airdropsData) });
+    if (!airdropsData || airdropsData.length === 0)
+      return res.status(404).json({ error: 'Project tidak ditemukan' });
+
+    const base   = airdropsData[0];
+    const extra  = (proyekData && proyekData.length > 0) ? proyekData[0] : {};
+    const merged = { ...base, ...extra, id: base.id };
+
+    return res.status(200).json(merged);
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
+}
 
   // ── POST ─────────────────────────────────────────────
   if (req.method === 'POST') {
