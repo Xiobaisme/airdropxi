@@ -1,20 +1,12 @@
 {
-  "routes": [
-    { "handle": "filesystem" },
-
+  "rewrites": [
     {
-      "src": "^/sitemap.xml$",
-      "dest": "/api/sitemap"
+      "source": "/guide/:id",
+      "destination": "/guide.html"
     },
-
     {
-      "src": "^/guide/(.*)",
-      "dest": "/guide.html"
-    },
-
-    {
-      "src": "^/$",
-      "dest": "/index.html"
+      "source": "/sitemap.xml",
+      "destination": "/api/sitemap"
     }
   ]
 }
