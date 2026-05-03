@@ -2,7 +2,7 @@
   "name": "airdropxi",
   "version": "1.0.0",
   "scripts": {
-    "build": "echo 'static site'"
+    "build": "echo build done"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.3",
