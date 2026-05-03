@@ -4,7 +4,7 @@
 
     {
       "src": "^/sitemap.xml$",
-      "dest": "/sitemap.js"
+      "dest": "/api/sitemap"
     },
 
     {
