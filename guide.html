@@ -786,12 +786,12 @@ function toggleFaq(i) {
 function parseFaq(raw) {
   if (!raw || !raw.trim()) return [];
   const result = [];
-  const blocks = raw.split(/\n{2,}/);
-  for (const block of blocks) {
-    const qMatch = block.match(/Q:\s*(.+)/i);
-    const aMatch = block.match(/A:\s*([\s\S]+)/i);
-    if (qMatch && aMatch) {
-      result.push({ q: qMatch[1].trim(), a: aMatch[1].trim() });
+  const lines = raw.split('\n').map(l => l.trim()).filter(Boolean);
+  for (const line of lines) {
+    // Format: "Q: pertanyaan | A: jawaban"
+    const match = line.match(/^Q:\s*(.+?)\s*\|\s*A:\s*(.+)$/i);
+    if (match) {
+      result.push({ q: match[1].trim(), a: match[2].trim() });
     }
   }
   return result;
