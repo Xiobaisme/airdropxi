@@ -33,10 +33,6 @@ export default async function handler(req, res) {
   <url>
     <loc>${baseUrl}/docs.html</loc>
     <priority>0.8</priority>
-  </url>
-  <url>
-    <loc>${baseUrl}/admin.html</loc>
-    <priority>0.5</priority>
   </url>`;
 
     if (airdrops && airdrops.length > 0) {
@@ -49,7 +45,8 @@ export default async function handler(req, res) {
       });
     }
 
-    xml += `\n</urlset>`;
+    xml += `
+</urlset>`;
 
     res.setHeader('Content-Type', 'text/xml');
     res.status(200).send(xml);
