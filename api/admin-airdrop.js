@@ -125,10 +125,14 @@ module.exports = async function handler(req, res) {
       if (!newId) throw new Error('Gagal dapat ID setelah insert ke airdrops');
 
       // 2. Insert ke proyek dengan airdrop_id = integer id dari airdrops
-      fetch(`${BASE}/proyek`, {
-        method: 'POST', headers: H,
-        body: JSON.stringify(buildProyekPayload(req.body, newId)),
-      }).catch(e => console.warn('Sync proyek POST gagal:', e.message));
+const r2 = await fetch(`${BASE}/proyek`, {
+  method: 'POST', headers: H,
+  body: JSON.stringify(buildProyekPayload(req.body, newId)),
+});
+if (!r2.ok) {
+  const err2 = await r2.json().catch(() => ({}));
+  console.error('Sync proyek gagal:', JSON.stringify(err2));
+}
 
       return res.status(201).json(Array.isArray(result1) ? result1 : [result1]);
     } catch (e) {
@@ -153,10 +157,10 @@ module.exports = async function handler(req, res) {
       if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result || text) });
 
       // 2. Update proyek by airdrop_id (best effort)
-      fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`, {
-        method: 'PATCH', headers: H,
-        body: JSON.stringify(buildProyekPayload(req.body)),
-      }).catch(e => console.warn('Sync proyek PATCH gagal:', e.message));
+      await fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`, {
+  method: 'PATCH', headers: H,
+  body: JSON.stringify(buildProyekPayload(req.body)),
+});
 
       const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...buildAirdropsPayload(req.body) }]);
       return res.status(200).json(updated);
