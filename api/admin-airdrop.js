@@ -1,7 +1,4 @@
 // api/admin-airdrop.js
-// airdrops = data simpel (index homepage)
-// proyek   = data lengkap (guide/detail) — relasi via airdrop_id
-
 module.exports = async function handler(req, res) {
   const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -33,7 +30,6 @@ module.exports = async function handler(req, res) {
     return JSON.stringify(val);
   }
 
-  // Payload untuk tabel airdrops (index)
   function buildAirdropsPayload(p) {
     return {
       name:          p.name          || null,
@@ -50,7 +46,6 @@ module.exports = async function handler(req, res) {
     };
   }
 
-  // Payload untuk tabel proyek (detail/guide)
   function buildProyekPayload(p, airdropsId) {
     const payload = {
       name:          p.name          || null,
@@ -76,42 +71,41 @@ module.exports = async function handler(req, res) {
       faqEN:         p.faqEN         || null,
       testnet_links: p.testnet_links || null,
     };
-    // Tambah airdrop_id kalau ada
     if (airdropsId !== undefined) payload.airdrop_id = airdropsId;
     return payload;
   }
 
   // ── GET ──────────────────────────────────────────────
-if (req.method === 'GET') {
-  try {
-    if (!id) {
-      const r = await fetch(`${BASE}/airdrops?select=*&order=created_at.desc`, { headers: H });
-      const data = await r.json();
-      if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
-      return res.status(200).json(Array.isArray(data) ? data : []);
+  if (req.method === 'GET') {
+    try {
+      if (!id) {
+        const r = await fetch(`${BASE}/airdrops?select=*&order=created_at.desc`, { headers: H });
+        const data = await r.json();
+        if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
+        return res.status(200).json(Array.isArray(data) ? data : []);
+      }
+
+      const [r1, r2] = await Promise.all([
+        fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}&limit=1`, { headers: H }),
+        fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}&limit=1`, { headers: H }),
+      ]);
+
+      const airdropsData = await r1.json();
+      const proyekData   = await r2.json();
+
+      if (!r1.ok) return res.status(r1.status).json({ error: serializeError(airdropsData) });
+      if (!airdropsData || airdropsData.length === 0)
+        return res.status(404).json({ error: 'Project tidak ditemukan' });
+
+      const base   = airdropsData[0];
+      const extra  = (proyekData && proyekData.length > 0) ? proyekData[0] : {};
+      const merged = { ...base, ...extra, id: base.id };
+
+      return res.status(200).json(merged);
+    } catch (e) {
+      return res.status(500).json({ error: e.message });
     }
-
-    const [r1, r2] = await Promise.all([
-      fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}&limit=1`, { headers: H }),
-      fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}&limit=1`, { headers: H }),
-    ]);
-
-    const airdropsData = await r1.json();
-    const proyekData   = await r2.json();
-
-    if (!r1.ok) return res.status(r1.status).json({ error: serializeError(airdropsData) });
-    if (!airdropsData || airdropsData.length === 0)
-      return res.status(404).json({ error: 'Project tidak ditemukan' });
-
-    const base   = airdropsData[0];
-    const extra  = (proyekData && proyekData.length > 0) ? proyekData[0] : {};
-    const merged = { ...base, ...extra, id: base.id };
-
-    return res.status(200).json(merged);
-  } catch (e) {
-    return res.status(500).json({ error: e.message });
   }
-}
 
   // ── POST ─────────────────────────────────────────────
   if (req.method === 'POST') {
@@ -119,7 +113,6 @@ if (req.method === 'GET') {
       return res.status(400).json({ error: 'Field "name" wajib diisi' });
 
     try {
-      // 1. Insert ke airdrops dulu — dapat integer id
       const r1 = await fetch(`${BASE}/airdrops`, {
         method: 'POST', headers: H,
         body: JSON.stringify(buildAirdropsPayload(req.body)),
@@ -130,15 +123,14 @@ if (req.method === 'GET') {
       const newId = Array.isArray(result1) ? result1[0]?.id : result1?.id;
       if (!newId) throw new Error('Gagal dapat ID setelah insert ke airdrops');
 
-      // 2. Insert ke proyek dengan airdrop_id = integer id dari airdrops
-const r2 = await fetch(`${BASE}/proyek`, {
-  method: 'POST', headers: H,
-  body: JSON.stringify(buildProyekPayload(req.body, newId)),
-});
-if (!r2.ok) {
-  const err2 = await r2.json().catch(() => ({}));
-  console.error('Sync proyek gagal:', JSON.stringify(err2));
-}
+      const r2 = await fetch(`${BASE}/proyek`, {
+        method: 'POST', headers: H,
+        body: JSON.stringify(buildProyekPayload(req.body, newId)),
+      });
+      if (!r2.ok) {
+        const err2 = await r2.json().catch(() => ({}));
+        console.error('Sync proyek gagal:', JSON.stringify(err2));
+      }
 
       return res.status(201).json(Array.isArray(result1) ? result1 : [result1]);
     } catch (e) {
@@ -151,7 +143,7 @@ if (!r2.ok) {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
     try {
-      // 1. Update airdrops (data simpel)
+      // 1. Update tabel airdrops
       const r1 = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, {
         method: 'PATCH', headers: H,
         body: JSON.stringify(buildAirdropsPayload(req.body)),
@@ -162,21 +154,29 @@ if (!r2.ok) {
       if (text) { try { result = JSON.parse(text); } catch(e) { result = null; } }
       if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result || text) });
 
-      // 2. Update proyek by airdrop_id — dengan timeout
-const controller = new AbortController();
-const timeout = setTimeout(() => controller.abort(), 8000);
-try {
-  await fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`, {
-    method: 'PATCH',
-    headers: H,
-    body: JSON.stringify(buildProyekPayload(req.body)),
-    signal: controller.signal,
-  });
-} catch(e) {
-  console.warn('Sync proyek PATCH timeout/error:', e.message);
-} finally {
-  clearTimeout(timeout);
-}
+      // 2. Ambil integer id dari airdrops dulu
+      const rCheck = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}&select=id`, { headers: H });
+      const checkData = await rCheck.json();
+      const intId = checkData?.[0]?.id;
+
+      // 3. Update tabel proyek pakai integer airdrop_id
+      if (intId !== undefined) {
+        const controller = new AbortController();
+        const timeout = setTimeout(() => controller.abort(), 8000);
+        try {
+          await fetch(`${BASE}/proyek?airdrop_id=eq.${intId}`, {
+            method: 'PATCH',
+            headers: H,
+            body: JSON.stringify(buildProyekPayload(req.body)),
+            signal: controller.signal,
+          });
+        } catch(e) {
+          console.warn('Sync proyek PATCH timeout/error:', e.message);
+        } finally {
+          clearTimeout(timeout);
+        }
+      }
+
       const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...buildAirdropsPayload(req.body) }]);
       return res.status(200).json(updated);
     } catch (e) {
@@ -189,10 +189,22 @@ try {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
     try {
-      const [r1, r2] = await Promise.all([
-        fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`,          { method: 'DELETE', headers: H }),
-        fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`,    { method: 'DELETE', headers: H }),
-      ]);
+      // Ambil integer id dulu sebelum delete
+      const rCheck = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}&select=id`, { headers: H });
+      const checkData = await rCheck.json();
+      const intId = checkData?.[0]?.id;
+
+      const deletePromises = [
+        fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: H }),
+      ];
+
+      if (intId !== undefined) {
+        deletePromises.push(
+          fetch(`${BASE}/proyek?airdrop_id=eq.${intId}`, { method: 'DELETE', headers: H })
+        );
+      }
+
+      const [r1] = await Promise.all(deletePromises);
 
       if (!r1.ok) {
         const err = await r1.json().catch(() => ({}));
