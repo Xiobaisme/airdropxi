@@ -1,8 +1,20 @@
 {
-  "rewrites": [
+  "routes": [
+    { "handle": "filesystem" },
+
     {
-      "source": "/guide/:id",
-      "destination": "/guide/index.html"
+      "src": "^/sitemap.xml$",
+      "dest": "/sitemap.js"
+    },
+
+    {
+      "src": "^/guide/(.*)",
+      "dest": "/guide.html"
+    },
+
+    {
+      "src": "^/$",
+      "dest": "/index.html"
     }
   ]
 }
