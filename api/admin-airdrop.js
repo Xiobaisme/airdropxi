@@ -156,12 +156,21 @@ if (!r2.ok) {
       if (text) { try { result = JSON.parse(text); } catch(e) { result = null; } }
       if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result || text) });
 
-      // 2. Update proyek by airdrop_id (best effort)
-      await fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`, {
-  method: 'PATCH', headers: H,
-  body: JSON.stringify(buildProyekPayload(req.body)),
-});
-
+      // 2. Update proyek by airdrop_id — dengan timeout
+const controller = new AbortController();
+const timeout = setTimeout(() => controller.abort(), 8000);
+try {
+  await fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`, {
+    method: 'PATCH',
+    headers: H,
+    body: JSON.stringify(buildProyekPayload(req.body)),
+    signal: controller.signal,
+  });
+} catch(e) {
+  console.warn('Sync proyek PATCH timeout/error:', e.message);
+} finally {
+  clearTimeout(timeout);
+}
       const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...buildAirdropsPayload(req.body) }]);
       return res.status(200).json(updated);
     } catch (e) {
