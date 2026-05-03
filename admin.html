@@ -345,7 +345,7 @@
     list.innerHTML = projects.map(p => {
       const isLive = p.published === true;
       return `
-        <div class="proj-item ${editingId === p.id ? 'active' : ''}" onclick="loadEdit('${p.id}')">
+        <div class="proj-item ${editingId == p.id ? 'active' : ''}" onclick="loadEdit(${p.id})">
           <div style="flex:1;min-width:0">
             <div class="proj-item-name">${esc(p.name)}</div>
             <div style="margin-top:4px;display:flex;gap:4px;align-items:center">
@@ -370,7 +370,14 @@
   }
 
   function newForm()    { editingId = null; renderList(); renderForm(null); }
-  function loadEdit(id) { editingId = id;   renderList(); renderForm(projects.find(p => p.id === id)); }
+  function loadEdit(id) {
+  editingId = id;
+  renderList();
+  fetch(`/api/admin-airdrop?id=${id}`)
+    .then(r => r.json())
+    .then(data => { if (data.error) showToast(data.error, 'error'); else renderForm(data); })
+    .catch(e => showToast('Gagal load: ' + e.message, 'error'));
+}
 
   // ── RENDER FORM ───────────────────────────────────────
   function renderForm(data) {
