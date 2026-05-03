@@ -1,0 +1,7 @@
+{
+  "routes": [
+    { "handle": "filesystem" },
+    { "src": "/sitemap.xml", "dest": "/api/sitemap.js" },
+    { "src": "/guide/(.*)", "dest": "/guide.html" }
+  ]
+}
