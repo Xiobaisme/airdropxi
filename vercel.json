@@ -2,6 +2,7 @@
   "routes": [
     { "handle": "filesystem" },
     { "src": "/sitemap.xml", "dest": "/api/sitemap.js" },
+    { "src": "/robots.txt", "dest": "/robots.txt" },
     { "src": "/guide", "dest": "/guide.html" },
     { "src": "/guide/(.*)", "dest": "/guide.html" }
   ]
