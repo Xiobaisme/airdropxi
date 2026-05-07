@@ -12,7 +12,6 @@ export default async function handler(req, res) {
   try {
     const { data: airdrops, error } = await supabase
       .from('airdrops')
-      .select('id, updated_at'); // ambil updated_at kalau ada
 
     if (error) throw error;
 
@@ -50,10 +49,6 @@ export default async function handler(req, res) {
   </url>`;
 
     airdrops?.forEach((item) => {
-      const lastmod = item.updated_at
-        ? item.updated_at.split('T')[0]
-        : today;
-
       xml += `
   <url>
     <loc>${baseUrl}/detail.html?id=${item.id}</loc>
