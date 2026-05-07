@@ -7,13 +7,25 @@ const supabase = createClient(
 
 export default async function handler(req, res) {
   const baseUrl = 'https://airdropxi.vercel.app';
-  const today = new Date().toISOString().split('T')[0]; // 2025-05-07
+  const today = new Date().toISOString().split('T')[0];
 
   try {
     const { data: airdrops, error } = await supabase
       .from('airdrops')
+      .select('id');
 
     if (error) throw error;
+
+    // DEBUG SEMENTARA
+    if (!airdrops || airdrops.length === 0) {
+      res.setHeader('Content-Type', 'application/json');
+      res.status(200).json({ 
+        message: 'query sukses tapi data kosong',
+        count: airdrops?.length,
+        airdrops: airdrops
+      });
+      return;
+    }
 
     let xml = `<?xml version="1.0" encoding="UTF-8"?>
 <urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
@@ -48,11 +60,11 @@ export default async function handler(req, res) {
     <priority>0.7</priority>
   </url>`;
 
-    airdrops?.forEach((item) => {
+    airdrops.forEach((item) => {
       xml += `
   <url>
     <loc>${baseUrl}/detail.html?id=${item.id}</loc>
-    <lastmod>${lastmod}</lastmod>
+    <lastmod>${today}</lastmod>
     <changefreq>weekly</changefreq>
     <priority>0.6</priority>
   </url>`;
@@ -60,17 +72,16 @@ export default async function handler(req, res) {
 
     xml += `\n</urlset>`;
 
-    res.setHeader('Content-Type', 'application/xml'); // ← lebih proper dari text/xml
-    res.setHeader('Cache-Control', 's-maxage=3600'); // cache 1 jam di Vercel
+    res.setHeader('Content-Type', 'application/xml');
+    res.setHeader('Cache-Control', 's-maxage=3600');
     res.status(200).send(xml);
 
- } catch (err) {
-    // TEMPORARY DEBUG - hapus setelah fix
+  } catch (err) {
     res.setHeader('Content-Type', 'application/json');
     res.status(500).json({ 
       error: err.message,
       supabase_url: process.env.SUPABASE_URL ? 'ADA' : 'TIDAK ADA',
-      supabase_key: process.env.SUPABASE_ANON_KEY ? 'ADA' : 'TIDAK ADA'
+      supabase_key: process.env.SUPABASE_SITEMAP_KEY ? 'ADA' : 'TIDAK ADA'
     });
   }
 }
