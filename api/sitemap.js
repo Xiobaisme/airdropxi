@@ -69,11 +69,13 @@ export default async function handler(req, res) {
     res.setHeader('Cache-Control', 's-maxage=3600'); // cache 1 jam di Vercel
     res.status(200).send(xml);
 
-  } catch (err) {
-    // Return valid XML even on error (bukan JSON)
-    res.setHeader('Content-Type', 'application/xml');
-    res.status(500).send(`<?xml version="1.0" encoding="UTF-8"?>
-<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">
-</urlset>`);
+ } catch (err) {
+    // TEMPORARY DEBUG - hapus setelah fix
+    res.setHeader('Content-Type', 'application/json');
+    res.status(500).json({ 
+      error: err.message,
+      supabase_url: process.env.SUPABASE_URL ? 'ADA' : 'TIDAK ADA',
+      supabase_key: process.env.SUPABASE_ANON_KEY ? 'ADA' : 'TIDAK ADA'
+    });
   }
 }
