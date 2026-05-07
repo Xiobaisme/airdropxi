@@ -1,9 +1,7 @@
 {
-  "routes": [
-    { "handle": "filesystem" },
-    { "src": "/sitemap.xml", "dest": "/api/sitemap.js" },
-    { "src": "/robots.txt", "dest": "/robots.txt" },
-    { "src": "/guide", "dest": "/guide.html" },
-    { "src": "/guide/(.*)", "dest": "/guide.html" }
+  "rewrites": [
+    { "source": "/sitemap.xml", "destination": "/api/sitemap" },
+    { "source": "/guide", "destination": "/guide.html" },
+    { "source": "/guide/(.*)", "destination": "/guide.html" }
   ]
 }
