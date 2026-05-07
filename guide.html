@@ -6,28 +6,30 @@
 <link rel="icon" type="image/png" href="/logo.png">
 <title>Guide — AirdropXI</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
-<link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
 <link rel="stylesheet" href="/css/style.css">
 <style>
   *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
   :root {
     --g: #00e87a;
+    --g2: #00c87a;
     --c: #00c8f0;
     --accent: #7c6dfa;
-    --bg: #060c12;
-    --surface: #0b1520;
-    --surface2: #0f1c2a;
-    --surface3: #132030;
-    --border: rgba(255,255,255,0.06);
-    --border2: rgba(255,255,255,0.11);
-    --border3: rgba(0,232,122,0.15);
-    --text: #e2edf8;
-    --text2: #5f7d96;
-    --text3: #3a5268;
-    --radius: 16px;
+    --bg: #050b10;
+    --surface: #091219;
+    --surface2: #0c1822;
+    --surface3: #101e2a;
+    --border: rgba(255,255,255,0.055);
+    --border2: rgba(255,255,255,0.10);
+    --border3: rgba(0,232,122,0.18);
+    --text: #ddeaf6;
+    --text2: #567085;
+    --text3: #2f4a5e;
+    --radius: 18px;
     --mono: 'JetBrains Mono', monospace;
-    --sans: 'Plus Jakarta Sans', sans-serif;
+    --sans: 'Space Grotesk', sans-serif;
+    --display: 'Syne', sans-serif;
   }
 
   body {
@@ -38,15 +40,27 @@
     overflow-x: hidden;
   }
 
-  /* ── NOISE TEXTURE ── */
+  /* ── GRID BG ── */
   body::before {
     content: '';
     position: fixed;
     inset: 0;
-    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    background-image:
+      linear-gradient(rgba(0,232,122,.018) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,232,122,.018) 1px, transparent 1px);
+    background-size: 48px 48px;
     pointer-events: none;
     z-index: 0;
-    opacity: 0.4;
+  }
+
+  body::after {
+    content: '';
+    position: fixed;
+    top: 0; left: 0; right: 0;
+    height: 300px;
+    background: radial-gradient(ellipse 80% 60% at 50% -10%, rgba(0,232,122,.07), transparent);
+    pointer-events: none;
+    z-index: 0;
   }
 
   /* ── NAV ── */
@@ -54,15 +68,16 @@
     position: sticky;
     top: 0;
     z-index: 100;
-    background: rgba(6,12,18,0.88);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(5,11,16,0.85);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     border-bottom: 1px solid var(--border);
-    padding: 0 28px;
-    height: 56px;
+    padding: 0 32px;
+    height: 58px;
     display: flex;
     align-items: center;
     justify-content: space-between;
+    gap: 16px;
   }
 
   .back-btn {
@@ -72,9 +87,9 @@
     color: var(--text2);
     text-decoration: none;
     font-family: var(--mono);
-    font-size: 11px;
+    font-size: 10px;
     font-weight: 500;
-    letter-spacing: .06em;
+    letter-spacing: .1em;
     transition: color .2s;
     text-transform: uppercase;
   }
@@ -88,6 +103,7 @@
     gap: 8px;
     text-decoration: none;
     color: var(--text);
+    font-family: var(--display);
     font-weight: 800;
     font-size: 15px;
     letter-spacing: -.3px;
@@ -95,38 +111,51 @@
   .nav-logo-sm img { width: 26px; height: 26px; border-radius: 7px; }
   .nav-logo-sm span { color: var(--g); }
 
+  /* ── LANG TOGGLE ── */
+  .lang-toggle {
+    display: flex;
+    align-items: center;
+    background: var(--surface2);
+    border: 1px solid var(--border2);
+    border-radius: 9px;
+    overflow: hidden;
+    gap: 0;
+  }
+  .lang-btn {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: .08em;
+    padding: 6px 13px;
+    cursor: pointer;
+    border: none;
+    background: transparent;
+    color: var(--text3);
+    transition: all .2s;
+    text-transform: uppercase;
+  }
+  .lang-btn.active {
+    background: rgba(0,232,122,.12);
+    color: var(--g);
+  }
+  .lang-btn:hover:not(.active) { color: var(--text2); }
+
   /* ── HERO BANNER ── */
   .project-hero {
     position: relative;
     z-index: 1;
-    background: linear-gradient(180deg, rgba(0,232,122,.04) 0%, transparent 100%);
-    border-bottom: 1px solid var(--border);
-    padding: 48px 28px 36px;
+    padding: 52px 32px 44px;
     overflow: hidden;
-  }
-  .project-hero::before {
-    content: '';
-    position: absolute;
-    top: -80px; left: -80px;
-    width: 400px; height: 400px;
-    background: radial-gradient(circle, rgba(0,232,122,.08) 0%, transparent 70%);
-    pointer-events: none;
-  }
-  .project-hero::after {
-    content: '';
-    position: absolute;
-    bottom: -60px; right: -60px;
-    width: 300px; height: 300px;
-    background: radial-gradient(circle, rgba(0,200,240,.05) 0%, transparent 70%);
-    pointer-events: none;
+    border-bottom: 1px solid var(--border);
   }
 
   .hero-inner {
-    max-width: 860px;
+    max-width: 900px;
     margin: 0 auto;
-    display: flex;
-    align-items: flex-start;
-    gap: 24px;
+    display: grid;
+    grid-template-columns: auto 1fr;
+    gap: 28px;
+    align-items: start;
     position: relative;
     z-index: 1;
   }
@@ -136,33 +165,24 @@
     flex-shrink: 0;
   }
   .project-logo {
-    width: 80px; height: 80px;
-    border-radius: 18px;
+    width: 88px; height: 88px;
+    border-radius: 20px;
     object-fit: cover;
     border: 1px solid var(--border2);
     background: var(--surface2);
     display: block;
+    box-shadow: 0 0 0 6px rgba(0,232,122,.05);
   }
   .project-logo-fallback {
-    width: 80px; height: 80px;
-    border-radius: 18px;
+    width: 88px; height: 88px;
+    border-radius: 20px;
     background: rgba(0,232,122,.06);
     border: 1px solid rgba(0,232,122,.15);
     display: flex;
     align-items: center;
     justify-content: center;
-    font-size: 34px;
+    font-size: 36px;
   }
-  .logo-glow {
-    position: absolute;
-    inset: -4px;
-    border-radius: 22px;
-    background: radial-gradient(ellipse, rgba(0,232,122,.2), transparent 70%);
-    z-index: -1;
-    opacity: 0;
-    transition: opacity .3s;
-  }
-  .project-logo-wrap:hover .logo-glow { opacity: 1; }
 
   .project-hero-meta { flex: 1; min-width: 0; }
 
@@ -170,34 +190,34 @@
     font-family: var(--mono);
     font-size: 10px;
     color: var(--g);
-    letter-spacing: .15em;
+    letter-spacing: .18em;
     text-transform: uppercase;
-    margin-bottom: 8px;
+    margin-bottom: 10px;
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 8px;
+    opacity: .8;
   }
-  .project-eyebrow::before {
-    content: '';
-    width: 16px; height: 1px;
-    background: var(--g);
-    opacity: .5;
+  .eyebrow-line {
+    width: 20px; height: 1px;
+    background: linear-gradient(90deg, var(--g), transparent);
   }
 
   .project-name {
-    font-size: 32px;
+    font-family: var(--display);
+    font-size: 38px;
     font-weight: 800;
-    letter-spacing: -1px;
+    letter-spacing: -1.5px;
     color: var(--text);
-    line-height: 1.15;
-    margin-bottom: 12px;
+    line-height: 1.1;
+    margin-bottom: 14px;
   }
 
   .badge-row {
     display: flex;
     flex-wrap: wrap;
     gap: 6px;
-    margin-bottom: 16px;
+    margin-bottom: 18px;
   }
   .badge {
     font-family: var(--mono);
@@ -238,55 +258,58 @@
 
   /* ── MAIN LAYOUT ── */
   .guide-wrap {
-    max-width: 860px;
+    max-width: 900px;
     margin: 0 auto;
-    padding: 28px 28px 200px;
+    padding: 32px 32px 200px;
     position: relative;
     z-index: 1;
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 0;
   }
 
   /* ── INFO STRIP ── */
   .info-strip {
     display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(160px, 1fr));
+    grid-template-columns: repeat(auto-fill, minmax(150px, 1fr));
     gap: 10px;
-    margin-bottom: 24px;
+    margin-bottom: 28px;
   }
   .info-chip {
     background: var(--surface);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    padding: 14px 16px;
+    border-radius: 14px;
+    padding: 16px 18px;
     position: relative;
     overflow: hidden;
-    transition: border-color .2s;
+    transition: border-color .2s, transform .2s;
   }
-  .info-chip:hover { border-color: var(--border3); }
+  .info-chip:hover { border-color: var(--border3); transform: translateY(-1px); }
   .info-chip::before {
     content: '';
     position: absolute;
     top: 0; left: 0; right: 0;
     height: 1px;
-    background: linear-gradient(90deg, transparent, rgba(0,232,122,.3), transparent);
+    background: linear-gradient(90deg, transparent, var(--g), transparent);
     opacity: 0;
     transition: opacity .2s;
   }
-  .info-chip:hover::before { opacity: 1; }
+  .info-chip:hover::before { opacity: .4; }
   .info-label {
     font-family: var(--mono);
     font-size: 9px;
     color: var(--text3);
-    letter-spacing: .12em;
+    letter-spacing: .14em;
     text-transform: uppercase;
-    margin-bottom: 7px;
+    margin-bottom: 8px;
   }
   .info-value {
     font-family: var(--mono);
     font-size: 14px;
     font-weight: 700;
   }
-  .info-value.green { color: var(--g); }
-  .info-value.cyan  { color: var(--c); }
+  .info-value.green  { color: var(--g); }
+  .info-value.cyan   { color: var(--c); }
   .info-value.purple { color: var(--accent); }
   .info-value.default { color: var(--text); }
 
@@ -295,161 +318,176 @@
     background: var(--surface);
     border: 1px solid var(--border);
     border-radius: var(--radius);
-    margin-bottom: 14px;
+    margin-bottom: 16px;
     overflow: hidden;
     transition: border-color .2s;
   }
-  .section-block:hover { border-color: var(--border2); }
+  .section-block:hover { border-color: rgba(0,232,122,.08); }
 
   .section-head {
     display: flex;
     align-items: center;
-    gap: 10px;
-    padding: 16px 20px;
+    gap: 12px;
+    padding: 16px 22px;
     border-bottom: 1px solid var(--border);
-    background: var(--surface2);
+    background: linear-gradient(90deg, var(--surface2), var(--surface));
   }
   .section-icon {
-    width: 28px; height: 28px;
+    width: 30px; height: 30px;
     border-radius: 8px;
     display: flex; align-items: center; justify-content: center;
-    font-size: 13px;
+    font-size: 14px;
     background: rgba(0,232,122,.08);
     border: 1px solid rgba(0,232,122,.15);
     flex-shrink: 0;
   }
   .section-title-txt {
-    font-family: var(--mono);
-    font-size: 10px;
+    font-family: var(--display);
+    font-size: 13px;
     font-weight: 700;
-    color: var(--g);
-    letter-spacing: .14em;
-    text-transform: uppercase;
+    color: var(--text);
+    letter-spacing: -.2px;
   }
   .section-count {
     margin-left: auto;
     font-family: var(--mono);
-    font-size: 10px;
-    color: var(--text3);
-    background: var(--surface3);
-    border: 1px solid var(--border);
-    padding: 2px 8px;
+    font-size: 9px;
+    color: var(--g);
+    background: rgba(0,232,122,.06);
+    border: 1px solid rgba(0,232,122,.15);
+    padding: 2px 9px;
     border-radius: 20px;
+    letter-spacing: .04em;
   }
 
-  .section-body { padding: 20px; }
+  .section-body { padding: 22px; }
 
   /* ── DESCRIPTION ── */
   .desc-text {
     font-size: 14px;
     color: var(--text2);
-    line-height: 1.85;
+    line-height: 1.9;
+    font-family: var(--sans);
   }
-  .desc-text p + p { margin-top: 12px; }
+  .desc-text p + p { margin-top: 14px; }
 
-  /* ── TASKS ── */
-  .task-list { display: flex; flex-direction: column; gap: 8px; }
+  /* ── MISSION STEPS (formerly tasks) ── */
+  .mission-grid {
+    display: grid;
+    grid-template-columns: 1fr;
+    gap: 10px;
+  }
 
-  .task-item {
+  .mission-card {
     display: flex;
     align-items: flex-start;
-    gap: 14px;
-    padding: 14px 16px;
+    gap: 16px;
+    padding: 18px 20px;
     background: var(--surface2);
     border: 1px solid var(--border);
-    border-radius: 12px;
-    font-size: 13px;
+    border-radius: 14px;
+    font-size: 13.5px;
     color: var(--text);
     line-height: 1.6;
-    transition: all .2s;
+    transition: all .22s;
     cursor: default;
+    position: relative;
+    overflow: hidden;
   }
-  .task-item:hover {
-    border-color: rgba(0,232,122,.2);
-    background: rgba(0,232,122,.03);
-    transform: translateX(2px);
+  .mission-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 2px;
+    background: linear-gradient(180deg, var(--g), transparent);
+    opacity: 0;
+    transition: opacity .22s;
   }
+  .mission-card:hover {
+    border-color: rgba(0,232,122,.22);
+    background: rgba(0,232,122,.025);
+    transform: translateX(3px);
+  }
+  .mission-card:hover::before { opacity: 1; }
 
-  .task-num {
-    font-family: var(--mono);
-    font-size: 10px;
-    font-weight: 700;
-    color: var(--g);
-    background: rgba(0,232,122,.08);
-    border: 1px solid rgba(0,232,122,.18);
-    border-radius: 7px;
-    padding: 3px 8px;
+  .mission-dot {
+    width: 8px; height: 8px;
+    border-radius: 50%;
+    background: var(--g);
     flex-shrink: 0;
-    margin-top: 1px;
-    min-width: 32px;
-    text-align: center;
+    margin-top: 6px;
+    box-shadow: 0 0 8px rgba(0,232,122,.5);
   }
 
-  .task-content { flex: 1; }
-  .task-title {
+  .mission-content { flex: 1; }
+  .mission-title {
     font-weight: 600;
     color: var(--text);
-    margin-bottom: 3px;
+    margin-bottom: 4px;
+    font-family: var(--sans);
+    font-size: 14px;
   }
-  .task-desc {
-    font-size: 12px;
+  .mission-desc {
+    font-size: 12.5px;
     color: var(--text2);
-    line-height: 1.5;
+    line-height: 1.55;
   }
 
-  .task-tip {
+  .mission-tip {
     display: flex;
     align-items: flex-start;
-    gap: 10px;
-    padding: 12px 16px;
+    gap: 12px;
+    padding: 14px 18px;
     background: rgba(0,200,240,.04);
     border: 1px solid rgba(0,200,240,.12);
-    border-radius: 10px;
-    font-size: 12px;
-    color: var(--c);
-    line-height: 1.5;
-    margin-top: 4px;
+    border-radius: 12px;
+    font-size: 12.5px;
+    color: #5dd8f0;
+    line-height: 1.55;
+    margin-top: 6px;
   }
+  .tip-icon { font-size: 14px; flex-shrink: 0; margin-top: 1px; }
 
   /* ── FAQ ── */
   .faq-list { display: flex; flex-direction: column; gap: 8px; }
   .faq-item {
     border: 1px solid var(--border);
-    border-radius: 12px;
+    border-radius: 14px;
     overflow: hidden;
     transition: border-color .2s;
   }
   .faq-item:hover { border-color: var(--border2); }
-  .faq-item.open { border-color: rgba(0,232,122,.2); }
+  .faq-item.open { border-color: rgba(0,232,122,.22); }
 
   .faq-q {
     display: flex;
     justify-content: space-between;
     align-items: center;
-    padding: 15px 18px;
+    padding: 16px 20px;
     cursor: pointer;
-    font-size: 13px;
+    font-size: 13.5px;
     font-weight: 600;
     color: var(--text);
     background: var(--surface2);
     user-select: none;
-    gap: 12px;
+    gap: 14px;
     transition: background .2s;
+    font-family: var(--sans);
   }
   .faq-q:hover { background: rgba(0,232,122,.04); }
 
   .faq-arrow {
-    width: 22px; height: 22px;
-    border-radius: 6px;
+    width: 24px; height: 24px;
+    border-radius: 7px;
     background: rgba(0,232,122,.08);
     border: 1px solid rgba(0,232,122,.15);
     display: flex; align-items: center; justify-content: center;
-    font-size: 10px;
+    font-size: 9px;
     color: var(--g);
-    transition: transform .25s;
+    transition: transform .25s, background .2s;
     flex-shrink: 0;
   }
-  .faq-item.open .faq-arrow { transform: rotate(180deg); }
+  .faq-item.open .faq-arrow { transform: rotate(180deg); background: rgba(0,232,122,.14); }
 
   .faq-a {
     max-height: 0;
@@ -457,11 +495,12 @@
     transition: max-height .35s ease, padding .3s;
     font-size: 13px;
     color: var(--text2);
-    line-height: 1.75;
+    line-height: 1.8;
     background: var(--surface);
-    padding: 0 18px;
+    padding: 0 20px;
+    font-family: var(--sans);
   }
-  .faq-item.open .faq-a { max-height: 500px; padding: 16px 18px; }
+  .faq-item.open .faq-a { max-height: 600px; padding: 18px 20px; }
 
   /* ── LOADING / ERROR ── */
   .state-center {
@@ -490,11 +529,11 @@
   .cta-wrap {
     position: fixed;
     bottom: 0; left: 0; right: 0;
-    background: rgba(6,12,18,0.95);
-    backdrop-filter: blur(20px);
-    -webkit-backdrop-filter: blur(20px);
+    background: rgba(5,11,16,0.96);
+    backdrop-filter: blur(24px);
+    -webkit-backdrop-filter: blur(24px);
     border-top: 1px solid var(--border);
-    padding: 14px 28px;
+    padding: 14px 32px;
     display: flex;
     align-items: center;
     gap: 12px;
@@ -506,15 +545,15 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 24px;
+    padding: 12px 26px;
     background: linear-gradient(135deg, var(--g), var(--c));
     color: #000;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 12px;
     font-family: var(--mono);
-    border-radius: 10px;
+    border-radius: 11px;
     text-decoration: none;
-    letter-spacing: .05em;
+    letter-spacing: .06em;
     text-transform: uppercase;
     transition: opacity .2s, transform .15s, box-shadow .2s;
     border: none;
@@ -522,8 +561,8 @@
   }
   .btn-main:hover {
     opacity: .9;
-    transform: translateY(-1px);
-    box-shadow: 0 8px 24px rgba(0,232,122,.25);
+    transform: translateY(-2px);
+    box-shadow: 0 10px 28px rgba(0,232,122,.28);
   }
 
   .btn-dropdown-wrap { position: relative; }
@@ -531,36 +570,36 @@
     display: inline-flex;
     align-items: center;
     gap: 8px;
-    padding: 12px 24px;
+    padding: 12px 26px;
     background: linear-gradient(135deg, var(--g), var(--c));
     color: #000;
-    font-weight: 800;
+    font-weight: 700;
     font-size: 12px;
     font-family: var(--mono);
-    border-radius: 10px;
+    border-radius: 11px;
     cursor: pointer;
     border: none;
-    letter-spacing: .05em;
+    letter-spacing: .06em;
     text-transform: uppercase;
     transition: opacity .2s, box-shadow .2s;
     user-select: none;
   }
-  .btn-dropdown-toggle:hover { opacity: .9; box-shadow: 0 8px 24px rgba(0,232,122,.25); }
+  .btn-dropdown-toggle:hover { opacity: .9; box-shadow: 0 10px 28px rgba(0,232,122,.28); }
 
   .btn-arrow-ico { font-size: 9px; transition: transform .2s; }
   .btn-dropdown-wrap.open .btn-arrow-ico { transform: rotate(180deg); }
 
   .btn-dropdown-menu {
     position: absolute;
-    bottom: calc(100% + 10px);
+    bottom: calc(100% + 12px);
     left: 0;
-    min-width: 280px;
+    min-width: 290px;
     background: var(--surface);
     border: 1px solid var(--border2);
-    border-radius: 14px;
+    border-radius: 16px;
     overflow: hidden;
     display: none;
-    box-shadow: 0 -12px 40px rgba(0,0,0,.6);
+    box-shadow: 0 -16px 48px rgba(0,0,0,.7);
     z-index: 200;
   }
   .btn-dropdown-wrap.open .btn-dropdown-menu { display: block; }
@@ -568,8 +607,8 @@
   .dropdown-item {
     display: flex;
     align-items: center;
-    gap: 12px;
-    padding: 13px 16px;
+    gap: 13px;
+    padding: 14px 18px;
     text-decoration: none;
     color: var(--text);
     font-size: 13px;
@@ -579,15 +618,15 @@
   .dropdown-item:last-child { border-bottom: none; }
   .dropdown-item:hover { background: rgba(0,232,122,.06); }
   .dropdown-item-icon {
-    width: 30px; height: 30px;
-    border-radius: 8px;
+    width: 32px; height: 32px;
+    border-radius: 9px;
     background: rgba(0,232,122,.08);
     border: 1px solid rgba(0,232,122,.18);
     display: flex; align-items: center; justify-content: center;
     font-size: 13px;
     flex-shrink: 0;
   }
-  .dropdown-item-label { font-weight: 600; font-size: 12px; margin-bottom: 2px; }
+  .dropdown-item-label { font-weight: 600; font-size: 12.5px; margin-bottom: 2px; font-family: var(--sans); }
   .dropdown-item-url {
     font-family: var(--mono);
     font-size: 10px;
@@ -595,7 +634,7 @@
     white-space: nowrap;
     overflow: hidden;
     text-overflow: ellipsis;
-    max-width: 180px;
+    max-width: 190px;
   }
 
   .btn-ghost-sm {
@@ -605,7 +644,7 @@
     padding: 10px 18px;
     background: transparent;
     border: 1px solid var(--border2);
-    border-radius: 10px;
+    border-radius: 11px;
     color: var(--text2);
     font-size: 11px;
     font-family: var(--mono);
@@ -619,26 +658,62 @@
   /* ── FADE IN ── */
   .fade-in {
     opacity: 0;
-    transform: translateY(14px);
-    animation: fadeUp .45s ease forwards;
+    transform: translateY(16px);
+    animation: fadeUp .5s ease forwards;
   }
   @keyframes fadeUp { to { opacity: 1; transform: translateY(0); } }
-  .fade-in:nth-child(1) { animation-delay: .04s; }
-  .fade-in:nth-child(2) { animation-delay: .09s; }
-  .fade-in:nth-child(3) { animation-delay: .14s; }
-  .fade-in:nth-child(4) { animation-delay: .19s; }
-  .fade-in:nth-child(5) { animation-delay: .24s; }
-  .fade-in:nth-child(6) { animation-delay: .29s; }
-  .fade-in:nth-child(7) { animation-delay: .34s; }
+  .fade-in:nth-child(1) { animation-delay: .05s; }
+  .fade-in:nth-child(2) { animation-delay: .10s; }
+  .fade-in:nth-child(3) { animation-delay: .16s; }
+  .fade-in:nth-child(4) { animation-delay: .22s; }
+  .fade-in:nth-child(5) { animation-delay: .28s; }
+  .fade-in:nth-child(6) { animation-delay: .34s; }
 
-  @media (max-width: 600px) {
-    .hero-inner { flex-direction: column; gap: 16px; }
-    .project-name { font-size: 24px; }
-    .project-hero { padding: 32px 20px 28px; }
-    .guide-wrap { padding: 20px 16px 120px; }
+  /* ── MOBILE ── */
+  @media (max-width: 640px) {
+    .hero-inner { grid-template-columns: 1fr; gap: 18px; }
+    .project-name { font-size: 28px; }
+    .project-hero { padding: 36px 20px 32px; }
+    .guide-wrap { padding: 22px 18px 130px; }
     .info-strip { grid-template-columns: 1fr 1fr; }
-    .cta-wrap { padding: 12px 16px; }
-    .guide-nav { padding: 0 16px; }
+    .cta-wrap { padding: 12px 18px; }
+    .guide-nav { padding: 0 18px; }
+  }
+
+  /* ── FOOTER ── */
+  footer { position: relative; z-index: 1; border-top: 1px solid var(--border); }
+  .footer-grid {
+    max-width: 900px;
+    margin: 0 auto;
+    padding: 0 32px;
+  }
+  .footer-dyor {
+    text-align: center;
+    padding: 14px;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 11px;
+    color: #f59e0b;
+    background: rgba(245,158,11,0.04);
+  }
+  .footer-top {
+    display: grid;
+    grid-template-columns: 1fr 1fr 1fr;
+    gap: 40px;
+    padding: 40px 0 32px;
+  }
+  .footer-bottom {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 20px 0;
+    border-top: 1px solid var(--border);
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  @media (max-width: 640px) {
+    .footer-top { grid-template-columns: 1fr; gap: 28px; }
+    .footer-grid { padding: 0 20px; }
   }
 </style>
 </head>
@@ -648,23 +723,28 @@
 <nav class="guide-nav">
   <a href="/" class="back-btn">
     <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    Kembali
+    Back
   </a>
   <a href="/" class="nav-logo-sm">
     <img src="/logo.png" alt="AirdropXI">
     Airdrop<span>XI</span>
   </a>
+  <!-- Language Toggle -->
+  <div class="lang-toggle" id="lang-toggle">
+    <button class="lang-btn" id="btn-id" onclick="setLang('id')">ID</button>
+    <button class="lang-btn" id="btn-en" onclick="setLang('en')">EN</button>
+  </div>
 </nav>
 
-<!-- Loading / Error (before data loads) -->
+<!-- Loading / Error -->
 <div class="state-center" id="loading-state">
   <div class="spinner"></div>
-  <span>Memuat data project...</span>
+  <span>Loading project data...</span>
 </div>
 <div class="state-center" id="error-state" style="display:none">
   <span style="font-size:36px">⚠️</span>
-  <span id="error-msg" style="color:#ff2d55;font-size:13px">Project tidak ditemukan</span>
-  <a href="/" style="color:var(--g);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em">← Kembali ke daftar</a>
+  <span id="error-msg" style="color:#ff2d55;font-size:13px">Project not found</span>
+  <a href="/" style="color:var(--g);font-family:var(--mono);font-size:11px;text-transform:uppercase;letter-spacing:.08em">← Back to list</a>
 </div>
 
 <!-- Hero Banner (injected by JS) -->
@@ -680,28 +760,23 @@
   <div id="cta-buttons"></div>
   <a href="/" class="btn-ghost-sm">
     <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
-    Lihat Airdrop Lain
+    <span id="cta-back-txt">Lihat Airdrop Lain</span>
   </a>
 </div>
 
 <!-- Footer -->
-<footer style="position:relative;z-index:1;border-top:1px solid var(--border);margin-top:0">
-  <div style="max-width:1100px;margin:0 auto;padding:0 28px">
-
-    <!-- DYOR Banner -->
-    <div style="text-align:center;padding:16px;border-bottom:1px solid var(--border);font-family:var(--mono);font-size:11px;color:#f59e0b;background:rgba(245,158,11,0.04)">
-      ⚠️ DYOR — Semua informasi hanya untuk edukasi. Selalu lakukan riset sendiri sebelum berinvestasi.
+<footer>
+  <div class="footer-grid">
+    <div class="footer-dyor">
+      ⚠️ <span id="footer-dyor-txt">DYOR — Semua informasi hanya untuk edukasi. Selalu lakukan riset sendiri sebelum berinvestasi.</span>
     </div>
-
-    <!-- Footer Top -->
-    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;padding:40px 0 32px">
-
+    <div class="footer-top">
       <!-- Brand -->
       <div>
-        <div style="font-size:18px;font-weight:800;letter-spacing:-.5px;margin-bottom:10px">
+        <div style="font-family:var(--display);font-size:18px;font-weight:800;letter-spacing:-.5px;margin-bottom:10px">
           Airdrop<span style="color:var(--g)">XI</span>
         </div>
-        <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:16px;font-family:var(--mono)">
+        <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:16px;font-family:var(--mono)" id="footer-tagline">
           Peluang airdrop yang dikurasi dengan data terstruktur.
         </p>
         <div style="display:flex;gap:8px">
@@ -719,7 +794,6 @@
           </a>
         </div>
       </div>
-
       <!-- Navigate -->
       <div>
         <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px">Navigate</div>
@@ -732,7 +806,6 @@
           <a href="/reward.html" style="font-size:13px;color:#00ff88;text-decoration:none;transition:color .2s">🎁 Reward</a>
         </div>
       </div>
-
       <!-- Contact -->
       <div>
         <div style="font-family:var(--mono);font-size:10px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px">Contact</div>
@@ -742,17 +815,83 @@
         </div>
       </div>
     </div>
-
-    <!-- Footer Bottom -->
-    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px">
+    <div class="footer-bottom">
       <span style="font-family:var(--mono);font-size:11px;color:var(--text3)">© 2025 AirdropXI — Stay Safe & Keep Grinding</span>
       <span style="font-family:var(--mono);font-size:11px;color:var(--g)">Built with ⚡ for Web3 hunters</span>
     </div>
-
   </div>
 </footer>
+
 <script>
- 
+/* ── I18N ── */
+const i18n = {
+  id: {
+    back: 'Kembali',
+    loading: 'Memuat data project...',
+    eyebrow: 'AirdropXI Guide',
+    about: 'Tentang Project',
+    mission: 'Mission Playbook',
+    missionSub: 'steps',
+    faq: 'FAQ',
+    faqSub: 'pertanyaan',
+    cta: 'Garap Sekarang',
+    ctaNA: 'Link Belum Tersedia',
+    ctaBack: 'Lihat Airdrop Lain',
+    tip: '💡',
+    dyor: 'DYOR — Semua informasi hanya untuk edukasi. Selalu lakukan riset sendiri sebelum berinvestasi.',
+    tagline: 'Peluang airdrop yang dikurasi dengan data terstruktur.',
+    raised: 'Dana Terkumpul',
+    notFound: 'Project tidak ditemukan',
+  },
+  en: {
+    back: 'Back',
+    loading: 'Loading project data...',
+    eyebrow: 'AirdropXI Guide',
+    about: 'About Project',
+    mission: 'Mission Playbook',
+    missionSub: 'steps',
+    faq: 'FAQ',
+    faqSub: 'questions',
+    cta: 'Start Now',
+    ctaNA: 'Link Not Available',
+    ctaBack: 'Explore Other Airdrops',
+    tip: '💡',
+    dyor: 'DYOR — All information is for educational purposes only. Always do your own research before investing.',
+    tagline: 'Curated airdrop opportunities with structured data.',
+    raised: 'Total Raised',
+    notFound: 'Project not found',
+  }
+};
+
+let currentLang = localStorage.getItem('axi-lang') || 'id';
+
+function setLang(lang) {
+  currentLang = lang;
+  localStorage.setItem('axi-lang', lang);
+  document.getElementById('btn-id').classList.toggle('active', lang === 'id');
+  document.getElementById('btn-en').classList.toggle('active', lang === 'en');
+
+  // Re-render if data available
+  if (window._projectData) render(window._projectData);
+  updateStaticI18n();
+}
+
+function updateStaticI18n() {
+  const t = i18n[currentLang];
+  const dyorEl = document.getElementById('footer-dyor-txt');
+  const taglineEl = document.getElementById('footer-tagline');
+  const ctaBackEl = document.getElementById('cta-back-txt');
+  if (dyorEl) dyorEl.textContent = t.dyor;
+  if (taglineEl) taglineEl.textContent = t.tagline;
+  if (ctaBackEl) ctaBackEl.textContent = t.ctaBack;
+}
+
+// Init lang buttons
+document.getElementById('btn-id').classList.toggle('active', currentLang === 'id');
+document.getElementById('btn-en').classList.toggle('active', currentLang === 'en');
+updateStaticI18n();
+
+/* ── UTIL ── */
 function esc(s) {
   return String(s || '')
     .replace(/&/g,'&amp;').replace(/</g,'&lt;')
@@ -767,15 +906,17 @@ function getStatusClass(s) {
   return 'badge-active';
 }
 
+/* ── LOAD ── */
 const pathId = window.location.pathname.split('/').filter(Boolean).pop();
 
 async function loadProject() {
-  if (!pathId) return showError('ID project tidak ditemukan');
+  if (!pathId) return showError(i18n[currentLang].notFound);
   try {
     const res = await fetch(`/api/guide?id=${encodeURIComponent(pathId)}`);
     if (!res.ok) throw new Error(`HTTP ${res.status}`);
     const p = await res.json();
-    if (!p || !p.name) throw new Error('Data kosong');
+    if (!p || !p.name) throw new Error('Empty data');
+    window._projectData = p;
     render(p);
   } catch(e) {
     showError(e.message);
@@ -789,17 +930,17 @@ function showError(msg) {
   document.getElementById('error-msg').textContent = msg;
 }
 
+/* ── RENDER ── */
 function render(p) {
+  const t = i18n[currentLang];
   document.title = `${p.name} — AirdropXI`;
   document.getElementById('loading-state').style.display = 'none';
 
-  const lang = localStorage.getItem('axi-lang') || 'id';
-  const isID = lang === 'id';
-
+  const isID = currentLang === 'id';
   const desc = isID ? (p.descriptionID || p.descriptionEN || '') : (p.descriptionEN || p.descriptionID || '');
   const tasksRaw = isID ? (p.tasksID || p.tasksEN || '') : (p.tasksEN || p.tasksID || '');
   const faqRaw = isID ? (p.faqID || p.faqEN || '') : (p.faqEN || p.faqID || '');
-  const tags = (p.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+  const tags = (p.tags || '').split(',').map(t2 => t2.trim()).filter(Boolean);
 
   // Logo
   const logoHtml = p.logo_url
@@ -807,11 +948,9 @@ function render(p) {
          <img src="${esc(p.logo_url)}" class="project-logo"
               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="${esc(p.name)}">
          <div class="project-logo-fallback" style="display:none">🪂</div>
-         <div class="logo-glow"></div>
        </div>`
     : `<div class="project-logo-wrap">
          <div class="project-logo-fallback">🪂</div>
-         <div class="logo-glow"></div>
        </div>`;
 
   // Socials
@@ -821,18 +960,21 @@ function render(p) {
   if (p.telegram) socials.push(`<a href="${esc(p.telegram)}" target="_blank" rel="noopener" class="social-btn">✈️ Telegram</a>`);
   if (p.link)     socials.push(`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="social-btn">🌐 Website</a>`);
 
-  // Render hero
+  // Hero
   const heroEl = document.getElementById('project-hero');
   heroEl.innerHTML = `
     <div class="project-hero">
       <div class="hero-inner">
         ${logoHtml}
         <div class="project-hero-meta">
-          <div class="project-eyebrow">AirdropXI Guide</div>
+          <div class="project-eyebrow">
+            <span class="eyebrow-line"></span>
+            ${esc(t.eyebrow)}
+          </div>
           <div class="project-name">${esc(p.name)}</div>
           <div class="badge-row">
             <span class="badge ${getStatusClass(p.status)}">${esc(p.status || 'TBA')}</span>
-            ${tags.map(t => `<span class="badge badge-tag">${esc(t)}</span>`).join('')}
+            ${tags.map(tg => `<span class="badge badge-tag">${esc(tg)}</span>`).join('')}
           </div>
           ${socials.length ? `<div class="social-row">${socials.join('')}</div>` : ''}
         </div>
@@ -842,7 +984,7 @@ function render(p) {
 
   // Info chips
   const infoItems = [];
-  if (p.RaisedID || p.RaisedEN) infoItems.push({ label: 'Dana Terkumpul', value: isID ? (p.RaisedID||p.RaisedEN) : (p.RaisedEN||p.RaisedID), cls: 'green' });
+  if (p.RaisedID || p.RaisedEN) infoItems.push({ label: t.raised, value: isID ? (p.RaisedID||p.RaisedEN) : (p.RaisedEN||p.RaisedID), cls: 'green' });
   if (p.ticker)       infoItems.push({ label: 'Ticker', value: '$' + p.ticker, cls: 'cyan' });
   if (p.network)      infoItems.push({ label: 'Network', value: p.network, cls: 'default' });
   if (p.total_supply) infoItems.push({ label: 'Total Supply', value: p.total_supply, cls: 'default' });
@@ -862,7 +1004,7 @@ function render(p) {
     <div class="section-block fade-in">
       <div class="section-head">
         <div class="section-icon">📋</div>
-        <div class="section-title-txt">Tentang Project</div>
+        <div class="section-title-txt">${esc(t.about)}</div>
       </div>
       <div class="section-body">
         <div class="desc-text">
@@ -871,7 +1013,7 @@ function render(p) {
       </div>
     </div>` : '';
 
-  // Tasks
+  // Mission Playbook (tasks)
   const taskLines = tasksRaw.split('\n').map(l => l.trim()).filter(Boolean);
   const taskItems = [];
   const tipItems = [];
@@ -880,7 +1022,6 @@ function render(p) {
     if (/^💡/i.test(line)) {
       tipItems.push(line.replace(/^💡\s*/, ''));
     } else if (!/^(Q:|A:)/i.test(line)) {
-      // Format: "1. Judul | Deskripsi" atau "1. Teks biasa"
       const cleanNum = line.replace(/^(\d+[\.\)]\s*)/, '');
       const parts = cleanNum.split(' | ');
       taskItems.push({
@@ -893,23 +1034,23 @@ function render(p) {
   const tasksHTML = taskItems.length ? `
     <div class="section-block fade-in">
       <div class="section-head">
-        <div class="section-icon">⚡</div>
-        <div class="section-title-txt">Langkah-langkah</div>
-        <span class="section-count">${taskItems.length} steps</span>
+        <div class="section-icon">🎯</div>
+        <div class="section-title-txt">${esc(t.mission)}</div>
+        <span class="section-count">${taskItems.length} ${esc(t.missionSub)}</span>
       </div>
       <div class="section-body">
-        <div class="task-list">
-          ${taskItems.map((t, i) => `
-            <div class="task-item">
-              <span class="task-num">${String(i+1).padStart(2,'0')}</span>
-              <div class="task-content">
-                <div class="task-title">${esc(t.title)}</div>
-                ${t.desc ? `<div class="task-desc">${esc(t.desc)}</div>` : ''}
+        <div class="mission-grid">
+          ${taskItems.map((task) => `
+            <div class="mission-card">
+              <div class="mission-dot"></div>
+              <div class="mission-content">
+                <div class="mission-title">${esc(task.title)}</div>
+                ${task.desc ? `<div class="mission-desc">${esc(task.desc)}</div>` : ''}
               </div>
             </div>`).join('')}
           ${tipItems.map(tip => `
-            <div class="task-tip">
-              <span>💡</span>
+            <div class="mission-tip">
+              <span class="tip-icon">💡</span>
               <span>${esc(tip)}</span>
             </div>`).join('')}
         </div>
@@ -922,8 +1063,8 @@ function render(p) {
     <div class="section-block fade-in">
       <div class="section-head">
         <div class="section-icon">❓</div>
-        <div class="section-title-txt">FAQ</div>
-        <span class="section-count">${faqs.length} pertanyaan</span>
+        <div class="section-title-txt">${esc(t.faq)}</div>
+        <span class="section-count">${faqs.length} ${esc(t.faqSub)}</span>
       </div>
       <div class="section-body">
         <div class="faq-list">
@@ -939,14 +1080,14 @@ function render(p) {
       </div>
     </div>` : '';
 
-  // Inject content
   document.getElementById('project-content').innerHTML = infoHTML + descHTML + tasksHTML + faqHTML;
   document.getElementById('guide-wrap').style.display = 'block';
 
-  renderCTA(p);
+  renderCTA(p, t);
+  updateStaticI18n();
 }
 
-function renderCTA(p) {
+function renderCTA(p, t) {
   const ctaWrap = document.getElementById('cta-wrap');
   const ctaBtns = document.getElementById('cta-buttons');
   ctaWrap.style.display = 'flex';
@@ -963,7 +1104,7 @@ function renderCTA(p) {
     ctaBtns.innerHTML = `
       <div class="btn-dropdown-wrap" id="dropdown-wrap">
         <button class="btn-dropdown-toggle" onclick="toggleDropdown()">
-          ⚡ Garap Sekarang
+          ⚡ ${esc(t.cta)}
           <span class="btn-arrow-ico">▲</span>
         </button>
         <div class="btn-dropdown-menu">
@@ -980,12 +1121,12 @@ function renderCTA(p) {
   } else if (p.link) {
     ctaBtns.innerHTML = `
       <a href="${esc(p.link)}" target="_blank" rel="noopener noreferrer" class="btn-main">
-        ⚡ Garap Sekarang
+        ⚡ ${esc(t.cta)}
       </a>`;
   } else {
     ctaBtns.innerHTML = `
-      <button class="btn-main" style="opacity:.4;cursor:not-allowed" disabled>
-        ⚡ Link Belum Tersedia
+      <button class="btn-main" style="opacity:.35;cursor:not-allowed" disabled>
+        ⚡ ${esc(t.ctaNA)}
       </button>`;
   }
 
