@@ -2520,10 +2520,6 @@ html, body {
     <p data-id="Bedanya pemenang dengan yang gagal adalah: Pemenang punya <strong>SISTEM</strong>, bukan asal gas." data-en="The difference between winners and losers is: Winners have a <strong>SYSTEM</strong>, not just random gas."></p>
   </div>
 
-<!-- ============================================================
-  BAGIAN 2 — SECTIONS HTML
-============================================================ -->
- 
 <!-- ── AI TOOLS ── -->
 <div class="doc-section" id="sec-ai-tools">
   <div class="breadcrumb"><span onclick="show('intro')">Docs</span><span class="sep">/</span><span data-id="AI Tools" data-en="AI Tools"></span></div>
@@ -3208,9 +3204,6 @@ html, body {
     </div>
   </div>
 </div>
-</div>
-</main>
-</div>
 
 <footer class="docs-footer" style="margin-top: 100px; padding: 80px 0 60px; border-top: 1px solid var(--border); background: linear-gradient(to bottom, transparent, rgba(0,232,122,0.02)); width: 100%;">
   <div style="max-width: 1000px; margin: 0 auto; padding: 0 32px; text-align: center;">
@@ -3320,24 +3313,6 @@ html, body {
 </style>
 
 <script>
-<!-- ============================================================
-  BAGIAN 3 — SEARCH INDEX
-  Tambahkan entri berikut ke dalam array searchIndex
-  di dalam <script> docs.html, sebelum tanda ];
-============================================================ -->
-<!--
-  {id:'ai-tools', keywords:['ai','chatgpt','claude','gemini','perplexity','grok','deepseek','llm','tools']},
-  {id:'programming-langs', keywords:['python','javascript','solidity','rust','bahasa pemrograman','coding','web3.py','ethers']},
-  {id:'vps-server', keywords:['vps','server','digitalocean','vultr','contabo','ssh','ubuntu','cloud','hosting']},
-  {id:'terminal-cli', keywords:['terminal','cli','command line','bash','linux','ssh','cron','crontab']},
-  {id:'git-github', keywords:['git','github','version control','clone','commit','push','pull','repo']},
-  {id:'nodejs-npm', keywords:['nodejs','node','npm','javascript','pm2','yarn','bun','package']},
-  {id:'docker', keywords:['docker','container','dockerfile','compose','image','container']},
-  {id:'database', keywords:['database','sql','nosql','postgresql','mongodb','redis','supabase','firebase']},
-  {id:'api-scraping', keywords:['api','scraping','web scraping','coingecko','etherscan','beautifulsoup','playwright']},
-  {id:'automation-bot', keywords:['bot','automation','otomasi','telegram','on-chain','script','monitor']},
--->
-
 const glossaryData = [
 {term:'Airdrop',badge:'c',cat:'Web3',def:{id:'Distribusi token oleh proyek kepada wallet pengguna berdasarkan snapshot, aktivitas on-chain, atau kontribusi tertentu.',en:'Token distribution to user wallets based on snapshots, on-chain activity, or contributions.'}},
 {term:'Account Abstraction',badge:'g',cat:'Web3',def:{id:'Model wallet berbasis smart contract yang memisahkan logika akun dari private key.',en:'A smart contract-based wallet model decoupling account logic from private keys.'}},
@@ -3368,7 +3343,7 @@ const glossaryData = [
 {term:'ZK Proof',badge:'g',cat:'Web3',def:{id:'Metode kriptografi untuk membuktikan kebenaran tanpa mengungkapkan data asli.',en:'Cryptographic method proving truth without revealing underlying data.'}},
 {term:'GM',badge:'r',cat:'Slang',def:{id:'Sapaan komunitas Web3 untuk membuka hari.',en:'Web3 community greeting to start the day.'}},
 {term:'LFG',badge:'r',cat:'Slang',def:{id:'Ekspresi hype terhadap momentum positif.',en:'Expression of hype toward positive momentum.'}},
-{term:'WAGMI',badge:'r',cat:'Slang',def:{id:'Keyakinan kolektif bahwa komunitas/proyek akan sukses.',en:'Collective belief that the community/project will succeed.'}}
+{term:'WAGMI',badge:'r',cat:'Slang',def:{id:'Keyakinan kolektif bahwa komunitas/proyek akan sukses.',en:'Collective belief that the community/project will succeed.'}} 
 ];
 
 let docLang = localStorage.getItem('axi-doc-lang') || 'id';
@@ -3452,6 +3427,16 @@ const searchIndex = [
   {id:'tax', keywords:['pajak','tax','regulasi','indonesia','bappebti','legal']},
   {id:'glossary', keywords:['glossary','glosarium','istilah','kamus']},
   {id:'ultra-pro', keywords:['ultra pro','pro system','advanced','smart money','arkham','nansen']},
+  {id:'ai-tools', keywords:['ai','chatgpt','claude','gemini','perplexity','grok','deepseek','llm','tools']},
+  {id:'programming-langs', keywords:['python','javascript','solidity','rust','bahasa pemrograman','coding','web3.py','ethers']},
+  {id:'vps-server', keywords:['vps','server','digitalocean','vultr','contabo','ssh','ubuntu','cloud','hosting']},
+  {id:'terminal-cli', keywords:['terminal','cli','command line','bash','linux','ssh','cron','crontab']},
+  {id:'git-github', keywords:['git','github','version control','clone','commit','push','pull','repo']},
+  {id:'nodejs-npm', keywords:['nodejs','node','npm','javascript','pm2','yarn','bun','package']},
+  {id:'docker', keywords:['docker','container','dockerfile','compose','image','container']},
+  {id:'database', keywords:['database','sql','nosql','postgresql','mongodb','redis','supabase','firebase']},
+  {id:'api-scraping', keywords:['api','scraping','web scraping','coingecko','etherscan','beautifulsoup','playwright']},
+  {id:'automation-bot', keywords:['bot','automation','otomasi','telegram','on-chain','script','monitor']},
 ];
 
 // ── SEARCH SYSTEM FIXED ──
@@ -3513,6 +3498,16 @@ function searchSidebar(q) {
     'restaking-lrt':'Restaking & LRT','modular':'Modular Blockchain','crosschain':'Cross-chain',
     'did':'DID','security':'Keamanan','scam':'Scam & Rug Pull','tax':'Pajak & Regulasi',
     'glossary':'Glossary','ultra-pro':'Pro Hunter System',
+    'ai-tools':'AI Tools',
+    'programming-langs':'Bahasa Pemrograman',
+    'vps-server':'VPS & Server',
+    'terminal-cli':'Terminal & CLI',
+    'git-github':'Git & GitHub',
+    'nodejs-npm':'Node.js & npm',
+    'docker':'Docker',
+    'database':'Database',
+    'api-scraping':'API & Web Scraping',
+    'automation-bot':'Automation & Bot',
   };
 
   dd.style.display = 'block';
