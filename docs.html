@@ -2519,6 +2519,7 @@ html, body {
     <h3 style="color: var(--accent); margin-bottom: 10px;">Airdrop = Early Access + Consistency + Non-Sybil + Narrative Awareness</h3>
     <p data-id="Bedanya pemenang dengan yang gagal adalah: Pemenang punya <strong>SISTEM</strong>, bukan asal gas." data-en="The difference between winners and losers is: Winners have a <strong>SYSTEM</strong>, not just random gas."></p>
   </div>
+  </div>
 
 <!-- ── AI TOOLS ── -->
 <div class="doc-section" id="sec-ai-tools">
@@ -3314,36 +3315,109 @@ html, body {
 
 <script>
 const glossaryData = [
-{term:'Airdrop',badge:'c',cat:'Web3',def:{id:'Distribusi token oleh proyek kepada wallet pengguna berdasarkan snapshot, aktivitas on-chain, atau kontribusi tertentu.',en:'Token distribution to user wallets based on snapshots, on-chain activity, or contributions.'}},
-{term:'Account Abstraction',badge:'g',cat:'Web3',def:{id:'Model wallet berbasis smart contract yang memisahkan logika akun dari private key.',en:'A smart contract-based wallet model decoupling account logic from private keys.'}},
-{term:'Address',badge:'g',cat:'Web3',def:{id:'Representasi hash dari public key sebagai identitas untuk menerima/mengirim aset.',en:'A hashed representation of a public key used as an identity to send/receive assets.'}},
-{term:'Aggregator',badge:'g',cat:'Web3',def:{id:'Protokol yang menggabungkan likuiditas dari berbagai DEX untuk harga optimal.',en:'Protocol aggregating liquidity from multiple DEXs for optimal pricing.'}},
-{term:'Allowance',badge:'g',cat:'Web3',def:{id:'Parameter ERC-20 yang menentukan jumlah token yang bisa digunakan pihak ketiga.',en:'An ERC-20 parameter defining how many tokens a third party can spend.'}},
-{term:'Blockchain',badge:'g',cat:'Web3',def:{id:'Ledger terdistribusi yang menyimpan transaksi dalam blok terhubung secara kriptografis.',en:'A distributed ledger storing transactions in cryptographically linked blocks.'}},
-{term:'Bridge',badge:'g',cat:'Web3',def:{id:'Infrastruktur lintas-chain untuk perpindahan aset/data antar blockchain.',en:'Cross-chain infrastructure enabling asset/data transfers between blockchains.'}},
-{term:'Burn',badge:'g',cat:'Web3',def:{id:'Proses menghapus token dari sirkulasi dengan mengirimnya ke address yang tidak dapat diakses.',en:'Process of removing tokens from circulation by sending to an inaccessible address.'}},
-{term:'Consensus',badge:'g',cat:'Web3',def:{id:'Mekanisme agar semua node sepakat terhadap state blockchain, seperti PoS atau PoW.',en:'Mechanism ensuring all nodes agree on blockchain state, such as PoS or PoW.'}},
-{term:'Cross-chain',badge:'g',cat:'Web3',def:{id:'Kemampuan beroperasi dan bertukar data/aset antar blockchain berbeda.',en:'Capability to operate and exchange data/assets across different blockchains.'}},
-{term:'DApp',badge:'g',cat:'Web3',def:{id:'Aplikasi di atas blockchain dengan backend smart contract tanpa server terpusat.',en:'Application running on blockchain with smart contracts as backend.'}},
-{term:'DAO',badge:'g',cat:'Web3',def:{id:'Organisasi otonom berbasis smart contract yang dikelola melalui voting token.',en:'Autonomous organization governed by token-based voting via smart contracts.'}},
-{term:'EVM',badge:'g',cat:'Web3',def:{id:'Lingkungan eksekusi virtual yang menjalankan smart contract di Ethereum.',en:'Virtual execution environment running smart contracts on Ethereum.'}},
-{term:'ENS',badge:'g',cat:'Web3',def:{id:'Sistem domain terdesentralisasi yang mengubah address wallet menjadi nama yang mudah dibaca.',en:'Decentralized naming system mapping wallet addresses to human-readable names.'}},
-{term:'Flash Loan',badge:'g',cat:'Web3',def:{id:'Pinjaman tanpa jaminan yang harus dikembalikan dalam satu transaksi atomik.',en:'Uncollateralized loan that must be repaid within a single atomic transaction.'}},
-{term:'Gas',badge:'g',cat:'Web3',def:{id:'Unit biaya komputasi untuk menjalankan operasi dalam blockchain.',en:'Unit of computational cost for executing operations on blockchain.'}},
-{term:'Layer 2',badge:'g',cat:'Web3',def:{id:'Solusi scaling yang memproses transaksi di luar Layer 1.',en:'Scaling solution processing transactions off Layer 1.'}},
-{term:'Liquidity Pool',badge:'g',cat:'Web3',def:{id:'Kumpulan aset dikunci dalam smart contract untuk likuiditas DeFi.',en:'Pool of assets locked in smart contracts to provide DeFi liquidity.'}},
-{term:'MEV',badge:'g',cat:'Web3',def:{id:'Nilai yang dapat diekstrak validator dari manipulasi urutan transaksi.',en:'Value extractable by validators from manipulating transaction ordering.'}},
-{term:'NFT',badge:'g',cat:'Web3',def:{id:'Token unik yang merepresentasikan kepemilikan aset digital atau fisik.',en:'Unique token representing ownership of digital or physical assets.'}},
-{term:'Oracle',badge:'g',cat:'Web3',def:{id:'Layanan yang menyediakan data eksternal ke dalam blockchain untuk smart contract.',en:'Service providing external data to blockchain for smart contract usage.'}},
-{term:'Rollup',badge:'g',cat:'Web3',def:{id:'Solusi Layer 2 yang menggabungkan banyak transaksi menjadi satu batch ke Layer 1.',en:'Layer 2 solution batching multiple transactions and publishing them to Layer 1.'}},
-{term:'Smart Contract',badge:'g',cat:'Web3',def:{id:'Program self-executing di blockchain yang berjalan sesuai kondisi yang telah ditentukan.',en:'Self-executing program on blockchain running based on predefined conditions.'}},
-{term:'Sybil',badge:'c',cat:'Web3',def:{id:'Serangan menggunakan banyak identitas untuk memanipulasi sistem reward.',en:'Attack using multiple identities to manipulate reward systems.'}},
-{term:'Tokenomics',badge:'g',cat:'Web3',def:{id:'Struktur ekonomi token termasuk supply, distribusi, dan utilitas.',en:'Economic structure of a token including supply, distribution, and utility.'}},
-{term:'TVL',badge:'g',cat:'Web3',def:{id:'Total nilai aset yang terkunci dalam protokol DeFi.',en:'Total value of assets locked in DeFi protocols.'}},
-{term:'ZK Proof',badge:'g',cat:'Web3',def:{id:'Metode kriptografi untuk membuktikan kebenaran tanpa mengungkapkan data asli.',en:'Cryptographic method proving truth without revealing underlying data.'}},
-{term:'GM',badge:'r',cat:'Slang',def:{id:'Sapaan komunitas Web3 untuk membuka hari.',en:'Web3 community greeting to start the day.'}},
-{term:'LFG',badge:'r',cat:'Slang',def:{id:'Ekspresi hype terhadap momentum positif.',en:'Expression of hype toward positive momentum.'}},
-{term:'WAGMI',badge:'r',cat:'Slang',def:{id:'Keyakinan kolektif bahwa komunitas/proyek akan sukses.',en:'Collective belief that the community/project will succeed.'}} 
+// ── FARMING & AIRDROP ──
+{term:'Airdrop',badge:'c',cat:'Farming',def:{id:'Distribusi token gratis dari project ke wallet berdasarkan snapshot atau aktivitas on-chain.',en:'Free token distribution from a project to wallets based on snapshots or on-chain activity.'}},
+{term:'Retroactive Airdrop',badge:'c',cat:'Farming',def:{id:'Reward untuk pengguna yang sudah pakai produk SEBELUM snapshot. Biasanya bernilai paling besar. Contoh: Uniswap, Arbitrum, dYdX.',en:'Rewards for users who used the product BEFORE the snapshot. Usually the highest value. Examples: Uniswap, Arbitrum, dYdX.'}},
+{term:'Snapshot',badge:'c',cat:'Farming',def:{id:'Momen project "memotret" kondisi blockchain untuk menentukan siapa yang berhak dapat airdrop.',en:'The moment a project captures blockchain state to determine who qualifies for an airdrop.'}},
+{term:'Sybil',badge:'r',cat:'Farming',def:{id:'Teknik curang membuat banyak wallet palsu untuk dapat lebih banyak airdrop. Project pakai AI untuk deteksi dan blacklist.',en:'Cheating technique of creating many fake wallets to receive more airdrops. Projects use AI to detect and blacklist them.'}},
+{term:'Farming',badge:'c',cat:'Farming',def:{id:'Aktivitas on-chain yang disengaja (swap, bridge, stake, LP) untuk memenuhi syarat eligibility airdrop.',en:'Deliberate on-chain activity (swap, bridge, stake, LP) to meet airdrop eligibility requirements.'}},
+{term:'Points System',badge:'c',cat:'Farming',def:{id:'Sistem poin dari aktivitas on-chain yang dikonversi ke token saat TGE. Populer di EigenLayer, Blast, Pendle.',en:'Point system from on-chain activity converted to tokens at TGE. Popular in EigenLayer, Blast, Pendle.'}},
+{term:'TGE',badge:'c',cat:'Farming',def:{id:'Token Generation Event — momen pertama token dibuat dan mulai bisa diperjualbelikan.',en:'Token Generation Event — the first moment a token is created and begins trading.'}},
+{term:'Vesting',badge:'c',cat:'Farming',def:{id:'Jadwal pelepasan token secara bertahap setelah TGE untuk mencegah insider dump massal.',en:'Schedule for gradual token release after TGE to prevent mass insider dumping.'}},
+{term:'Cliff',badge:'c',cat:'Farming',def:{id:'Periode penguncian token total sebelum vesting dimulai. Contoh: 12 bulan cliff, lalu vesting 24 bulan.',en:'Total lock-up period before vesting starts. Example: 12-month cliff, then 24-month vesting.'}},
+{term:'Burner Wallet',badge:'c',cat:'Farming',def:{id:'Wallet kosong tanpa aset berharga untuk mencoba dApp baru atau situs airdrop yang belum terpercaya.',en:'An empty wallet with no valuable assets for testing new dApps or unverified airdrop sites.'}},
+{term:'Warm Wallet',badge:'c',cat:'Farming',def:{id:'Wallet aktif bertransaksi secara rutin — terlihat lebih "manusiawi" di mata scanner airdrop.',en:'A wallet that transacts regularly — appears more "human" to airdrop scanners.'}},
+{term:'Claim',badge:'c',cat:'Farming',def:{id:'Proses mengambil token airdrop yang sudah eligible ke wallet melalui website resmi project.',en:'The process of collecting eligible airdrop tokens to your wallet via the official project site.'}},
+{term:'Eligibility',badge:'c',cat:'Farming',def:{id:'Syarat yang harus dipenuhi wallet agar berhak dapat airdrop — volume transaksi, jumlah interaksi, holding minimum, dll.',en:'Requirements a wallet must meet to qualify for an airdrop — transaction volume, interaction count, minimum holdings, etc.'}},
+{term:'Whitelist',badge:'c',cat:'Farming',def:{id:'Daftar wallet yang disetujui untuk dapat akses awal ke airdrop, mint NFT, atau fitur eksklusif project.',en:'A list of approved wallets granted early access to an airdrop, NFT mint, or exclusive project features.'}},
+
+// ── BLOCKCHAIN ──
+{term:'Blockchain',badge:'g',cat:'Blockchain',def:{id:'Ledger digital terdistribusi yang menyimpan transaksi dalam blok kriptografis yang tidak bisa diubah.',en:'A distributed digital ledger storing transactions in immutable cryptographic blocks.'}},
+{term:'Smart Contract',badge:'g',cat:'Blockchain',def:{id:'Program self-executing di blockchain yang otomatis berjalan saat kondisi terpenuhi — tanpa perantara.',en:'A self-executing blockchain program that runs automatically when conditions are met — no intermediaries.'}},
+{term:'Gas Fee',badge:'g',cat:'Blockchain',def:{id:'Biaya transaksi ke validator untuk memproses operasi di blockchain. Naik saat jaringan padat.',en:'Fees paid to validators to process blockchain operations. Increases during network congestion.'}},
+{term:'Validator',badge:'g',cat:'Blockchain',def:{id:'Node yang memverifikasi transaksi dan membuat blok baru di chain PoS. Dapat reward token untuk tugasnya.',en:'A node that verifies transactions and creates new blocks on PoS chains. Earns token rewards for this role.'}},
+{term:'Mainnet',badge:'g',cat:'Blockchain',def:{id:'Jaringan blockchain utama dengan nilai ekonomi nyata. Berlawanan dengan testnet.',en:'The main blockchain network with real economic value. The opposite of a testnet.'}},
+{term:'Testnet',badge:'g',cat:'Blockchain',def:{id:'Jaringan percobaan blockchain tanpa nilai nyata — untuk uji coba dApp dan sering target farming airdrop.',en:'A test blockchain network with no real value — for testing dApps and often targeted for airdrop farming.'}},
+{term:'Block Explorer',badge:'g',cat:'Blockchain',def:{id:'Website untuk menelusuri transaksi dan data blockchain. Contoh: Etherscan, Solscan, Arbiscan.',en:'A website for browsing blockchain transactions and data. Examples: Etherscan, Solscan, Arbiscan.'}},
+{term:'EVM',badge:'g',cat:'Blockchain',def:{id:'Ethereum Virtual Machine — lingkungan eksekusi smart contract. Chain EVM-compatible bisa pakai tooling Ethereum.',en:'Ethereum Virtual Machine — smart contract execution environment. EVM-compatible chains can use Ethereum tooling.'}},
+{term:'RPC',badge:'g',cat:'Blockchain',def:{id:'Endpoint yang dipakai wallet/dApp untuk berkomunikasi dengan node blockchain. Provider populer: Alchemy, Infura.',en:'Endpoint used by wallets/dApps to communicate with blockchain nodes. Popular providers: Alchemy, Infura.'}},
+{term:'Mempool',badge:'g',cat:'Blockchain',def:{id:'Ruang tunggu transaksi sebelum dikonfirmasi ke blok. Transaksi fee tinggi diprioritaskan miner/validator.',en:'The waiting area for transactions before block confirmation. Higher fee transactions are prioritized by miners/validators.'}},
+
+// ── WALLET & KEAMANAN ──
+{term:'Seed Phrase',badge:'r',cat:'Keamanan',def:{id:'12-24 kata rahasia master key wallet. Siapapun yang punya ini punya full akses asetmu. JANGAN PERNAH dibagikan.',en:'12-24 secret words that are your wallet\'s master key. Anyone who has this has full access to your assets. NEVER share it.'}},
+{term:'Private Key',badge:'r',cat:'Keamanan',def:{id:'Kunci kriptografi rahasia untuk menandatangani transaksi. Hilang = aset hilang selamanya.',en:'Secret cryptographic key for signing transactions. Lost = assets gone forever.'}},
+{term:'Hardware Wallet',badge:'g',cat:'Keamanan',def:{id:'Perangkat fisik offline untuk menyimpan private key. Paling aman dari hacker. Contoh: Ledger, Trezor.',en:'A physical offline device for storing private keys. Most secure from hackers. Examples: Ledger, Trezor.'}},
+{term:'Approval',badge:'r',cat:'Keamanan',def:{id:'Izin ke smart contract untuk akses token di walletmu. Bisa dieksploitasi — rutin revoke di Revoke.cash.',en:'Permission granted to a smart contract to access your wallet tokens. Can be exploited — regularly revoke at Revoke.cash.'}},
+{term:'Phishing',badge:'r',cat:'Keamanan',def:{id:'Penipuan via website/DM palsu yang meniru project resmi untuk mencuri seed phrase atau approval berbahaya.',en:'Fraud via fake websites/DMs impersonating official projects to steal seed phrases or dangerous approvals.'}},
+{term:'Rug Pull',badge:'r',cat:'Keamanan',def:{id:'Developer kabur membawa semua likuiditas/dana investor. Harga token jatuh ke nol dan tidak bisa dijual.',en:'Developers flee with all liquidity/investor funds. Token price drops to zero and cannot be sold.'}},
+{term:'Honeypot',badge:'r',cat:'Keamanan',def:{id:'Token yang bisa dibeli tapi tidak bisa dijual karena smart contract dikunci developer.',en:'A token that can be bought but not sold because the smart contract is locked by the developer.'}},
+{term:'Drainer',badge:'r',cat:'Keamanan',def:{id:'Script jahat yang menguras seluruh aset wallet begitu kamu sign transaksi berbahaya.',en:'A malicious script that drains all wallet assets once you sign a dangerous transaction.'}},
+
+// ── DeFi ──
+{term:'DeFi',badge:'g',cat:'DeFi',def:{id:'Decentralized Finance — sistem keuangan di blockchain tanpa bank. Semua diatur smart contract.',en:'Decentralized Finance — a blockchain financial system without banks. Everything governed by smart contracts.'}},
+{term:'DEX',badge:'g',cat:'DeFi',def:{id:'Decentralized Exchange — bursa kripto tanpa perantara. Swap langsung dari wallet. Contoh: Uniswap, PancakeSwap.',en:'Decentralized Exchange — a crypto exchange without intermediaries. Swap directly from wallet. Examples: Uniswap, PancakeSwap.'}},
+{term:'CEX',badge:'g',cat:'DeFi',def:{id:'Centralized Exchange — bursa kripto terpusat tempat kamu titipkan aset. Contoh: Binance, OKX, Indodax.',en:'Centralized Exchange — a centralized crypto exchange where you entrust assets. Examples: Binance, OKX, Indodax.'}},
+{term:'Liquidity Pool',badge:'g',cat:'DeFi',def:{id:'Kumpulan token dikunci di smart contract untuk sediakan likuiditas DEX. LP dapat fee dari setiap swap.',en:'A pool of tokens locked in smart contracts providing DEX liquidity. LPs earn fees from every swap.'}},
+{term:'TVL',badge:'g',cat:'DeFi',def:{id:'Total Value Locked — total aset terkunci di protokol DeFi. Indikator kepercayaan dan ukuran protokol.',en:'Total Value Locked — total assets locked in a DeFi protocol. An indicator of trust and protocol size.'}},
+{term:'APY',badge:'g',cat:'DeFi',def:{id:'Annual Percentage Yield — persentase keuntungan tahunan dari staking/farming termasuk bunga majemuk.',en:'Annual Percentage Yield — the yearly profit percentage from staking/farming including compound interest.'}},
+{term:'Impermanent Loss',badge:'r',cat:'DeFi',def:{id:'Kerugian LP saat harga token di pool berubah drastis dibanding saat deposit. Bisa hilang kalau harga kembali.',en:'Loss experienced by LPs when pool token prices change drastically from deposit time. Can disappear if prices return.'}},
+{term:'Slippage',badge:'g',cat:'DeFi',def:{id:'Perbedaan harga yang diharapkan vs yang didapat saat swap, akibat pergerakan harga atau likuiditas rendah.',en:'The price difference between expected and actual swap price, due to price movement or low liquidity.'}},
+{term:'Flash Loan',badge:'g',cat:'DeFi',def:{id:'Pinjaman tanpa jaminan yang harus dikembalikan dalam satu transaksi atomik. Populer untuk arbitrase.',en:'An uncollateralized loan repaid within a single atomic transaction. Popular for arbitrage.'}},
+
+// ── LAYER 2 & SCALING ──
+{term:'Layer 2',badge:'g',cat:'Scaling',def:{id:'Solusi di atas blockchain utama untuk transaksi lebih cepat dan murah. Contoh: Arbitrum, Optimism, zkSync.',en:'A solution built on top of the main blockchain for faster, cheaper transactions. Examples: Arbitrum, Optimism, zkSync.'}},
+{term:'Rollup',badge:'g',cat:'Scaling',def:{id:'Teknologi L2 yang batch banyak transaksi menjadi satu ke L1. Ada dua jenis: Optimistic Rollup dan ZK Rollup.',en:'L2 technology that batches many transactions into one for L1. Two types: Optimistic Rollup and ZK Rollup.'}},
+{term:'ZK Proof',badge:'g',cat:'Scaling',def:{id:'Zero-Knowledge Proof — bukti kriptografi yang verifikasi kebenaran tanpa mengungkap data aslinya.',en:'Zero-Knowledge Proof — a cryptographic proof that verifies truth without revealing the underlying data.'}},
+{term:'Bridge',badge:'g',cat:'Scaling',def:{id:'Teknologi transfer aset antar blockchain berbeda. Target utama hack — selalu pakai bridge yang sudah audit.',en:'Technology for transferring assets between different blockchains. A primary hack target — always use audited bridges.'}},
+{term:'Sequencer',badge:'g',cat:'Scaling',def:{id:'Komponen L2 yang kumpulkan dan urutkan transaksi sebelum dikirim ke L1. Seringkali masih terpusat di awal.',en:'An L2 component that collects and orders transactions before sending to L1. Often still centralized in early stages.'}},
+
+// ── NFT & GAMING ──
+{term:'NFT',badge:'g',cat:'NFT',def:{id:'Non-Fungible Token — token unik di blockchain sebagai bukti kepemilikan aset digital.',en:'Non-Fungible Token — a unique blockchain token as proof of digital asset ownership.'}},
+{term:'Mint',badge:'g',cat:'NFT',def:{id:'Proses membuat NFT baru ke blockchain. Mint price = harga beli NFT pertama kali langsung dari project.',en:'The process of creating a new NFT on the blockchain. Mint price = the price to buy an NFT directly from the project for the first time.'}},
+{term:'Floor Price',badge:'g',cat:'NFT',def:{id:'Harga terendah NFT dalam suatu koleksi yang tersedia di marketplace — indikator nilai minimum koleksi.',en:'The lowest price of an NFT in a collection available on the marketplace — an indicator of minimum collection value.'}},
+{term:'GameFi',badge:'g',cat:'NFT',def:{id:'Game + DeFi — main game sambil hasilkan token/NFT yang punya nilai ekonomi nyata.',en:'Game + DeFi — play games while earning tokens/NFTs with real economic value.'}},
+{term:'P2E',badge:'g',cat:'NFT',def:{id:'Play to Earn — model game di mana pemain hasilkan pendapatan nyata dari reward token atau jual NFT.',en:'Play to Earn — a gaming model where players earn real income from token rewards or NFT sales.'}},
+
+// ── NARASI & TREN ──
+{term:'Narrative',badge:'g',cat:'Tren',def:{id:'Tema besar yang sedang hype di crypto dan mendorong harga naik. Contoh: AI, L2, RWA, DePIN, Restaking.',en:'A major trending theme in crypto driving prices up. Examples: AI, L2, RWA, DePIN, Restaking.'}},
+{term:'RWA',badge:'g',cat:'Tren',def:{id:'Real World Assets — aset fisik (properti, obligasi, emas) yang di-tokenisasi ke blockchain.',en:'Real World Assets — physical assets (property, bonds, gold) tokenized onto the blockchain.'}},
+{term:'DePIN',badge:'g',cat:'Tren',def:{id:'Decentralized Physical Infrastructure Network — infrastruktur fisik (WiFi, GPU, storage) dikelola komunitas dengan insentif token.',en:'Decentralized Physical Infrastructure Network — physical infrastructure (WiFi, GPU, storage) managed by the community with token incentives.'}},
+{term:'Restaking',badge:'g',cat:'Tren',def:{id:'Menggunakan aset yang sudah di-stake untuk amankan protokol lain sekaligus. 1 aset = reward dari banyak sumber.',en:'Using already-staked assets to secure other protocols simultaneously. 1 asset = rewards from multiple sources.'}},
+{term:'Modular Blockchain',badge:'g',cat:'Tren',def:{id:'Arsitektur blockchain yang pisahkan fungsi eksekusi, konsensus, dan data availability ke layer terpisah. Contoh: Celestia.',en:'A blockchain architecture separating execution, consensus, and data availability into separate layers. Example: Celestia.'}},
+
+// ── TOKEN & EKONOMI ──
+{term:'Tokenomics',badge:'g',cat:'Token',def:{id:'Struktur ekonomi token: total supply, distribusi, utility, vesting, dan mekanisme inflasi/deflasi.',en:'The economic structure of a token: total supply, distribution, utility, vesting, and inflation/deflation mechanisms.'}},
+{term:'Market Cap',badge:'g',cat:'Token',def:{id:'Kapitalisasi pasar = harga × circulating supply. Indikator ukuran project.',en:'Market cap = price × circulating supply. An indicator of project size.'}},
+{term:'FDV',badge:'g',cat:'Token',def:{id:'Fully Diluted Valuation — valuasi project jika SEMUA token sudah beredar. Berguna menilai apakah harga wajar.',en:'Fully Diluted Valuation — a project\'s valuation if ALL tokens were circulating. Useful for assessing fair pricing.'}},
+{term:'Burn',badge:'g',cat:'Token',def:{id:'Menghapus token dari sirkulasi secara permanen — kurangi supply untuk tekan inflasi dan naikkan nilai.',en:'Permanently removing tokens from circulation — reducing supply to combat inflation and increase value.'}},
+
+// ── DAO & GOVERNANCE ──
+{term:'DAO',badge:'g',cat:'Governance',def:{id:'Decentralized Autonomous Organization — organisasi dijalankan komunitas via voting token, bukan manajemen tradisional.',en:'Decentralized Autonomous Organization — an organization run by the community through token voting, not traditional management.'}},
+{term:'Governance Token',badge:'g',cat:'Governance',def:{id:'Token yang beri hak suara dalam pengambilan keputusan protokol. Pemegang token = pemegang suara.',en:'A token granting voting rights in protocol decision-making. Token holders = vote holders.'}},
+{term:'ENS',badge:'g',cat:'Governance',def:{id:'Ethereum Name Service — mengubah alamat wallet panjang jadi nama.eth yang mudah dibaca.',en:'Ethereum Name Service — converts long wallet addresses into readable name.eth names.'}},
+{term:'DID',badge:'g',cat:'Governance',def:{id:'Decentralized Identity — identitas digital yang dikontrol pengguna via blockchain, bukan perusahaan.',en:'Decentralized Identity — a digital identity controlled by the user via blockchain, not a company.'}},
+{term:'Proof of Humanity',badge:'g',cat:'Governance',def:{id:'Verifikasi bahwa akun milik manusia nyata bukan bot. Penting cegah Sybil. Contoh: Worldcoin, Gitcoin Passport.',en:'Verification that an account belongs to a real human, not a bot. Critical for preventing Sybil attacks. Examples: Worldcoin, Gitcoin Passport.'}},
+
+// ── SLANG KOMUNITAS ──
+{term:'WAGMI',badge:'r',cat:'Slang',def:{id:'We Are Gonna Make It — ekspresi optimisme kolektif bahwa semua orang di komunitas akan sukses.',en:'We Are Gonna Make It — a collective optimism that everyone in the community will succeed.'}},
+{term:'NGMI',badge:'r',cat:'Slang',def:{id:'Not Gonna Make It — kebalikan WAGMI. Dipakai kritik keputusan buruk atau perilaku pemula.',en:'Not Gonna Make It — the opposite of WAGMI. Used to criticize bad decisions or rookie behavior.'}},
+{term:'DYOR',badge:'r',cat:'Slang',def:{id:'Do Your Own Research — selalu riset mandiri sebelum invest. Jangan ikut-ikutan tanpa tahu fundamentalnya.',en:'Do Your Own Research — always research independently before investing. Don\'t follow blindly.'}},
+{term:'FOMO',badge:'r',cat:'Slang',def:{id:'Fear Of Missing Out — rasa takut ketinggalan peluang yang buat orang beli aset saat harga sudah tinggi.',en:'Fear Of Missing Out — the fear of missing an opportunity that causes people to buy assets at already high prices.'}},
+{term:'FUD',badge:'r',cat:'Slang',def:{id:'Fear, Uncertainty, Doubt — informasi negatif/palsu yang sengaja disebarkan untuk jatuhkan harga atau sentimen.',en:'Fear, Uncertainty, Doubt — negative/false information deliberately spread to tank prices or sentiment.'}},
+{term:'Alpha',badge:'r',cat:'Slang',def:{id:'Informasi eksklusif belum diketahui publik tentang project bagus atau peluang profit. "Share alpha dong!"',en:'Exclusive insider information about a good project or profit opportunity not yet known to the public.'}},
+{term:'Degen',badge:'r',cat:'Slang',def:{id:'Degenerate — trader crypto sangat agresif, suka ambil risiko tinggi, farming project baru tanpa banyak riset.',en:'Degenerate — a highly aggressive crypto trader who loves high risk and farms new projects with minimal research.'}},
+{term:'Rug',badge:'r',cat:'Slang',def:{id:'Singkatan Rug Pull. "Project-nya rug bro" = developer kabur bawa dana investor.',en:'Short for Rug Pull. "The project rugged bro" = the developer fled with investor funds.'}},
+{term:'Rekt',badge:'r',cat:'Slang',def:{id:'Wrecked — kondisi rugi besar akibat posisi yang salah arah atau kena rug pull.',en:'Wrecked — the state of major losses from a wrong position or rug pull.'}},
+{term:'Pump & Dump',badge:'r',cat:'Slang',def:{id:'Skema manipulasi: harga dipompa insider/influencer, lalu mereka jual semua saat publik FOMO masuk.',en:'Manipulation scheme: price pumped by insiders/influencers, then they dump everything when the public FOMOs in.'}},
+{term:'Hodl',badge:'r',cat:'Slang',def:{id:'Hold On for Dear Life — simpan token jangka panjang tanpa jual meski harga turun drastis.',en:'Hold On for Dear Life — long-term holding without selling even during drastic price drops.'}},
+{term:'NFA',badge:'r',cat:'Slang',def:{id:'Not Financial Advice — disclaimer bahwa pendapat yang disampaikan bukan saran finansial resmi.',en:'Not Financial Advice — a disclaimer that the opinion shared is not formal financial advice.'}},
+{term:'Probably Nothing',badge:'r',cat:'Slang',def:{id:'Frasa ironis yang artinya justru "ini sangat penting". Dipakai saat share berita bullish secara santai.',en:'An ironic phrase meaning "this is actually very significant". Used when casually sharing bullish news.'}},
+{term:'GM',badge:'r',cat:'Slang',def:{id:'Good Morning — sapaan khas komunitas Web3 tanda semangat dan optimisme.',en:'Good Morning — the signature Web3 community greeting symbolizing enthusiasm and optimism.'}},
+{term:'LFG',badge:'r',cat:'Slang',def:{id:'Let\'s F***ing Go — ekspresi hype ekstrem terhadap project atau momen bullish.',en:'Let\'s F***ing Go — an expression of extreme hype toward a project or bullish moment.'}},
+{term:'Shill',badge:'r',cat:'Slang',def:{id:'Mempromosikan token/project secara berlebihan, biasanya karena dibayar atau punya kepentingan pribadi.',en:'Excessively promoting a token/project, usually because of being paid or having a personal stake.'}},
+{term:'Buidl',badge:'r',cat:'Slang',def:{id:'Versi crypto dari "Build" — fokus bangun produk nyata daripada hanya spekulasi harga.',en:'The crypto version of "Build" — focusing on building real products rather than just price speculation.'}},
+{term:'To The Moon',badge:'r',cat:'Slang',def:{id:'Harapan bahwa harga token akan naik sangat tinggi. Sering disingkat "🚀🌙".',en:'The hope that a token\'s price will rise extremely high. Often shortened to "🚀🌙".'}},
+{term:'Cope',badge:'r',cat:'Slang',def:{id:'Menolak menerima kenyataan bahwa investasinya gagal dan mencari berbagai pembenaran.',en:'Refusing to accept that an investment failed and seeking various justifications.'}},
 ];
 
 let docLang = localStorage.getItem('axi-doc-lang') || 'id';
