@@ -203,7 +203,7 @@ nav {
   color: var(--text); text-decoration:none;
   flex-shrink: 0;
 }
-.nav-logo img { width:30px; height:30px; border-radius:8px; object-fit:contain; }
+.nav-logo img { width:44px; height:44px; border-radius:8px; object-fit:contain; }
 
 .nav-links { display:flex; gap:28px; }
 .nav-links a {
