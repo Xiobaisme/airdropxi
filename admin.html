@@ -264,9 +264,135 @@
       padding: 2rem; text-align: center; font-family: var(--mono); font-size: 0.68rem; color: var(--text3);
       display: flex; flex-direction: column; align-items: center; gap: 10px;
     }
+
+    /* ── LOGO UPLOAD WIDGET ── */
+    .logo-upload-wrap {
+      display: flex; flex-direction: column; gap: 8px;
+    }
+    .logo-preview-row {
+      display: flex; align-items: center; gap: 12px;
+    }
+    .logo-preview-box {
+      width: 52px; height: 52px; border-radius: 10px;
+      border: 1px solid var(--border2); background: var(--s3);
+      display: flex; align-items: center; justify-content: center;
+      overflow: hidden; flex-shrink: 0;
+      font-size: 1.3rem; color: var(--text3);
+      transition: border-color 0.2s;
+    }
+    .logo-preview-box img {
+      width: 100%; height: 100%; object-fit: contain;
+    }
+    .logo-preview-box.has-img { border-color: var(--aborder); }
+    .logo-upload-right { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
+    .logo-url-display {
+      font-family: var(--mono); font-size: 0.62rem; color: var(--text2);
+      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+      padding: 0.3rem 0.5rem; background: var(--s3); border-radius: 4px;
+      border: 1px solid var(--border);
+    }
+    .logo-url-display.empty { color: var(--text3); font-style: italic; }
+    .logo-upload-btns { display: flex; gap: 6px; flex-wrap: wrap; }
+    .btn-upload-logo {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 0.42rem 0.85rem;
+      background: var(--adim); border: 1px solid var(--aborder);
+      border-radius: 6px; color: var(--accent);
+      font-family: var(--mono); font-size: 0.64rem;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-upload-logo:hover { background: rgba(0,229,160,0.14); }
+    .btn-upload-logo:disabled { opacity: 0.4; cursor: not-allowed; }
+    .btn-clear-logo {
+      display: inline-flex; align-items: center; gap: 5px;
+      padding: 0.42rem 0.75rem;
+      background: transparent; border: 1px solid var(--border2);
+      border-radius: 6px; color: var(--text3);
+      font-family: var(--mono); font-size: 0.64rem;
+      cursor: pointer; transition: all 0.2s; white-space: nowrap;
+    }
+    .btn-clear-logo:hover { border-color: var(--red); color: var(--red); }
+    .logo-upload-status {
+      font-family: var(--mono); font-size: 0.6rem;
+      padding: 0.3rem 0.5rem; border-radius: 4px;
+      display: none;
+    }
+    .logo-upload-status.uploading {
+      display: flex; align-items: center; gap: 6px;
+      background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2);
+      color: var(--blue);
+    }
+    .logo-upload-status.success {
+      display: block;
+      background: var(--adim); border: 1px solid var(--aborder);
+      color: var(--accent);
+    }
+    .logo-upload-status.error {
+      display: block;
+      background: var(--rdim); border: 1px solid rgba(239,68,68,0.2);
+      color: var(--red);
+    }
+
+    /* ── GITHUB TOKEN MODAL ── */
+    .modal-overlay {
+      position: fixed; inset: 0; z-index: 500;
+      background: rgba(7,9,11,0.85); backdrop-filter: blur(8px);
+      display: flex; align-items: center; justify-content: center;
+    }
+    .modal-box {
+      background: var(--s1); border: 1px solid var(--border2);
+      border-radius: 14px; padding: 2rem; max-width: 420px; width: 90%;
+    }
+    .modal-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 8px; }
+    .modal-sub { font-family: var(--mono); font-size: 0.65rem; color: var(--text2); margin-bottom: 1.25rem; line-height: 1.6; }
+    .modal-sub a { color: var(--accent); text-decoration: none; }
+    .modal-sub a:hover { text-decoration: underline; }
+    .modal-input-wrap { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
+    .modal-input-wrap label { font-family: var(--mono); font-size: 0.6rem; color: var(--text2); letter-spacing: 0.06em; text-transform: uppercase; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+    .btn-modal-save {
+      padding: 0.55rem 1.2rem; background: var(--accent); color: #000;
+      font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
+      border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s;
+    }
+    .btn-modal-save:hover { opacity: 0.85; }
+    .btn-modal-cancel {
+      padding: 0.55rem 1rem; background: transparent; color: var(--text2);
+      font-family: var(--mono); font-size: 0.68rem;
+      border: 1px solid var(--border2); border-radius: 6px; cursor: pointer;
+    }
+    .token-warning {
+      font-family: var(--mono); font-size: 0.6rem; color: var(--text3);
+      margin-top: 0.5rem; padding: 0.5rem 0.75rem;
+      background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15);
+      border-radius: 6px; line-height: 1.5;
+    }
   </style>
 </head>
 <body>
+
+<!-- GITHUB TOKEN MODAL -->
+<div class="modal-overlay hidden" id="token-modal">
+  <div class="modal-box">
+    <div class="modal-title">🔑 GitHub Token</div>
+    <div class="modal-sub">
+      Token diperlukan untuk upload gambar ke repo GitHub kamu.<br><br>
+      Buat di: <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a>
+      <br>Centang permission: <strong style="color:var(--accent)">repo</strong> (Full control).<br><br>
+      Token disimpan hanya di <code style="color:var(--accent)">localStorage</code> browser ini.
+    </div>
+    <div class="modal-input-wrap">
+      <label>Personal Access Token (Classic)</label>
+      <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
+    </div>
+    <div class="token-warning">⚠️ Jangan share token ini ke siapapun. Ini hanya tersimpan di browser kamu.</div>
+    <br>
+    <div class="modal-actions">
+      <button class="btn-modal-cancel" onclick="closeTokenModal()">Batal</button>
+      <button class="btn-modal-save" onclick="saveToken()">Simpan Token</button>
+    </div>
+  </div>
+</div>
 
 <!-- LOGIN SCREEN -->
 <div id="login-section">
@@ -302,6 +428,10 @@
           <div class="list-loading"><div class="spinner"></div><span>Memuat...</span></div>
         </div>
       </div>
+      <!-- GitHub token setup button -->
+      <button class="btn-new" onclick="openTokenModal()" style="border-color:rgba(59,130,246,0.3);color:var(--blue);background:rgba(59,130,246,0.06)">
+        🔑 Setup GitHub Token
+      </button>
     </div>
 
     <!-- FORM AREA -->
@@ -319,10 +449,212 @@
 </div>
 
 <script>
+  // ── CONFIG ────────────────────────────────────────────
+  // Sesuaikan dengan repo kamu
+  const GH_OWNER  = 'Xiobaisme';
+  const GH_REPO   = 'airdropxi';
+  const GH_BRANCH = 'main';
+  const GH_LOGOS_PATH = 'assets/logos'; // folder tujuan di repo
+
+  // ── GITHUB TOKEN MANAGEMENT ───────────────────────────
+  function getGHToken() {
+    return localStorage.getItem('gh_token_airdropxi') || '';
+  }
+
+  function openTokenModal() {
+    const modal = document.getElementById('token-modal');
+    const input = document.getElementById('token-input');
+    modal.classList.remove('hidden');
+    // Tampilkan token yg sudah ada (masked)
+    const existing = getGHToken();
+    if (existing) input.value = existing;
+    input.focus();
+  }
+
+  function closeTokenModal() {
+    document.getElementById('token-modal').classList.add('hidden');
+  }
+
+  function saveToken() {
+    const val = document.getElementById('token-input').value.trim();
+    if (!val) { showToast('Token tidak boleh kosong!', 'error'); return; }
+    if (!val.startsWith('ghp_') && !val.startsWith('github_pat_')) {
+      if (!confirm('Token terlihat tidak valid (biasanya diawali "ghp_"). Simpan tetap?')) return;
+    }
+    localStorage.setItem('gh_token_airdropxi', val);
+    closeTokenModal();
+    showToast('✓ Token disimpan!', 'success');
+  }
+
+  // Enter key on token input
+  document.getElementById('token-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') saveToken();
+  });
+
+  // ── GITHUB IMAGE UPLOAD ───────────────────────────────
+  // Mengupload file gambar ke GitHub repo, return raw URL
+  async function uploadImageToGitHub(file, projectName) {
+    const token = getGHToken();
+    if (!token) {
+      openTokenModal();
+      throw new Error('GitHub token belum diset. Isi token dulu!');
+    }
+
+    // Sanitize nama file: pakai nama project + timestamp
+    const ext = file.name.split('.').pop().toLowerCase();
+    const safeName = (projectName || 'logo').toLowerCase()
+      .replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    const filename = `${safeName}-${Date.now()}.${ext}`;
+    const filePath = `${GH_LOGOS_PATH}/${filename}`;
+
+    // Convert file ke base64
+    const base64 = await fileToBase64(file);
+
+    // Cek apakah file sudah ada (untuk dapat SHA kalau mau overwrite)
+    let sha = null;
+    try {
+      const checkRes = await fetch(
+        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${filePath}`,
+        { headers: { Authorization: `token ${token}` } }
+      );
+      if (checkRes.ok) {
+        const existing = await checkRes.json();
+        sha = existing.sha;
+      }
+    } catch(e) { /* file belum ada, lanjut */ }
+
+    // Upload via GitHub Contents API
+    const body = {
+      message: `Upload logo: ${filename}`,
+      content: base64,
+      branch: GH_BRANCH,
+    };
+    if (sha) body.sha = sha; // diperlukan kalau overwrite
+
+    const res = await fetch(
+      `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${filePath}`,
+      {
+        method: 'PUT',
+        headers: {
+          Authorization: `token ${token}`,
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(body),
+      }
+    );
+
+    if (!res.ok) {
+      const err = await res.json().catch(() => ({}));
+      if (res.status === 401) throw new Error('Token tidak valid atau expired. Update token kamu!');
+      if (res.status === 403) throw new Error('Token tidak punya akses repo. Pastikan centang "repo" saat buat token.');
+      throw new Error(err.message || `GitHub API error ${res.status}`);
+    }
+
+    const data = await res.json();
+    // Return raw URL yang bisa dipakai sebagai gambar
+    const rawUrl = data.content.download_url
+      || `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${filePath}`;
+    return rawUrl;
+  }
+
+  function fileToBase64(file) {
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload  = () => resolve(reader.result.split(',')[1]); // strip data:...;base64,
+      reader.onerror = () => reject(new Error('Gagal baca file'));
+      reader.readAsDataURL(file);
+    });
+  }
+
+  // ── LOGO UPLOAD WIDGET HANDLER ────────────────────────
+  let pendingLogoUrl = null; // URL hasil upload, siap disimpan ke Supabase
+
+  function initLogoUpload(existingUrl) {
+    pendingLogoUrl = existingUrl || null;
+    updateLogoPreview(existingUrl);
+  }
+
+  function updateLogoPreview(url) {
+    const box    = document.getElementById('logo-preview-box');
+    const urlDisp = document.getElementById('logo-url-display');
+    if (!box || !urlDisp) return;
+
+    if (url) {
+      box.innerHTML = `<img src="${esc(url)}" onerror="this.parentElement.innerHTML='🖼️'">`;
+      box.classList.add('has-img');
+      urlDisp.textContent = url;
+      urlDisp.classList.remove('empty');
+    } else {
+      box.innerHTML = '🖼️';
+      box.classList.remove('has-img');
+      urlDisp.textContent = 'Belum ada logo';
+      urlDisp.classList.add('empty');
+    }
+  }
+
+  function triggerLogoUpload() {
+    const input = document.getElementById('logo-file-input');
+    if (input) input.click();
+  }
+
+  async function handleLogoFileChange(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+
+    // Validasi tipe file
+    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml', 'image/gif'];
+    if (!allowed.includes(file.type)) {
+      showToast('Format tidak didukung. Gunakan PNG, JPG, WEBP, atau SVG.', 'error');
+      return;
+    }
+
+    // Validasi ukuran (max 2MB)
+    if (file.size > 2 * 1024 * 1024) {
+      showToast('Ukuran file terlalu besar. Maksimal 2MB.', 'error');
+      return;
+    }
+
+    const statusEl  = document.getElementById('logo-upload-status');
+    const uploadBtn = document.getElementById('btn-upload-logo');
+
+    // Show uploading state
+    statusEl.className = 'logo-upload-status uploading';
+    statusEl.innerHTML = '<span class="spinner"></span> Mengupload ke GitHub...';
+    if (uploadBtn) uploadBtn.disabled = true;
+
+    try {
+      const projectName = document.getElementById('f-name')?.value?.trim() || 'project';
+      const rawUrl = await uploadImageToGitHub(file, projectName);
+
+      pendingLogoUrl = rawUrl;
+      updateLogoPreview(rawUrl);
+
+      statusEl.className = 'logo-upload-status success';
+      statusEl.textContent = '✓ Upload berhasil! Klik Simpan untuk menyimpan perubahan.';
+
+      showToast('✓ Gambar berhasil diupload ke GitHub!', 'success');
+    } catch(err) {
+      statusEl.className = 'logo-upload-status error';
+      statusEl.textContent = '✕ ' + err.message;
+      showToast('Upload gagal: ' + err.message, 'error');
+    } finally {
+      if (uploadBtn) uploadBtn.disabled = false;
+      // Reset file input biar bisa pilih file sama lagi
+      e.target.value = '';
+    }
+  }
+
+  function clearLogo() {
+    pendingLogoUrl = null;
+    updateLogoPreview(null);
+    const statusEl = document.getElementById('logo-upload-status');
+    if (statusEl) { statusEl.className = 'logo-upload-status'; statusEl.textContent = ''; }
+  }
+
+  // ── LOAD LIST ─────────────────────────────────────────
   let projects = [];
   let editingId = null;
 
-  // ── LOAD LIST ─────────────────────────────────────────
   async function loadProjects() {
     try {
       const res = await fetch('/api/admin-airdrop');
@@ -371,13 +703,13 @@
 
   function newForm()    { editingId = null; renderList(); renderForm(null); }
   function loadEdit(id) {
-  editingId = id;
-  renderList();
-  fetch(`/api/admin-airdrop?id=${id}`)
-    .then(r => r.json())
-    .then(data => { if (data.error) showToast(data.error, 'error'); else renderForm(data); })
-    .catch(e => showToast('Gagal load: ' + e.message, 'error'));
-}
+    editingId = id;
+    renderList();
+    fetch(`/api/admin-airdrop?id=${id}`)
+      .then(r => r.json())
+      .then(data => { if (data.error) showToast(data.error, 'error'); else renderForm(data); })
+      .catch(e => showToast('Gagal load: ' + e.message, 'error'));
+  }
 
   // ── RENDER FORM ───────────────────────────────────────
   function renderForm(data) {
@@ -573,10 +905,34 @@
               <label>TGE / Listing Date</label>
               <input id="f-tge" type="text" placeholder="Q3 2026 / TBA" value="${esc(d.tge_date||'')}">
             </div>
-            <div class="field">
-              <label>Logo URL</label>
-              <input id="f-logo" type="url" placeholder="https://..." value="${esc(d.logo_url||'')}">
+
+            <!-- ── LOGO UPLOAD (menggantikan Logo URL input biasa) ── -->
+            <div class="field" style="grid-column: span 2">
+              <label>Logo Proyek <span class="hint">PNG/JPG/WEBP/SVG, maks 2MB — upload langsung ke GitHub</span></label>
+              <div class="logo-upload-wrap">
+                <div class="logo-preview-row">
+                  <div class="logo-preview-box" id="logo-preview-box">🖼️</div>
+                  <div class="logo-upload-right">
+                    <div class="logo-url-display empty" id="logo-url-display">Belum ada logo</div>
+                    <div class="logo-upload-btns">
+                      <!-- Hidden file input -->
+                      <input type="file" id="logo-file-input" accept="image/*"
+                        style="display:none" onchange="handleLogoFileChange(event)">
+                      <button type="button" class="btn-upload-logo" id="btn-upload-logo"
+                        onclick="triggerLogoUpload()">
+                        ⬆ Upload Gambar
+                      </button>
+                      <button type="button" class="btn-clear-logo" onclick="clearLogo()">
+                        ✕ Hapus
+                      </button>
+                    </div>
+                  </div>
+                </div>
+                <div class="logo-upload-status" id="logo-upload-status"></div>
+              </div>
             </div>
+            <!-- hidden input untuk menyimpan URL final -->
+            <input type="hidden" id="f-logo">
           </div>
         </div>
 
@@ -611,6 +967,9 @@
 
       </div>
     `;
+
+    // Init logo upload widget dengan URL yang sudah ada
+    initLogoUpload(d.logo_url || null);
 
     // Tambah row pertama kalau testnet kosong
     if (!testnetLinks.length) {
@@ -674,6 +1033,7 @@
 
   function cancelForm() {
     editingId = null; renderList();
+    pendingLogoUrl = null;
     document.getElementById('form-area').innerHTML = `
       <div class="panel">
         <div class="empty-form">
@@ -691,6 +1051,9 @@
     const publishedEl = document.getElementById('f-published');
     const isPublished = publishedEl ? publishedEl.checked : false;
 
+    // Ambil logo URL dari pendingLogoUrl (hasil upload) atau null
+    const logoUrl = pendingLogoUrl || null;
+
     const payload = {
       name,
       status:        document.getElementById('f-status')?.value         || null,
@@ -707,7 +1070,7 @@
       total_supply:  document.getElementById('f-supply')?.value?.trim()  || null,
       network:       document.getElementById('f-network')?.value?.trim() || null,
       tge_date:      document.getElementById('f-tge')?.value?.trim()     || null,
-      logo_url:      document.getElementById('f-logo')?.value?.trim()    || null,
+      logo_url:      logoUrl,
       twitter:       document.getElementById('f-twitter')?.value?.trim() || null,
       discord:       document.getElementById('f-discord')?.value?.trim() || null,
       telegram:      document.getElementById('f-telegram')?.value?.trim()|| null,
@@ -738,8 +1101,6 @@
       }
 
       const result = await res.json();
-
-      // FIX: result.error sekarang selalu string (bukan object) dari API yang sudah difix
       if (!res.ok) throw new Error(result.error || `HTTP ${res.status}`);
 
       showToast(editingId ? '✓ Berhasil diupdate!' : '✓ Proyek ditambahkan!', 'success');
@@ -774,6 +1135,7 @@
       }
       showToast('✓ Proyek dihapus', 'success');
       editingId = null;
+      pendingLogoUrl = null;
       await loadProjects();
       cancelForm();
     } catch(e) {
@@ -813,6 +1175,13 @@
       if (res.ok && result.success) {
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('admin-content').classList.remove('hidden');
+
+        // Kalau belum ada GitHub token, prompt untuk setup
+        if (!localStorage.getItem('gh_token_airdropxi')) {
+          setTimeout(() => {
+            showToast('💡 Setup GitHub Token untuk enable upload gambar!', 'success');
+          }, 800);
+        }
       } else {
         alert(`Akses ditolak: ${result.message || 'Unauthorized'}`);
         google.accounts.id.disableAutoSelect();
