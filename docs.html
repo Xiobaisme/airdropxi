@@ -569,6 +569,28 @@ html, body {
 </a>
     </div>
   </div>
+<!-- ============================================================
+  BAGIAN 1 — SIDEBAR ENTRY
+============================================================ -->
+ 
+<div class="sb-group">
+  <div class="sb-cat" onclick="toggleGroup(this)">
+    <span data-id="🛠️ Tools & Tutorial" data-en="🛠️ Tools & Tutorial">🛠️ Tools & Tutorial</span>
+    <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>
+  </div>
+  <div class="sb-list">
+    <a class="sb-link" onclick="show('ai-tools')"><span class="sb-icon">🤖</span><span data-id="AI Tools" data-en="AI Tools">AI Tools</span><span class="sb-badge">NEW</span></a>
+    <a class="sb-link" onclick="show('programming-langs')"><span class="sb-icon">💻</span><span data-id="Bahasa Pemrograman" data-en="Programming Languages">Bahasa Pemrograman</span></a>
+    <a class="sb-link" onclick="show('vps-server')"><span class="sb-icon">🖥️</span><span data-id="VPS & Server" data-en="VPS & Server">VPS & Server</span></a>
+    <a class="sb-link" onclick="show('terminal-cli')"><span class="sb-icon">⌨️</span><span data-id="Terminal & CLI" data-en="Terminal & CLI">Terminal & CLI</span></a>
+    <a class="sb-link" onclick="show('git-github')"><span class="sb-icon">🐙</span><span data-id="Git & GitHub" data-en="Git & GitHub">Git & GitHub</span></a>
+    <a class="sb-link" onclick="show('nodejs-npm')"><span class="sb-icon">🟢</span><span data-id="Node.js & npm" data-en="Node.js & npm">Node.js & npm</span></a>
+    <a class="sb-link" onclick="show('docker')"><span class="sb-icon">🐳</span><span data-id="Docker" data-en="Docker">Docker</span></a>
+    <a class="sb-link" onclick="show('database')"><span class="sb-icon">🗄️</span><span data-id="Database" data-en="Database">Database</span></a>
+    <a class="sb-link" onclick="show('api-scraping')"><span class="sb-icon">🔌</span><span data-id="API & Web Scraping" data-en="API & Web Scraping">API & Web Scraping</span></a>
+    <a class="sb-link" onclick="show('automation-bot')"><span class="sb-icon">⚙️</span><span data-id="Automation & Bot" data-en="Automation & Bot">Automation & Bot</span></a>
+  </div>
+</div>
 
 </aside>
 
@@ -2498,6 +2520,694 @@ html, body {
     <p data-id="Bedanya pemenang dengan yang gagal adalah: Pemenang punya <strong>SISTEM</strong>, bukan asal gas." data-en="The difference between winners and losers is: Winners have a <strong>SYSTEM</strong>, not just random gas."></p>
   </div>
 
+<!-- ============================================================
+  BAGIAN 2 — SECTIONS HTML
+============================================================ -->
+ 
+<!-- ── AI TOOLS ── -->
+<div class="doc-section" id="sec-ai-tools">
+  <div class="breadcrumb"><span onclick="show('intro')">Docs</span><span class="sep">/</span><span data-id="AI Tools" data-en="AI Tools"></span></div>
+  <div class="doc-hero">
+    <div class="doc-tag" data-id="Tutorial" data-en="Tutorial"></div>
+    <h1 data-id="AI <span>Tools</span> untuk Hunter" data-en="AI <span>Tools</span> for Hunters"></h1>
+    <p data-id="Panduan lengkap menggunakan berbagai AI tools untuk riset, coding, otomasi, dan strategi airdrop hunting secara efisien." data-en="Complete guide to using various AI tools for research, coding, automation, and airdrop hunting strategy efficiently."></p>
+  </div>
+ 
+  <div class="callout c-info">
+    <div class="callout-icon">🧠</div>
+    <div class="callout-text">
+      <strong data-id="Kenapa AI Penting untuk Hunter?" data-en="Why AI Matters for Hunters?"></strong>
+      <span data-id="AI bukan cuma buat ngobrol. Hunter Pro menggunakan AI untuk riset project, analisis whitepaper, nulis script otomasi, debug kode, hingga translate dokumen teknis — semua lebih cepat 10x." data-en="AI isn't just for chatting. Pro hunters use AI to research projects, analyze whitepapers, write automation scripts, debug code, and translate technical documents — all 10x faster."></span>
+    </div>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🤖</span><span data-id="Platform AI Utama" data-en="Major AI Platforms"></span></h2>
+  <div class="dcg">
+    <div class="dc">
+      <div class="dc-icon">💬</div>
+      <h4>ChatGPT (OpenAI)</h4>
+      <p data-id="Model GPT-4o. Paling populer, cocok untuk nulis, riset, debug code, dan brainstorming strategi. Ada versi gratis (GPT-4o mini) dan Pro ($20/bulan). Akses di chat.openai.com." data-en="GPT-4o model. Most popular, great for writing, research, debugging code, and strategy brainstorming. Free tier (GPT-4o mini) and Pro ($20/month). Access at chat.openai.com."></p>
+    </div>
+    <div class="dc">
+      <div class="dc-icon">⚡</div>
+      <h4>Claude (Anthropic)</h4>
+      <p data-id="Model Claude Sonnet/Opus. Unggul dalam analisis dokumen panjang, nulis code kompleks, dan reasoning mendalam. Gratis di claude.ai, Pro $20/bulan. Terbaik untuk analisis whitepaper." data-en="Claude Sonnet/Opus model. Excellent at analyzing long documents, writing complex code, and deep reasoning. Free at claude.ai, Pro $20/month. Best for whitepaper analysis."></p>
+    </div>
+    <div class="dc">
+      <div class="dc-icon">🌟</div>
+      <h4>Gemini (Google)</h4>
+      <p data-id="Model Gemini 2.0/2.5. Terintegrasi dengan Google Search — bisa akses info real-time. Gratis di gemini.google.com. Cocok untuk riset berita terkini tentang project crypto." data-en="Gemini 2.0/2.5 model. Integrated with Google Search — can access real-time info. Free at gemini.google.com. Best for researching latest news about crypto projects."></p>
+    </div>
+    <div class="dc">
+      <div class="dc-icon">🔍</div>
+      <h4>Perplexity AI</h4>
+      <p data-id="AI search engine dengan sumber terverifikasi dan kutipan langsung. Ideal untuk fact-checking dan riset berbasis sumber. Gratis di perplexity.ai, Pro $20/bulan." data-en="AI search engine with verified sources and direct citations. Ideal for fact-checking and source-based research. Free at perplexity.ai, Pro $20/month."></p>
+    </div>
+    <div class="dc">
+      <div class="dc-icon">🦅</div>
+      <h4>Grok (xAI)</h4>
+      <p data-id="Model dari Elon Musk's xAI. Terintegrasi langsung dengan X (Twitter) — sangat kuat untuk analisis sentiment komunitas crypto dan berita real-time. Tersedia di X Premium." data-en="Model from Elon Musk's xAI. Directly integrated with X (Twitter) — very powerful for analyzing crypto community sentiment and real-time news. Available on X Premium."></p>
+    </div>
+    <div class="dc">
+      <div class="dc-icon">🚀</div>
+      <h4>DeepSeek</h4>
+      <p data-id="Model open-source dari China. Performa setara GPT-4 tapi gratis. Sangat kuat untuk coding dan matematika. Akses di chat.deepseek.com. Alternatif terbaik saat budget terbatas." data-en="Open-source model from China. GPT-4 level performance but free. Extremely strong for coding and math. Access at chat.deepseek.com. Best alternative on a tight budget."></p>
+    </div>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">⚡</span><span data-id="Use Case AI untuk Crypto Hunter" data-en="AI Use Cases for Crypto Hunters"></span></h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">1</div>
+      <div class="step-body">
+        <div class="step-title" data-id="Riset Project" data-en="Project Research"></div>
+        <div class="step-desc" data-id='Prompt: "Analisis whitepaper [nama project]. Jelaskan teknologi inti, tokenomics, tim, investor, dan potensi airdrop-nya. Apakah ada red flags?" — Claude atau ChatGPT sangat baik untuk ini.' data-en='Prompt: "Analyze the whitepaper of [project name]. Explain core tech, tokenomics, team, investors, and airdrop potential. Any red flags?" — Claude or ChatGPT excel at this.'></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">2</div>
+      <div class="step-body">
+        <div class="step-title" data-id="Debug & Tulis Script" data-en="Debug & Write Scripts"></div>
+        <div class="step-desc" data-id='Paste error kode kamu ke ChatGPT/Claude dan tanya "Fix this error and explain why". Atau minta AI nulisin script Python/JS untuk otomasi task airdrop.' data-en='Paste your code error to ChatGPT/Claude and ask "Fix this error and explain why". Or ask AI to write Python/JS scripts for airdrop task automation.'></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">3</div>
+      <div class="step-body">
+        <div class="step-title" data-id="Analisis Smart Contract" data-en="Smart Contract Analysis"></div>
+        <div class="step-desc" data-id='Copy kode Solidity dari Etherscan dan tanya AI: "Apakah ada fungsi berbahaya dalam contract ini? Cek ownership, pause function, dan unlimited mint." Bisa deteksi rug pull secara mandiri.' data-en='Copy Solidity code from Etherscan and ask AI: "Are there any dangerous functions in this contract? Check ownership, pause function, and unlimited mint." Independently detect potential rug pulls.'></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">4</div>
+      <div class="step-body">
+        <div class="step-title" data-id="Translate Dokumen Teknis" data-en="Translate Technical Docs"></div>
+        <div class="step-desc" data-id="Paste dokumentasi teknis berbahasa Inggris ke AI dan minta summary dalam Bahasa Indonesia yang mudah dipahami. Hemat waktu berjam-jam membaca docs yang kompleks." data-en="Paste English technical documentation into AI and request a summary in easy-to-understand Indonesian. Saves hours of reading complex docs."></div>
+      </div>
+    </div>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🛠️</span><span data-id="AI Tools Spesialis Lainnya" data-en="Other Specialist AI Tools"></span></h2>
+  <div class="dcg">
+    <div class="dc"><div class="dc-icon">🎨</div><h4>Midjourney / DALL-E</h4><p data-id="Generate gambar AI untuk kebutuhan konten komunitas, thumbnail, atau NFT art." data-en="Generate AI images for community content, thumbnails, or NFT art needs."></p></div>
+    <div class="dc"><div class="dc-icon">🎙️</div><h4>ElevenLabs</h4><p data-id="Text-to-speech AI berkualitas tinggi. Buat narasi video tutorial atau konten edukasi crypto." data-en="High-quality text-to-speech AI. Create narration for tutorial videos or crypto educational content."></p></div>
+    <div class="dc"><div class="dc-icon">📊</div><h4>Julius AI</h4><p data-id="AI untuk analisis data. Upload CSV on-chain data dan AI langsung buat chart dan insight." data-en="AI for data analysis. Upload on-chain CSV data and AI instantly creates charts and insights."></p></div>
+    <div class="dc"><div class="dc-icon">🔐</div><h4>GitHub Copilot</h4><p data-id="AI autocomplete langsung di code editor (VS Code). Gratis untuk pelajar, $10/bulan lainnya." data-en="AI autocomplete directly in code editor (VS Code). Free for students, $10/month otherwise."></p></div>
+  </div>
+ 
+  <div class="callout c-warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-text">
+      <strong data-id="Batasan AI" data-en="AI Limitations"></strong>
+      <span data-id="AI bisa salah (hallucinate). Selalu verifikasi informasi penting dari AI dengan sumber primer (whitepaper asli, block explorer, official docs). Jangan percaya 100% untuk keputusan finansial." data-en="AI can be wrong (hallucinate). Always verify important AI-generated information from primary sources (original whitepaper, block explorer, official docs). Never trust 100% for financial decisions."></span>
+    </div>
+  </div>
+</div>
+ 
+ 
+<!-- ── BAHASA PEMROGRAMAN ── -->
+<div class="doc-section" id="sec-programming-langs">
+  <div class="breadcrumb"><span onclick="show('intro')">Docs</span><span class="sep">/</span><span data-id="Bahasa Pemrograman" data-en="Programming Languages"></span></div>
+  <div class="doc-hero">
+    <div class="doc-tag" data-id="Tutorial" data-en="Tutorial"></div>
+    <h1 data-id="Bahasa <span>Pemrograman</span> untuk Web3" data-en="<span>Programming Languages</span> for Web3"></h1>
+    <p data-id="Panduan bahasa pemrograman yang paling relevan untuk developer Web3, hunter, dan builder — dari scripting sederhana hingga smart contract." data-en="Guide to programming languages most relevant for Web3 developers, hunters, and builders — from simple scripting to smart contracts."></p>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🐍</span><span data-id="Python — Bahasa Serba Bisa" data-en="Python — The All-Purpose Language"></span></h2>
+  <p class="dp" data-id="Bahasa paling populer untuk scripting, otomasi, dan data analysis. Cocok untuk pemula karena sintaks-nya bersih dan mudah dibaca. Banyak library Web3 tersedia." data-en="The most popular language for scripting, automation, and data analysis. Perfect for beginners due to clean, readable syntax. Many Web3 libraries available."></p>
+  <div class="dcg" style="margin-bottom:16px">
+    <div class="dc"><h4 data-id="Kegunaan di Web3" data-en="Web3 Use Cases"></h4><p data-id="Bot trading, script on-chain interaction, data scraping, analisis transaksi blockchain, otomasi airdrop task." data-en="Trading bots, on-chain interaction scripts, data scraping, blockchain transaction analysis, airdrop task automation."></p></div>
+    <div class="dc"><h4 data-id="Library Penting" data-en="Key Libraries"></h4><p data-id="web3.py (interaksi Ethereum), requests (HTTP), selenium/playwright (browser automation), pandas (data), asyncio (async)." data-en="web3.py (Ethereum interaction), requests (HTTP), selenium/playwright (browser automation), pandas (data), asyncio (async)."></p></div>
+  </div>
+  <div class="dcode">
+    <span class="cm"># Install library web3</span><br>
+    pip install web3<br><br>
+    <span class="cm"># Contoh cek balance ETH</span><br>
+    <span class="ky">from</span> web3 <span class="ky">import</span> Web3<br>
+    w3 = Web3(Web3.HTTPProvider(<span class="vl">'https://mainnet.infura.io/v3/YOUR_KEY'</span>))<br>
+    balance = w3.eth.get_balance(<span class="vl">'0xYOUR_ADDRESS'</span>)<br>
+    print(w3.from_wei(balance, <span class="vl">'ether'</span>))
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🟨</span><span data-id="JavaScript / TypeScript — Raja Frontend & Bot" data-en="JavaScript / TypeScript — King of Frontend & Bots"></span></h2>
+  <p class="dp" data-id="Bahasa wajib untuk web development dan sangat populer di ekosistem Web3. TypeScript adalah versi JS dengan type safety — lebih aman untuk project besar." data-en="Essential language for web development and extremely popular in the Web3 ecosystem. TypeScript is JS with type safety — safer for larger projects."></p>
+  <div class="dcg" style="margin-bottom:16px">
+    <div class="dc"><h4 data-id="Kegunaan di Web3" data-en="Web3 Use Cases"></h4><p data-id="Frontend dApp (React), smart contract interaction (ethers.js/viem), bot Telegram/Discord, script on-chain dengan Node.js." data-en="dApp frontend (React), smart contract interaction (ethers.js/viem), Telegram/Discord bots, on-chain scripts with Node.js."></p></div>
+    <div class="dc"><h4 data-id="Library Penting" data-en="Key Libraries"></h4><p data-id="ethers.js, viem, wagmi (React hooks), web3.js, hardhat (testing), @whiskeysockets/baileys (WhatsApp bot)." data-en="ethers.js, viem, wagmi (React hooks), web3.js, hardhat (testing), @whiskeysockets/baileys (WhatsApp bot)."></p></div>
+  </div>
+  <div class="dcode">
+    <span class="cm">// Cek balance dengan ethers.js</span><br>
+    <span class="ky">import</span> { ethers } <span class="ky">from</span> <span class="vl">'ethers'</span>;<br><br>
+    <span class="ky">const</span> provider = <span class="ky">new</span> ethers.JsonRpcProvider(<span class="vl">'https://mainnet.infura.io/v3/KEY'</span>);<br>
+    <span class="ky">const</span> balance = <span class="ky">await</span> provider.getBalance(<span class="vl">'0xYOUR_ADDRESS'</span>);<br>
+    console.log(ethers.formatEther(balance), <span class="vl">'ETH'</span>);
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🔷</span><span data-id="Solidity — Bahasa Smart Contract" data-en="Solidity — Smart Contract Language"></span></h2>
+  <p class="dp" data-id="Bahasa utama untuk menulis smart contract di Ethereum dan EVM-compatible chains. Mirip JavaScript tapi statically typed. Harus dipahami minimal dasarnya untuk bisa audit contract." data-en="Primary language for writing smart contracts on Ethereum and EVM-compatible chains. Similar to JavaScript but statically typed. At minimum the basics must be understood to audit contracts."></p>
+  <div class="dcg" style="margin-bottom:16px">
+    <div class="dc"><h4 data-id="Kegunaan di Web3" data-en="Web3 Use Cases"></h4><p data-id="Deploy token ERC-20/ERC-721, buat smart contract DeFi, audit contract (baca kode dari Etherscan), buat NFT collection." data-en="Deploy ERC-20/ERC-721 tokens, create DeFi smart contracts, audit contracts (reading code from Etherscan), create NFT collections."></p></div>
+    <div class="dc"><h4 data-id="Tools Penting" data-en="Key Tools"></h4><p data-id="Remix IDE (browser-based, gratis), Hardhat (testing framework), Foundry (testing cepat), OpenZeppelin (library template aman)." data-en="Remix IDE (browser-based, free), Hardhat (testing framework), Foundry (fast testing), OpenZeppelin (safe template library)."></p></div>
+  </div>
+  <div class="dcode">
+    <span class="cm">// SPDX-License-Identifier: MIT</span><br>
+    <span class="ky">pragma</span> solidity ^0.8.20;<br><br>
+    <span class="ky">contract</span> SimpleToken {<br>
+    &nbsp;&nbsp;<span class="ky">string</span> <span class="ky">public</span> name = <span class="vl">"MyToken"</span>;<br>
+    &nbsp;&nbsp;<span class="ky">mapping</span>(<span class="ky">address</span> => <span class="ky">uint256</span>) <span class="ky">public</span> balanceOf;<br><br>
+    &nbsp;&nbsp;<span class="ky">function</span> transfer(<span class="ky">address</span> to, <span class="ky">uint256</span> amount) <span class="ky">public</span> {<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;balanceOf[msg.sender] -= amount;<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;balanceOf[to] += amount;<br>
+    &nbsp;&nbsp;}<br>
+    }
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🦀</span><span data-id="Bahasa Lain yang Relevan" data-en="Other Relevant Languages"></span></h2>
+  <div class="dcg">
+    <div class="dc"><div class="dc-icon">🦀</div><h4>Rust</h4><p data-id="Bahasa utama Solana smart contract (Program). Performa sangat tinggi tapi learning curve curam. Cocok untuk developer advanced yang target Solana ecosystem." data-en="Primary language for Solana smart contracts (Programs). Very high performance but steep learning curve. Suited for advanced developers targeting the Solana ecosystem."></p></div>
+    <div class="dc"><div class="dc-icon">🐹</div><h4>Go (Golang)</h4><p data-id="Bahasa untuk backend blockchain infrastructure. Ethereum (Geth) dan banyak node software ditulis dengan Go. Cocok untuk build indexer atau custom RPC." data-en="Language for blockchain backend infrastructure. Ethereum (Geth) and many node software are written in Go. Good for building indexers or custom RPCs."></p></div>
+    <div class="dc"><div class="dc-icon">📜</div><h4>Bash / Shell Script</h4><p data-id="Scripting untuk otomasi di server Linux/VPS. Wajib dipahami untuk manage VPS, cron job, deploy bot, dan maintenance server secara otomatis." data-en="Scripting for Linux/VPS server automation. Must be understood for VPS management, cron jobs, bot deployment, and automated server maintenance."></p></div>
+    <div class="dc"><div class="dc-icon">🔵</div><h4>Move (Aptos/Sui)</h4><p data-id="Bahasa smart contract untuk chain Aptos dan Sui — dua ekosistem yang punya banyak airdrop potensial. Aman secara desain, mencegah banyak bug umum Solidity." data-en="Smart contract language for Aptos and Sui chains — two ecosystems with many airdrop potentials. Safe by design, preventing many common Solidity bugs."></p></div>
+  </div>
+ 
+  <div class="callout c-ok">
+    <div class="callout-icon">🎯</div>
+    <div class="callout-text">
+      <strong data-id="Rekomendasi Jalur Belajar" data-en="Recommended Learning Path"></strong>
+      <span data-id="Pemula → Python dulu (otomasi & scripting). Lanjut JavaScript/TypeScript (Web3 interaction). Kemudian Solidity (baca & audit contract). Advanced → Rust (Solana) atau Go (infrastructure)." data-en="Beginner → Python first (automation & scripting). Then JavaScript/TypeScript (Web3 interaction). Then Solidity (read & audit contracts). Advanced → Rust (Solana) or Go (infrastructure)."></span>
+    </div>
+  </div>
+</div>
+ 
+ 
+<!-- ── VPS & SERVER ── -->
+<div class="doc-section" id="sec-vps-server">
+  <div class="breadcrumb"><span onclick="show('intro')">Docs</span><span class="sep">/</span><span data-id="VPS & Server" data-en="VPS & Server"></span></div>
+  <div class="doc-hero">
+    <div class="doc-tag" data-id="Tutorial" data-en="Tutorial"></div>
+    <h1 data-id="VPS & <span>Server</span> untuk Hunter" data-en="VPS & <span>Server</span> for Hunters"></h1>
+    <p data-id="Virtual Private Server (VPS) adalah komputer virtual di cloud yang bisa kamu gunakan untuk menjalankan bot, node blockchain, atau script 24/7 tanpa PC kamu harus selalu nyala." data-en="A Virtual Private Server (VPS) is a virtual computer in the cloud you can use to run bots, blockchain nodes, or scripts 24/7 without keeping your PC on."></p>
+  </div>
+ 
+  <div class="callout c-info">
+    <div class="callout-icon">🖥️</div>
+    <div class="callout-text">
+      <strong data-id="Kenapa Hunter Butuh VPS?" data-en="Why Do Hunters Need a VPS?"></strong>
+      <span data-id="Bot airdrop harus jalan 24/7. Script harus tetap aktif saat kamu tidur. Node blockchain harus sync terus-menerus. VPS menjawab semua kebutuhan itu dengan harga mulai $4–$6/bulan." data-en="Airdrop bots must run 24/7. Scripts must stay active while you sleep. Blockchain nodes must sync continuously. A VPS answers all these needs starting from $4–$6/month."></span>
+    </div>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🏪</span><span data-id="Provider VPS Terpopuler" data-en="Most Popular VPS Providers"></span></h2>
+  <div class="dcg">
+    <div class="dc"><div class="dc-icon">🌊</div><h4>DigitalOcean</h4><p data-id="Paling ramah pemula. UI bersih, dokumentasi lengkap. Droplet (VPS) mulai $6/bulan. Cocok untuk bot dan script ringan. Ada kredit gratis $200 untuk akun baru." data-en="Most beginner-friendly. Clean UI, complete documentation. Droplets (VPS) from $6/month. Great for bots and light scripts. $200 free credit for new accounts."></p></div>
+    <div class="dc"><div class="dc-icon">🦅</div><h4>Vultr</h4><p data-id="Harga kompetitif mulai $2.5/bulan (plan shared). 25+ lokasi server global. Pilihan OS fleksibel. Cocok untuk multi-region deployment bot airdrop." data-en="Competitive pricing from $2.5/month (shared plan). 25+ global server locations. Flexible OS options. Great for multi-region airdrop bot deployment."></p></div>
+    <div class="dc"><div class="dc-icon">🌐</div><h4>Contabo</h4><p data-id="VPS murah tapi spek tinggi — favorit untuk run blockchain node. Harga mulai €4.50/bulan untuk 4 vCPU + 6GB RAM. Kualitas bagus untuk harga ini." data-en="Cheap but high-spec VPS — favorite for running blockchain nodes. Starting at €4.50/month for 4 vCPU + 6GB RAM. Excellent quality at this price point."></p></div>
+    <div class="dc"><div class="dc-icon">☁️</div><h4>AWS / GCP / Azure</h4><p data-id="Enterprise grade. Sangat powerful tapi lebih mahal dan konfigurasi lebih kompleks. Cocok untuk project serius atau jika butuh scaling besar." data-en="Enterprise grade. Very powerful but more expensive and complex to configure. Suitable for serious projects or when large-scale is needed."></p></div>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🚀</span><span data-id="Setup VPS dari Nol (Ubuntu)" data-en="VPS Setup from Scratch (Ubuntu)"></span></h2>
+  <div class="steps">
+    <div class="step">
+      <div class="step-n">1</div>
+      <div class="step-body">
+        <div class="step-title" data-id="Beli & Pilih Spesifikasi" data-en="Purchase & Choose Specs"></div>
+        <div class="step-desc" data-id="Untuk bot ringan: 1 vCPU, 1GB RAM, 25GB SSD cukup. Untuk blockchain node: minimal 4 vCPU, 8GB RAM, 500GB SSD. Pilih OS Ubuntu 22.04 LTS." data-en="For light bots: 1 vCPU, 1GB RAM, 25GB SSD is enough. For blockchain nodes: minimum 4 vCPU, 8GB RAM, 500GB SSD. Choose OS Ubuntu 22.04 LTS."></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">2</div>
+      <div class="step-body">
+        <div class="step-title" data-id="Koneksi via SSH" data-en="Connect via SSH"></div>
+        <div class="step-desc" data-id="SSH = Secure Shell. Cara akses terminal VPS dari laptop kamu. Provider akan kasih IP, username (root), dan password/key." data-en="SSH = Secure Shell. How to access your VPS terminal from your laptop. The provider will give you an IP, username (root), and password/key."></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">3</div>
+      <div class="step-body">
+        <div class="step-title" data-id="Update System" data-en="Update System"></div>
+        <div class="step-desc" data-id="Selalu update dulu setelah VPS baru dibuat untuk keamanan dan kompatibilitas package terbaru." data-en="Always update immediately after creating a new VPS for security and latest package compatibility."></div>
+      </div>
+    </div>
+    <div class="step">
+      <div class="step-n">4</div>
+      <div class="step-body">
+        <div class="step-title" data-id="Install & Jalankan Bot/Script" data-en="Install & Run Bot/Script"></div>
+        <div class="step-desc" data-id="Install dependencies (Node.js/Python), clone repo atau upload file kamu, jalankan dengan screen/pm2 agar tetap aktif setelah SSH ditutup." data-en="Install dependencies (Node.js/Python), clone repo or upload your files, run with screen/pm2 to keep active after SSH is closed."></div>
+      </div>
+    </div>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">💻</span><span data-id="Command SSH Penting" data-en="Essential SSH Commands"></span></h2>
+  <div class="dcode">
+    <span class="cm"># Konek ke VPS</span><br>
+    ssh root@<span class="vl">IP_VPS_KAMU</span><br><br>
+    <span class="cm"># Update sistem Ubuntu</span><br>
+    apt update && apt upgrade -y<br><br>
+    <span class="cm"># Jalankan script di background (tetap jalan saat SSH tutup)</span><br>
+    screen -S <span class="vl">nama_session</span><br>
+    <span class="cm"># ... jalankan program kamu di sini ...</span><br>
+    <span class="cm"># Ctrl+A lalu D untuk detach (keluar tanpa stop)</span><br><br>
+    <span class="cm"># Kembali ke session yang berjalan</span><br>
+    screen -r <span class="vl">nama_session</span><br><br>
+    <span class="cm"># Lihat semua session aktif</span><br>
+    screen -ls
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🔒</span><span data-id="Keamanan VPS Dasar" data-en="Basic VPS Security"></span></h2>
+  <div class="dcg">
+    <div class="dc"><h4 data-id="Ganti Password Default" data-en="Change Default Password"></h4><p data-id="Langsung ganti password root setelah login pertama. Gunakan password panjang dan unik — simpan di password manager." data-en="Immediately change the root password after first login. Use a long, unique password — store it in a password manager."></p></div>
+    <div class="dc"><h4 data-id="SSH Key Authentication" data-en="SSH Key Authentication"></h4><p data-id="Gunakan SSH key pair (lebih aman dari password). Generate key di laptop, upload public key ke VPS." data-en="Use SSH key pairs (more secure than passwords). Generate keys on your laptop, upload the public key to VPS."></p></div>
+    <div class="dc"><h4 data-id="Firewall (UFW)" data-en="Firewall (UFW)"></h4><p data-id="Aktifkan firewall Ubuntu (UFW). Block semua port kecuali yang dibutuhkan: 22 (SSH), 80 (HTTP), 443 (HTTPS)." data-en="Enable Ubuntu Firewall (UFW). Block all ports except what's needed: 22 (SSH), 80 (HTTP), 443 (HTTPS)."></p></div>
+    <div class="dc"><h4 data-id="Jangan Simpan Private Key di VPS" data-en="Never Store Private Keys on VPS"></h4><p data-id="Private key wallet JANGAN disimpan di VPS jika VPS itu bisa diakses orang lain atau rawan dicompromise. Gunakan .env + file permission ketat." data-en="Never store wallet private keys on a VPS that can be accessed by others or is prone to being compromised. Use .env + strict file permissions."></p></div>
+  </div>
+</div>
+ 
+ 
+<!-- ── TERMINAL & CLI ── -->
+<div class="doc-section" id="sec-terminal-cli">
+  <div class="breadcrumb"><span onclick="show('intro')">Docs</span><span class="sep">/</span><span data-id="Terminal & CLI" data-en="Terminal & CLI"></span></div>
+  <div class="doc-hero">
+    <div class="doc-tag" data-id="Tutorial" data-en="Tutorial"></div>
+    <h1 data-id="Terminal & <span>Command Line</span>" data-en="Terminal & <span>Command Line</span>"></h1>
+    <p data-id="Menguasai terminal adalah skill wajib untuk hunter yang serius. Semua operasi VPS, bot, dan node blockchain dikontrol lewat command line." data-en="Mastering the terminal is a mandatory skill for serious hunters. All VPS operations, bots, and blockchain nodes are controlled via command line."></p>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">📁</span><span data-id="Navigasi File & Direktori" data-en="File & Directory Navigation"></span></h2>
+  <div class="dcode">
+    pwd          <span class="cm"># Tampilkan direktori saat ini</span><br>
+    ls           <span class="cm"># List file di folder</span><br>
+    ls -la       <span class="cm"># List lengkap + file tersembunyi</span><br>
+    cd /path     <span class="cm"># Pindah ke direktori</span><br>
+    cd ..        <span class="cm"># Naik satu level ke atas</span><br>
+    cd ~         <span class="cm"># Ke home directory</span><br>
+    mkdir nama   <span class="cm"># Buat folder baru</span><br>
+    rm -rf nama  <span class="cm"># Hapus folder (⚠️ hati-hati, permanen)</span>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">📄</span><span data-id="Manajemen File" data-en="File Management"></span></h2>
+  <div class="dcode">
+    cat file.txt          <span class="cm"># Tampilkan isi file</span><br>
+    nano file.txt         <span class="cm"># Edit file (text editor sederhana)</span><br>
+    cp source dest        <span class="cm"># Copy file</span><br>
+    mv source dest        <span class="cm"># Pindah/rename file</span><br>
+    chmod +x script.sh    <span class="cm"># Beri izin eksekusi ke script</span><br>
+    chown user:group file <span class="cm"># Ganti kepemilikan file</span>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">⚙️</span><span data-id="Process Management" data-en="Process Management"></span></h2>
+  <div class="dcode">
+    ps aux            <span class="cm"># Lihat semua proses berjalan</span><br>
+    top / htop        <span class="cm"># Monitor CPU & RAM real-time</span><br>
+    kill PID          <span class="cm"># Hentikan proses by ID</span><br>
+    pkill nama_proses <span class="cm"># Hentikan proses by nama</span><br>
+    nohup cmd &       <span class="cm"># Jalankan di background</span><br>
+    jobs              <span class="cm"># Lihat background jobs</span>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🌐</span><span data-id="Network & Download" data-en="Network & Download"></span></h2>
+  <div class="dcode">
+    curl https://url.com         <span class="cm"># HTTP request</span><br>
+    wget https://url.com/file    <span class="cm"># Download file</span><br>
+    ping google.com              <span class="cm"># Test koneksi</span><br>
+    netstat -tulpn               <span class="cm"># Lihat port yang terbuka</span><br>
+    ufw status                   <span class="cm"># Status firewall</span><br>
+    ufw allow 8080               <span class="cm"># Buka port 8080</span>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">⏰</span><span data-id="Cron Job — Otomasi Terjadwal" data-en="Cron Job — Scheduled Automation"></span></h2>
+  <p class="dp" data-id="Cron job adalah scheduler bawaan Linux untuk menjalankan script secara otomatis pada waktu tertentu — misalnya setiap jam atau setiap tengah malam." data-en="Cron job is Linux's built-in scheduler for automatically running scripts at specific times — for example, every hour or at midnight."></p>
+  <div class="dcode">
+    crontab -e    <span class="cm"># Buka cron editor</span><br><br>
+    <span class="cm"># Format: menit jam hari bulan hari_minggu perintah</span><br>
+    0 * * * * /usr/bin/python3 /home/bot/script.py     <span class="cm"># Setiap jam</span><br>
+    0 0 * * * /bin/bash /home/backup.sh                 <span class="cm"># Setiap tengah malam</span><br>
+    */5 * * * * curl https://api.example.com/ping       <span class="cm"># Setiap 5 menit</span>
+  </div>
+ 
+  <div class="callout c-ok">
+    <div class="callout-icon">💡</div>
+    <div class="callout-text">
+      <strong data-id="Tips Terminal" data-en="Terminal Tips"></strong>
+      <span data-id="• Tab = autocomplete nama file/perintah. • Ctrl+C = hentikan proses yang berjalan. • Ctrl+R = cari perintah yang pernah diketik. • !! = ulangi perintah terakhir. • history = lihat semua perintah yang pernah diketik." data-en="• Tab = autocomplete file/command names. • Ctrl+C = stop running process. • Ctrl+R = search previously typed commands. • !! = repeat last command. • history = see all previously typed commands."></span>
+    </div>
+  </div>
+</div>
+ 
+ 
+<!-- ── GIT & GITHUB ── -->
+<div class="doc-section" id="sec-git-github">
+  <div class="breadcrumb"><span onclick="show('intro')">Docs</span><span class="sep">/</span><span data-id="Git & GitHub" data-en="Git & GitHub"></span></div>
+  <div class="doc-hero">
+    <div class="doc-tag" data-id="Tutorial" data-en="Tutorial"></div>
+    <h1 data-id="Git & <span>GitHub</span>" data-en="Git & <span>GitHub</span>"></h1>
+    <p data-id="Git adalah sistem version control untuk melacak perubahan kode. GitHub adalah platform hosting repository Git yang paling populer di dunia." data-en="Git is a version control system for tracking code changes. GitHub is the world's most popular platform for hosting Git repositories."></p>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">⚙️</span><span data-id="Setup Awal" data-en="Initial Setup"></span></h2>
+  <div class="dcode">
+    <span class="cm"># Install Git (Ubuntu)</span><br>
+    apt install git<br><br>
+    <span class="cm"># Konfigurasi identitas (wajib sekali)</span><br>
+    git config --global user.name <span class="vl">"Nama Kamu"</span><br>
+    git config --global user.email <span class="vl">"email@kamu.com"</span>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">📋</span><span data-id="Workflow Dasar Git" data-en="Basic Git Workflow"></span></h2>
+  <div class="dcode">
+    <span class="cm"># Clone repo dari GitHub ke VPS/laptop</span><br>
+    git clone https://github.com/user/repo.git<br><br>
+    <span class="cm"># Lihat status perubahan</span><br>
+    git status<br><br>
+    <span class="cm"># Stage perubahan</span><br>
+    git add .              <span class="cm"># Semua file</span><br>
+    git add file.txt       <span class="cm"># File spesifik</span><br><br>
+    <span class="cm"># Commit (simpan snapshot)</span><br>
+    git commit -m <span class="vl">"Pesan perubahan kamu"</span><br><br>
+    <span class="cm"># Push ke GitHub</span><br>
+    git push origin main<br><br>
+    <span class="cm"># Pull update terbaru dari GitHub</span><br>
+    git pull origin main
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🌿</span><span data-id="Branch — Kerja Paralel" data-en="Branches — Parallel Work"></span></h2>
+  <div class="dcode">
+    git branch                    <span class="cm"># Lihat semua branch</span><br>
+    git checkout -b fitur-baru    <span class="cm"># Buat & pindah ke branch baru</span><br>
+    git checkout main             <span class="cm"># Kembali ke branch main</span><br>
+    git merge fitur-baru          <span class="cm"># Gabung branch ke main</span><br>
+    git branch -d fitur-baru      <span class="cm"># Hapus branch</span>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🔑</span><span data-id="GitHub Actions & Secrets" data-en="GitHub Actions & Secrets"></span></h2>
+  <div class="dcg">
+    <div class="dc"><div class="dc-icon">🤖</div><h4>GitHub Actions</h4><p data-id="CI/CD built-in GitHub. Bisa otomasi: run test saat ada push, deploy ke server otomatis, atau jalankan script terjadwal (mirip cron tapi di cloud gratis)." data-en="GitHub's built-in CI/CD. Can automate: run tests on push, auto-deploy to server, or run scheduled scripts (like cron but in free cloud)."></p></div>
+    <div class="dc"><div class="dc-icon">🔐</div><h4>GitHub Secrets</h4><p data-id="Simpan API key, token, atau password secara aman di repository settings. Bisa diakses di Actions workflow tanpa expose ke publik — ini yang kita pakai untuk GitHub token upload gambar." data-en="Store API keys, tokens, or passwords securely in repository settings. Accessible in Actions workflows without public exposure — this is what we use for GitHub token image uploads."></p></div>
+  </div>
+ 
+  <div class="callout c-warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-text">
+      <strong data-id="Jangan Commit Secret" data-en="Never Commit Secrets"></strong>
+      <span data-id="JANGAN PERNAH commit file .env, private key, atau API key ke GitHub — bahkan di repo private. Gunakan .gitignore untuk exclude file sensitif. GitHub akan scan dan kadang otomatis revoke token yang ter-expose." data-en="NEVER commit .env files, private keys, or API keys to GitHub — even in private repos. Use .gitignore to exclude sensitive files. GitHub will scan and sometimes auto-revoke exposed tokens."></span>
+    </div>
+  </div>
+</div>
+ 
+ 
+<!-- ── NODE.JS & NPM ── -->
+<div class="doc-section" id="sec-nodejs-npm">
+  <div class="breadcrumb"><span onclick="show('intro')">Docs</span><span class="sep">/</span><span data-id="Node.js & npm" data-en="Node.js & npm"></span></div>
+  <div class="doc-hero">
+    <div class="doc-tag" data-id="Tutorial" data-en="Tutorial"></div>
+    <h1 data-id="Node.js & <span>npm</span>" data-en="Node.js & <span>npm</span>"></h1>
+    <p data-id="Node.js adalah runtime JavaScript di luar browser. npm adalah package manager-nya. Keduanya wajib untuk menjalankan hampir semua project Web3 berbasis JavaScript." data-en="Node.js is the JavaScript runtime outside browsers. npm is its package manager. Both are essential for running almost all JavaScript-based Web3 projects."></p>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">⚙️</span><span data-id="Install Node.js di Ubuntu/VPS" data-en="Install Node.js on Ubuntu/VPS"></span></h2>
+  <div class="dcode">
+    <span class="cm"># Install via NVM (Node Version Manager) — direkomendasikan</span><br>
+    curl -o- https://raw.githubusercontent.com/nvm-sh/nvm/v0.39.7/install.sh | bash<br>
+    source ~/.bashrc<br><br>
+    <span class="cm"># Install Node.js versi terbaru LTS</span><br>
+    nvm install --lts<br>
+    nvm use --lts<br><br>
+    <span class="cm"># Verifikasi instalasi</span><br>
+    node --version<br>
+    npm --version
+  </div>
+ 
+  <h2 class="dh2"><span class="di">📦</span><span data-id="npm — Package Manager" data-en="npm — Package Manager"></span></h2>
+  <div class="dcode">
+    <span class="cm"># Inisialisasi project baru</span><br>
+    npm init -y<br><br>
+    <span class="cm"># Install package</span><br>
+    npm install ethers         <span class="cm"># Install ethers.js</span><br>
+    npm install -g pm2         <span class="cm"># Install global (pm2 process manager)</span><br><br>
+    <span class="cm"># Jalankan script</span><br>
+    node index.js<br>
+    npm run start             <span class="cm"># Jalankan script dari package.json</span><br><br>
+    <span class="cm"># Lihat semua package terinstall</span><br>
+    npm list
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🔄</span><span data-id="PM2 — Process Manager" data-en="PM2 — Process Manager"></span></h2>
+  <p class="dp" data-id="PM2 adalah process manager untuk Node.js. Lebih baik dari screen karena punya auto-restart saat crash, log management, dan monitoring built-in." data-en="PM2 is a process manager for Node.js. Better than screen because it has auto-restart on crash, log management, and built-in monitoring."></p>
+  <div class="dcode">
+    npm install -g pm2<br><br>
+    pm2 start index.js --name <span class="vl">"bot-saya"</span>   <span class="cm"># Jalankan bot</span><br>
+    pm2 list                                   <span class="cm"># Lihat semua proses</span><br>
+    pm2 logs bot-saya                          <span class="cm"># Lihat log real-time</span><br>
+    pm2 restart bot-saya                       <span class="cm"># Restart bot</span><br>
+    pm2 stop bot-saya                          <span class="cm"># Stop bot</span><br>
+    pm2 startup                                <span class="cm"># Auto-start saat VPS reboot</span><br>
+    pm2 save                                   <span class="cm"># Simpan konfigurasi</span>
+  </div>
+ 
+  <div class="callout c-info">
+    <div class="callout-icon">💡</div>
+    <div class="callout-text">
+      <strong data-id="npm vs yarn vs bun" data-en="npm vs yarn vs bun"></strong>
+      <span data-id="npm = default, paling banyak didukung. yarn = lebih cepat dari npm, populer di project besar. bun = paling baru dan tercepat, tapi belum semua project support. Untuk pemula, pakai npm saja dulu." data-en="npm = default, most widely supported. yarn = faster than npm, popular in large projects. bun = newest and fastest, but not all projects support it yet. For beginners, just stick with npm."></span>
+    </div>
+  </div>
+</div>
+ 
+ 
+<!-- ── DOCKER ── -->
+<div class="doc-section" id="sec-docker">
+  <div class="breadcrumb"><span onclick="show('intro')">Docs</span><span class="sep">/</span><span data-id="Docker" data-en="Docker"></span></div>
+  <div class="doc-hero">
+    <div class="doc-tag" data-id="Tutorial" data-en="Tutorial"></div>
+    <h1 data-id="<span>Docker</span> — Containerization" data-en="<span>Docker</span> — Containerization"></h1>
+    <p data-id="Docker memungkinkan kamu menjalankan aplikasi dalam container yang terisolasi. Tidak perlu khawatir tentang konflik dependency atau perbedaan environment antara dev dan production." data-en="Docker lets you run applications in isolated containers. No need to worry about dependency conflicts or environment differences between dev and production."></p>
+  </div>
+ 
+  <div class="callout c-info">
+    <div class="callout-icon">🐳</div>
+    <div class="callout-text">
+      <strong data-id="Analogi Docker" data-en="Docker Analogy"></strong>
+      <span data-id="Bayangkan Docker seperti kotak shipping standar. Apapun isinya (aplikasi), bisa dikirim dan dijalankan di mana saja — laptop, VPS, atau cloud — dengan cara yang persis sama tanpa konfigurasi ulang." data-en="Think of Docker like standardized shipping containers. Whatever's inside (the app) can be shipped and run anywhere — laptop, VPS, or cloud — in exactly the same way without reconfiguration."></span>
+    </div>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">⚙️</span><span data-id="Install Docker di Ubuntu" data-en="Install Docker on Ubuntu"></span></h2>
+  <div class="dcode">
+    <span class="cm"># Install Docker</span><br>
+    curl -fsSL https://get.docker.com -o get-docker.sh<br>
+    sh get-docker.sh<br><br>
+    <span class="cm"># Jalankan Docker tanpa sudo (opsional)</span><br>
+    usermod -aG docker $USER<br>
+    newgrp docker<br><br>
+    <span class="cm"># Verifikasi</span><br>
+    docker --version
+  </div>
+ 
+  <h2 class="dh2"><span class="di">📋</span><span data-id="Command Docker Penting" data-en="Essential Docker Commands"></span></h2>
+  <div class="dcode">
+    <span class="cm"># Pull image dari Docker Hub</span><br>
+    docker pull node:20<br><br>
+    <span class="cm"># Jalankan container</span><br>
+    docker run -d --name bot-saya node:20 node /app/index.js<br><br>
+    <span class="cm"># Lihat container berjalan</span><br>
+    docker ps<br><br>
+    <span class="cm"># Lihat log container</span><br>
+    docker logs bot-saya<br><br>
+    <span class="cm"># Stop & hapus container</span><br>
+    docker stop bot-saya && docker rm bot-saya<br><br>
+    <span class="cm"># Lihat semua image tersimpan</span><br>
+    docker images
+  </div>
+ 
+  <h2 class="dh2"><span class="di">📄</span><span data-id="Dockerfile — Buat Image Sendiri" data-en="Dockerfile — Build Your Own Image"></span></h2>
+  <div class="dcode">
+    <span class="cm"># Contoh Dockerfile untuk bot Node.js</span><br>
+    FROM node:20-alpine<br>
+    WORKDIR /app<br>
+    COPY package*.json ./<br>
+    RUN npm install<br>
+    COPY . .<br>
+    CMD [<span class="vl">"node"</span>, <span class="vl">"index.js"</span>]<br><br>
+    <span class="cm"># Build image</span><br>
+    docker build -t bot-saya .<br><br>
+    <span class="cm"># Jalankan image</span><br>
+    docker run -d --name bot bot-saya
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🎼</span><span data-id="Docker Compose — Multi Container" data-en="Docker Compose — Multi Container"></span></h2>
+  <p class="dp" data-id="Docker Compose memungkinkan kamu mendefinisikan dan menjalankan banyak container sekaligus dengan satu file YAML. Berguna untuk stack lengkap: bot + database + monitoring." data-en="Docker Compose lets you define and run multiple containers simultaneously with one YAML file. Useful for a complete stack: bot + database + monitoring."></p>
+  <div class="dcode">
+    <span class="cm"># docker-compose.yml</span><br>
+    version: <span class="vl">'3.8'</span><br>
+    services:<br>
+    &nbsp;&nbsp;bot:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;build: .<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;restart: always<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;env_file: .env<br>
+    &nbsp;&nbsp;db:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;image: postgres:15<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;environment:<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;POSTGRES_PASSWORD: <span class="vl">secret</span><br><br>
+    <span class="cm"># Jalankan semua service</span><br>
+    docker compose up -d
+  </div>
+</div>
+ 
+ 
+<!-- ── DATABASE ── -->
+<div class="doc-section" id="sec-database">
+  <div class="breadcrumb"><span onclick="show('intro')">Docs</span><span class="sep">/</span><span data-id="Database" data-en="Database"></span></div>
+  <div class="doc-hero">
+    <div class="doc-tag" data-id="Tutorial" data-en="Tutorial"></div>
+    <h1 data-id="<span>Database</span> Dasar" data-en="Database <span>Basics</span>"></h1>
+    <p data-id="Database adalah sistem penyimpanan data terstruktur. Untuk hunter dan builder Web3, database digunakan untuk menyimpan data airdrop, history transaksi, state bot, dan lain-lain." data-en="A database is a structured data storage system. For Web3 hunters and builders, databases store airdrop data, transaction history, bot state, and more."></p>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🐘</span><span data-id="SQL — Database Relasional" data-en="SQL — Relational Database"></span></h2>
+  <p class="dp" data-id="SQL (Structured Query Language) adalah bahasa standar untuk query database relasional. Data disimpan dalam tabel dengan baris dan kolom. Contoh: PostgreSQL (dipakai Supabase), MySQL, SQLite." data-en="SQL (Structured Query Language) is the standard language for querying relational databases. Data is stored in tables with rows and columns. Examples: PostgreSQL (used by Supabase), MySQL, SQLite."></p>
+  <div class="dcode">
+    <span class="cm">-- Buat tabel</span><br>
+    CREATE TABLE airdrops (<br>
+    &nbsp;&nbsp;id SERIAL PRIMARY KEY,<br>
+    &nbsp;&nbsp;name TEXT NOT NULL,<br>
+    &nbsp;&nbsp;status TEXT DEFAULT <span class="vl">'active'</span>,<br>
+    &nbsp;&nbsp;created_at TIMESTAMP DEFAULT NOW()<br>
+    );<br><br>
+    <span class="cm">-- Insert data</span><br>
+    INSERT INTO airdrops (name, status) VALUES (<span class="vl">'LayerZero'</span>, <span class="vl">'active'</span>);<br><br>
+    <span class="cm">-- Query data</span><br>
+    SELECT * FROM airdrops WHERE status = <span class="vl">'active'</span> ORDER BY created_at DESC;<br><br>
+    <span class="cm">-- Update data</span><br>
+    UPDATE airdrops SET status = <span class="vl">'listed'</span> WHERE name = <span class="vl">'LayerZero'</span>;<br><br>
+    <span class="cm">-- Hapus data</span><br>
+    DELETE FROM airdrops WHERE id = 1;
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🍃</span><span data-id="NoSQL — Database Fleksibel" data-en="NoSQL — Flexible Database"></span></h2>
+  <p class="dp" data-id="NoSQL menyimpan data dalam format lain seperti JSON (document), key-value, atau graph. Lebih fleksibel dari SQL, cocok untuk data yang struktur-nya sering berubah." data-en="NoSQL stores data in other formats like JSON (document), key-value, or graph. More flexible than SQL, ideal for data with frequently changing structures."></p>
+  <div class="dcg">
+    <div class="dc"><div class="dc-icon">🌿</div><h4>MongoDB</h4><p data-id="Database dokumen JSON paling populer. Cocok untuk data airdrop yang struktur-nya tidak selalu sama. Gratis di MongoDB Atlas (cloud)." data-en="The most popular JSON document database. Great for airdrop data with inconsistent structures. Free on MongoDB Atlas (cloud)."></p></div>
+    <div class="dc"><div class="dc-icon">🔴</div><h4>Redis</h4><p data-id="Database in-memory super cepat. Digunakan untuk caching, session storage, dan queue. Sangat berguna untuk bot yang perlu response time sangat cepat." data-en="Super fast in-memory database. Used for caching, session storage, and queues. Very useful for bots requiring extremely fast response times."></p></div>
+    <div class="dc"><div class="dc-icon">⚡</div><h4>Supabase</h4><p data-id="PostgreSQL as a Service dengan Realtime, Auth, dan Storage built-in. Gratis untuk project kecil. Inilah yang dipakai AirdropXI untuk menyimpan data airdrop dan news ticker." data-en="PostgreSQL as a Service with built-in Realtime, Auth, and Storage. Free for small projects. This is what AirdropXI uses to store airdrop data and the news ticker."></p></div>
+    <div class="dc"><div class="dc-icon">🔥</div><h4>Firebase</h4><p data-id="Backend-as-a-Service dari Google. Realtime Database dan Firestore sangat cocok untuk bot Telegram atau aplikasi dengan sinkronisasi data real-time." data-en="Backend-as-a-Service from Google. Realtime Database and Firestore are perfect for Telegram bots or apps requiring real-time data syncing."></p></div>
+  </div>
+ 
+  <div class="callout c-info">
+    <div class="callout-icon">🧠</div>
+    <div class="callout-text">
+      <strong data-id="Kapan Pakai SQL vs NoSQL?" data-en="When to Use SQL vs NoSQL?"></strong>
+      <span data-id="SQL: data terstruktur, relasi antar tabel, butuh transaksi ACID (finansial, inventory). NoSQL: data fleksibel, butuh scale horizontal, prototype cepat. Untuk kebanyakan project Web3 kecil-menengah → Supabase (SQL) adalah pilihan terbaik." data-en="SQL: structured data, table relationships, need ACID transactions (financial, inventory). NoSQL: flexible data, need horizontal scaling, rapid prototyping. For most small-medium Web3 projects → Supabase (SQL) is the best choice."></span>
+    </div>
+  </div>
+</div>
+ 
+ 
+<!-- ── API & WEB SCRAPING ── -->
+<div class="doc-section" id="sec-api-scraping">
+  <div class="breadcrumb"><span onclick="show('intro')">Docs</span><span class="sep">/</span><span data-id="API & Web Scraping" data-en="API & Web Scraping"></span></div>
+  <div class="doc-hero">
+    <div class="doc-tag" data-id="Tutorial" data-en="Tutorial"></div>
+    <h1 data-id="API & <span>Web Scraping</span>" data-en="API & <span>Web Scraping</span>"></h1>
+    <p data-id="API memungkinkan program berkomunikasi satu sama lain. Web scraping mengambil data dari website. Keduanya adalah skill inti untuk hunter yang ingin otomasi riset dan monitoring." data-en="APIs allow programs to communicate with each other. Web scraping extracts data from websites. Both are core skills for hunters who want to automate research and monitoring."></p>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🔌</span><span data-id="API — Application Programming Interface" data-en="API — Application Programming Interface"></span></h2>
+  <p class="dp" data-id="API adalah antarmuka yang memungkinkan dua sistem berkomunikasi. Di crypto, kamu akan sering berinteraksi dengan: API harga (CoinGecko), API blockchain (Etherscan, Alchemy), dan API sosial (Twitter)." data-en="An API is an interface enabling two systems to communicate. In crypto, you'll frequently interact with: price APIs (CoinGecko), blockchain APIs (Etherscan, Alchemy), and social APIs (Twitter)."></p>
+ 
+  <div class="dcode">
+    <span class="cm">// Fetch harga ETH dari CoinGecko API (JavaScript)</span><br>
+    <span class="ky">const</span> res = <span class="ky">await</span> fetch(<span class="vl">'https://api.coingecko.com/api/v3/simple/price?ids=ethereum&vs_currencies=usd'</span>);<br>
+    <span class="ky">const</span> data = <span class="ky">await</span> res.json();<br>
+    console.log(<span class="vl">'ETH Price: $'</span> + data.ethereum.usd);<br><br>
+    <span class="cm"># Fetch balance dari Etherscan API (Python)</span><br>
+    <span class="ky">import</span> requests<br>
+    url = <span class="vl">f'https://api.etherscan.io/api?module=account&action=balance&address=0xADDRESS&apikey=KEY'</span><br>
+    r = requests.get(url).json()<br>
+    print(int(r[<span class="vl">'result'</span>]) / 1e18, <span class="vl">'ETH'</span>)
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🕷️</span><span data-id="Web Scraping" data-en="Web Scraping"></span></h2>
+  <p class="dp" data-id="Web scraping adalah teknik mengambil data dari website secara otomatis. Berguna untuk monitor airdrop baru, track perubahan whitelist, atau kumpulkan data project yang tidak punya API." data-en="Web scraping is the technique of automatically extracting data from websites. Useful for monitoring new airdrops, tracking whitelist changes, or gathering project data that lacks an API."></p>
+  <div class="dcg">
+    <div class="dc"><div class="dc-icon">🍲</div><h4>BeautifulSoup (Python)</h4><p data-id="Library scraping HTML paling populer. Cocok untuk website statis. Dipakai bersama requests untuk fetch + parse HTML." data-en="The most popular HTML scraping library. Great for static websites. Used with requests to fetch + parse HTML."></p></div>
+    <div class="dc"><div class="dc-icon">🎭</div><h4>Playwright / Puppeteer</h4><p data-id="Browser automation — bisa scrape website yang pakai JavaScript dinamis (SPA). Bisa login, klik tombol, isi form secara otomatis. Python dan JS versions tersedia." data-en="Browser automation — can scrape dynamic JavaScript websites (SPAs). Can log in, click buttons, fill forms automatically. Python and JS versions available."></p></div>
+    <div class="dc"><div class="dc-icon">🕷️</div><h4>Scrapy (Python)</h4><p data-id="Framework scraping skala besar. Cocok untuk crawl ratusan halaman sekaligus dengan efisiensi tinggi. Punya built-in spider dan pipeline data." data-en="Large-scale scraping framework. Great for crawling hundreds of pages simultaneously with high efficiency. Has built-in spiders and data pipelines."></p></div>
+    <div class="dc"><div class="dc-icon">🌐</div><h4>Bright Data / Proxy</h4><p data-id="Saat website memblokir IP kamu, gunakan rotating proxy. Bright Data, OxyLabs, atau SmartProxy menyediakan pool IP besar untuk bypass rate limiting." data-en="When a website blocks your IP, use rotating proxies. Bright Data, OxyLabs, or SmartProxy offer large IP pools to bypass rate limiting."></p></div>
+  </div>
+ 
+  <div class="callout c-warn">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-text">
+      <strong data-id="Etika & Legalitas Scraping" data-en="Scraping Ethics & Legality"></strong>
+      <span data-id="Selalu cek robots.txt website sebelum scraping (domain.com/robots.txt). Beberapa website melarang scraping di ToS mereka. Jangan scraping agresif yang bisa membebani server — pakai rate limiting dan delay." data-en="Always check a website's robots.txt before scraping (domain.com/robots.txt). Some websites prohibit scraping in their ToS. Don't aggressively scrape in a way that burdens the server — use rate limiting and delays."></span>
+    </div>
+  </div>
+</div>
+ 
+ 
+<!-- ── AUTOMATION & BOT ── -->
+<div class="doc-section" id="sec-automation-bot">
+  <div class="breadcrumb"><span onclick="show('intro')">Docs</span><span class="sep">/</span><span data-id="Automation & Bot" data-en="Automation & Bot"></span></div>
+  <div class="doc-hero">
+    <div class="doc-tag" data-id="Tutorial" data-en="Tutorial"></div>
+    <h1 data-id="Automation & <span>Bot</span>" data-en="Automation & <span>Bot</span>"></h1>
+    <p data-id="Otomasi adalah senjata utama hunter profesional. Bot bisa mengerjakan task repetitif 24/7 tanpa kamu harus hadir — dari monitoring harga hingga eksekusi transaksi on-chain." data-en="Automation is the pro hunter's primary weapon. Bots can perform repetitive tasks 24/7 without you being present — from price monitoring to executing on-chain transactions."></p>
+  </div>
+ 
+  <div class="callout c-info">
+    <div class="callout-icon">🤖</div>
+    <div class="callout-text">
+      <strong data-id="Prinsip Otomasi" data-en="Automation Principle"></strong>
+      <span data-id="Jika sebuah task dilakukan lebih dari 3 kali dengan cara yang sama, automasi adalah jawabannya. Waktu kamu terlalu berharga untuk dihabiskan pada pekerjaan repetitif." data-en="If a task is performed more than 3 times in the same way, automation is the answer. Your time is too valuable to spend on repetitive work."></span>
+    </div>
+  </div>
+ 
+  <h2 class="dh2"><span class="di">📱</span><span data-id="Bot Telegram" data-en="Telegram Bot"></span></h2>
+  <p class="dp" data-id="Bot Telegram adalah cara paling mudah dan populer untuk membuat notifikasi dan kontrol otomasi. Bisa terima pesan, kirim alert, bahkan eksekusi perintah dari HP." data-en="Telegram bots are the easiest and most popular way to create notifications and automation control. Can receive messages, send alerts, and even execute commands from your phone."></p>
+  <div class="dcode">
+    <span class="cm"># Python — Telegram Bot sederhana dengan python-telegram-bot</span><br>
+    pip install python-telegram-bot<br><br>
+    <span class="ky">from</span> telegram <span class="ky">import</span> Bot<br>
+    <span class="ky">import</span> asyncio<br><br>
+    <span class="ky">async def</span> kirim_alert():<br>
+    &nbsp;&nbsp;bot = Bot(token=<span class="vl">"TOKEN_BOT_KAMU"</span>)<br>
+    &nbsp;&nbsp;<span class="ky">await</span> bot.send_message(<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;chat_id=<span class="vl">"CHAT_ID_KAMU"</span>,<br>
+    &nbsp;&nbsp;&nbsp;&nbsp;text=<span class="vl">"🚨 Alert: Airdrop baru terdeteksi!"</span><br>
+    &nbsp;&nbsp;)<br><br>
+    asyncio.run(kirim_alert())
+  </div>
+ 
+  <h2 class="dh2"><span class="di">⛓️</span><span data-id="Bot On-Chain (Web3)" data-en="On-Chain Bot (Web3)"></span></h2>
+  <p class="dp" data-id="Bot on-chain berinteraksi langsung dengan smart contract di blockchain. Bisa untuk: auto-claim reward, auto-compound yield, monitor event tertentu, atau eksekusi swap." data-en="On-chain bots interact directly with smart contracts on the blockchain. Can be used for: auto-claiming rewards, auto-compounding yield, monitoring specific events, or executing swaps."></p>
+  <div class="dcode">
+    <span class="cm">// JavaScript — Auto claim reward dari contract</span><br>
+    <span class="ky">import</span> { ethers } <span class="ky">from</span> <span class="vl">'ethers'</span>;<br><br>
+    <span class="ky">const</span> provider = <span class="ky">new</span> ethers.JsonRpcProvider(RPC_URL);<br>
+    <span class="ky">const</span> wallet = <span class="ky">new</span> ethers.Wallet(PRIVATE_KEY, provider);<br>
+    <span class="ky">const</span> contract = <span class="ky">new</span> ethers.Contract(CONTRACT_ADDR, ABI, wallet);<br><br>
+    <span class="cm">// Claim reward</span><br>
+    <span class="ky">const</span> tx = <span class="ky">await</span> contract.claimReward();<br>
+    <span class="ky">await</span> tx.wait();<br>
+    console.log(<span class="vl">'Claimed! TX:'</span>, tx.hash);
+  </div>
+ 
+  <h2 class="dh2"><span class="di">🎯</span><span data-id="Use Case Bot untuk Airdrop Hunter" data-en="Bot Use Cases for Airdrop Hunters"></span></h2>
+  <div class="dcg">
+    <div class="dc"><div class="dc-icon">📊</div><h4 data-id="Price Monitor Bot" data-en="Price Monitor Bot"></h4><p data-id="Monitor harga token airdrop setelah listing. Kirim alert ke Telegram saat harga naik/turun melampaui threshold tertentu." data-en="Monitor airdrop token prices after listing. Send Telegram alerts when price rises/falls beyond a set threshold."></p></div>
+    <div class="dc"><div class="dc-icon">🔔</div><h4 data-id="Airdrop Alert Bot" data-en="Airdrop Alert Bot"></h4><p data-id="Scrape website airdrop aggregator setiap jam. Kirim notif ke Telegram saat ada airdrop baru yang sesuai kriteria (funding, chain, dll)." data-en="Scrape airdrop aggregator websites every hour. Send Telegram notifications when a new airdrop matching your criteria (funding, chain, etc.) appears."></p></div>
+    <div class="dc"><div class="dc-icon">🔄</div><h4 data-id="Auto-Interact Bot" data-en="Auto-Interact Bot"></h4><p data-id="Script yang otomatis melakukan swap/bridge kecil di beberapa protocol setiap hari untuk menjaga wallet tetap aktif. Hati-hati: pastikan sesuai ToS project." data-en="Script that automatically performs small swaps/bridges on several protocols daily to keep wallets active. Be careful: ensure it complies with the project's ToS."></p></div>
+    <div class="dc"><div class="dc-icon">📱</div><h4 data-id="Wallet Monitor Bot" data-en="Wallet Monitor Bot"></h4><p data-id="Monitor multiple wallet sekaligus. Alert saat ada incoming transaction, perubahan balance besar, atau saat airdrop token masuk ke wallet." data-en="Monitor multiple wallets simultaneously. Alert on incoming transactions, large balance changes, or when airdrop tokens arrive in your wallet."></p></div>
+  </div>
+ 
+  <div class="callout c-danger">
+    <div class="callout-icon">⚠️</div>
+    <div class="callout-text">
+      <strong data-id="Batasan Etis Bot" data-en="Ethical Bot Limits"></strong>
+      <span data-id="Bot on-chain yang terlalu agresif bisa dianggap Sybil oleh project dan di-blacklist dari airdrop. Gunakan bot untuk efisiensi operasional dan monitoring — bukan untuk spam transaksi masif yang tidak natural. Selalu cek ToS setiap project." data-en="Overly aggressive on-chain bots can be flagged as Sybil by projects and blacklisted from airdrops. Use bots for operational efficiency and monitoring — not for massive unnatural transaction spam. Always check each project's ToS."></span>
+    </div>
+  </div>
+</div>
 </div>
 </main>
 </div>
@@ -2610,6 +3320,24 @@ html, body {
 </style>
 
 <script>
+<!-- ============================================================
+  BAGIAN 3 — SEARCH INDEX
+  Tambahkan entri berikut ke dalam array searchIndex
+  di dalam <script> docs.html, sebelum tanda ];
+============================================================ -->
+<!--
+  {id:'ai-tools', keywords:['ai','chatgpt','claude','gemini','perplexity','grok','deepseek','llm','tools']},
+  {id:'programming-langs', keywords:['python','javascript','solidity','rust','bahasa pemrograman','coding','web3.py','ethers']},
+  {id:'vps-server', keywords:['vps','server','digitalocean','vultr','contabo','ssh','ubuntu','cloud','hosting']},
+  {id:'terminal-cli', keywords:['terminal','cli','command line','bash','linux','ssh','cron','crontab']},
+  {id:'git-github', keywords:['git','github','version control','clone','commit','push','pull','repo']},
+  {id:'nodejs-npm', keywords:['nodejs','node','npm','javascript','pm2','yarn','bun','package']},
+  {id:'docker', keywords:['docker','container','dockerfile','compose','image','container']},
+  {id:'database', keywords:['database','sql','nosql','postgresql','mongodb','redis','supabase','firebase']},
+  {id:'api-scraping', keywords:['api','scraping','web scraping','coingecko','etherscan','beautifulsoup','playwright']},
+  {id:'automation-bot', keywords:['bot','automation','otomasi','telegram','on-chain','script','monitor']},
+-->
+
 const glossaryData = [
 {term:'Airdrop',badge:'c',cat:'Web3',def:{id:'Distribusi token oleh proyek kepada wallet pengguna berdasarkan snapshot, aktivitas on-chain, atau kontribusi tertentu.',en:'Token distribution to user wallets based on snapshots, on-chain activity, or contributions.'}},
 {term:'Account Abstraction',badge:'g',cat:'Web3',def:{id:'Model wallet berbasis smart contract yang memisahkan logika akun dari private key.',en:'A smart contract-based wallet model decoupling account logic from private keys.'}},
