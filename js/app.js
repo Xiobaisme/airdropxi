@@ -2,7 +2,7 @@
 // A. CORE CONFIG & INIT
 // ==========================================
 
-let allData = [], currentLang = 'id', activeFilter = 'all';
+let allData = [], currentLang = 'id', activeFilter = 'all', visibleCount = 9;
 
 // Restore bahasa dari localStorage sebelum apapun
 (function () {
@@ -159,6 +159,7 @@ const T = {
     aiLabel:'AI Agent', fcLatestTitle:'DROP TERBARU', fcActiveNow:'Aktif Sekarang',
     fcRaisedTitle:'TOTAL DANA', fcAcross:'Dari semua proyek',
     hsTotalL:'Total Airdrops', hsActiveL:'Aktif Sekarang',
+    showMore:'Tampilkan Lebih Banyak',
   },
   en: {
     badge:'🔥 Live Opportunities',
@@ -194,6 +195,7 @@ const T = {
     aiLabel:'AI Agent', fcLatestTitle:'LATEST DROP', fcActiveNow:'Active Now',
     fcRaisedTitle:'TOTAL RAISED', fcAcross:'Across all projects',
     hsTotalL:'Total Airdrops', hsActiveL:'Active Now',
+    showMore:'Show More',
   }
 };
 
@@ -313,10 +315,17 @@ function setFilter(el, f) {
   document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   activeFilter = f;
+  visibleCount = 9; // [CHANGED] reset ke awal setiap ganti filter
   renderCards();
 }
 
 function filterCards() {
+  visibleCount = 9; // [CHANGED] reset ke awal setiap search baru
+  renderCards();
+}
+
+function showMore() {
+  visibleCount += 9; // [CHANGED] tambah 9 card lagi
   renderCards();
 }
 
@@ -414,7 +423,11 @@ function renderCards() {
     if (fcRaised) fcRaised.textContent = first.RaisedEN || first.RaisedID || 'N/A';
   }
 
-  cont.innerHTML = filtered.map((item, i) => {
+  // [CHANGED] Ambil hanya sebanyak visibleCount
+  const visible = filtered.slice(0, visibleCount);
+  const remaining = filtered.length - visibleCount;
+
+  cont.innerHTML = visible.map((item, i) => {
     const raised = currentLang === 'id'
       ? (item.RaisedID || item.RaisedEN || t.unknown)
       : (item.RaisedEN || item.RaisedID || t.unknown);
@@ -498,6 +511,20 @@ function renderCards() {
    onclick="event.stopPropagation()">⚡ ${t.cta}</a>
       </div>`;
   }).join('');
+
+  // [CHANGED] Tombol Show More — muncul hanya kalau masih ada sisa
+  if (remaining > 0) {
+    cont.innerHTML += `
+      <div style="grid-column:1/-1;text-align:center;margin-top:8px;padding-bottom:4px">
+        <button
+          onclick="showMore()"
+          style="background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.3);color:#00e5a0;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;padding:12px 32px;border-radius:10px;cursor:pointer;letter-spacing:.5px;transition:all .2s"
+          onmouseover="this.style.background='rgba(0,229,160,0.15)';this.style.borderColor='rgba(0,229,160,0.6)'"
+          onmouseout="this.style.background='rgba(0,229,160,0.08)';this.style.borderColor='rgba(0,229,160,0.3)'">
+          ⬇ ${t.showMore} (${remaining})
+        </button>
+      </div>`;
+  }
 
   document.querySelectorAll('.acard.reveal').forEach(el => observer.observe(el));
   bindHoverEffects();
