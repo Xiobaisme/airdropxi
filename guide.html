@@ -907,10 +907,13 @@ function render(p, roadmapData) {
     : `<div class="project-logo-wrap"><div class="project-logo-fallback">🪂</div></div>`;
 
   const socials = [];
+  if (p.link)     socials.push(`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="social-btn">🌐 Website</a>`);
   if (p.twitter)  socials.push(`<a href="${esc(p.twitter)}" target="_blank" rel="noopener" class="social-btn">𝕏 Twitter</a>`);
   if (p.discord)  socials.push(`<a href="${esc(p.discord)}" target="_blank" rel="noopener" class="social-btn">💬 Discord</a>`);
   if (p.telegram) socials.push(`<a href="${esc(p.telegram)}" target="_blank" rel="noopener" class="social-btn">✈️ Telegram</a>`);
-  if (p.link)     socials.push(`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="social-btn">🌐 Website</a>`);
+  if (p.linkedin)  socials.push(`<a href="${esc(p.linkedin)}" target="_blank" rel="noopener" class="social-btn">💼 LinkedIn</a>`);
+  if (p.youtube)   socials.push(`<a href="${esc(p.youtube)}" target="_blank" rel="noopener" class="social-btn">▶️ YouTube</a>`);
+  if (p.instagram) socials.push(`<a href="${esc(p.instagram)}" target="_blank" rel="noopener" class="social-btn">📸 Instagram</a>`);
 
   const heroEl = document.getElementById('project-hero');
   heroEl.innerHTML = `
