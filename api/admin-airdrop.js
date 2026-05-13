@@ -101,6 +101,15 @@ module.exports = async function handler(req, res) {
       const extra  = (proyekData && proyekData.length > 0) ? proyekData[0] : {};
       const merged = { ...base, ...extra, id: base.id };
 
+      // Fetch roadmap untuk project ini
+      const intId = extra.airdrop_id || base.id;
+      const rRoadmap = await fetch(
+        `${BASE}/project_roadmaps?airdrop_id=eq.${intId}&order=sort_order.asc`,
+        { headers: H }
+      );
+      const roadmapData = rRoadmap.ok ? await rRoadmap.json() : [];
+      merged._roadmap = Array.isArray(roadmapData) ? roadmapData : [];
+
       return res.status(200).json(merged);
     } catch (e) {
       return res.status(500).json({ error: e.message });
@@ -132,6 +141,11 @@ module.exports = async function handler(req, res) {
         console.error('Sync proyek gagal:', JSON.stringify(err2));
       }
 
+      // Simpan roadmap kalau ada
+      if (req.body._roadmap && Array.isArray(req.body._roadmap) && req.body._roadmap.length > 0) {
+        await saveRoadmap(BASE, H, newId, req.body._roadmap);
+      }
+
       return res.status(201).json(Array.isArray(result1) ? result1 : [result1]);
     } catch (e) {
       return res.status(500).json({ error: e.message });
@@ -154,12 +168,12 @@ module.exports = async function handler(req, res) {
       if (text) { try { result = JSON.parse(text); } catch(e) { result = null; } }
       if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result || text) });
 
-      // 2. Ambil integer id dari airdrops dulu
+      // 2. Ambil integer id dari airdrops
       const rCheck = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}&select=id`, { headers: H });
       const checkData = await rCheck.json();
       const intId = checkData?.[0]?.id;
 
-      // 3. Update tabel proyek pakai integer airdrop_id
+      // 3. Update tabel proyek
       if (intId !== undefined) {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
@@ -175,6 +189,11 @@ module.exports = async function handler(req, res) {
         } finally {
           clearTimeout(timeout);
         }
+
+        // 4. Update roadmap kalau ada di payload
+        if (req.body._roadmap !== undefined && intId !== undefined) {
+          await saveRoadmap(BASE, H, intId, req.body._roadmap || []);
+        }
       }
 
       const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...buildAirdropsPayload(req.body) }]);
@@ -189,7 +208,6 @@ module.exports = async function handler(req, res) {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
     try {
-      // Ambil integer id dulu sebelum delete
       const rCheck = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}&select=id`, { headers: H });
       const checkData = await rCheck.json();
       const intId = checkData?.[0]?.id;
@@ -200,7 +218,8 @@ module.exports = async function handler(req, res) {
 
       if (intId !== undefined) {
         deletePromises.push(
-          fetch(`${BASE}/proyek?airdrop_id=eq.${intId}`, { method: 'DELETE', headers: H })
+          fetch(`${BASE}/proyek?airdrop_id=eq.${intId}`, { method: 'DELETE', headers: H }),
+          fetch(`${BASE}/project_roadmaps?airdrop_id=eq.${intId}`, { method: 'DELETE', headers: H })
         );
       }
 
@@ -220,3 +239,39 @@ module.exports = async function handler(req, res) {
   res.setHeader('Allow', ['GET','POST','PATCH','DELETE']);
   return res.status(405).json({ error: `Method ${req.method} tidak diizinkan` });
 };
+
+// ── HELPER: save roadmap (delete all + re-insert) ────
+async function saveRoadmap(BASE, H, airdropId, items) {
+  try {
+    // Hapus semua roadmap lama untuk project ini
+    await fetch(`${BASE}/project_roadmaps?airdrop_id=eq.${airdropId}`, {
+      method: 'DELETE', headers: H,
+    });
+
+    // Insert baru kalau ada isinya
+    if (!items || items.length === 0) return;
+
+    const rows = items
+      .filter(item => item.phase_label && item.phase_title)
+      .map((item, idx) => ({
+        airdrop_id:   airdropId,
+        phase_label:  item.phase_label  || '',
+        phase_title:  item.phase_title  || '',
+        phase_desc:   item.phase_desc   || null,
+        status:       ['done','in_progress','planned'].includes(item.status) ? item.status : 'planned',
+        sort_order:   idx,
+        source_url:   item.source_url   || null,
+        source_label: item.source_label || 'Official Roadmap',
+      }));
+
+    if (rows.length === 0) return;
+
+    await fetch(`${BASE}/project_roadmaps`, {
+      method: 'POST',
+      headers: { ...H, 'Prefer': 'return=minimal' },
+      body: JSON.stringify(rows),
+    });
+  } catch(e) {
+    console.warn('saveRoadmap error:', e.message);
+  }
+}
