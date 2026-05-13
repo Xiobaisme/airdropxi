@@ -33,10 +33,7 @@
       --r:       10px;
     }
 
-    body {
-      background: var(--bg); color: var(--text);
-      font-family: var(--sans); min-height: 100vh;
-    }
+    body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; }
     body::before {
       content: ''; position: fixed; inset: 0; z-index: 0;
       background-image:
@@ -45,22 +42,18 @@
       background-size: 48px 48px; pointer-events: none;
     }
 
-    /* ── LOGIN SCREEN ── */
     #login-section {
       position: fixed; inset: 0; z-index: 999;
-      display: flex; align-items: center; justify-content: center;
-      background: var(--bg);
+      display: flex; align-items: center; justify-content: center; background: var(--bg);
     }
     .login-card {
       background: var(--s1); border: 1px solid var(--border);
-      border-radius: 16px; padding: 2.5rem 2rem; text-align: center;
-      max-width: 380px; width: 90%;
+      border-radius: 16px; padding: 2.5rem 2rem; text-align: center; max-width: 380px; width: 90%;
     }
     .login-logo { font-family: var(--mono); font-size: 1.4rem; color: var(--accent); font-weight: 700; margin-bottom: 0.5rem; }
     .login-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
     .login-sub { font-size: 0.82rem; color: var(--text2); margin-bottom: 1.5rem; }
 
-    /* ── NAV ── */
     nav {
       position: sticky; top: 0; z-index: 100;
       background: rgba(7,9,11,0.92); backdrop-filter: blur(20px);
@@ -71,24 +64,20 @@
     .nav-left { display: flex; align-items: center; gap: 10px; }
     .nav-logo { font-family: var(--mono); font-size: 0.82rem; font-weight: 700; color: var(--accent); text-decoration: none; }
     .nav-badge {
-      font-family: var(--mono); font-size: 0.58rem; font-weight: 700;
-      padding: 0.2rem 0.55rem;
+      font-family: var(--mono); font-size: 0.58rem; font-weight: 700; padding: 0.2rem 0.55rem;
       background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
       border-radius: 4px; color: var(--red); letter-spacing: 0.08em;
     }
     .nav-back { font-family: var(--mono); font-size: 0.68rem; color: var(--text2); text-decoration: none; transition: color 0.2s; }
     .nav-back:hover { color: var(--accent); }
 
-    /* ── LAYOUT ── */
     .wrap {
-      position: relative; z-index: 1;
-      max-width: 1120px; margin: 0 auto;
+      position: relative; z-index: 1; max-width: 1120px; margin: 0 auto;
       padding: 1.5rem 1.25rem 5rem;
       display: grid; grid-template-columns: 270px 1fr; gap: 1.25rem;
     }
     @media (max-width: 768px) { .wrap { grid-template-columns: 1fr; } }
 
-    /* ── SIDEBAR ── */
     .sidebar { display: flex; flex-direction: column; gap: 1rem; }
     .panel { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
     .panel-head { display: flex; align-items: center; gap: 8px; padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); }
@@ -109,11 +98,7 @@
     .proj-item:hover { background: var(--s2); }
     .proj-item.active { background: var(--adim); }
     .proj-item-name { font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .proj-item-status {
-      font-family: var(--mono); font-size: 0.52rem;
-      padding: 0.15rem 0.4rem; border-radius: 3px;
-      white-space: nowrap; flex-shrink: 0;
-    }
+    .proj-item-status { font-family: var(--mono); font-size: 0.52rem; padding: 0.15rem 0.4rem; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
     .st-a { background: rgba(0,229,160,0.1); color: var(--accent); }
     .st-w { background: rgba(245,158,11,0.1); color: var(--warn); }
     .st-d { background: var(--s3); color: var(--text3); }
@@ -121,13 +106,11 @@
     .btn-new {
       width: 100%; padding: 0.7rem;
       background: var(--adim); border: 1px dashed var(--aborder);
-      border-radius: 8px; color: var(--accent);
-      font-family: var(--mono); font-size: 0.7rem;
+      border-radius: 8px; color: var(--accent); font-family: var(--mono); font-size: 0.7rem;
       cursor: pointer; transition: all 0.2s; letter-spacing: 0.04em;
     }
     .btn-new:hover { background: rgba(0,229,160,0.14); }
 
-    /* ── FORM ── */
     .form-area { display: flex; flex-direction: column; gap: 1rem; }
     .form-panel { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
     .form-header {
@@ -137,8 +120,7 @@
     .form-title { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
     .edit-badge {
       font-family: var(--mono); font-size: 0.58rem; padding: 0.2rem 0.5rem;
-      background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25);
-      border-radius: 4px; color: var(--blue);
+      background: rgba(59,130,246,0.1); border: 1px solid rgba(59,130,246,0.25); border-radius: 4px; color: var(--blue);
     }
     .form-actions { display: flex; gap: 8px; flex-wrap: wrap; }
 
@@ -165,11 +147,9 @@
     label .hint { color: var(--text3); font-size: 0.54rem; margin-left: 4px; text-transform: none; letter-spacing: 0; }
 
     input, select, textarea {
-      width: 100%; background: var(--s2);
-      border: 1px solid var(--border2); border-radius: 6px;
+      width: 100%; background: var(--s2); border: 1px solid var(--border2); border-radius: 6px;
       color: var(--text); font-family: var(--mono); font-size: 0.76rem;
-      padding: 0.58rem 0.75rem; outline: none;
-      transition: border-color 0.2s; resize: vertical;
+      padding: 0.58rem 0.75rem; outline: none; transition: border-color 0.2s; resize: vertical;
     }
     input:focus, select:focus, textarea:focus { border-color: var(--accent); }
     input::placeholder, textarea::placeholder { color: var(--text3); }
@@ -177,7 +157,7 @@
     textarea { min-height: 90px; line-height: 1.5; }
     textarea.tall { min-height: 130px; }
 
-    /* Testnet links builder */
+    /* Testnet */
     .testnet-builder { display: flex; flex-direction: column; gap: 8px; }
     .testnet-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; align-items: center; }
     .testnet-row input { margin: 0; }
@@ -185,8 +165,7 @@
       width: 30px; height: 30px; border-radius: 6px;
       background: var(--rdim); border: 1px solid rgba(239,68,68,0.2);
       color: var(--red); cursor: pointer; font-size: 1rem;
-      display: flex; align-items: center; justify-content: center;
-      transition: all 0.15s; flex-shrink: 0;
+      display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0;
     }
     .btn-remove-testnet:hover { background: rgba(239,68,68,0.15); }
     .btn-add-testnet {
@@ -195,6 +174,55 @@
       cursor: pointer; transition: all 0.2s; align-self: flex-start;
     }
     .btn-add-testnet:hover { border-color: var(--accent); color: var(--accent); }
+
+    /* ── ROADMAP BUILDER ── */
+    .roadmap-builder { display: flex; flex-direction: column; gap: 10px; }
+    .roadmap-card {
+      background: var(--s2); border: 1px solid var(--border2); border-radius: 8px; overflow: hidden;
+      transition: border-color 0.2s;
+    }
+    .roadmap-card:focus-within { border-color: rgba(59,130,246,0.4); }
+    .roadmap-card-header {
+      display: flex; align-items: center; gap: 8px;
+      padding: 0.6rem 0.875rem; border-bottom: 1px solid var(--border); background: var(--s3);
+    }
+    .roadmap-drag-handle { color: var(--text3); font-size: 0.75rem; cursor: grab; user-select: none; padding: 0 2px; }
+    .roadmap-phase-num { font-family: var(--mono); font-size: 0.58rem; color: var(--text3); min-width: 56px; }
+    .roadmap-status-btn {
+      font-family: var(--mono); font-size: 0.52rem; padding: 0.18rem 0.55rem; border-radius: 4px;
+      cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap; margin-left: auto;
+    }
+    .roadmap-status-btn.done        { background: rgba(0,229,160,0.12); color: var(--accent); }
+    .roadmap-status-btn.in_progress { background: rgba(59,130,246,0.12); color: var(--blue); }
+    .roadmap-status-btn.planned     { background: var(--s3); color: var(--text3); border: 1px solid var(--border); }
+    .roadmap-card-body {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0.875rem;
+    }
+    @media (max-width: 600px) { .roadmap-card-body { grid-template-columns: 1fr; } }
+    .roadmap-card-body .field { gap: 4px; }
+    .roadmap-card-body label { font-size: 0.55rem; }
+    .roadmap-card-body input,
+    .roadmap-card-body textarea,
+    .roadmap-card-body select { font-size: 0.72rem; padding: 0.45rem 0.65rem; }
+    .roadmap-card-body textarea { min-height: 60px; }
+    .roadmap-card-body .field.full { grid-column: span 2; }
+    .roadmap-card-actions { display: flex; justify-content: flex-end; padding: 0 0.875rem 0.75rem; }
+    .btn-remove-roadmap {
+      padding: 0.3rem 0.7rem; background: transparent;
+      border: 1px solid rgba(239,68,68,0.2); border-radius: 5px;
+      color: var(--red); font-family: var(--mono); font-size: 0.6rem; cursor: pointer; transition: all 0.15s;
+    }
+    .btn-remove-roadmap:hover { background: var(--rdim); }
+    .btn-add-roadmap {
+      padding: 0.5rem 1rem; background: transparent; border: 1px dashed var(--border2);
+      border-radius: 6px; color: var(--text2); font-family: var(--mono); font-size: 0.65rem;
+      cursor: pointer; transition: all 0.2s; align-self: flex-start;
+    }
+    .btn-add-roadmap:hover { border-color: var(--blue); color: var(--blue); }
+    .roadmap-empty {
+      padding: 1.25rem; text-align: center; font-family: var(--mono); font-size: 0.65rem; color: var(--text3);
+      border: 1px dashed var(--border); border-radius: 8px;
+    }
 
     /* Buttons */
     .btn-save {
@@ -218,131 +246,59 @@
     }
     .btn-cancel:hover { border-color: var(--text2); color: var(--text); }
 
-    /* Publish toggle */
     .publish-section {
       padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
     }
     .publish-toggle-wrap { display: flex; align-items: center; gap: 12px; }
-    .toggle-track {
-      position: relative; width: 44px; height: 24px;
-      border-radius: 12px; cursor: pointer; transition: background 0.25s;
-      flex-shrink: 0;
-    }
-    .toggle-thumb {
-      position: absolute; top: 3px; width: 18px; height: 18px;
-      border-radius: 50%; background: #fff; transition: left 0.25s; pointer-events: none;
-    }
+    .toggle-track { position: relative; width: 44px; height: 24px; border-radius: 12px; cursor: pointer; transition: background 0.25s; flex-shrink: 0; }
+    .toggle-thumb { position: absolute; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left 0.25s; pointer-events: none; }
     .publish-label { font-size: 0.82rem; font-weight: 600; transition: color 0.25s; }
     .publish-note { font-family: var(--mono); font-size: 0.62rem; color: var(--text3); }
 
-    /* Toast */
     .toast {
-      position: fixed; bottom: 2rem; right: 2rem;
-      padding: 0.75rem 1.25rem; border-radius: 8px;
+      position: fixed; bottom: 2rem; right: 2rem; padding: 0.75rem 1.25rem; border-radius: 8px;
       font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
-      z-index: 999; pointer-events: none;
-      transform: translateY(80px); opacity: 0; transition: all 0.3s ease;
+      z-index: 999; pointer-events: none; transform: translateY(80px); opacity: 0; transition: all 0.3s ease;
     }
     .toast.show { transform: translateY(0); opacity: 1; }
     .toast.success { background: var(--accent); color: #000; }
     .toast.error   { background: var(--red); color: #fff; }
 
-    /* Empty & loading */
-    .empty-form {
-      display: flex; flex-direction: column; align-items: center; justify-content: center;
-      min-height: 380px; gap: 1rem; text-align: center;
-    }
+    .empty-form { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; gap: 1rem; text-align: center; }
     .empty-icon { font-size: 2.5rem; }
     .empty-text { color: var(--text3); font-family: var(--mono); font-size: 0.72rem; line-height: 1.6; }
-    .spinner {
-      width: 18px; height: 18px; border: 2px solid var(--border2); border-top-color: var(--accent);
-      border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block;
-    }
+    .spinner { width: 18px; height: 18px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .list-loading {
-      padding: 2rem; text-align: center; font-family: var(--mono); font-size: 0.68rem; color: var(--text3);
-      display: flex; flex-direction: column; align-items: center; gap: 10px;
-    }
+    .list-loading { padding: 2rem; text-align: center; font-family: var(--mono); font-size: 0.68rem; color: var(--text3); display: flex; flex-direction: column; align-items: center; gap: 10px; }
 
-    /* ── LOGO UPLOAD WIDGET ── */
-    .logo-upload-wrap {
-      display: flex; flex-direction: column; gap: 8px;
-    }
-    .logo-preview-row {
-      display: flex; align-items: center; gap: 12px;
-    }
+    /* Logo upload */
+    .logo-upload-wrap { display: flex; flex-direction: column; gap: 8px; }
+    .logo-preview-row { display: flex; align-items: center; gap: 12px; }
     .logo-preview-box {
-      width: 52px; height: 52px; border-radius: 10px;
-      border: 1px solid var(--border2); background: var(--s3);
-      display: flex; align-items: center; justify-content: center;
-      overflow: hidden; flex-shrink: 0;
-      font-size: 1.3rem; color: var(--text3);
-      transition: border-color 0.2s;
+      width: 52px; height: 52px; border-radius: 10px; border: 1px solid var(--border2); background: var(--s3);
+      display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0;
+      font-size: 1.3rem; color: var(--text3); transition: border-color 0.2s;
     }
-    .logo-preview-box img {
-      width: 100%; height: 100%; object-fit: contain;
-    }
+    .logo-preview-box img { width: 100%; height: 100%; object-fit: contain; }
     .logo-preview-box.has-img { border-color: var(--aborder); }
     .logo-upload-right { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
-    .logo-url-display {
-      font-family: var(--mono); font-size: 0.62rem; color: var(--text2);
-      white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-      padding: 0.3rem 0.5rem; background: var(--s3); border-radius: 4px;
-      border: 1px solid var(--border);
-    }
+    .logo-url-display { font-family: var(--mono); font-size: 0.62rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0.3rem 0.5rem; background: var(--s3); border-radius: 4px; border: 1px solid var(--border); }
     .logo-url-display.empty { color: var(--text3); font-style: italic; }
     .logo-upload-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-    .btn-upload-logo {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 0.42rem 0.85rem;
-      background: var(--adim); border: 1px solid var(--aborder);
-      border-radius: 6px; color: var(--accent);
-      font-family: var(--mono); font-size: 0.64rem;
-      cursor: pointer; transition: all 0.2s; white-space: nowrap;
-    }
+    .btn-upload-logo { display: inline-flex; align-items: center; gap: 5px; padding: 0.42rem 0.85rem; background: var(--adim); border: 1px solid var(--aborder); border-radius: 6px; color: var(--accent); font-family: var(--mono); font-size: 0.64rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
     .btn-upload-logo:hover { background: rgba(0,229,160,0.14); }
     .btn-upload-logo:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-clear-logo {
-      display: inline-flex; align-items: center; gap: 5px;
-      padding: 0.42rem 0.75rem;
-      background: transparent; border: 1px solid var(--border2);
-      border-radius: 6px; color: var(--text3);
-      font-family: var(--mono); font-size: 0.64rem;
-      cursor: pointer; transition: all 0.2s; white-space: nowrap;
-    }
+    .btn-clear-logo { display: inline-flex; align-items: center; gap: 5px; padding: 0.42rem 0.75rem; background: transparent; border: 1px solid var(--border2); border-radius: 6px; color: var(--text3); font-family: var(--mono); font-size: 0.64rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
     .btn-clear-logo:hover { border-color: var(--red); color: var(--red); }
-    .logo-upload-status {
-      font-family: var(--mono); font-size: 0.6rem;
-      padding: 0.3rem 0.5rem; border-radius: 4px;
-      display: none;
-    }
-    .logo-upload-status.uploading {
-      display: flex; align-items: center; gap: 6px;
-      background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2);
-      color: var(--blue);
-    }
-    .logo-upload-status.success {
-      display: block;
-      background: var(--adim); border: 1px solid var(--aborder);
-      color: var(--accent);
-    }
-    .logo-upload-status.error {
-      display: block;
-      background: var(--rdim); border: 1px solid rgba(239,68,68,0.2);
-      color: var(--red);
-    }
+    .logo-upload-status { font-family: var(--mono); font-size: 0.6rem; padding: 0.3rem 0.5rem; border-radius: 4px; display: none; }
+    .logo-upload-status.uploading { display: flex; align-items: center; gap: 6px; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); color: var(--blue); }
+    .logo-upload-status.success { display: block; background: var(--adim); border: 1px solid var(--aborder); color: var(--accent); }
+    .logo-upload-status.error   { display: block; background: var(--rdim); border: 1px solid rgba(239,68,68,0.2); color: var(--red); }
 
-    /* ── GITHUB TOKEN MODAL ── */
-    .modal-overlay {
-      position: fixed; inset: 0; z-index: 500;
-      background: rgba(7,9,11,0.85); backdrop-filter: blur(8px);
-      display: flex; align-items: center; justify-content: center;
-    }
-    .modal-box {
-      background: var(--s1); border: 1px solid var(--border2);
-      border-radius: 14px; padding: 2rem; max-width: 420px; width: 90%;
-    }
+    /* Modal */
+    .modal-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(7,9,11,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; }
+    .modal-box { background: var(--s1); border: 1px solid var(--border2); border-radius: 14px; padding: 2rem; max-width: 420px; width: 90%; }
     .modal-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 8px; }
     .modal-sub { font-family: var(--mono); font-size: 0.65rem; color: var(--text2); margin-bottom: 1.25rem; line-height: 1.6; }
     .modal-sub a { color: var(--accent); text-decoration: none; }
@@ -350,23 +306,10 @@
     .modal-input-wrap { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
     .modal-input-wrap label { font-family: var(--mono); font-size: 0.6rem; color: var(--text2); letter-spacing: 0.06em; text-transform: uppercase; }
     .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-    .btn-modal-save {
-      padding: 0.55rem 1.2rem; background: var(--accent); color: #000;
-      font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
-      border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s;
-    }
+    .btn-modal-save { padding: 0.55rem 1.2rem; background: var(--accent); color: #000; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; }
     .btn-modal-save:hover { opacity: 0.85; }
-    .btn-modal-cancel {
-      padding: 0.55rem 1rem; background: transparent; color: var(--text2);
-      font-family: var(--mono); font-size: 0.68rem;
-      border: 1px solid var(--border2); border-radius: 6px; cursor: pointer;
-    }
-    .token-warning {
-      font-family: var(--mono); font-size: 0.6rem; color: var(--text3);
-      margin-top: 0.5rem; padding: 0.5rem 0.75rem;
-      background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15);
-      border-radius: 6px; line-height: 1.5;
-    }
+    .btn-modal-cancel { padding: 0.55rem 1rem; background: transparent; color: var(--text2); font-family: var(--mono); font-size: 0.68rem; border: 1px solid var(--border2); border-radius: 6px; cursor: pointer; }
+    .token-warning { font-family: var(--mono); font-size: 0.6rem; color: var(--text3); margin-top: 0.5rem; padding: 0.5rem 0.75rem; background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15); border-radius: 6px; line-height: 1.5; }
   </style>
 </head>
 <body>
@@ -394,7 +337,7 @@
   </div>
 </div>
 
-<!-- LOGIN SCREEN -->
+<!-- LOGIN -->
 <div id="login-section">
   <div class="login-card">
     <div class="login-logo">⚡ AirdropXI</div>
@@ -415,7 +358,6 @@
   </nav>
 
   <div class="wrap">
-    <!-- SIDEBAR -->
     <div class="sidebar">
       <button class="btn-new" onclick="newForm()">＋ Tambah Airdrop Baru</button>
       <div class="panel">
@@ -428,13 +370,11 @@
           <div class="list-loading"><div class="spinner"></div><span>Memuat...</span></div>
         </div>
       </div>
-      <!-- GitHub token setup button -->
       <button class="btn-new" onclick="openTokenModal()" style="border-color:rgba(59,130,246,0.3);color:var(--blue);background:rgba(59,130,246,0.06)">
         🔑 Setup GitHub Token
       </button>
     </div>
 
-    <!-- FORM AREA -->
     <div class="form-area" id="form-area">
       <div class="panel">
         <div class="empty-form">
@@ -450,31 +390,22 @@
 
 <script>
   // ── CONFIG ────────────────────────────────────────────
-  // Sesuaikan dengan repo kamu
-  const GH_OWNER  = 'Xiobaisme';
-  const GH_REPO   = 'airdropxi';
-  const GH_BRANCH = 'main';
-  const GH_LOGOS_PATH = 'assets/logos'; // folder tujuan di repo
+  const GH_OWNER      = 'Xiobaisme';
+  const GH_REPO       = 'airdropxi';
+  const GH_BRANCH     = 'main';
+  const GH_LOGOS_PATH = 'assets/logos';
 
-  // ── GITHUB TOKEN MANAGEMENT ───────────────────────────
-  function getGHToken() {
-    return localStorage.getItem('gh_token_airdropxi') || '';
-  }
-
+  // ── GITHUB TOKEN ──────────────────────────────────────
+  function getGHToken() { return localStorage.getItem('gh_token_airdropxi') || ''; }
   function openTokenModal() {
     const modal = document.getElementById('token-modal');
     const input = document.getElementById('token-input');
     modal.classList.remove('hidden');
-    // Tampilkan token yg sudah ada (masked)
     const existing = getGHToken();
     if (existing) input.value = existing;
     input.focus();
   }
-
-  function closeTokenModal() {
-    document.getElementById('token-modal').classList.add('hidden');
-  }
-
+  function closeTokenModal() { document.getElementById('token-modal').classList.add('hidden'); }
   function saveToken() {
     const val = document.getElementById('token-input').value.trim();
     if (!val) { showToast('Token tidak boleh kosong!', 'error'); return; }
@@ -485,100 +416,58 @@
     closeTokenModal();
     showToast('✓ Token disimpan!', 'success');
   }
-
-  // Enter key on token input
-  document.getElementById('token-input').addEventListener('keydown', e => {
-    if (e.key === 'Enter') saveToken();
-  });
+  document.getElementById('token-input').addEventListener('keydown', e => { if (e.key === 'Enter') saveToken(); });
 
   // ── GITHUB IMAGE UPLOAD ───────────────────────────────
-  // Mengupload file gambar ke GitHub repo, return raw URL
   async function uploadImageToGitHub(file, projectName) {
     const token = getGHToken();
-    if (!token) {
-      openTokenModal();
-      throw new Error('GitHub token belum diset. Isi token dulu!');
-    }
-
-    // Sanitize nama file: pakai nama project + timestamp
-    const ext = file.name.split('.').pop().toLowerCase();
-    const safeName = (projectName || 'logo').toLowerCase()
-      .replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
+    if (!token) { openTokenModal(); throw new Error('GitHub token belum diset. Isi token dulu!'); }
+    const ext      = file.name.split('.').pop().toLowerCase();
+    const safeName = (projectName || 'logo').toLowerCase().replace(/[^a-z0-9]/g, '-').replace(/-+/g, '-').replace(/^-|-$/g, '');
     const filename = `${safeName}-${Date.now()}.${ext}`;
     const filePath = `${GH_LOGOS_PATH}/${filename}`;
+    const base64   = await fileToBase64(file);
 
-    // Convert file ke base64
-    const base64 = await fileToBase64(file);
-
-    // Cek apakah file sudah ada (untuk dapat SHA kalau mau overwrite)
     let sha = null;
     try {
-      const checkRes = await fetch(
-        `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${filePath}`,
-        { headers: { Authorization: `token ${token}` } }
-      );
-      if (checkRes.ok) {
-        const existing = await checkRes.json();
-        sha = existing.sha;
-      }
-    } catch(e) { /* file belum ada, lanjut */ }
+      const checkRes = await fetch(`https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${filePath}`, { headers: { Authorization: `token ${token}` } });
+      if (checkRes.ok) { const existing = await checkRes.json(); sha = existing.sha; }
+    } catch(e) {}
 
-    // Upload via GitHub Contents API
-    const body = {
-      message: `Upload logo: ${filename}`,
-      content: base64,
-      branch: GH_BRANCH,
-    };
-    if (sha) body.sha = sha; // diperlukan kalau overwrite
+    const body = { message: `Upload logo: ${filename}`, content: base64, branch: GH_BRANCH };
+    if (sha) body.sha = sha;
 
     const res = await fetch(
       `https://api.github.com/repos/${GH_OWNER}/${GH_REPO}/contents/${filePath}`,
-      {
-        method: 'PUT',
-        headers: {
-          Authorization: `token ${token}`,
-          'Content-Type': 'application/json',
-        },
-        body: JSON.stringify(body),
-      }
+      { method: 'PUT', headers: { Authorization: `token ${token}`, 'Content-Type': 'application/json' }, body: JSON.stringify(body) }
     );
-
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
       if (res.status === 401) throw new Error('Token tidak valid atau expired. Update token kamu!');
       if (res.status === 403) throw new Error('Token tidak punya akses repo. Pastikan centang "repo" saat buat token.');
       throw new Error(err.message || `GitHub API error ${res.status}`);
     }
-
     const data = await res.json();
-    // Return raw URL yang bisa dipakai sebagai gambar
-    const rawUrl = data.content.download_url
-      || `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${filePath}`;
-    return rawUrl;
+    return data.content.download_url || `https://raw.githubusercontent.com/${GH_OWNER}/${GH_REPO}/${GH_BRANCH}/${filePath}`;
   }
 
   function fileToBase64(file) {
     return new Promise((resolve, reject) => {
       const reader = new FileReader();
-      reader.onload  = () => resolve(reader.result.split(',')[1]); // strip data:...;base64,
+      reader.onload  = () => resolve(reader.result.split(',')[1]);
       reader.onerror = () => reject(new Error('Gagal baca file'));
       reader.readAsDataURL(file);
     });
   }
 
-  // ── LOGO UPLOAD WIDGET HANDLER ────────────────────────
-  let pendingLogoUrl = null; // URL hasil upload, siap disimpan ke Supabase
+  // ── LOGO UPLOAD WIDGET ────────────────────────────────
+  let pendingLogoUrl = null;
 
-  function initLogoUpload(existingUrl) {
-    pendingLogoUrl = existingUrl || null;
-    updateLogoPreview(existingUrl);
-  }
-
+  function initLogoUpload(existingUrl) { pendingLogoUrl = existingUrl || null; updateLogoPreview(existingUrl); }
   function updateLogoPreview(url) {
-    const box    = document.getElementById('logo-preview-box');
+    const box     = document.getElementById('logo-preview-box');
     const urlDisp = document.getElementById('logo-url-display');
     if (!box || !urlDisp) return;
-
     if (url) {
       box.innerHTML = `<img src="${esc(url)}" onerror="this.parentElement.innerHTML='🖼️'">`;
       box.classList.add('has-img');
@@ -591,47 +480,25 @@
       urlDisp.classList.add('empty');
     }
   }
-
-  function triggerLogoUpload() {
-    const input = document.getElementById('logo-file-input');
-    if (input) input.click();
-  }
-
+  function triggerLogoUpload() { const i = document.getElementById('logo-file-input'); if (i) i.click(); }
   async function handleLogoFileChange(e) {
     const file = e.target.files?.[0];
     if (!file) return;
-
-    // Validasi tipe file
-    const allowed = ['image/png', 'image/jpeg', 'image/jpg', 'image/webp', 'image/svg+xml', 'image/gif'];
-    if (!allowed.includes(file.type)) {
-      showToast('Format tidak didukung. Gunakan PNG, JPG, WEBP, atau SVG.', 'error');
-      return;
-    }
-
-    // Validasi ukuran (max 2MB)
-    if (file.size > 2 * 1024 * 1024) {
-      showToast('Ukuran file terlalu besar. Maksimal 2MB.', 'error');
-      return;
-    }
-
+    const allowed = ['image/png','image/jpeg','image/jpg','image/webp','image/svg+xml','image/gif'];
+    if (!allowed.includes(file.type)) { showToast('Format tidak didukung. Gunakan PNG, JPG, WEBP, atau SVG.', 'error'); return; }
+    if (file.size > 2 * 1024 * 1024) { showToast('Ukuran file terlalu besar. Maksimal 2MB.', 'error'); return; }
     const statusEl  = document.getElementById('logo-upload-status');
     const uploadBtn = document.getElementById('btn-upload-logo');
-
-    // Show uploading state
     statusEl.className = 'logo-upload-status uploading';
     statusEl.innerHTML = '<span class="spinner"></span> Mengupload ke GitHub...';
     if (uploadBtn) uploadBtn.disabled = true;
-
     try {
       const projectName = document.getElementById('f-name')?.value?.trim() || 'project';
       const rawUrl = await uploadImageToGitHub(file, projectName);
-
       pendingLogoUrl = rawUrl;
       updateLogoPreview(rawUrl);
-
       statusEl.className = 'logo-upload-status success';
       statusEl.textContent = '✓ Upload berhasil! Klik Simpan untuk menyimpan perubahan.';
-
       showToast('✓ Gambar berhasil diupload ke GitHub!', 'success');
     } catch(err) {
       statusEl.className = 'logo-upload-status error';
@@ -639,20 +506,17 @@
       showToast('Upload gagal: ' + err.message, 'error');
     } finally {
       if (uploadBtn) uploadBtn.disabled = false;
-      // Reset file input biar bisa pilih file sama lagi
       e.target.value = '';
     }
   }
-
   function clearLogo() {
-    pendingLogoUrl = null;
-    updateLogoPreview(null);
+    pendingLogoUrl = null; updateLogoPreview(null);
     const statusEl = document.getElementById('logo-upload-status');
     if (statusEl) { statusEl.className = 'logo-upload-status'; statusEl.textContent = ''; }
   }
 
   // ── LOAD LIST ─────────────────────────────────────────
-  let projects = [];
+  let projects  = [];
   let editingId = null;
 
   async function loadProjects() {
@@ -662,18 +526,14 @@
       projects = await res.json();
       renderList();
     } catch(e) {
-      document.getElementById('proj-list').innerHTML =
-        `<div class="list-loading" style="color:var(--red)">${e.message}</div>`;
+      document.getElementById('proj-list').innerHTML = `<div class="list-loading" style="color:var(--red)">${e.message}</div>`;
     }
   }
 
   function renderList() {
     const list = document.getElementById('proj-list');
     document.getElementById('proj-count').textContent = projects.length;
-    if (!projects.length) {
-      list.innerHTML = '<div class="list-loading">Belum ada proyek.</div>';
-      return;
-    }
+    if (!projects.length) { list.innerHTML = '<div class="list-loading">Belum ada proyek.</div>'; return; }
     list.innerHTML = projects.map(p => {
       const isLive = p.published === true;
       return `
@@ -689,8 +549,7 @@
               </span>
             </div>
           </div>
-        </div>
-      `;
+        </div>`;
     }).join('');
   }
 
@@ -703,8 +562,7 @@
 
   function newForm()    { editingId = null; renderList(); renderForm(null); }
   function loadEdit(id) {
-    editingId = id;
-    renderList();
+    editingId = id; renderList();
     fetch(`/api/admin-airdrop?id=${id}`)
       .then(r => r.json())
       .then(data => { if (data.error) showToast(data.error, 'error'); else renderForm(data); })
@@ -713,23 +571,22 @@
 
   // ── RENDER FORM ───────────────────────────────────────
   function renderForm(data) {
-    const d = data || {};
+    const d      = data || {};
     const isEdit = !!data;
     const isLive = d.published === true;
 
     let testnetLinks = [];
     if (d.testnet_links) {
-      try {
-        testnetLinks = typeof d.testnet_links === 'string'
-          ? JSON.parse(d.testnet_links)
-          : (Array.isArray(d.testnet_links) ? d.testnet_links : []);
-      } catch(e) { testnetLinks = []; }
+      try { testnetLinks = typeof d.testnet_links === 'string' ? JSON.parse(d.testnet_links) : (Array.isArray(d.testnet_links) ? d.testnet_links : []); }
+      catch(e) { testnetLinks = []; }
     }
+
+    // Roadmap data dari API GET (field _roadmap)
+    const roadmapItems = Array.isArray(d._roadmap) ? d._roadmap : [];
 
     document.getElementById('form-area').innerHTML = `
       <div class="form-panel">
 
-        <!-- HEADER -->
         <div class="form-header">
           <div class="form-title">
             ${isEdit ? `✏️ Edit: ${esc(d.name)}` : '➕ Tambah Airdrop Baru'}
@@ -738,31 +595,21 @@
           <div class="form-actions">
             ${isEdit ? `<button class="btn-delete" onclick="deleteProject('${d.id}')">🗑 Hapus</button>` : ''}
             <button class="btn-cancel" onclick="cancelForm()">✕ Batal</button>
-            <button class="btn-save" id="btn-save" onclick="saveForm()">
-              ${isEdit ? '💾 Simpan' : '➕ Tambah'}
-            </button>
+            <button class="btn-save" id="btn-save" onclick="saveForm()">${isEdit ? '💾 Simpan' : '➕ Tambah'}</button>
           </div>
         </div>
 
-        <!-- PUBLISHED TOGGLE -->
         <div class="publish-section" style="background:${isLive ? 'rgba(0,229,160,0.04)' : 'rgba(245,158,11,0.03)'}">
           <div class="publish-toggle-wrap">
-            <div class="toggle-track" id="toggle-track"
-              style="background:${isLive ? 'var(--accent)' : 'var(--border2)'}"
-              onclick="togglePublish()">
-              <div class="toggle-thumb" id="toggle-thumb"
-                style="left:${isLive ? '23px' : '3px'}"></div>
+            <div class="toggle-track" id="toggle-track" style="background:${isLive ? 'var(--accent)' : 'var(--border2)'}" onclick="togglePublish()">
+              <div class="toggle-thumb" id="toggle-thumb" style="left:${isLive ? '23px' : '3px'}"></div>
             </div>
-            <input type="checkbox" id="f-published" ${isLive ? 'checked' : ''}
-              style="display:none">
+            <input type="checkbox" id="f-published" ${isLive ? 'checked' : ''} style="display:none">
             <div>
-              <div class="publish-label" id="publish-label"
-                style="color:${isLive ? 'var(--accent)' : 'var(--warn)'}">
+              <div class="publish-label" id="publish-label" style="color:${isLive ? 'var(--accent)' : 'var(--warn)'}">
                 ${isLive ? '✓ Published — Tampil di index publik' : '○ Draft — Tidak tampil di index'}
               </div>
-              <div class="publish-note">
-                ${isLive ? 'Proyek ini bisa dilihat semua pengunjung' : 'Hanya admin yang bisa melihat proyek ini'}
-              </div>
+              <div class="publish-note">${isLive ? 'Proyek ini bisa dilihat semua pengunjung' : 'Hanya admin yang bisa melihat proyek ini'}</div>
             </div>
           </div>
           <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);max-width:260px;line-height:1.5">
@@ -827,7 +674,7 @@
           </div>
         </div>
 
-        <!-- TUGAS / GUIDE STEPS -->
+        <!-- TUGAS -->
         <div class="form-sec">
           <div class="sec-lbl">
             Tugas / Guide Steps
@@ -838,13 +685,11 @@
           <div class="fg c1">
             <div class="field">
               <label>Tugas (ID)</label>
-              <textarea id="f-tasksid" class="tall"
-                placeholder="1. Daftar di website | Kunjungi https://... dan klik Sign Up&#10;2. Connect wallet | Hubungkan MetaMask kamu&#10;💡 Gunakan burner wallet untuk keamanan">${esc(d.tasksID||'')}</textarea>
+              <textarea id="f-tasksid" class="tall" placeholder="1. Daftar di website | Kunjungi https://... dan klik Sign Up&#10;💡 Gunakan burner wallet untuk keamanan">${esc(d.tasksID||'')}</textarea>
             </div>
             <div class="field">
               <label>Tasks (EN)</label>
-              <textarea id="f-tasksen" class="tall"
-                placeholder="1. Register | Visit https://... and click Sign Up&#10;2. Connect wallet | Connect your MetaMask">${esc(d.tasksEN||'')}</textarea>
+              <textarea id="f-tasksen" class="tall" placeholder="1. Register | Visit https://... and click Sign Up&#10;2. Connect wallet | Connect your MetaMask">${esc(d.tasksEN||'')}</textarea>
             </div>
           </div>
         </div>
@@ -863,6 +708,23 @@
           <button class="btn-add-testnet" onclick="addTestnetRow()" style="margin-top:8px">＋ Tambah Link</button>
         </div>
 
+        <!-- ── ROADMAP ── -->
+        <div class="form-sec">
+          <div class="sec-lbl">
+            Roadmap
+            <span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400">
+              — Fase perjalanan proyek. Klik badge status untuk toggle planned → in_progress → done.
+            </span>
+          </div>
+          <div class="roadmap-builder" id="roadmap-builder">
+            ${roadmapItems.length
+              ? roadmapItems.map((item, i) => roadmapCard(i, item)).join('')
+              : '<div class="roadmap-empty">Belum ada fase roadmap. Klik tombol di bawah untuk menambah.</div>'
+            }
+          </div>
+          <button class="btn-add-roadmap" onclick="addRoadmapCard()" style="margin-top:10px">＋ Tambah Fase</button>
+        </div>
+
         <!-- FAQ -->
         <div class="form-sec">
           <div class="sec-lbl">
@@ -874,13 +736,11 @@
           <div class="fg c1">
             <div class="field">
               <label>FAQ (ID)</label>
-              <textarea id="f-faqid" class="tall"
-                placeholder="Q: Apa itu airdrop ini? | A: Program distribusi token gratis.&#10;Q: Kapan token dibagikan? | A: Setelah TGE di Q3 2025.">${esc(d.faqID||'')}</textarea>
+              <textarea id="f-faqid" class="tall" placeholder="Q: Apa itu airdrop ini? | A: Program distribusi token gratis.">${esc(d.faqID||'')}</textarea>
             </div>
             <div class="field">
               <label>FAQ (EN)</label>
-              <textarea id="f-faqen" class="tall"
-                placeholder="Q: What is this? | A: A free token distribution program.">${esc(d.faqEN||'')}</textarea>
+              <textarea id="f-faqen" class="tall" placeholder="Q: What is this? | A: A free token distribution program.">${esc(d.faqEN||'')}</textarea>
             </div>
           </div>
         </div>
@@ -905,8 +765,6 @@
               <label>TGE / Listing Date</label>
               <input id="f-tge" type="text" placeholder="Q3 2026 / TBA" value="${esc(d.tge_date||'')}">
             </div>
-
-            <!-- ── LOGO UPLOAD (menggantikan Logo URL input biasa) ── -->
             <div class="field" style="grid-column: span 2">
               <label>Logo Proyek <span class="hint">PNG/JPG/WEBP/SVG, maks 2MB — upload langsung ke GitHub</span></label>
               <div class="logo-upload-wrap">
@@ -915,28 +773,20 @@
                   <div class="logo-upload-right">
                     <div class="logo-url-display empty" id="logo-url-display">Belum ada logo</div>
                     <div class="logo-upload-btns">
-                      <!-- Hidden file input -->
-                      <input type="file" id="logo-file-input" accept="image/*"
-                        style="display:none" onchange="handleLogoFileChange(event)">
-                      <button type="button" class="btn-upload-logo" id="btn-upload-logo"
-                        onclick="triggerLogoUpload()">
-                        ⬆ Upload Gambar
-                      </button>
-                      <button type="button" class="btn-clear-logo" onclick="clearLogo()">
-                        ✕ Hapus
-                      </button>
+                      <input type="file" id="logo-file-input" accept="image/*" style="display:none" onchange="handleLogoFileChange(event)">
+                      <button type="button" class="btn-upload-logo" id="btn-upload-logo" onclick="triggerLogoUpload()">⬆ Upload Gambar</button>
+                      <button type="button" class="btn-clear-logo" onclick="clearLogo()">✕ Hapus</button>
                     </div>
                   </div>
                 </div>
                 <div class="logo-upload-status" id="logo-upload-status"></div>
               </div>
             </div>
-            <!-- hidden input untuk menyimpan URL final -->
             <input type="hidden" id="f-logo">
           </div>
         </div>
 
-        <!-- SOSIAL MEDIA -->
+        <!-- SOSMED -->
         <div class="form-sec">
           <div class="sec-lbl">Sosial Media</div>
           <div class="fg">
@@ -968,10 +818,7 @@
       </div>
     `;
 
-    // Init logo upload widget dengan URL yang sudah ada
     initLogoUpload(d.logo_url || null);
-
-    // Tambah row pertama kalau testnet kosong
     if (!testnetLinks.length) {
       const builder = document.getElementById('testnet-builder');
       if (builder) builder.innerHTML = testnetRow(0,'','');
@@ -990,12 +837,10 @@
     track.style.background = on ? 'var(--accent)' : 'var(--border2)';
     thumb.style.left        = on ? '23px' : '3px';
     label.style.color       = on ? 'var(--accent)' : 'var(--warn)';
-    label.textContent       = on
-      ? '✓ Published — Tampil di index publik'
-      : '○ Draft — Tidak tampil di index';
+    label.textContent       = on ? '✓ Published — Tampil di index publik' : '○ Draft — Tidak tampil di index';
   }
 
-  // ── TESTNET ROWS ──────────────────────────────────────
+  // ── TESTNET ───────────────────────────────────────────
   function testnetRow(i, label, url) {
     return `
       <div class="testnet-row" id="trow-${i}">
@@ -1004,21 +849,13 @@
         <button class="btn-remove-testnet" onclick="removeTestnetRow(${i})" title="Hapus">✕</button>
       </div>`;
   }
-
   function addTestnetRow() {
     const builder = document.getElementById('testnet-builder');
     if (!builder) return;
-    if (builder.querySelectorAll('.testnet-row').length >= 5) {
-      showToast('Maksimal 5 link', 'error'); return;
-    }
+    if (builder.querySelectorAll('.testnet-row').length >= 5) { showToast('Maksimal 5 link', 'error'); return; }
     builder.insertAdjacentHTML('beforeend', testnetRow(Date.now(),'',''));
   }
-
-  function removeTestnetRow(i) {
-    const row = document.getElementById(`trow-${i}`);
-    if (row) row.remove();
-  }
-
+  function removeTestnetRow(i) { const row = document.getElementById(`trow-${i}`); if (row) row.remove(); }
   function getTestnetLinks() {
     const builder = document.getElementById('testnet-builder');
     if (!builder) return null;
@@ -1031,9 +868,114 @@
     return links.length ? JSON.stringify(links) : null;
   }
 
+  // ── ROADMAP BUILDER ───────────────────────────────────
+  const RM_STATUSES = ['planned','in_progress','done'];
+  const RM_LABELS   = { planned: '○ Planned', in_progress: '⟳ In Progress', done: '✓ Done' };
+
+  function roadmapCard(i, item) {
+    item = item || {};
+    const status = RM_STATUSES.includes(item.status) ? item.status : 'planned';
+    return `
+      <div class="roadmap-card" id="rcard-${i}">
+        <div class="roadmap-card-header">
+          <span class="roadmap-drag-handle">⠿</span>
+          <span class="roadmap-phase-num">FASE —</span>
+          <button class="roadmap-status-btn ${status}" id="rstatus-${i}" data-status="${status}"
+            onclick="cycleRoadmapStatus(${i})" title="Klik untuk ganti status">
+            ${RM_LABELS[status]}
+          </button>
+        </div>
+        <div class="roadmap-card-body">
+          <div class="field">
+            <label>Phase Label <span class="hint">e.g. Phase 1</span></label>
+            <input type="text" class="rm-phase-label" placeholder="Phase 1" value="${esc(item.phase_label||'')}">
+          </div>
+          <div class="field">
+            <label>Phase Title <span class="req">*</span> <span class="hint">e.g. Testnet Launch</span></label>
+            <input type="text" class="rm-phase-title" placeholder="Testnet Launch" value="${esc(item.phase_title||'')}">
+          </div>
+          <div class="field full">
+            <label>Description <span class="hint">opsional</span></label>
+            <textarea class="rm-phase-desc" placeholder="Deskripsi singkat fase ini...">${esc(item.phase_desc||'')}</textarea>
+          </div>
+          <div class="field">
+            <label>Source URL <span class="hint">link referensi roadmap</span></label>
+            <input type="url" class="rm-source-url" placeholder="https://..." value="${esc(item.source_url||'')}">
+          </div>
+          <div class="field">
+            <label>Source Label <span class="hint">default: Official Roadmap</span></label>
+            <input type="text" class="rm-source-label" placeholder="Official Roadmap" value="${esc(item.source_label||'Official Roadmap')}">
+          </div>
+        </div>
+        <div class="roadmap-card-actions">
+          <button class="btn-remove-roadmap" onclick="removeRoadmapCard(${i})">✕ Hapus Fase</button>
+        </div>
+      </div>`;
+  }
+
+  function cycleRoadmapStatus(i) {
+    const btn  = document.getElementById(`rstatus-${i}`);
+    if (!btn) return;
+    const cur  = btn.dataset.status || 'planned';
+    const next = RM_STATUSES[(RM_STATUSES.indexOf(cur) + 1) % RM_STATUSES.length];
+    btn.dataset.status = next;
+    btn.className      = `roadmap-status-btn ${next}`;
+    btn.textContent    = RM_LABELS[next];
+  }
+
+  function addRoadmapCard() {
+    const builder = document.getElementById('roadmap-builder');
+    if (!builder) return;
+    const emptyEl = builder.querySelector('.roadmap-empty');
+    if (emptyEl) emptyEl.remove();
+    const count = builder.querySelectorAll('.roadmap-card').length;
+    if (count >= 20) { showToast('Maksimal 20 fase roadmap', 'error'); return; }
+    builder.insertAdjacentHTML('beforeend', roadmapCard(Date.now(), {}));
+    refreshRoadmapNums();
+  }
+
+  function removeRoadmapCard(i) {
+    const card = document.getElementById(`rcard-${i}`);
+    if (card) card.remove();
+    refreshRoadmapNums();
+    const builder = document.getElementById('roadmap-builder');
+    if (builder && builder.querySelectorAll('.roadmap-card').length === 0) {
+      builder.innerHTML = '<div class="roadmap-empty">Belum ada fase roadmap. Klik tombol di bawah untuk menambah.</div>';
+    }
+  }
+
+  function refreshRoadmapNums() {
+    const builder = document.getElementById('roadmap-builder');
+    if (!builder) return;
+    builder.querySelectorAll('.roadmap-card').forEach((card, idx) => {
+      const el = card.querySelector('.roadmap-phase-num');
+      if (el) el.textContent = `FASE ${idx + 1}`;
+    });
+  }
+
+  // Panggil refreshRoadmapNums setelah renderForm agar nomor fase tampil benar
+  const _origRenderForm = renderForm;
+
+  function getRoadmapItems() {
+    const builder = document.getElementById('roadmap-builder');
+    if (!builder) return [];
+    const items = [];
+    builder.querySelectorAll('.roadmap-card').forEach((card, idx) => {
+      const phase_label  = card.querySelector('.rm-phase-label')?.value?.trim()  || '';
+      const phase_title  = card.querySelector('.rm-phase-title')?.value?.trim()  || '';
+      const phase_desc   = card.querySelector('.rm-phase-desc')?.value?.trim()   || null;
+      const source_url   = card.querySelector('.rm-source-url')?.value?.trim()   || null;
+      const source_label = card.querySelector('.rm-source-label')?.value?.trim() || 'Official Roadmap';
+      const statusBtn    = card.querySelector('.roadmap-status-btn');
+      const status       = statusBtn?.dataset?.status || 'planned';
+      if (!phase_title && !phase_label) return; // skip kosong
+      items.push({ phase_label, phase_title, phase_desc, status, source_url, source_label, sort_order: idx });
+    });
+    return items;
+  }
+
   function cancelForm() {
-    editingId = null; renderList();
-    pendingLogoUrl = null;
+    editingId = null; renderList(); pendingLogoUrl = null;
     document.getElementById('form-area').innerHTML = `
       <div class="panel">
         <div class="empty-form">
@@ -1048,11 +990,9 @@
     const name = document.getElementById('f-name')?.value?.trim();
     if (!name) { showToast('Nama proyek wajib diisi!', 'error'); return; }
 
-    const publishedEl = document.getElementById('f-published');
-    const isPublished = publishedEl ? publishedEl.checked : false;
-
-    // Ambil logo URL dari pendingLogoUrl (hasil upload) atau null
-    const logoUrl = pendingLogoUrl || null;
+    const isPublished = document.getElementById('f-published')?.checked || false;
+    const logoUrl     = pendingLogoUrl || null;
+    const roadmapItems = getRoadmapItems();
 
     const payload = {
       name,
@@ -1077,6 +1017,7 @@
       faqID:         document.getElementById('f-faqid')?.value?.trim()   || null,
       faqEN:         document.getElementById('f-faqen')?.value?.trim()   || null,
       testnet_links: getTestnetLinks(),
+      _roadmap:      roadmapItems,   // ← dikirim ke API → disimpan ke project_roadmaps
     };
 
     ['btn-save','btn-save-bottom'].forEach(id => {
@@ -1085,21 +1026,10 @@
     });
 
     try {
-      let res;
-      if (editingId) {
-        res = await fetch(`/api/admin-airdrop?id=${editingId}`, {
-          method: 'PATCH',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-      } else {
-        res = await fetch('/api/admin-airdrop', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify(payload),
-        });
-      }
-
+      const res = await fetch(
+        editingId ? `/api/admin-airdrop?id=${editingId}` : '/api/admin-airdrop',
+        { method: editingId ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+      );
       const result = await res.json();
       if (!res.ok) throw new Error(result.error || `HTTP ${res.status}`);
 
@@ -1109,10 +1039,9 @@
       if (!editingId && Array.isArray(result) && result[0]) {
         editingId = result[0].id;
         renderList();
-        renderForm(result[0]);
+        loadEdit(editingId); // reload dari API supaya _roadmap ikut
       } else if (editingId) {
-        const updated = projects.find(p => p.id === editingId);
-        if (updated) renderForm(updated);
+        loadEdit(editingId);
       }
     } catch(e) {
       showToast('Error: ' + e.message, 'error');
@@ -1123,44 +1052,53 @@
     }
   }
 
-  // ── DELETE ─────────────────────────────────────────────
+  // ── DELETE ────────────────────────────────────────────
   async function deleteProject(id) {
     const p = projects.find(x => x.id === id);
     if (!confirm(`Hapus "${p?.name || id}"?\nTindakan ini tidak bisa dibatalkan.`)) return;
     try {
       const res = await fetch(`/api/admin-airdrop?id=${id}`, { method: 'DELETE' });
-      if (!res.ok) {
-        const err = await res.json().catch(() => ({}));
-        throw new Error(err.error || 'Gagal hapus');
-      }
+      if (!res.ok) { const err = await res.json().catch(() => ({})); throw new Error(err.error || 'Gagal hapus'); }
       showToast('✓ Proyek dihapus', 'success');
-      editingId = null;
-      pendingLogoUrl = null;
+      editingId = null; pendingLogoUrl = null;
       await loadProjects();
       cancelForm();
-    } catch(e) {
-      showToast('Error: ' + e.message, 'error');
-    }
+    } catch(e) { showToast('Error: ' + e.message, 'error'); }
   }
 
-  // ── TOAST ──────────────────────────────────────────────
+  // ── TOAST & HELPER ────────────────────────────────────
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
-    t.textContent = msg;
-    t.className = `toast ${type} show`;
+    t.textContent = msg; t.className = `toast ${type} show`;
     setTimeout(() => t.classList.remove('show'), 3000);
   }
 
   function esc(s) {
-    return String(s||'')
-      .replace(/&/g,'&amp;').replace(/</g,'&lt;')
-      .replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+
+  // Jalankan refreshRoadmapNums setelah DOM renderForm selesai
+  const _origLoadEdit = loadEdit;
+  loadEdit = function(id) {
+    editingId = id; renderList();
+    fetch(`/api/admin-airdrop?id=${id}`)
+      .then(r => r.json())
+      .then(data => {
+        if (data.error) { showToast(data.error, 'error'); return; }
+        renderForm(data);
+        refreshRoadmapNums();
+      })
+      .catch(e => showToast('Gagal load: ' + e.message, 'error'));
+  };
+
+  newForm._orig = newForm;
+  const _origNewForm = newForm;
+  newForm = function() { editingId = null; renderList(); renderForm(null); refreshRoadmapNums(); };
 
   loadProjects();
 </script>
 
-<!-- GOOGLE LOGIN SCRIPT -->
+<!-- GOOGLE LOGIN -->
 <script>
   const YOUR_CLIENT_ID = '1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com';
 
@@ -1175,12 +1113,8 @@
       if (res.ok && result.success) {
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('admin-content').classList.remove('hidden');
-
-        // Kalau belum ada GitHub token, prompt untuk setup
         if (!localStorage.getItem('gh_token_airdropxi')) {
-          setTimeout(() => {
-            showToast('💡 Setup GitHub Token untuk enable upload gambar!', 'success');
-          }, 800);
+          setTimeout(() => showToast('💡 Setup GitHub Token untuk enable upload gambar!', 'success'), 800);
         }
       } else {
         alert(`Akses ditolak: ${result.message || 'Unauthorized'}`);
@@ -1192,14 +1126,8 @@
   }
 
   window.onload = function() {
-    google.accounts.id.initialize({
-      client_id: YOUR_CLIENT_ID,
-      callback: handleCredentialResponse,
-    });
-    google.accounts.id.renderButton(
-      document.getElementById('g_id_onload'),
-      { theme: 'outline', size: 'large' }
-    );
+    google.accounts.id.initialize({ client_id: YOUR_CLIENT_ID, callback: handleCredentialResponse });
+    google.accounts.id.renderButton(document.getElementById('g_id_onload'), { theme: 'outline', size: 'large' });
     google.accounts.id.prompt();
   };
 </script>
