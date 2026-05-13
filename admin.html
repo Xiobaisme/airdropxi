@@ -786,24 +786,74 @@
           </div>
         </div>
 
-        <!-- SOSMED -->
-        <div class="form-sec">
-          <div class="sec-lbl">Sosial Media</div>
-          <div class="fg">
-            <div class="field">
-              <label>Twitter / X</label>
-              <input id="f-twitter" type="url" placeholder="https://x.com/..." value="${esc(d.twitter||'')}">
-            </div>
-            <div class="field">
-              <label>Discord</label>
-              <input id="f-discord" type="url" placeholder="https://discord.gg/..." value="${esc(d.discord||'')}">
-            </div>
-            <div class="field">
-              <label>Telegram</label>
-              <input id="f-telegram" type="url" placeholder="https://t.me/..." value="${esc(d.telegram||'')}">
-            </div>
-          </div>
-        </div>
+<!-- SOSMED -->
+<div class="form-sec">
+  <div class="sec-lbl">Sosial Media</div>
+
+  <div class="fg">
+
+    <div class="field">
+      <label for="f-twitter">Twitter / X</label>
+      <input 
+        id="f-twitter"
+        type="url"
+        placeholder="https://x.com/..."
+        value="${esc(d.twitter || '')}"
+      >
+    </div>
+
+    <div class="field">
+      <label for="f-discord">Discord</label>
+      <input 
+        id="f-discord"
+        type="url"
+        placeholder="https://discord.gg/..."
+        value="${esc(d.discord || '')}"
+      >
+    </div>
+
+    <div class="field">
+      <label for="f-telegram">Telegram</label>
+      <input 
+        id="f-telegram"
+        type="url"
+        placeholder="https://t.me/..."
+        value="${esc(d.telegram || '')}"
+      >
+    </div>
+
+    <div class="field">
+      <label for="f-linkedin">LinkedIn</label>
+      <input 
+        id="f-linkedin"
+        type="url"
+        placeholder="https://linkedin.com/company/..."
+        value="${esc(d.linkedin || '')}"
+      >
+    </div>
+
+    <div class="field">
+      <label for="f-youtube">YouTube</label>
+      <input 
+        id="f-youtube"
+        type="url"
+        placeholder="https://youtube.com/@..."
+        value="${esc(d.youtube || '')}"
+      >
+    </div>
+
+    <div class="field">
+      <label for="f-instagram">Instagram</label>
+      <input 
+        id="f-instagram"
+        type="url"
+        placeholder="https://instagram.com/..."
+        value="${esc(d.instagram || '')}"
+      >
+    </div>
+
+  </div>
+</div>
 
         <!-- BOTTOM ACTIONS -->
         <div class="form-sec">
