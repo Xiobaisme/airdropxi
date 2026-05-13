@@ -157,7 +157,6 @@
     textarea { min-height: 90px; line-height: 1.5; }
     textarea.tall { min-height: 130px; }
 
-    /* Testnet */
     .testnet-builder { display: flex; flex-direction: column; gap: 8px; }
     .testnet-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; align-items: center; }
     .testnet-row input { margin: 0; }
@@ -175,7 +174,6 @@
     }
     .btn-add-testnet:hover { border-color: var(--accent); color: var(--accent); }
 
-    /* ── ROADMAP BUILDER ── */
     .roadmap-builder { display: flex; flex-direction: column; gap: 10px; }
     .roadmap-card {
       background: var(--s2); border: 1px solid var(--border2); border-radius: 8px; overflow: hidden;
@@ -224,7 +222,6 @@
       border: 1px dashed var(--border); border-radius: 8px;
     }
 
-    /* Buttons */
     .btn-save {
       display: inline-flex; align-items: center; gap: 6px; padding: 0.62rem 1.4rem;
       background: var(--accent); color: #000; font-family: var(--mono); font-size: 0.7rem;
@@ -272,7 +269,6 @@
     @keyframes spin { to { transform: rotate(360deg); } }
     .list-loading { padding: 2rem; text-align: center; font-family: var(--mono); font-size: 0.68rem; color: var(--text3); display: flex; flex-direction: column; align-items: center; gap: 10px; }
 
-    /* Logo upload */
     .logo-upload-wrap { display: flex; flex-direction: column; gap: 8px; }
     .logo-preview-row { display: flex; align-items: center; gap: 12px; }
     .logo-preview-box {
@@ -296,7 +292,6 @@
     .logo-upload-status.success { display: block; background: var(--adim); border: 1px solid var(--aborder); color: var(--accent); }
     .logo-upload-status.error   { display: block; background: var(--rdim); border: 1px solid rgba(239,68,68,0.2); color: var(--red); }
 
-    /* Modal */
     .modal-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(7,9,11,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; }
     .modal-box { background: var(--s1); border: 1px solid var(--border2); border-radius: 14px; padding: 2rem; max-width: 420px; width: 90%; }
     .modal-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 8px; }
@@ -394,6 +389,9 @@
   const GH_REPO       = 'airdropxi';
   const GH_BRANCH     = 'main';
   const GH_LOGOS_PATH = 'assets/logos';
+
+  // ── GOOGLE TOKEN (untuk auth notify) ─────────────────
+  let _adminGoogleToken = null;
 
   // ── GITHUB TOKEN ──────────────────────────────────────
   function getGHToken() { return localStorage.getItem('gh_token_airdropxi') || ''; }
@@ -560,12 +558,17 @@
     return 'st-d';
   }
 
-  function newForm()    { editingId = null; renderList(); renderForm(null); }
+  function newForm() { editingId = null; renderList(); renderForm(null); refreshRoadmapNums(); }
+
   function loadEdit(id) {
     editingId = id; renderList();
     fetch(`/api/admin-airdrop?id=${id}`)
       .then(r => r.json())
-      .then(data => { if (data.error) showToast(data.error, 'error'); else renderForm(data); })
+      .then(data => {
+        if (data.error) { showToast(data.error, 'error'); return; }
+        renderForm(data);
+        refreshRoadmapNums();
+      })
       .catch(e => showToast('Gagal load: ' + e.message, 'error'));
   }
 
@@ -581,7 +584,6 @@
       catch(e) { testnetLinks = []; }
     }
 
-    // Roadmap data dari API GET (field _roadmap)
     const roadmapItems = Array.isArray(d._roadmap) ? d._roadmap : [];
 
     document.getElementById('form-area').innerHTML = `
@@ -708,7 +710,7 @@
           <button class="btn-add-testnet" onclick="addTestnetRow()" style="margin-top:8px">＋ Tambah Link</button>
         </div>
 
-        <!-- ── ROADMAP ── -->
+        <!-- ROADMAP -->
         <div class="form-sec">
           <div class="sec-lbl">
             Roadmap
@@ -786,74 +788,36 @@
           </div>
         </div>
 
-<!-- SOSMED -->
-<div class="form-sec">
-  <div class="sec-lbl">Sosial Media</div>
-
-  <div class="fg">
-
-    <div class="field">
-      <label for="f-twitter">Twitter / X</label>
-      <input 
-        id="f-twitter"
-        type="url"
-        placeholder="https://x.com/..."
-        value="${esc(d.twitter || '')}"
-      >
-    </div>
-
-    <div class="field">
-      <label for="f-discord">Discord</label>
-      <input 
-        id="f-discord"
-        type="url"
-        placeholder="https://discord.gg/..."
-        value="${esc(d.discord || '')}"
-      >
-    </div>
-
-    <div class="field">
-      <label for="f-telegram">Telegram</label>
-      <input 
-        id="f-telegram"
-        type="url"
-        placeholder="https://t.me/..."
-        value="${esc(d.telegram || '')}"
-      >
-    </div>
-
-    <div class="field">
-      <label for="f-linkedin">LinkedIn</label>
-      <input 
-        id="f-linkedin"
-        type="url"
-        placeholder="https://linkedin.com/company/..."
-        value="${esc(d.linkedin || '')}"
-      >
-    </div>
-
-    <div class="field">
-      <label for="f-youtube">YouTube</label>
-      <input 
-        id="f-youtube"
-        type="url"
-        placeholder="https://youtube.com/@..."
-        value="${esc(d.youtube || '')}"
-      >
-    </div>
-
-    <div class="field">
-      <label for="f-instagram">Instagram</label>
-      <input 
-        id="f-instagram"
-        type="url"
-        placeholder="https://instagram.com/..."
-        value="${esc(d.instagram || '')}"
-      >
-    </div>
-
-  </div>
-</div>
+        <!-- SOSMED -->
+        <div class="form-sec">
+          <div class="sec-lbl">Sosial Media</div>
+          <div class="fg">
+            <div class="field">
+              <label for="f-twitter">Twitter / X</label>
+              <input id="f-twitter" type="url" placeholder="https://x.com/..." value="${esc(d.twitter||'')}">
+            </div>
+            <div class="field">
+              <label for="f-discord">Discord</label>
+              <input id="f-discord" type="url" placeholder="https://discord.gg/..." value="${esc(d.discord||'')}">
+            </div>
+            <div class="field">
+              <label for="f-telegram">Telegram</label>
+              <input id="f-telegram" type="url" placeholder="https://t.me/..." value="${esc(d.telegram||'')}">
+            </div>
+            <div class="field">
+              <label for="f-linkedin">LinkedIn</label>
+              <input id="f-linkedin" type="url" placeholder="https://linkedin.com/company/..." value="${esc(d.linkedin||'')}">
+            </div>
+            <div class="field">
+              <label for="f-youtube">YouTube</label>
+              <input id="f-youtube" type="url" placeholder="https://youtube.com/@..." value="${esc(d.youtube||'')}">
+            </div>
+            <div class="field">
+              <label for="f-instagram">Instagram</label>
+              <input id="f-instagram" type="url" placeholder="https://instagram.com/..." value="${esc(d.instagram||'')}">
+            </div>
+          </div>
+        </div>
 
         <!-- BOTTOM ACTIONS -->
         <div class="form-sec">
@@ -1003,9 +967,6 @@
     });
   }
 
-  // Panggil refreshRoadmapNums setelah renderForm agar nomor fase tampil benar
-  const _origRenderForm = renderForm;
-
   function getRoadmapItems() {
     const builder = document.getElementById('roadmap-builder');
     if (!builder) return [];
@@ -1018,7 +979,7 @@
       const source_label = card.querySelector('.rm-source-label')?.value?.trim() || 'Official Roadmap';
       const statusBtn    = card.querySelector('.roadmap-status-btn');
       const status       = statusBtn?.dataset?.status || 'planned';
-      if (!phase_title && !phase_label) return; // skip kosong
+      if (!phase_title && !phase_label) return;
       items.push({ phase_label, phase_title, phase_desc, status, source_url, source_label, sort_order: idx });
     });
     return items;
@@ -1040,37 +1001,37 @@
     const name = document.getElementById('f-name')?.value?.trim();
     if (!name) { showToast('Nama proyek wajib diisi!', 'error'); return; }
 
-    const isPublished = document.getElementById('f-published')?.checked || false;
-    const logoUrl     = pendingLogoUrl || null;
+    const isPublished  = document.getElementById('f-published')?.checked || false;
+    const logoUrl      = pendingLogoUrl || null;
     const roadmapItems = getRoadmapItems();
 
     const payload = {
       name,
-      status:        document.getElementById('f-status')?.value         || null,
+      status:        document.getElementById('f-status')?.value          || null,
       published:     isPublished,
-      link:          document.getElementById('f-link')?.value?.trim()    || null,
-      tags:          document.getElementById('f-tags')?.value?.trim()    || null,
-      RaisedID:      document.getElementById('f-raisedid')?.value?.trim()|| null,
-      RaisedEN:      document.getElementById('f-raiseden')?.value?.trim()|| null,
-      tasksID:       document.getElementById('f-tasksid')?.value?.trim() || null,
-      tasksEN:       document.getElementById('f-tasksen')?.value?.trim() || null,
-      descriptionID: document.getElementById('f-descid')?.value?.trim()  || null,
-      descriptionEN: document.getElementById('f-descen')?.value?.trim()  || null,
-      ticker:        document.getElementById('f-ticker')?.value?.trim()  || null,
-      total_supply:  document.getElementById('f-supply')?.value?.trim()  || null,
-      network:       document.getElementById('f-network')?.value?.trim() || null,
-      tge_date:      document.getElementById('f-tge')?.value?.trim()     || null,
+      link:          document.getElementById('f-link')?.value?.trim()     || null,
+      tags:          document.getElementById('f-tags')?.value?.trim()     || null,
+      RaisedID:      document.getElementById('f-raisedid')?.value?.trim() || null,
+      RaisedEN:      document.getElementById('f-raiseden')?.value?.trim() || null,
+      tasksID:       document.getElementById('f-tasksid')?.value?.trim()  || null,
+      tasksEN:       document.getElementById('f-tasksen')?.value?.trim()  || null,
+      descriptionID: document.getElementById('f-descid')?.value?.trim()   || null,
+      descriptionEN: document.getElementById('f-descen')?.value?.trim()   || null,
+      ticker:        document.getElementById('f-ticker')?.value?.trim()   || null,
+      total_supply:  document.getElementById('f-supply')?.value?.trim()   || null,
+      network:       document.getElementById('f-network')?.value?.trim()  || null,
+      tge_date:      document.getElementById('f-tge')?.value?.trim()      || null,
       logo_url:      logoUrl,
-      twitter:       document.getElementById('f-twitter')?.value?.trim() || null,
-      discord:       document.getElementById('f-discord')?.value?.trim() || null,
-      telegram:      document.getElementById('f-telegram')?.value?.trim()|| null,
-      linkedin:      document.getElementById('f-linkedin')?.value?.trim()  || null,
-      youtube:       document.getElementById('f-youtube')?.value?.trim()   || null,
-      instagram:     document.getElementById('f-instagram')?.value?.trim() || null,
-      faqID:         document.getElementById('f-faqid')?.value?.trim()   || null,
-      faqEN:         document.getElementById('f-faqen')?.value?.trim()   || null,
+      twitter:       document.getElementById('f-twitter')?.value?.trim()  || null,
+      discord:       document.getElementById('f-discord')?.value?.trim()  || null,
+      telegram:      document.getElementById('f-telegram')?.value?.trim() || null,
+      linkedin:      document.getElementById('f-linkedin')?.value?.trim() || null,
+      youtube:       document.getElementById('f-youtube')?.value?.trim()  || null,
+      instagram:     document.getElementById('f-instagram')?.value?.trim()|| null,
+      faqID:         document.getElementById('f-faqid')?.value?.trim()    || null,
+      faqEN:         document.getElementById('f-faqen')?.value?.trim()    || null,
       testnet_links: getTestnetLinks(),
-      _roadmap:      roadmapItems,   // ← dikirim ke API → disimpan ke project_roadmaps
+      _roadmap:      roadmapItems,
     };
 
     ['btn-save','btn-save-bottom'].forEach(id => {
@@ -1079,6 +1040,7 @@
     });
 
     try {
+      const isNew = !editingId;
       const res = await fetch(
         editingId ? `/api/admin-airdrop?id=${editingId}` : '/api/admin-airdrop',
         { method: editingId ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
@@ -1089,10 +1051,23 @@
       showToast(editingId ? '✓ Berhasil diupdate!' : '✓ Proyek ditambahkan!', 'success');
       await loadProjects();
 
-      if (!editingId && Array.isArray(result) && result[0]) {
+      if (isNew && Array.isArray(result) && result[0]) {
         editingId = result[0].id;
         renderList();
-        loadEdit(editingId); // reload dari API supaya _roadmap ikut
+        loadEdit(editingId);
+
+        // ── NOTIFY SUBSCRIBERS (hanya untuk proyek baru) ──
+        fetch('/api/notify-subscribers', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({
+            googleToken:   _adminGoogleToken,
+            projectName:   name,
+            projectUrl:    `https://airdropxi.vercel.app/guide/${result[0].id}`,
+            description:   payload.descriptionID || payload.descriptionEN || '',
+          }),
+        }).catch(e => console.error('Notify gagal:', e));
+
       } else if (editingId) {
         loadEdit(editingId);
       }
@@ -1130,24 +1105,6 @@
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // Jalankan refreshRoadmapNums setelah DOM renderForm selesai
-  const _origLoadEdit = loadEdit;
-  loadEdit = function(id) {
-    editingId = id; renderList();
-    fetch(`/api/admin-airdrop?id=${id}`)
-      .then(r => r.json())
-      .then(data => {
-        if (data.error) { showToast(data.error, 'error'); return; }
-        renderForm(data);
-        refreshRoadmapNums();
-      })
-      .catch(e => showToast('Gagal load: ' + e.message, 'error'));
-  };
-
-  newForm._orig = newForm;
-  const _origNewForm = newForm;
-  newForm = function() { editingId = null; renderList(); renderForm(null); refreshRoadmapNums(); };
-
   loadProjects();
 </script>
 
@@ -1157,6 +1114,9 @@
 
   async function handleCredentialResponse(response) {
     try {
+      // Simpan token untuk dipakai notify-subscribers
+      _adminGoogleToken = response.credential;
+
       const res = await fetch('/api/verify-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
