@@ -28,7 +28,7 @@ module.exports = async function handler(req, res) {
         'Content-Type': 'application/json',
       },
       body: JSON.stringify({
-        sender: { name: 'AirdropXI', email: 'noreply@airdropxi.vercel.app' },
+        sender: { name: 'AirdropXI', email: 'regifrdm@gmail.com' },
         to: emails.map(email => ({ email })),
         subject: `🚀 New Airdrop: ${projectName}`,
         htmlContent: `
