@@ -701,7 +701,7 @@
           <a href="/docs.html" class="footer-link">📚 Documentation</a>
           <a href="/unlocks.html" class="footer-link">🔓 Token Unlocks</a>
           <a href="/exchanges.html" class="footer-link">📊 Exchanges</a>
-          <a href="/reward.html" style="font-size:13px;color:var(--g-readable);text-decoration:none;transition:color .2s">🎁 Reward</a>
+          <a href="/reward.html" style="font-size:13px;color:var(--g-readable);text-decoration:none">🎁 Reward</a>
         </div>
       </div>
       <div>
@@ -712,6 +712,28 @@
         </div>
       </div>
     </div>
+
+    <!-- SUBSCRIBE -->
+    <div style="border-top:1px solid var(--border);padding:28px 0;margin-bottom:0">
+      <div style="max-width:480px">
+        <div style="font-family:var(--mono);font-size:10px;color:var(--g-readable);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">📬 Newsletter</div>
+        <h4 style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px">Dapat notif airdrop baru</h4>
+        <p style="font-size:12px;color:var(--text2);font-family:var(--mono);margin-bottom:16px">Subscribe dan kamu bakal langsung dikabarin tiap ada airdrop baru.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="email" id="sub-email" placeholder="emailkamu@gmail.com"
+            style="flex:1;min-width:200px;background:var(--surface2);border:1px solid var(--border2);border-radius:10px;padding:10px 14px;color:var(--text);font-family:var(--mono);font-size:12px;outline:none;transition:border-color .2s"
+            onfocus="this.style.borderColor='var(--g-readable)'" onblur="this.style.borderColor=''"
+            onkeydown="if(event.key==='Enter')subscribeEmail()">
+          <button onclick="subscribeEmail()"
+            style="background:linear-gradient(135deg,var(--g),var(--c));color:#000;font-family:var(--mono);font-size:11px;font-weight:700;padding:10px 20px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;transition:opacity .2s"
+            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            Subscribe ⚡
+          </button>
+        </div>
+        <div id="sub-msg" style="margin-top:10px;font-family:var(--mono);font-size:11px;display:none"></div>
+      </div>
+    </div>
+
     <div class="footer-bottom">
       <span style="font-family:var(--mono);font-size:11px;color:var(--text3)">© 2025 AirdropXI — Stay Safe & Keep Grinding</span>
       <span style="font-family:var(--mono);font-size:11px;color:var(--g-readable)">Built with ⚡ for Web3 hunters</span>
@@ -720,6 +742,21 @@
 </footer>
 
 <script>
+async function subscribeEmail() {
+  const input = document.getElementById('sub-email');
+  const msg = document.getElementById('sub-msg');
+  const email = input.value.trim();
+  if (!email || !email.includes('@')) { msg.style.display='block'; msg.style.color='#ff2d55'; msg.textContent='✕ Masukkan email yang valid'; return; }
+  msg.style.display='block'; msg.style.color='var(--text2)'; msg.textContent='Mendaftarkan...';
+  try {
+    const r = await fetch('/api/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+    const d = await r.json();
+    if (r.ok) { msg.style.color='var(--g-readable)'; msg.textContent='✓ Berhasil! Kamu akan dapat notif airdrop baru.'; input.value=''; }
+    else if (r.status===409) { msg.style.color='#f59e0b'; msg.textContent='⚠ Email sudah terdaftar.'; }
+    else { msg.style.color='#ff2d55'; msg.textContent='✕ '+(d.error||'Gagal, coba lagi.'); }
+  } catch(e) { msg.style.color='#ff2d55'; msg.textContent='✕ Gagal konek ke server.'; }
+}
+</script>
 /* ── CANVAS BG ── */
 (function () {
   const c = document.getElementById('bg-canvas');
