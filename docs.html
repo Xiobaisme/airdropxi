@@ -3206,67 +3206,88 @@ html, body {
   </div>
 </div>
 
-<footer class="docs-footer" style="margin-top: 100px; padding: 80px 0 60px; border-top: 1px solid var(--border); background: linear-gradient(to bottom, transparent, rgba(0,232,122,0.02)); width: 100%;">
-  <div style="max-width: 1000px; margin: 0 auto; padding: 0 32px; text-align: center;">
-    
-    <div style="display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 40px; margin-bottom: 64px; text-align: left;">
+<footer style="position:relative;z-index:1;border-top:1px solid var(--border);margin-top:60px">
+  <div style="max-width:1000px;margin:0 auto;padding:0 32px">
+    <div style="text-align:center;padding:14px;border-bottom:1px solid var(--border);font-family:'JetBrains Mono',monospace;font-size:11px;color:#f59e0b;background:rgba(245,158,11,0.04)">
+      ⚠️ DYOR — Semua informasi hanya untuk edukasi. Selalu lakukan riset sendiri sebelum berinvestasi.
+    </div>
+    <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;padding:40px 0 32px">
       <div>
-        <h5 style="font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--c); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">🌐 FUNDAMENTAL</h5>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <span class="f-nav-link" onclick="show('web3')">Web3 Basics</span>
-          <span class="f-nav-link" onclick="show('blockchain')">Blockchain</span>
-          <span class="f-nav-link" onclick="show('defi')">DeFi</span>
+        <div style="font-family:'Plus Jakarta Sans',sans-serif;font-size:18px;font-weight:800;letter-spacing:-.5px;margin-bottom:10px;color:var(--text)">Airdrop<span style="color:var(--g)">XI</span></div>
+        <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:16px;font-family:'JetBrains Mono',monospace">Peluang airdrop yang dikurasi dengan data terstruktur.</p>
+        <div style="display:flex;gap:8px">
+          <a href="https://x.com/xiobai06" target="_blank" style="width:32px;height:32px;border-radius:8px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text2);text-decoration:none;transition:all .2s" onmouseover="this.style.borderColor='var(--g)';this.style.color='var(--g)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          </a>
+          <a href="https://t.me/Xiobaiishikii" target="_blank" style="width:32px;height:32px;border-radius:8px;background:var(--surface);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text2);text-decoration:none;transition:all .2s" onmouseover="this.style.borderColor='var(--g)';this.style.color='var(--g)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
+            <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          </a>
         </div>
       </div>
       <div>
-        <h5 style="font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--danger); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">🛡️ KEAMANAN</h5>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <span class="f-nav-link" onclick="show('security')">Crypto Security</span>
-          <span class="f-nav-link" onclick="show('scam')">Scam & Rug Pull</span>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px">Navigate</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a href="/" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--g)'" onmouseout="this.style.color='var(--text2)'">Explore Airdrops</a>
+          <a href="/#guide" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--g)'" onmouseout="this.style.color='var(--text2)'">Guide & Tutorial</a>
+          <a href="/docs.html" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--g)'" onmouseout="this.style.color='var(--text2)'">📚 Documentation</a>
+          <a href="/unlocks.html" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--g)'" onmouseout="this.style.color='var(--text2)'">🔓 Token Unlocks</a>
+          <a href="/exchanges.html" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--g)'" onmouseout="this.style.color='var(--text2)'">📊 Exchanges</a>
+          <a href="/reward.html" style="font-size:13px;color:var(--g);text-decoration:none">🎁 Reward</a>
         </div>
       </div>
       <div>
-        <h5 style="font-size: 10px; font-family: 'JetBrains Mono', monospace; color: var(--g); letter-spacing: 2px; text-transform: uppercase; margin-bottom: 20px; display: flex; align-items: center; gap: 8px;">📚 REFERENSI</h5>
-        <div style="display: flex; flex-direction: column; gap: 12px;">
-          <span class="f-nav-link" onclick="show('ultra-pro')">Pro System</span>
-          <span class="f-nav-link" onclick="show('glossary')">Crypto Glossary</span>
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text3);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px">Contact</div>
+        <div style="display:flex;flex-direction:column;gap:10px">
+          <a href="https://x.com/xiobai06" target="_blank" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--g)'" onmouseout="this.style.color='var(--text2)'">Twitter / X</a>
+          <a href="https://t.me/Xiobaiishikii" target="_blank" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--g)'" onmouseout="this.style.color='var(--text2)'">Telegram</a>
         </div>
       </div>
     </div>
 
-    <hr style="border: 0; border-top: 1px solid var(--border); margin-bottom: 48px;">
-
-    <div style="display: flex; flex-direction: column; align-items: center; gap: 24px;">
-      <div style="display: flex; align-items: center; gap: 12px;">
-        <img src="logo.png" alt="Logo" style="width: 32px; height: 32px; border-radius: 8px;">
-        <span style="font-weight: 800; font-size: 22px; color: var(--text); letter-spacing: -0.5px;">Airdrop<span style="color:var(--g)">XI</span> Docs</span>
+    <!-- SUBSCRIBE -->
+    <div style="border-top:1px solid var(--border);padding:28px 0;margin-bottom:0">
+      <div style="max-width:480px">
+        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--g);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">📬 Newsletter</div>
+        <h4 style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px">Dapat notif airdrop baru</h4>
+        <p style="font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-bottom:16px">Subscribe dan kamu bakal langsung dikabarin tiap ada airdrop baru.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <input type="email" id="sub-email" placeholder="emailkamu@gmail.com"
+            style="flex:1;min-width:200px;background:var(--surface);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color .2s"
+            onfocus="this.style.borderColor='var(--g)'" onblur="this.style.borderColor=''"
+            onkeydown="if(event.key==='Enter')subscribeEmail()">
+          <button onclick="subscribeEmail()"
+            style="background:linear-gradient(135deg,var(--g),var(--c));color:#000;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:10px 20px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;transition:opacity .2s"
+            onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
+            Subscribe ⚡
+          </button>
+        </div>
+        <div id="sub-msg" style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;display:none"></div>
       </div>
-      
-      <div style="display: flex; gap: 16px;">
-        <a href="https://x.com/xiobai06" target="_blank" class="f-contact-btn" title="Twitter / X">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-          <span>Twitter</span>
-        </a>
-        <a href="https://t.me/Xiobaiishikii" target="_blank" class="f-contact-btn" title="Telegram">
-          <svg width="18" height="18" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-          <span>Telegram</span>
-        </a>
-      </div>
-
-      <p style="font-size: 12px; font-family: 'JetBrains Mono', monospace; color: var(--text3); opacity: 0.8;">
-        © 2026 Xiobaiishikii — Stay Safe & Keep Grinding ⚡
-      </p>
     </div>
 
-    <div style="margin-top: 48px;">
-      <p style="font-size: 10px; color: var(--text3); font-family: 'JetBrains Mono', monospace; letter-spacing: 0.5px; opacity: 0.6; max-width: 600px; margin: 0 auto 24px;">
-        DYOR: CONTENT PROVIDED FOR EDUCATIONAL PURPOSES ONLY. NO FINANCIAL ADVICE.
-      </p>
-      <a href="index.html" class="f-home-btn">BACK TO HOME</a>
+    <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px">
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text3)">© 2025 AirdropXI — Stay Safe & Keep Grinding</span>
+      <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--g)">Built with ⚡ for Web3 hunters</span>
     </div>
-
   </div>
 </footer>
+
+<script>
+async function subscribeEmail() {
+  const input = document.getElementById('sub-email');
+  const msg = document.getElementById('sub-msg');
+  const email = input.value.trim();
+  if (!email || !email.includes('@')) { msg.style.display='block'; msg.style.color='#ff2d55'; msg.textContent='✕ Masukkan email yang valid'; return; }
+  msg.style.display='block'; msg.style.color='var(--text2)'; msg.textContent='Mendaftarkan...';
+  try {
+    const r = await fetch('/api/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+    const d = await r.json();
+    if (r.ok) { msg.style.color='var(--g)'; msg.textContent='✓ Berhasil! Kamu akan dapat notif airdrop baru.'; input.value=''; }
+    else if (r.status===409) { msg.style.color='#f59e0b'; msg.textContent='⚠ Email sudah terdaftar.'; }
+    else { msg.style.color='#ff2d55'; msg.textContent='✕ '+(d.error||'Gagal, coba lagi.'); }
+  } catch(e) { msg.style.color='#ff2d55'; msg.textContent='✕ Gagal konek ke server.'; }
+}
+</script>
 
 <style>
   .f-nav-link { font-size: 13px; color: var(--text2); cursor: pointer; transition: all 0.25s ease; width: fit-content; }
