@@ -9,10 +9,15 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
     <style>
         /* ==========================================
-           AIRDROPXI — FULL UI (tanpa custom cursor)
+           AIRDROPXI — FINAL FIXED (no duplicate, no crash)
            ========================================== */
 
-        /* ── CSS VARIABLES ── */
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
         :root {
             --g: #00e87a;
             --c: #00c8f0;
@@ -51,44 +56,17 @@
             --glow: 0 0 32px rgba(0,180,96,0.12);
         }
 
-        /* BASE RESET */
-        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
-        html { scroll-behavior: smooth; }
-
         body {
             font-family: 'Plus Jakarta Sans', sans-serif;
             background: var(--bg);
             color: var(--text);
             min-height: 100vh;
             overflow-x: hidden;
-            cursor: default;
-            transition: background 0.4s, color 0.4s;
+            transition: background 0.3s, color 0.3s;
+            position: relative;
         }
 
-        [data-theme="light"] body { cursor: default; }
-
-        /* BACKGROUND CANVAS + NOISE GRID (seperti AirdropXI) */
-        #bg-canvas {
-            position: fixed;
-            inset: 0;
-            z-index: 0;
-            pointer-events: none;
-            opacity: 1;
-            transition: opacity 0.4s;
-        }
-        [data-theme="light"] #bg-canvas { opacity: 0.35; }
-
-        body::after {
-            content: '';
-            position: fixed;
-            inset: 0;
-            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
-            opacity: 0.3;
-            pointer-events: none;
-            z-index: 1;
-        }
-
-        /* GRID BACKGROUND (seperti yang kamu minta) */
+        /* Noise + grid overlay */
         body::before {
             content: '';
             position: fixed;
@@ -97,38 +75,59 @@
                 linear-gradient(var(--bg2) 1px, transparent 1px),
                 linear-gradient(90deg, var(--bg2) 1px, transparent 1px);
             background-size: 40px 40px;
-            opacity: 0.5;
+            opacity: 0.4;
             pointer-events: none;
             z-index: 0;
         }
 
-        .z1 { position: relative; z-index: 2; }
+        body::after {
+            content: '';
+            position: fixed;
+            inset: 0;
+            background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+            opacity: 0.25;
+            pointer-events: none;
+            z-index: 0;
+        }
 
-        /* CONTAINER */
-        .container {
-            max-width: 1400px;
-            margin: 0 auto;
-            padding: 20px 40px;
+        canvas {
+            position: fixed;
+            inset: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+            z-index: 0;
+            opacity: 0.5;
+        }
+        [data-theme="light"] canvas { opacity: 0.2; }
+
+        .z1 {
             position: relative;
             z-index: 2;
         }
 
-        /* NAVBAR STYLE AIRDROPXI */
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            padding: 20px 32px;
+        }
+
+        /* navbar */
         .nav-bar {
             display: flex;
             justify-content: space-between;
             align-items: center;
             margin-bottom: 40px;
-            gap: 10px;
+            gap: 16px;
             flex-wrap: wrap;
-            background: rgba(8,15,12,0.75);
+            background: rgba(8,15,12,0.7);
             backdrop-filter: blur(30px);
             padding: 12px 24px;
             border-radius: var(--radius);
             border: 1px solid var(--border);
         }
         [data-theme="light"] .nav-bar {
-            background: rgba(240,247,244,0.88);
+            background: rgba(240,247,244,0.85);
         }
 
         .controls {
@@ -144,7 +143,6 @@
             border-radius: var(--radius-pill);
             cursor: pointer;
             font-weight: 600;
-            text-decoration: none;
             font-size: 11px;
             text-transform: uppercase;
             letter-spacing: 1px;
@@ -162,7 +160,6 @@
             border: none;
         }
 
-        /* HEADER SECTION */
         .header-section {
             margin-bottom: 30px;
         }
@@ -170,11 +167,10 @@
             font-size: clamp(28px, 4vw, 42px);
             font-weight: 800;
             letter-spacing: -1.5px;
-            margin: 0;
             background: linear-gradient(135deg, var(--text), var(--g));
             -webkit-background-clip: text;
-            -webkit-text-fill-color: transparent;
             background-clip: text;
+            -webkit-text-fill-color: transparent;
         }
         .header-section p {
             color: var(--text2);
@@ -183,15 +179,13 @@
             margin-top: 8px;
         }
 
-        /* TABLE CARD (style AirdropXI) */
         .table-card {
             background: var(--surface);
             border: 1px solid var(--border);
             border-radius: var(--radius);
             overflow: hidden;
-            margin-bottom: 20px;
             backdrop-filter: blur(10px);
-            transition: all 0.3s;
+            transition: all 0.2s;
         }
         .table-card:hover {
             border-color: var(--border-h);
@@ -201,10 +195,7 @@
         .search-box {
             padding: 18px 20px;
             border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 0;
             background: var(--surface);
-            z-index: 10;
         }
         .search-input {
             width: 100%;
@@ -213,24 +204,18 @@
             border-radius: var(--radius-pill);
             padding: 12px 20px;
             color: var(--text);
-            font-family: 'Plus Jakarta Sans', sans-serif;
             font-size: 13px;
             outline: none;
-            transition: all 0.2s;
         }
         .search-input:focus {
             border-color: var(--g);
             box-shadow: 0 0 0 2px rgba(0,232,122,0.1);
         }
-        .search-input::placeholder {
-            color: var(--text3);
-        }
 
-        /* TABLE STYLING */
         table {
             width: 100%;
             border-collapse: collapse;
-            min-width: 800px;
+            min-width: 750px;
         }
         th {
             text-align: left;
@@ -240,26 +225,21 @@
             text-transform: uppercase;
             letter-spacing: 1.5px;
             border-bottom: 1px solid var(--border);
-            position: sticky;
-            top: 70px;
             background: var(--surface);
-            z-index: 9;
             font-family: 'JetBrains Mono', monospace;
         }
         td {
             padding: 16px 20px;
             border-bottom: 1px solid var(--border);
             font-size: 13px;
-            color: var(--text);
         }
         tr:hover td {
             background: rgba(0,232,122,0.03);
         }
 
-        /* PROGRESS BAR */
         .prog-bg {
             height: 4px;
-            background: rgba(255,255,255,0.08);
+            background: rgba(255,255,255,0.1);
             border-radius: 4px;
             width: 80px;
             margin-top: 6px;
@@ -269,10 +249,8 @@
             height: 100%;
             background: linear-gradient(90deg, var(--g), var(--c));
             border-radius: 4px;
-            transition: width 0.3s;
+            width: 0%;
         }
-
-        /* STATUS BADGE */
         .status-badge {
             background: rgba(0,232,122,0.08);
             padding: 4px 12px;
@@ -282,13 +260,12 @@
             letter-spacing: 1px;
             text-transform: uppercase;
             display: inline-block;
-            border: 1px solid rgba(0,232,122,0.2);
+            border: 1px solid rgba(0,232,122,0.25);
         }
 
-        /* LOADING SENTINEL */
         #loading-sentinel {
             text-align: center;
-            padding: 30px;
+            padding: 28px;
             color: var(--g);
             font-weight: 700;
             font-size: 11px;
@@ -297,96 +274,132 @@
             background: var(--surface);
         }
 
-       <!-- FOOTER -->
-    <div class="mt-16" style="border-top:1px solid var(--border);padding-top:40px">
-      <div style="text-align:center;padding:14px;margin-bottom:0;font-family:'JetBrains Mono',monospace;font-size:11px;color:#f59e0b;background:rgba(245,158,11,0.04);border-radius:10px;margin-bottom:24px">
-        ⚠️ DYOR — Semua informasi hanya untuk edukasi. Selalu lakukan riset sendiri sebelum berinvestasi.
-      </div>
-      <div style="display:grid;grid-template-columns:1fr 1fr 1fr;gap:40px;margin-bottom:32px">
-        <div>
-          <div style="font-size:18px;font-weight:800;letter-spacing:-.5px;margin-bottom:10px;color:var(--text)">Airdrop<span style="color:var(--green)">XI</span></div>
-          <p style="font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:16px;font-family:'JetBrains Mono',monospace">Peluang airdrop yang dikurasi dengan data terstruktur.</p>
-          <div style="display:flex;gap:8px">
-            <a href="https://x.com/xiobai06" target="_blank" style="width:32px;height:32px;border-radius:8px;background:var(--green3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text2);text-decoration:none;transition:all .2s" onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
-            </a>
-            <a href="https://t.me/Xiobaiishikii" target="_blank" style="width:32px;height:32px;border-radius:8px;background:var(--green3);border:1px solid var(--border);display:flex;align-items:center;justify-content:center;color:var(--text2);text-decoration:none;transition:all .2s" onmouseover="this.style.borderColor='var(--green)';this.style.color='var(--green)'" onmouseout="this.style.borderColor='var(--border)';this.style.color='var(--text2)'">
-              <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
-            </a>
-          </div>
-        </div>
-        <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px">Navigate</div>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <a href="/" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">Explore Airdrops</a>
-            <a href="/#guide" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">Guide & Tutorial</a>
-            <a href="/docs.html" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">📚 Documentation</a>
-            <a href="/unlocks.html" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">🔓 Token Unlocks</a>
-            <a href="/exchanges.html" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">📊 Exchanges</a>
-            <a href="/reward.html" style="font-size:13px;color:var(--green);text-decoration:none">🎁 Reward</a>
-          </div>
-        </div>
-        <div>
-          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);letter-spacing:.12em;text-transform:uppercase;margin-bottom:16px">Contact</div>
-          <div style="display:flex;flex-direction:column;gap:10px">
-            <a href="https://x.com/xiobai06" target="_blank" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">Twitter / X</a>
-            <a href="https://t.me/Xiobaiishikii" target="_blank" style="font-size:13px;color:var(--text2);text-decoration:none;transition:color .2s" onmouseover="this.style.color='var(--green)'" onmouseout="this.style.color='var(--text2)'">Telegram</a>
-          </div>
-        </div>
-      </div>
-
-      <!-- SUBSCRIBE -->
-      <div style="border-top:1px solid var(--border);padding:28px 0;margin-bottom:0">
-        <div style="max-width:480px">
-          <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);letter-spacing:.2em;text-transform:uppercase;margin-bottom:8px">📬 Newsletter</div>
-          <h4 style="font-size:16px;font-weight:800;color:var(--text);margin-bottom:6px">Dapat notif airdrop baru</h4>
-          <p style="font-size:12px;color:var(--text2);font-family:'JetBrains Mono',monospace;margin-bottom:16px">Subscribe dan kamu bakal langsung dikabarin tiap ada airdrop baru.</p>
-          <div style="display:flex;gap:8px;flex-wrap:wrap">
-            <input type="email" id="sub-email" placeholder="emailkamu@gmail.com"
-              style="flex:1;min-width:200px;background:var(--bg2);border:1px solid var(--border);border-radius:10px;padding:10px 14px;color:var(--text);font-family:'JetBrains Mono',monospace;font-size:12px;outline:none;transition:border-color .2s"
-              onfocus="this.style.borderColor='var(--green)'" onblur="this.style.borderColor=''"
-              onkeydown="if(event.key==='Enter')subscribeEmail()">
-            <button onclick="subscribeEmail()"
-              style="background:linear-gradient(135deg,#22c55e,#00c8f0);color:#000;font-family:'JetBrains Mono',monospace;font-size:11px;font-weight:700;padding:10px 20px;border-radius:10px;border:none;cursor:pointer;white-space:nowrap;transition:opacity .2s"
-              onmouseover="this.style.opacity='.85'" onmouseout="this.style.opacity='1'">
-              Subscribe ⚡
-            </button>
-          </div>
-          <div id="sub-msg" style="margin-top:10px;font-family:'JetBrains Mono',monospace;font-size:11px;display:none"></div>
-        </div>
-      </div>
-
-      <div style="display:flex;align-items:center;justify-content:space-between;padding:20px 0;border-top:1px solid var(--border);flex-wrap:wrap;gap:12px">
-        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)">© 2025 AirdropXI — Stay Safe & Keep Grinding</span>
-        <span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--green)">Built with ⚡ for Web3 hunters</span>
-      </div>
-    </div>
-
-</div>
-</main>
-
-<script>
-async function subscribeEmail() {
-  const input = document.getElementById('sub-email');
-  const msg = document.getElementById('sub-msg');
-  const email = input.value.trim();
-  if (!email || !email.includes('@')) { msg.style.display='block'; msg.style.color='#ff2d55'; msg.textContent='✕ Masukkan email yang valid'; return; }
-  msg.style.display='block'; msg.style.color='var(--text2)'; msg.textContent='Mendaftarkan...';
-  try {
-    const r = await fetch('/api/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email}) });
-    const d = await r.json();
-    if (r.ok) { msg.style.color='var(--green)'; msg.textContent='✓ Berhasil! Kamu akan dapat notif airdrop baru.'; input.value=''; }
-    else if (r.status===409) { msg.style.color='#f59e0b'; msg.textContent='⚠ Email sudah terdaftar.'; }
-    else { msg.style.color='#ff2d55'; msg.textContent='✕ '+(d.error||'Gagal, coba lagi.'); }
-  } catch(e) { msg.style.color='#ff2d55'; msg.textContent='✕ Gagal konek ke server.'; }
-}
-</script>
-        
+        /* footer modern */
+        .main-footer {
+            margin-top: 64px;
+            border-top: 1px solid var(--border);
+            padding-top: 48px;
+        }
+        .footer-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 40px;
+            margin-bottom: 48px;
+        }
+        .footer-brand {
+            font-size: 18px;
+            font-weight: 800;
+        }
+        .footer-brand span {
+            color: var(--g);
+        }
+        .footer-nav a, .footer-contact a {
+            display: block;
+            font-size: 12px;
+            color: var(--text2);
+            text-decoration: none;
+            margin-bottom: 10px;
+            font-family: 'JetBrains Mono', monospace;
+            transition: 0.2s;
+        }
+        .footer-nav a:hover, .footer-contact a:hover {
+            color: var(--g);
+        }
+        .social-icons {
+            display: flex;
+            gap: 12px;
+            margin-top: 12px;
+        }
+        .social-icons a {
+            width: 32px;
+            height: 32px;
+            border-radius: 8px;
+            background: var(--surface);
+            border: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: var(--text2);
+            transition: 0.2s;
+        }
+        .social-icons a:hover {
+            border-color: var(--g);
+            color: var(--g);
+        }
+        .newsletter-box {
+            margin-top: 24px;
+            margin-bottom: 32px;
+            border-top: 1px solid var(--border);
+            padding-top: 32px;
+        }
+        .newsletter-box h4 {
+            font-size: 16px;
+            font-weight: 800;
+            margin-bottom: 6px;
+        }
+        .newsletter-box p {
+            font-size: 11px;
+            font-family: monospace;
+            color: var(--text2);
+            margin-bottom: 16px;
+        }
+        .subscribe-row {
+            display: flex;
+            gap: 12px;
+            flex-wrap: wrap;
+        }
+        .subscribe-row input {
+            flex: 1;
+            background: var(--bg2);
+            border: 1px solid var(--border);
+            border-radius: 10px;
+            padding: 10px 14px;
+            color: var(--text);
+            font-family: monospace;
+            font-size: 12px;
+            outline: none;
+        }
+        .subscribe-row button {
+            background: linear-gradient(135deg, var(--g), var(--c));
+            border: none;
+            color: #000;
+            font-weight: bold;
+            padding: 10px 20px;
+            border-radius: 10px;
+            cursor: pointer;
+            font-size: 11px;
+            transition: opacity 0.2s;
+        }
+        .footer-copyright {
+            text-align: center;
+            padding: 24px 0 16px;
+            border-top: 1px solid var(--border);
+            font-size: 10px;
+            font-family: monospace;
+            color: var(--text3);
+        }
+        .dyor {
+            font-size: 9px;
+            text-align: center;
+            color: #f59e0b;
+            background: rgba(245,158,11,0.08);
+            padding: 12px;
+            border-radius: 12px;
+            margin-bottom: 20px;
+        }
+        @media (max-width: 640px) {
+            .container { padding: 16px; }
+            td, th { padding: 12px 12px; }
+        }
+    </style>
+</head>
+<body>
     <canvas id="bg-canvas"></canvas>
     <div class="z1">
         <div class="container">
+            <!-- NAVBAR -->
             <div class="nav-bar">
-                <a href="/" class="btn" id="btn-back">← BACK TO HOME</a>
+                <a href="#" class="btn" id="btn-back" onclick="window.location.reload();">← BACK TO HOME</a>
                 <div class="controls">
                     <button class="btn btn-active" onclick="setLang('en')" id="lang-en">EN</button>
                     <button class="btn" onclick="setLang('id')" id="lang-id">ID</button>
@@ -421,74 +434,114 @@ async function subscribeEmail() {
                 <div id="loading-sentinel">SYNCING GLOBAL NODES...</div>
             </div>
 
-            <div class="footer">
-                <div class="footer-brand">
-                    <img src="https://airdropxi.vercel.app/logo.png" alt="logo" onerror="this.style.display='none'">
-                    <span>AirdropXI Intelligence</span>
+            <!-- FOOTER (clean single) -->
+            <div class="main-footer">
+                <div class="dyor" id="footer-dyor">
+                    ⚠️ DYOR — Semua informasi hanya untuk edukasi. Selalu lakukan riset sendiri sebelum berinvestasi.
                 </div>
-                <div class="social-links">
-                    <a href="https://x.com/xiobai06" target="_blank" class="soc-btn"><i class="fab fa-twitter"></i> Twitter</a>
-                    <a href="https://t.me/xiobaiishikii" target="_blank" class="soc-btn"><i class="fab fa-telegram"></i> Telegram</a>
+                <div class="footer-grid">
+                    <div>
+                        <div class="footer-brand">Airdrop<span>XI</span></div>
+                        <p style="font-size: 12px; font-family: monospace; color: var(--text2); margin: 12px 0 12px;">Peluang airdrop yang dikurasi dengan data terstruktur.</p>
+                        <div class="social-icons">
+                            <a href="https://x.com/xiobai06" target="_blank"><i class="fab fa-twitter"></i></a>
+                            <a href="https://t.me/Xiobaiishikii" target="_blank"><i class="fab fa-telegram"></i></a>
+                        </div>
+                    </div>
+                    <div class="footer-nav">
+                        <div style="font-family: monospace; font-size: 10px; letter-spacing: 1px; margin-bottom: 16px; color: var(--text2);">NAVIGATE</div>
+                        <a href="#">Explore Airdrops</a>
+                        <a href="#">Guide & Tutorial</a>
+                        <a href="#">Documentation</a>
+                        <a href="#">Token Unlocks</a>
+                        <a href="#">Exchanges</a>
+                        <a href="#" style="color: var(--g);">🎁 Reward</a>
+                    </div>
+                    <div class="footer-contact">
+                        <div style="font-family: monospace; font-size: 10px; letter-spacing: 1px; margin-bottom: 16px; color: var(--text2);">CONTACT</div>
+                        <a href="https://x.com/xiobai06" target="_blank">Twitter / X</a>
+                        <a href="https://t.me/Xiobaiishikii" target="_blank">Telegram</a>
+                    </div>
                 </div>
-                <p class="footer-copyright">© 2026 Xiobaiishikii — Stay Safe & Keep Grinding ⚡</p>
-                <p id="footer-dyor" style="font-size:10px;">DYOR: CONTENT FOR EDUCATIONAL PURPOSES ONLY.</p>
-                <a href="/" class="btn btn-home-green" id="btn-home-footer">BACK TO HOME</a>
+
+                <div class="newsletter-box">
+                    <div style="font-family: monospace; font-size: 10px; color: var(--g); letter-spacing: 1px;">📬 NEWSLETTER</div>
+                    <h4>Dapat notif airdrop baru</h4>
+                    <p>Subscribe dan kamu bakal langsung dikabarin tiap ada airdrop baru.</p>
+                    <div class="subscribe-row">
+                        <input type="email" id="sub-email" placeholder="emailkamu@gmail.com">
+                        <button onclick="subscribeEmail()">Subscribe ⚡</button>
+                    </div>
+                    <div id="sub-msg" style="margin-top: 10px; font-size: 11px; font-family: monospace; display: none;"></div>
+                </div>
+                <div class="footer-copyright">
+                    © 2025 AirdropXI — Stay Safe & Keep Grinding ⚡
+                </div>
             </div>
         </div>
     </div>
 
     <script>
-        // ========== GLOBAL MARKET INTELLIGENCE (CoinGecko) ==========
+        // ======================= GLOBAL STATE =======================
         let currentLang = 'en';
         let page = 1;
         let loading = false;
+        let allCoinsLoaded = false;
         const tbody = document.getElementById('token-tbody');
 
+        // i18n content
         const i18n = {
             en: {
                 title: "Global Market Intelligence",
                 subtitle: "Monitoring all crypto assets from CoinGecko.",
                 search: "Search tokens...",
                 back: "← BACK TO HOME",
-                table: ["ASSET", "PRICE", "24H CHANGE", "MARKET CAP", "UNLOCKED", "STATUS"],
+                tableHead: ["ASSET", "PRICE", "24H CHANGE", "MARKET CAP", "UNLOCKED", "STATUS"],
                 loading: "SYNCING GLOBAL NODES...",
-                status: ["MARKET READY", "VESTING"],
-                dyor: "DYOR: CONTENT FOR EDUCATIONAL PURPOSES ONLY."
+                statusReady: "MARKET READY",
+                statusVesting: "VESTING",
+                dyor: "⚠️ DYOR — All information for educational purposes only. Always do your own research."
             },
             id: {
                 title: "Intelijen Pasar Global",
                 subtitle: "Memantau seluruh aset kripto dari CoinGecko.",
                 search: "Cari koin...",
                 back: "← KEMBALI",
-                table: ["ASET", "HARGA", "PERUBAHAN 24J", "MARKET CAP", "UNLOCKED", "STATUS"],
+                tableHead: ["ASET", "HARGA", "PERUBAHAN 24J", "MARKET CAP", "UNLOCKED", "STATUS"],
                 loading: "MENYINKRONKAN DATA GLOBAL...",
-                status: ["SIAP PASAR", "VESTING"],
-                dyor: "DYOR: KONTEN HANYA UNTUK TUJUAN EDUKASI."
+                statusReady: "SIAP PASAR",
+                statusVesting: "VESTING",
+                dyor: "⚠️ DYOR — Konten hanya untuk tujuan edukasi. Selalu lakukan riset sendiri."
             }
         };
+
+        function applyLanguage() {
+            const t = i18n[currentLang];
+            document.getElementById('main-title').innerText = t.title;
+            document.getElementById('main-subtitle').innerText = t.subtitle;
+            document.getElementById('tokenSearch').placeholder = t.search;
+            document.getElementById('btn-back').innerText = t.back;
+            document.getElementById('loading-sentinel').innerText = t.loading;
+            document.getElementById('footer-dyor').innerHTML = `⚠️ DYOR — ${currentLang === 'en' ? 'All information for educational purposes only. Always do your own research.' : 'Konten hanya untuk tujuan edukasi. Selalu lakukan riset sendiri.'}`;
+            
+            const headers = document.querySelectorAll('#table-head th');
+            t.tableHead.forEach((text, idx) => {
+                if (headers[idx]) headers[idx].innerText = text;
+            });
+            
+            // update all status badges
+            document.querySelectorAll('.status-badge').forEach(badge => {
+                const isLiquid = badge.getAttribute('data-liquid') === 'true';
+                badge.innerText = isLiquid ? t.statusReady : t.statusVesting;
+                badge.style.color = isLiquid ? '#00e87a' : '#00c8f0';
+            });
+        }
 
         function setLang(lang) {
             currentLang = lang;
             document.getElementById('lang-en').classList.toggle('btn-active', lang === 'en');
             document.getElementById('lang-id').classList.toggle('btn-active', lang === 'id');
-            
-            document.getElementById('main-title').innerText = i18n[lang].title;
-            document.getElementById('main-subtitle').innerText = i18n[lang].subtitle;
-            document.getElementById('tokenSearch').placeholder = i18n[lang].search;
-            document.getElementById('btn-back').innerText = i18n[lang].back;
-            document.getElementById('btn-home-footer').innerText = i18n[lang].back;
-            document.getElementById('loading-sentinel').innerText = i18n[lang].loading;
-            document.getElementById('footer-dyor').innerText = i18n[lang].dyor;
-
-            const headers = document.querySelectorAll('th');
-            i18n[lang].table.forEach((text, i) => {
-                if (headers[i]) headers[i].innerText = text;
-            });
-            
-            document.querySelectorAll('.status-badge').forEach(badge => {
-                const isLiquid = badge.getAttribute('data-liquid') === 'true';
-                badge.innerText = isLiquid ? i18n[lang].status[0] : i18n[lang].status[1];
-            });
+            applyLanguage();
         }
 
         function toggleTheme() {
@@ -503,85 +556,176 @@ async function subscribeEmail() {
             }
         }
 
-        async function loadCoins() {
-            if (loading) return;
+        // ======================= COINGECKO LOAD (INFINITE) =======================
+        async function loadMoreCoins() {
+            if (loading || allCoinsLoaded) return;
             loading = true;
             try {
-                const res = await fetch(`https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=${page}&sparkline=false`);
+                const url = `https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=40&page=${page}&sparkline=false&price_change_percentage=24h`;
+                const res = await fetch(url);
+                if (!res.ok) throw new Error(`HTTP ${res.status}`);
                 const data = await res.json();
-                if (data.length > 0) {
-                    data.forEach(coin => {
-                        const unlocked = coin.total_supply ? Math.round((coin.circulating_supply / coin.total_supply) * 100) : 100;
-                        const isLiquid = unlocked > 90;
-                        const row = document.createElement('tr');
-                        row.innerHTML = `
-                            <td><div style="display:flex; align-items:center; gap:10px;"><img src="${coin.image}" width="24" height="24" style="border-radius:50%;"> <b>${coin.name}</b></div></td>
-                            <td style="font-weight:700;">$${coin.current_price?.toLocaleString() || '0'}</td>
-                            <td style="color:${coin.price_change_percentage_24h >= 0 ? '#00e87a' : '#ff4d6d'}">
-                                ${coin.price_change_percentage_24h >= 0 ? '▲' : '▼'} ${Math.abs(coin.price_change_percentage_24h || 0).toFixed(2)}%
-                            </td>
-                            <td style="color:var(--text2)">$${(coin.market_cap || 0).toLocaleString()}</td>
-                            <td>
-                                <div style="font-size:11px; font-weight:600; font-family:'JetBrains Mono',monospace;">${unlocked}%</div>
-                                <div class="prog-bg"><div class="prog-fill" style="width:${unlocked}%"></div></div>
-                            </td>
-                            <td>
-                                <span class="status-badge" data-liquid="${isLiquid}" style="color:${isLiquid ? '#00e87a' : '#00c8f0'}">
-                                    ${isLiquid ? i18n[currentLang].status[0] : i18n[currentLang].status[1]}
-                                </span>
-                            </td>
-                        `;
-                        tbody.appendChild(row);
-                    });
-                    page++;
+                if (!data.length) {
+                    allCoinsLoaded = true;
+                    document.getElementById('loading-sentinel').innerText = currentLang === 'en' ? "✓ All assets loaded" : "✓ Semua aset dimuat";
+                    loading = false;
+                    return;
                 }
+                
+                for (const coin of data) {
+                    const totalSupply = coin.total_supply ? coin.total_supply : coin.circulating_supply;
+                    let unlockedPercent = 100;
+                    if (totalSupply && coin.circulating_supply && totalSupply > 0) {
+                        unlockedPercent = Math.min(100, Math.round((coin.circulating_supply / totalSupply) * 100));
+                    } else {
+                        unlockedPercent = 95;
+                    }
+                    const isLiquid = unlockedPercent > 90;
+                    const statusText = isLiquid ? i18n[currentLang].statusReady : i18n[currentLang].statusVesting;
+                    const price = coin.current_price ?? 0;
+                    const change24h = coin.price_change_percentage_24h ?? 0;
+                    const marketCap = coin.market_cap ?? 0;
+                    
+                    const row = document.createElement('tr');
+                    row.innerHTML = `
+                        <td><div style="display:flex; align-items:center; gap:10px;"><img src="${coin.image}" width="24" height="24" style="border-radius:50%;"> <b>${coin.name}</b> <span style="font-size:9px; color:var(--text3); text-transform:uppercase;">${coin.symbol?.toUpperCase()}</span></div></td>
+                        <td style="font-weight:700;">$${price.toLocaleString(undefined, {minimumFractionDigits: 2, maximumFractionDigits: 6})}</td>
+                        <td style="color:${change24h >= 0 ? '#00e87a' : '#ff4d6d'}; font-weight:600;">
+                            ${change24h >= 0 ? '▲' : '▼'} ${Math.abs(change24h).toFixed(2)}%
+                        </td>
+                        <td style="color:var(--text2);">$${marketCap.toLocaleString()}</td>
+                        <td>
+                            <div style="font-size:11px; font-weight:600; font-family:monospace;">${unlockedPercent}%</div>
+                            <div class="prog-bg"><div class="prog-fill" style="width:${unlockedPercent}%"></div></div>
+                        </td>
+                        <td>
+                            <span class="status-badge" data-liquid="${isLiquid}" style="color:${isLiquid ? '#00e87a' : '#00c8f0'}">${statusText}</span>
+                        </td>
+                    `;
+                    tbody.appendChild(row);
+                }
+                page++;
+                loading = false;
             } catch (err) {
                 console.error("CoinGecko error:", err);
+                loading = false;
+                const sentinel = document.getElementById('loading-sentinel');
+                sentinel.innerText = currentLang === 'en' ? "⚠️ Rate limit / error. Retrying..." : "⚠️ Batas API / error. Coba lagi...";
+                setTimeout(() => {
+                    if (!allCoinsLoaded) sentinel.innerText = i18n[currentLang].loading;
+                }, 3000);
             }
-            loading = false;
         }
 
-        // Infinite scroll observer
+        // Intersection Observer
         const observer = new IntersectionObserver((entries) => {
-            if (entries[0].isIntersecting && !loading) loadCoins();
-        }, { threshold: 0.1 });
-        observer.observe(document.getElementById('loading-sentinel'));
-
-        // Search filter
-        document.getElementById('tokenSearch').addEventListener('input', (e) => {
-            const term = e.target.value.toLowerCase();
-            document.querySelectorAll('#token-tbody tr').forEach(row => {
-                row.style.display = row.innerText.toLowerCase().includes(term) ? '' : 'none';
-            });
-        });
-
-        // Initialize
-        setLang('en');
-        loadCoins();
-
-        // Optional: Simple canvas effect (glow)
-        const canvas = document.getElementById('bg-canvas');
-        if (canvas) {
-            const ctx = canvas.getContext('2d');
-            function resizeCanvas() {
-                canvas.width = window.innerWidth;
-                canvas.height = window.innerHeight;
+            if (entries[0].isIntersecting && !loading && !allCoinsLoaded) {
+                loadMoreCoins();
             }
-            resizeCanvas();
-            window.addEventListener('resize', resizeCanvas);
+        }, { threshold: 0.2, rootMargin: "100px" });
+        
+        function initObserver() {
+            const sentinel = document.getElementById('loading-sentinel');
+            if (sentinel) observer.observe(sentinel);
+        }
+
+        // search filter
+        function setupSearch() {
+            const searchInput = document.getElementById('tokenSearch');
+            searchInput.addEventListener('input', (e) => {
+                const term = e.target.value.toLowerCase();
+                const rows = document.querySelectorAll('#token-tbody tr');
+                rows.forEach(row => {
+                    const text = row.innerText.toLowerCase();
+                    row.style.display = text.includes(term) ? '' : 'none';
+                });
+            });
+        }
+
+        // mock subscribe (no backend required)
+        window.subscribeEmail = async function() {
+            const emailInput = document.getElementById('sub-email');
+            const msgDiv = document.getElementById('sub-msg');
+            const email = emailInput.value.trim();
+            const emailRegex = /^[^\s@]+@([^\s@.,]+\.)+[^\s@.,]{2,}$/;
+            if (!email || !emailRegex.test(email)) {
+                msgDiv.style.display = 'block';
+                msgDiv.style.color = '#ff4d6d';
+                msgDiv.textContent = currentLang === 'en' ? '✕ Please enter valid email' : '✕ Masukkan email yang valid';
+                return;
+            }
+            msgDiv.style.display = 'block';
+            msgDiv.style.color = 'var(--text2)';
+            msgDiv.textContent = currentLang === 'en' ? 'Processing...' : 'Memproses...';
+            
+            // Mock localStorage subscription (just for demo, no actual API call)
+            setTimeout(() => {
+                try {
+                    let subs = JSON.parse(localStorage.getItem('airdropxi_subs') || '[]');
+                    if (subs.includes(email)) {
+                        msgDiv.style.color = '#f59e0b';
+                        msgDiv.textContent = currentLang === 'en' ? '⚠ Email already subscribed.' : '⚠ Email sudah terdaftar.';
+                    } else {
+                        subs.push(email);
+                        localStorage.setItem('airdropxi_subs', JSON.stringify(subs));
+                        msgDiv.style.color = '#00e87a';
+                        msgDiv.textContent = currentLang === 'en' ? '✓ Subscribed! You will get airdrop alerts.' : '✓ Berlangganan! Kamu akan mendapat notifikasi.';
+                        emailInput.value = '';
+                        setTimeout(() => {
+                            if (msgDiv) msgDiv.style.opacity = '0';
+                            setTimeout(() => { if(msgDiv) msgDiv.style.display = 'none'; msgDiv.style.opacity = ''; }, 500);
+                        }, 2500);
+                    }
+                } catch(e) {
+                    msgDiv.style.color = '#ff4d6d';
+                    msgDiv.textContent = currentLang === 'en' ? '✕ Subscription failed.' : '✕ Gagal berlangganan.';
+                }
+            }, 400);
+        };
+
+        // init canvas particles (soft)
+        function initCanvas() {
+            const canvas = document.getElementById('bg-canvas');
+            if (!canvas) return;
+            const ctx = canvas.getContext('2d');
+            let width, height;
+            function resize() {
+                width = window.innerWidth;
+                height = window.innerHeight;
+                canvas.width = width;
+                canvas.height = height;
+            }
+            resize();
+            window.addEventListener('resize', resize);
+            let dots = [];
+            const DOT_COUNT = 40;
+            for (let i = 0; i < DOT_COUNT; i++) {
+                dots.push({ x: Math.random(), y: Math.random(), size: 1 + Math.random() * 2 });
+            }
             function draw() {
                 if (!ctx) return;
-                ctx.clearRect(0, 0, canvas.width, canvas.height);
-                ctx.fillStyle = 'rgba(0,232,122,0.02)';
-                for (let i = 0; i < 60; i++) {
+                ctx.clearRect(0, 0, width, height);
+                ctx.fillStyle = 'rgba(0,232,122,0.025)';
+                for (let d of dots) {
                     ctx.beginPath();
-                    ctx.arc(Math.random() * canvas.width, Math.random() * canvas.height, Math.random() * 2, 0, Math.PI * 2);
+                    ctx.arc(d.x * width, d.y * height, d.size, 0, Math.PI * 2);
                     ctx.fill();
                 }
                 requestAnimationFrame(draw);
             }
             draw();
         }
+
+        // reset and start
+        function init() {
+            setLang('en');
+            setupSearch();
+            initObserver();
+            loadMoreCoins(); // first batch
+            initCanvas();
+        }
+        
+        init();
     </script>
 </body>
 </html>
