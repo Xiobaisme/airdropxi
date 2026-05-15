@@ -1,208 +1,471 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="id" data-theme="dark">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <link rel="icon" type="image/png" href="logo.png">
-    <title>AirdropXI - Ultimate Reward</title>
-    <style>
-        :root {
-            --neon-green: #00ff88;
-            --dark-bg: #050a05;
-        }
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <link rel="icon" type="image/png" href="logo.png">
+  <title>AirdropXI - Reward</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link href="https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+  <style>
+    :root {
+      --g: #00e87a;
+      --c: #00c8f0;
+      --bg: #050b10;
+      --surface: #091219;
+      --surface2: #0c1822;
+      --border: rgba(255,255,255,0.055);
+      --border2: rgba(255,255,255,0.10);
+      --text: #ddeaf6;
+      --text2: #7a9bb5;
+      --text3: #3a5a72;
+    }
+    [data-theme="light"] {
+      --bg: #f0f5f9;
+      --surface: #ffffff;
+      --surface2: #eef3f8;
+      --border: rgba(0,0,0,0.07);
+      --border2: rgba(0,0,0,0.12);
+      --text: #0d1f2d;
+      --text2: #3a5a72;
+      --text3: #6a8ca8;
+      --g: #00924d;
+      --c: #007fa0;
+    }
 
-        body {
-            background-color: var(--dark-bg);
-            color: var(--neon-green);
-            font-family: 'Courier New', Courier, monospace;
-            display: flex;
-            flex-direction: column;
-            align-items: center;
-            justify-content: center;
-            height: 100vh;
-            margin: 0;
-            text-align: center;
-            overflow: hidden; /* Supaya emoji tidak buat scrollbar */
-        }
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        /* Language Switcher */
-        .lang-switch {
-            position: absolute;
-            top: 20px;
-            right: 20px;
-            z-index: 10;
-        }
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'Plus Jakarta Sans', sans-serif;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      overflow-x: hidden;
+      transition: background .35s, color .35s;
+    }
 
-        .lang-btn {
-            background: transparent;
-            border: 1px solid var(--neon-green);
-            color: var(--neon-green);
-            padding: 5px 10px;
-            cursor: pointer;
-            font-family: inherit;
-            font-size: 0.8rem;
-        }
+    /* NAV */
+    nav {
+      position: sticky; top: 0; z-index: 100;
+      background: rgba(5,11,16,0.88);
+      backdrop-filter: blur(24px);
+      border-bottom: 1px solid var(--border);
+      padding: 0 32px; height: 58px;
+      display: flex; align-items: center; justify-content: space-between;
+    }
+    [data-theme="light"] nav { background: rgba(240,245,249,0.92); }
 
-        .lang-btn:hover {
-            background: var(--neon-green);
-            color: var(--dark-bg);
-        }
+    .nav-logo {
+      display: flex; align-items: center; gap: 8px;
+      text-decoration: none; color: var(--text);
+      font-weight: 800; font-size: 16px; letter-spacing: -.3px;
+    }
+    .nav-logo img { width: 26px; height: 26px; border-radius: 7px; }
+    .nav-logo span { color: var(--g); }
 
-        h1 {
-            font-size: 1.2rem;
-            letter-spacing: 4px;
-            text-transform: uppercase;
-            margin-bottom: 0;
-            z-index: 5;
-        }
+    .nav-right { display: flex; align-items: center; gap: 8px; }
+    .lang-toggle { display: flex; background: var(--surface2); border: 1px solid var(--border2); border-radius: 9px; overflow: hidden; }
+    .lang-btn { font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700; letter-spacing: .08em; padding: 6px 13px; cursor: pointer; border: none; background: transparent; color: var(--text3); transition: all .2s; text-transform: uppercase; }
+    .lang-btn.active { background: rgba(0,232,122,.12); color: var(--g); }
+    .theme-btn { width: 34px; height: 34px; border-radius: 9px; background: var(--surface2); border: 1px solid var(--border2); display: flex; align-items: center; justify-content: center; cursor: pointer; font-size: 15px; transition: all .2s; }
+    .theme-btn:hover { border-color: var(--g); }
 
-        #countdown {
-            font-size: clamp(2rem, 8vw, 4rem);
-            font-weight: bold;
-            margin: 20px 0;
-            text-shadow: 0 0 20px rgba(0, 255, 136, 0.6);
-            font-variant-numeric: tabular-nums;
-            z-index: 5;
-        }
+    /* MAIN */
+    main {
+      flex: 1;
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 60px 24px;
+      position: relative; overflow: hidden;
+    }
 
-        .message-box {
-            height: 50px;
-            margin-bottom: 40px;
-            z-index: 5;
-        }
+    /* Background glow */
+    main::before {
+      content: '';
+      position: absolute; top: -100px; left: 50%; transform: translateX(-50%);
+      width: 700px; height: 500px;
+      background: radial-gradient(ellipse, rgba(0,232,122,.07) 0%, transparent 65%);
+      pointer-events: none;
+    }
 
-        .message {
-            color: #666;
-            font-size: 0.9rem;
-            max-width: 500px;
-            font-style: italic;
-        }
+    .maintenance-badge {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: rgba(245,158,11,.1); border: 1px solid rgba(245,158,11,.3);
+      color: #f59e0b; border-radius: 20px;
+      font-family: 'JetBrains Mono', monospace; font-size: 10px; font-weight: 700;
+      letter-spacing: .12em; text-transform: uppercase; padding: 6px 16px;
+      margin-bottom: 28px;
+    }
+    .maintenance-badge-dot {
+      width: 6px; height: 6px; border-radius: 50%;
+      background: #f59e0b; box-shadow: 0 0 8px #f59e0b;
+      animation: blink 1.5s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:.2} }
 
-        .back-btn {
-            color: var(--neon-green);
-            text-decoration: none;
-            border: 1px solid var(--neon-green);
-            padding: 12px 24px;
-            transition: all 0.3s ease;
-            text-transform: uppercase;
-            font-size: 0.8rem;
-            letter-spacing: 2px;
-            z-index: 5;
-        }
+    .maintenance-title {
+      font-size: clamp(32px, 6vw, 56px);
+      font-weight: 800; letter-spacing: -2px; line-height: 1.1;
+      text-align: center; margin-bottom: 16px;
+      background: linear-gradient(135deg, var(--text) 50%, rgba(0,232,122,.7));
+      -webkit-background-clip: text; -webkit-text-fill-color: transparent; background-clip: text;
+    }
 
-        .back-btn:hover {
-            box-shadow: 0 0 15px var(--neon-green);
-            background: var(--neon-green);
-            color: var(--dark-bg);
-        }
+    .maintenance-sub {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 13px; color: var(--text2); text-align: center;
+      max-width: 460px; line-height: 1.8; margin-bottom: 40px;
+    }
 
-        /* CSS UNTUK EMOJI JATUH */
-        .emoji-fall {
-            position: fixed;
-            top: -50px;
-            font-size: 24px;
-            z-index: 1; /* Di bawah teks tapi di atas background */
-            user-select: none;
-            pointer-events: none;
-            animation: fall linear forwards;
-        }
+    .countdown-wrap {
+      display: flex; gap: 16px; margin-bottom: 48px; flex-wrap: wrap; justify-content: center;
+    }
+    .countdown-box {
+      background: var(--surface); border: 1px solid var(--border2);
+      border-radius: 16px; padding: 20px 24px; text-align: center; min-width: 80px;
+      position: relative; overflow: hidden;
+    }
+    .countdown-box::before {
+      content: ''; position: absolute; top: 0; left: 0; right: 0; height: 1px;
+      background: linear-gradient(90deg, transparent, var(--g), transparent); opacity: .4;
+    }
+    .countdown-num {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 32px; font-weight: 700; color: var(--g);
+      text-shadow: 0 0 20px rgba(0,232,122,.4);
+      display: block; line-height: 1;
+    }
+    .countdown-lbl {
+      font-family: 'JetBrains Mono', monospace;
+      font-size: 9px; color: var(--text3); letter-spacing: .12em;
+      text-transform: uppercase; margin-top: 8px; display: block;
+    }
 
-        @keyframes fall {
-            to {
-                transform: translateY(110vh) rotate(360deg);
-            }
-        }
-    </style>
+    .back-btn {
+      display: inline-flex; align-items: center; gap: 8px;
+      background: linear-gradient(135deg, var(--g), var(--c)); color: #000;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+      letter-spacing: .08em; text-transform: uppercase; text-decoration: none;
+      padding: 12px 28px; border-radius: 11px; transition: all .2s;
+    }
+    .back-btn:hover { opacity: .85; transform: translateY(-2px); box-shadow: 0 10px 32px rgba(0,232,122,.3); }
+
+    /* COIN FALL */
+    .coin-fall {
+      position: fixed; top: -60px;
+      width: 32px; height: 32px;
+      z-index: 0; user-select: none; pointer-events: none;
+      animation: fall linear forwards;
+    }
+    @keyframes fall {
+      to { transform: translateY(110vh) rotate(720deg); }
+    }
+
+    /* FOOTER */
+    footer {
+      border-top: 1px solid var(--border);
+      position: relative; z-index: 1;
+    }
+    .footer-inner { max-width: 1100px; margin: 0 auto; padding: 0 32px; }
+    .dyor-badge {
+      text-align: center; font-family: 'JetBrains Mono', monospace; font-size: 11px;
+      color: #f59e0b; background: rgba(245,158,11,.07);
+      border: 1px solid rgba(245,158,11,.2); border-radius: 10px;
+      padding: 10px 20px; margin: 28px 0;
+    }
+    .footer-top {
+      display: grid; grid-template-columns: 1.2fr 1fr 1fr;
+      gap: 48px; padding-bottom: 32px;
+      border-bottom: 1px solid var(--border);
+    }
+    .footer-brand h3 { font-size: 18px; font-weight: 800; letter-spacing: -.5px; margin-bottom: 10px; }
+    .footer-brand h3 span { color: var(--g); }
+    .footer-brand p { font-family: 'JetBrains Mono', monospace; font-size: 12px; color: var(--text2); line-height: 1.6; }
+    .footer-links h4 { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--text3); letter-spacing: .12em; text-transform: uppercase; margin-bottom: 16px; }
+    .footer-links a { display: flex; align-items: center; gap: 8px; font-size: 13px; color: var(--text2); text-decoration: none; margin-bottom: 10px; transition: color .2s; }
+    .footer-links a:hover { color: var(--g); }
+    .footer-bottom {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 20px 0; flex-wrap: wrap; gap: 12px;
+    }
+    .footer-bottom span { font-family: 'JetBrains Mono', monospace; font-size: 11px; color: var(--text3); }
+    .footer-bottom span.green { color: var(--g); }
+
+    /* Subscribe */
+    .subscribe-wrap { border-top: 1px solid var(--border); padding: 28px 0; }
+    .subscribe-inner { max-width: 480px; }
+    .sub-tag { font-family: 'JetBrains Mono', monospace; font-size: 10px; color: var(--g); letter-spacing: .2em; text-transform: uppercase; margin-bottom: 8px; }
+    .sub-title { font-size: 16px; font-weight: 800; color: var(--text); margin-bottom: 6px; }
+    .sub-desc { font-size: 12px; color: var(--text2); font-family: 'JetBrains Mono', monospace; margin-bottom: 16px; }
+    .sub-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .sub-input {
+      flex: 1; min-width: 200px; background: var(--surface2);
+      border: 1px solid var(--border2); border-radius: 10px;
+      padding: 10px 14px; color: var(--text);
+      font-family: 'JetBrains Mono', monospace; font-size: 12px; outline: none;
+      transition: border-color .2s;
+    }
+    .sub-input:focus { border-color: var(--g); }
+    .sub-btn {
+      background: linear-gradient(135deg, var(--g), var(--c)); color: #000;
+      font-family: 'JetBrains Mono', monospace; font-size: 11px; font-weight: 700;
+      padding: 10px 20px; border-radius: 10px; border: none; cursor: pointer;
+      white-space: nowrap; transition: opacity .2s;
+    }
+    .sub-btn:hover { opacity: .85; }
+    #sub-msg { margin-top: 10px; font-family: 'JetBrains Mono', monospace; font-size: 11px; display: none; }
+
+    @media (max-width: 640px) {
+      nav { padding: 0 16px; }
+      .footer-top { grid-template-columns: 1fr; gap: 28px; }
+      .footer-inner { padding: 0 20px; }
+      .countdown-box { padding: 16px; min-width: 64px; }
+      .countdown-num { font-size: 24px; }
+    }
+  </style>
 </head>
 <body>
 
-    <div class="lang-switch">
-        <button class="lang-btn" onclick="setLang('id')">ID</button>
-        <button class="lang-btn" onclick="setLang('en')">EN</button>
+<!-- NAV -->
+<nav>
+  <a href="index.html" class="nav-logo">
+    <img src="logo.png" alt="AirdropXI">
+    Airdrop<span>XI</span>
+  </a>
+  <div class="nav-right">
+    <button class="theme-btn" id="themeBtn" onclick="toggleTheme()">🌙</button>
+    <div class="lang-toggle">
+      <button class="lang-btn active" id="btn-id" onclick="setLang('id')">🇮🇩 ID</button>
+      <button class="lang-btn" id="btn-en" onclick="setLang('en')">🇬🇧 EN</button>
+    </div>
+  </div>
+</nav>
+
+<!-- MAIN -->
+<main>
+  <div class="maintenance-badge">
+    <div class="maintenance-badge-dot"></div>
+    <span id="badge-txt">🚧 Under Maintenance</span>
+  </div>
+
+  <h1 class="maintenance-title" id="main-title">Reward Segera<br>Hadir!</h1>
+
+  <p class="maintenance-sub" id="main-sub">
+    Fitur reward sedang dalam pengembangan. Kami sedang mempersiapkan sesuatu yang spesial untuk para hunter crypto setia AirdropXI.
+  </p>
+
+  <div class="countdown-wrap">
+    <div class="countdown-box">
+      <span class="countdown-num" id="cd-d">00</span>
+      <span class="countdown-lbl" id="lbl-d">Hari</span>
+    </div>
+    <div class="countdown-box">
+      <span class="countdown-num" id="cd-h">00</span>
+      <span class="countdown-lbl" id="lbl-h">Jam</span>
+    </div>
+    <div class="countdown-box">
+      <span class="countdown-num" id="cd-m">00</span>
+      <span class="countdown-lbl" id="lbl-m">Menit</span>
+    </div>
+    <div class="countdown-box">
+      <span class="countdown-num" id="cd-s">00</span>
+      <span class="countdown-lbl" id="lbl-s">Detik</span>
+    </div>
+  </div>
+
+  <a href="index.html" class="back-btn" id="back-btn">
+    ← <span id="back-txt">Kembali Berburu Airdrop</span>
+  </a>
+</main>
+
+<!-- FOOTER -->
+<footer>
+  <div class="footer-inner">
+    <div class="dyor-badge">⚠️ DYOR — Semua informasi hanya untuk edukasi. Selalu lakukan riset sendiri sebelum berinvestasi.</div>
+    <div class="footer-top">
+      <div class="footer-brand">
+        <h3>Airdrop<span>XI</span></h3>
+        <p>Curated airdrop opportunities with structured data and snapshot optimization.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Navigate</h4>
+        <a href="index.html">Explore Airdrops</a>
+        <a href="index.html#guide">Guide & Tutorial</a>
+        <a href="docs.html">📚 Documentation</a>
+        <a href="unlocks.html">🔓 Token Unlocks</a>
+        <a href="exchanges.html">📊 Exchanges</a>
+        <a href="reward.html" style="color:#00e87a">🎁 Reward</a>
+      </div>
+      <div class="footer-links">
+        <h4>Social Media</h4>
+        <a href="https://x.com/xiobai06" target="_blank">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
+          Twitter / X
+        </a>
+        <a href="https://t.me/Xiobaiishikii" target="_blank">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M11.944 0A12 12 0 0 0 0 12a12 12 0 0 0 12 12 12 12 0 0 0 12-12A12 12 0 0 0 12 0a12 12 0 0 0-.056 0zm4.962 7.224c.1-.002.321.023.465.14a.506.506 0 0 1 .171.325c.016.093.036.306.02.472-.18 1.898-.962 6.502-1.36 8.627-.168.9-.499 1.201-.82 1.23-.696.065-1.225-.46-1.9-.902-1.056-.693-1.653-1.124-2.678-1.8-1.185-.78-.417-1.21.258-1.91.177-.184 3.247-2.977 3.307-3.23.007-.032.014-.15-.056-.212s-.174-.041-.249-.024c-.106.024-1.793 1.14-5.061 3.345-.48.33-.913.49-1.302.48-.428-.008-1.252-.241-1.865-.44-.752-.245-1.349-.374-1.297-.789.027-.216.325-.437.893-.663 3.498-1.524 5.83-2.529 6.998-3.014 3.332-1.386 4.025-1.627 4.476-1.635z"/></svg>
+          Telegram
+        </a>
+        <a href="https://www.tiktok.com/@xiobaiishikii_" target="_blank">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
+          TikTok
+        </a>
+        <a href="https://www.facebook.com/profile.php?id=61589062246319" target="_blank">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
+          Facebook
+        </a>
+        <a href="https://github.com/Xiobaisme" target="_blank">
+          <svg width="13" height="13" viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
+          GitHub
+        </a>
+      </div>
     </div>
 
-    <h1 id="titleText">REWARD TERBUKA DALAM</h1>
-    
-    <div id="countdown">00y 00d 00h 00m 00s</div>
-    
-    <div class="message-box">
-        <p class="message" id="quoteText">"Hunter sejati tahu bahwa kesabaran adalah strategi utama."</p>
+    <!-- SUBSCRIBE -->
+    <div class="subscribe-wrap">
+      <div class="subscribe-inner">
+        <div class="sub-tag">📬 Newsletter</div>
+        <h4 class="sub-title">Dapat notif airdrop baru</h4>
+        <p class="sub-desc">Subscribe dan kamu bakal langsung dikabarin tiap ada airdrop baru.</p>
+        <div class="sub-row">
+          <input type="email" id="sub-email" class="sub-input" placeholder="emailkamu@gmail.com"
+            onkeydown="if(event.key==='Enter')subscribeEmail()">
+          <button class="sub-btn" onclick="subscribeEmail()">Subscribe ⚡</button>
+        </div>
+        <div id="sub-msg"></div>
+      </div>
     </div>
 
-    <a href="index.html" class="back-btn" id="backBtn">Kembali Berjuang</a>
+    <div class="footer-bottom">
+      <span>© 2025 AirdropXI — Stay Safe & Keep Grinding</span>
+      <span class="green">Built with ⚡ for Web3 hunters</span>
+    </div>
+  </div>
+</footer>
 
-    <script>
-        // --- LOGIC BAHASA ---
-        const content = {
-            id: {
-                title: "REWARD TERBUKA DALAM",
-                quote: '"Hunter sejati tahu bahwa kesabaran adalah strategi utama."',
-                back: "Kembali Berjuang",
-                years: "th", days: "hr", hours: "j", minutes: "m", seconds: "d"
-            },
-            en: {
-                title: "REWARD UNLOCK IN",
-                quote: '"True hunters know that patience is the ultimate strategy."',
-                back: "Keep Grinding",
-                years: "y", days: "d", hours: "h", minutes: "m", seconds: "s"
-            }
-        };
+<script>
+// ── THEME ──
+let theme = localStorage.getItem('axi-theme') || 'dark';
+function applyTheme(t) {
+  document.documentElement.setAttribute('data-theme', t);
+  document.getElementById('themeBtn').textContent = t === 'dark' ? '🌙' : '☀️';
+  localStorage.setItem('axi-theme', t);
+}
+function toggleTheme() { theme = theme === 'dark' ? 'light' : 'dark'; applyTheme(theme); }
+applyTheme(theme);
 
-        let currentLang = 'id';
+// ── LANG ──
+const i18n = {
+  id: {
+    badge: '🚧 Sedang Maintenance',
+    title: 'Reward Segera<br>Hadir!',
+    sub: 'Fitur reward sedang dalam pengembangan. Kami sedang mempersiapkan sesuatu yang spesial untuk para hunter crypto setia AirdropXI.',
+    back: 'Kembali Berburu Airdrop',
+    days: 'Hari', hours: 'Jam', mins: 'Menit', secs: 'Detik',
+  },
+  en: {
+    badge: '🚧 Under Maintenance',
+    title: 'Reward Coming<br>Soon!',
+    sub: 'The reward feature is currently under development. We\'re preparing something special for loyal AirdropXI crypto hunters.',
+    back: 'Back to Hunting Airdrops',
+    days: 'Days', hours: 'Hours', mins: 'Minutes', secs: 'Seconds',
+  }
+};
 
-        function setLang(lang) {
-            currentLang = lang;
-            document.getElementById('titleText').innerText = content[lang].title;
-            document.getElementById('quoteText').innerText = content[lang].quote;
-            document.getElementById('backBtn').innerText = content[lang].back;
-            updateTimer();
-        }
+let currentLang = localStorage.getItem('axi-lang') || 'id';
 
-        // --- LOGIC TIMER 10 TAHUN ---
-        const targetDate = new Date();
-        targetDate.setFullYear(targetDate.getFullYear() + 10);
+function setLang(l) {
+  currentLang = l;
+  localStorage.setItem('axi-lang', l);
+  document.getElementById('btn-id').className = 'lang-btn' + (l === 'id' ? ' active' : '');
+  document.getElementById('btn-en').className = 'lang-btn' + (l === 'en' ? ' active' : '');
+  const t = i18n[l];
+  document.getElementById('badge-txt').textContent = t.badge;
+  document.getElementById('main-title').innerHTML = t.title;
+  document.getElementById('main-sub').textContent = t.sub;
+  document.getElementById('back-txt').textContent = t.back;
+  document.getElementById('lbl-d').textContent = t.days;
+  document.getElementById('lbl-h').textContent = t.hours;
+  document.getElementById('lbl-m').textContent = t.mins;
+  document.getElementById('lbl-s').textContent = t.secs;
+}
+setLang(currentLang);
 
-        function updateTimer() {
-            const now = new Date().getTime();
-            const distance = targetDate - now;
+// ── COUNTDOWN (target: 1 Jan 2026) ──
+const target = new Date();
+target.setFullYear(target.getFullYear() + 10);
+function updateCountdown() {
+  const now = new Date();
+  const diff = target - now;
+  if (diff <= 0) {
+    ['cd-d','cd-h','cd-m','cd-s'].forEach(id => document.getElementById(id).textContent = '00');
+    return;
+  }
+  const d = Math.floor(diff / 86400000);
+  const h = Math.floor((diff % 86400000) / 3600000);
+  const m = Math.floor((diff % 3600000) / 60000);
+  const s = Math.floor((diff % 60000) / 1000);
+  document.getElementById('cd-d').textContent = String(d).padStart(2,'0');
+  document.getElementById('cd-h').textContent = String(h).padStart(2,'0');
+  document.getElementById('cd-m').textContent = String(m).padStart(2,'0');
+  document.getElementById('cd-s').textContent = String(s).padStart(2,'0');
+}
+setInterval(updateCountdown, 1000);
+updateCountdown();
 
-            const y = Math.floor(distance / (1000 * 60 * 60 * 24 * 365.25));
-            const d = Math.floor((distance % (1000 * 60 * 60 * 24 * 365.25)) / (1000 * 60 * 60 * 24));
-            const h = Math.floor((distance % (1000 * 60 * 60 * 24)) / (1000 * 60 * 60));
-            const m = Math.floor((distance % (1000 * 60 * 60)) / (1000 * 60));
-            const s = Math.floor((distance % (1000 * 60)) / 1000);
+// ── COIN RAIN ──
+const coins = [
+  'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/btc.svg',
+  'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/eth.svg',
+  'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/bnb.svg',
+  'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/sol.svg',
+  'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/xrp.svg',
+  'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/ada.svg',
+  'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/doge.svg',
+  'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/dot.svg',
+  'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/matic.svg',
+  'https://cdn.jsdelivr.net/gh/atomiclabs/cryptocurrency-icons@1a63530be6e374711a8554f31b17e4cb92c25fa5/svg/color/link.svg',
+];
 
-            const l = content[currentLang];
-            document.getElementById("countdown").innerHTML = 
-                `${y}${l.years} ${d}${l.days} ${h}${l.hours} ${m}${l.minutes} ${s}${l.seconds}`;
-        }
+function createCoin() {
+  const img = document.createElement('img');
+  img.className = 'coin-fall';
+  img.src = coins[Math.floor(Math.random() * coins.length)];
+  const size = Math.random() * 20 + 20;
+  img.style.width = size + 'px';
+  img.style.height = size + 'px';
+  img.style.left = Math.random() * 100 + 'vw';
+  img.style.opacity = Math.random() * 0.5 + 0.15;
+  const dur = Math.random() * 5 + 4;
+  img.style.animationDuration = dur + 's';
+  document.body.appendChild(img);
+  setTimeout(() => img.remove(), dur * 1000);
+}
+setInterval(createCoin, 400);
 
-        // --- LOGIC HUJAN EMOJI ---
-        function createEmoji() {
-            const emojis = ['😂', '🤣', '💀', '🤡', '🤑']; 
-            const emoji = document.createElement('div');
-            
-            emoji.className = 'emoji-fall';
-            emoji.innerText = emojis[Math.floor(Math.random() * emojis.length)];
-            
-            emoji.style.left = Math.random() * 100 + 'vw';
-            emoji.style.fontSize = Math.random() * 30 + 20 + 'px';
-            
-            const duration = Math.random() * 5 + 3;
-            emoji.style.animationDuration = duration + 's';
-            emoji.style.opacity = Math.random() * 0.4 + 0.1;
-
-            document.body.appendChild(emoji);
-
-            setTimeout(() => {
-                emoji.remove();
-            }, duration * 1000);
-        }
-
-        // Jalankan semua fungsi
-        setInterval(updateTimer, 1000);
-        setInterval(createEmoji, 300); // Muncul emoji tiap 0.3 detik
-        setLang('id'); 
-    </script>
+// ── SUBSCRIBE ──
+async function subscribeEmail() {
+  const input = document.getElementById('sub-email');
+  const msg = document.getElementById('sub-msg');
+  const email = input.value.trim();
+  if (!email || !email.includes('@')) {
+    msg.style.display = 'block'; msg.style.color = '#ff2d55';
+    msg.textContent = '✕ Masukkan email yang valid'; return;
+  }
+  msg.style.display = 'block'; msg.style.color = 'var(--text2)';
+  msg.textContent = 'Mendaftarkan...';
+  try {
+    const r = await fetch('/api/subscribe', {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ email })
+    });
+    const d = await r.json();
+    if (r.ok) { msg.style.color = 'var(--g)'; msg.textContent = '✓ Berhasil! Kamu akan dapat notif airdrop baru.'; input.value = ''; }
+    else if (r.status === 409) { msg.style.color = '#f59e0b'; msg.textContent = '⚠ Email sudah terdaftar.'; }
+    else { msg.style.color = '#ff2d55'; msg.textContent = '✕ ' + (d.error || 'Gagal, coba lagi.'); }
+  } catch(e) { msg.style.color = '#ff2d55'; msg.textContent = '✕ Gagal konek ke server.'; }
+}
+</script>
 </body>
 </html>
