@@ -213,17 +213,11 @@ nav {
   text-transform: uppercase;
   white-space: nowrap;
 }
-.nav-links a:hover { color:var(--g); }
-
-.nav-right { display:flex; align-items:center; gap:10px; }
-.nav-social { display:flex; gap:6px; }
-.nav-social a {
-  width:30px; height:30px;
-  border: 1px solid var(--border); border-radius:var(--radius-sm);
-  display:flex; align-items:center; justify-content:center;
-  color:var(--text2); text-decoration:none;
-  transition: all .2s; font-size:12px;
+.nav-links a:hover {
+  color: var(--g);
+  text-shadow: 0 0 8px rgba(0,232,122,.8), 0 0 20px rgba(0,232,122,.4), 0 0 40px rgba(0,232,122,.2);
 }
+.nav-right { display:flex; align-items:center; gap:10px; }
 .nav-social a:hover { border-color:var(--g); color:var(--g); background:rgba(0,232,122,.06); }
 
 .lang-toggle {
