@@ -144,17 +144,35 @@ module.exports = async function handler(req, res) {
         console.error('Sync proyek gagal:', JSON.stringify(err2));
       }
 
-      // Simpan roadmap kalau ada
+       // Simpan roadmap kalau ada
       if (req.body._roadmap && Array.isArray(req.body._roadmap) && req.body._roadmap.length > 0) {
         await saveRoadmap(BASE, H, newId, req.body._roadmap);
       }
 
-      return res.status(201).json(Array.isArray(result1) ? result1 : [result1]);
+      // Notify subscribers
+      try {
+        await fetch(`https://airdropxi.vercel.app/api/notify-subscribers`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'x-admin-key': process.env.ADMIN_SECRET_KEY,
+          },
+          body: JSON.stringify({
+            projectName: req.body.name,
+            projectUrl:  `https://airdropxi.vercel.app/guide/${newId}`,
+            description: req.body.descriptionID || req.body.descriptionEN || '',
+          }),
+        });
+      } catch(e) {
+        console.warn('Notify gagal:', e.message);
+      }
+
+    return res.status(201).json(Array.isArray(result1) ? result1 : [result1]);
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
-
+ 
   // ── PATCH ────────────────────────────────────────────
   if (req.method === 'PATCH') {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
