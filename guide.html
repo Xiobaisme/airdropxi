@@ -599,7 +599,7 @@
   }
   .btn-ghost-sm:hover { border-color: var(--g-readable); color: var(--g-readable); }
 
-  @media (max-width: 640px) {
+ @media (max-width: 640px) {
     .hero-inner { grid-template-columns: 1fr; gap: 20px; padding: 36px 0 32px; }
     .project-name { font-size: 30px; letter-spacing: -1.2px; }
     .project-hero { padding: 0 20px; }
@@ -613,9 +613,35 @@
     .section-body { padding: 18px; }
     .roadmap-timeline::before { left: 15px; }
     .roadmap-dot { width: 32px; height: 32px; font-size: 11px; }
-    .footer-container { display: none; } /* hapus class lama */
-    .footer-bottom { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; border-top: 1px solid var(--border); flex-wrap: wrap; gap: 12px; }
-  @media (max-width: 640px) { .footer-top { grid-template-columns: 1fr; gap: 28px; } .footer-grid { padding: 0 20px; } }
+    .footer-top { grid-template-columns: 1fr; gap: 28px; }
+    .footer-grid { padding: 28px 20px 0; }
+    .footer-bottom { display: flex; align-items: center; justify-content: space-between; padding: 20px 0; flex-wrap: wrap; gap: 12px; }
+  }
+
+  /* ── FOOTER ── */
+  footer { position: relative; z-index: 1; border-top: 1px solid var(--border); }
+  .footer-grid { max-width: 1100px; margin: 0 auto; padding: 40px 32px 0; }
+  .footer-dyor {
+    text-align: center; font-family: var(--mono); font-size: 11px;
+    color: #f59e0b; background: rgba(245,158,11,.07);
+    border: 1px solid rgba(245,158,11,.2); border-radius: 10px;
+    padding: 10px 20px; margin-bottom: 36px; letter-spacing: .02em;
+  }
+  .footer-top {
+    display: grid; grid-template-columns: 1.2fr 1fr 1fr;
+    gap: 48px; padding-bottom: 36px;
+    border-bottom: 1px solid var(--border);
+  }
+  .footer-nav-label {
+    font-family: var(--mono); font-size: 10px; color: var(--text3);
+    letter-spacing: .12em; text-transform: uppercase; margin-bottom: 16px;
+  }
+  .footer-link { font-size: 13px; color: var(--text2); text-decoration: none; transition: color .2s; }
+  .footer-link:hover { color: var(--g-readable); }
+  .footer-bottom {
+    display: flex; align-items: center; justify-content: space-between;
+    padding: 20px 0; flex-wrap: wrap; gap: 12px;
+  }
 </style>
 </head>
 <body>
