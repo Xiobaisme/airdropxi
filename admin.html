@@ -1056,18 +1056,6 @@
         renderList();
         loadEdit(editingId);
 
-        // ── NOTIFY SUBSCRIBERS (hanya untuk proyek baru) ──
-        fetch('/api/notify-subscribers', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({
-            googleToken:   _adminGoogleToken,
-            projectName:   name,
-            projectUrl:    `https://airdropxi.vercel.app/guide/${result[0].id}`,
-            description:   payload.descriptionID || payload.descriptionEN || '',
-          }),
-        }).catch(e => console.error('Notify gagal:', e));
-
       } else if (editingId) {
         loadEdit(editingId);
       }
