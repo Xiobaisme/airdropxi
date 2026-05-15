@@ -214,8 +214,8 @@ nav {
   white-space: nowrap;
 }
 .nav-links a:hover {
-  color: var(--g);
-  text-shadow: 0 0 8px rgba(0,232,122,.8), 0 0 20px rgba(0,232,122,.4), 0 0 40px rgba(0,232,122,.2);
+  color: var(--g) !important;
+  text-shadow: 0 0 8px rgba(0,232,122,.8), 0 0 20px rgba(0,232,122,.4), 0 0 40px rgba(0,232,122,.2) !important;
 }
 .nav-right { display:flex; align-items:center; gap:10px; }
 .nav-social a:hover { border-color:var(--g); color:var(--g); background:rgba(0,232,122,.06); }
