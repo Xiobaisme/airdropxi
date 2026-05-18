@@ -22,6 +22,11 @@
       --adim:    rgba(0,229,160,0.08);
       --aborder: rgba(0,229,160,0.2);
       --blue:    #3b82f6;
+      --bdim:    rgba(59,130,246,0.08);
+      --cyan:    #00c8f0;
+      --cdim:    rgba(0,200,240,0.08);
+      --purple:  #7c6dfa;
+      --pdim:    rgba(124,109,250,0.08);
       --warn:    #f59e0b;
       --red:     #ef4444;
       --rdim:    rgba(239,68,68,0.08);
@@ -42,6 +47,7 @@
       background-size: 48px 48px; pointer-events: none;
     }
 
+    /* ── LOGIN ── */
     #login-section {
       position: fixed; inset: 0; z-index: 999;
       display: flex; align-items: center; justify-content: center; background: var(--bg);
@@ -54,6 +60,7 @@
     .login-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
     .login-sub { font-size: 0.82rem; color: var(--text2); margin-bottom: 1.5rem; }
 
+    /* ── NAV ── */
     nav {
       position: sticky; top: 0; z-index: 100;
       background: rgba(7,9,11,0.92); backdrop-filter: blur(20px);
@@ -71,37 +78,110 @@
     .nav-back { font-family: var(--mono); font-size: 0.68rem; color: var(--text2); text-decoration: none; transition: color 0.2s; }
     .nav-back:hover { color: var(--accent); }
 
+    /* ── LAYOUT ── */
     .wrap {
-      position: relative; z-index: 1; max-width: 1120px; margin: 0 auto;
-      padding: 1.5rem 1.25rem 5rem;
-      display: grid; grid-template-columns: 270px 1fr; gap: 1.25rem;
+      position: relative; z-index: 1; max-width: 1160px; margin: 0 auto;
+      padding: 1.25rem 1.25rem 5rem;
+      display: grid; grid-template-columns: 290px 1fr; gap: 1.25rem;
     }
-    @media (max-width: 768px) { .wrap { grid-template-columns: 1fr; } }
+    @media (max-width: 800px) { .wrap { grid-template-columns: 1fr; } }
 
-    .sidebar { display: flex; flex-direction: column; gap: 1rem; }
+    /* ── SIDEBAR ── */
+    .sidebar { display: flex; flex-direction: column; gap: 0.875rem; }
+
+    /* ── STATS STRIP ── */
+    .stats-strip {
+      display: grid; grid-template-columns: 1fr 1fr; gap: 6px;
+    }
+    .stat-card {
+      background: var(--s1); border: 1px solid var(--border); border-radius: 8px;
+      padding: 10px 12px; display: flex; flex-direction: column; gap: 3px;
+      transition: border-color 0.2s;
+    }
+    .stat-card:hover { border-color: var(--border2); }
+    .stat-label { font-family: var(--mono); font-size: 0.5rem; color: var(--text3); letter-spacing: 0.12em; text-transform: uppercase; }
+    .stat-value { font-family: var(--mono); font-size: 1.05rem; font-weight: 700; }
+    .stat-value.green  { color: var(--accent); }
+    .stat-value.blue   { color: var(--blue); }
+    .stat-value.warn   { color: var(--warn); }
+    .stat-value.cyan   { color: var(--cyan); }
+
+    /* ── SEARCH ── */
+    .search-wrap { position: relative; }
+    .search-icon {
+      position: absolute; left: 10px; top: 50%; transform: translateY(-50%);
+      color: var(--text3); font-size: 0.75rem; pointer-events: none;
+    }
+    #search-input {
+      width: 100%; background: var(--s1); border: 1px solid var(--border);
+      border-radius: 8px; color: var(--text); font-family: var(--mono); font-size: 0.72rem;
+      padding: 0.55rem 0.75rem 0.55rem 2rem; outline: none; transition: border-color 0.2s;
+    }
+    #search-input:focus { border-color: var(--accent); }
+    #search-input::placeholder { color: var(--text3); }
+    .search-clear {
+      position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+      background: none; border: none; color: var(--text3); cursor: pointer;
+      font-size: 0.65rem; padding: 3px 5px; border-radius: 4px; transition: color 0.15s;
+      display: none;
+    }
+    .search-clear:hover { color: var(--text); }
+    .search-clear.visible { display: block; }
+
+    /* ── FILTER TABS ── */
+    .filter-tabs {
+      display: flex; gap: 4px; flex-wrap: wrap;
+    }
+    .ftab {
+      font-family: var(--mono); font-size: 0.54rem; padding: 0.22rem 0.6rem; border-radius: 4px;
+      cursor: pointer; border: 1px solid var(--border); background: transparent; color: var(--text3);
+      transition: all 0.15s; letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .ftab:hover { border-color: var(--border2); color: var(--text2); }
+    .ftab.active { background: var(--adim); border-color: var(--aborder); color: var(--accent); }
+    .ftab.active.draft { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.25); color: var(--warn); }
+
+    /* ── PANEL ── */
     .panel { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
-    .panel-head { display: flex; align-items: center; gap: 8px; padding: 0.8rem 1rem; border-bottom: 1px solid var(--border); }
-    .ph-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); }
-    .ph-title { font-family: var(--mono); font-size: 0.62rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; flex: 1; }
+    .panel-head { display: flex; align-items: center; gap: 8px; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
+    .ph-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); flex-shrink: 0; }
+    .ph-title { font-family: var(--mono); font-size: 0.6rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; flex: 1; }
     .ph-count { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); }
 
-    .proj-list { max-height: 500px; overflow-y: auto; }
+    /* ── PROJECT LIST ── */
+    .proj-list { max-height: 440px; overflow-y: auto; }
     .proj-list::-webkit-scrollbar { width: 3px; }
     .proj-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
 
     .proj-item {
       display: flex; align-items: flex-start; justify-content: space-between;
-      padding: 0.7rem 1rem; border-bottom: 1px solid var(--border);
+      padding: 0.65rem 1rem; border-bottom: 1px solid var(--border);
       cursor: pointer; transition: background 0.15s; gap: 8px;
     }
     .proj-item:last-child { border-bottom: none; }
     .proj-item:hover { background: var(--s2); }
-    .proj-item.active { background: var(--adim); }
-    .proj-item-name { font-size: 0.82rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-    .proj-item-status { font-family: var(--mono); font-size: 0.52rem; padding: 0.15rem 0.4rem; border-radius: 3px; white-space: nowrap; flex-shrink: 0; }
-    .st-a { background: rgba(0,229,160,0.1); color: var(--accent); }
-    .st-w { background: rgba(245,158,11,0.1); color: var(--warn); }
-    .st-d { background: var(--s3); color: var(--text3); }
+    .proj-item.active { background: var(--adim); border-left: 2px solid var(--accent); }
+    .proj-item-info { flex: 1; min-width: 0; }
+    .proj-item-name { font-size: 0.8rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 4px; }
+    .proj-item-badges { display: flex; gap: 4px; align-items: center; flex-wrap: wrap; }
+    .proj-item-status { font-family: var(--mono); font-size: 0.5rem; padding: 0.12rem 0.42rem; border-radius: 3px; white-space: nowrap; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.04em; }
+    .st-a  { background: rgba(0,229,160,0.1); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+    .st-w  { background: rgba(245,158,11,0.1); color: var(--warn); border: 1px solid rgba(245,158,11,0.2); }
+    .st-s  { background: rgba(59,130,246,0.1); color: var(--blue); border: 1px solid rgba(59,130,246,0.2); }
+    .st-c  { background: rgba(0,200,240,0.1); color: var(--cyan); border: 1px solid rgba(0,200,240,0.2); }
+    .st-p  { background: rgba(124,109,250,0.1); color: var(--purple); border: 1px solid rgba(124,109,250,0.2); }
+    .st-d  { background: var(--s3); color: var(--text3); border: 1px solid var(--border); }
+    .live-dot { font-family: var(--mono); font-size: 0.48rem; padding: 0.1rem 0.38rem; border-radius: 3px; }
+    .live-dot.on  { background: rgba(0,229,160,0.12); color: var(--accent); border: 1px solid rgba(0,229,160,0.2); }
+    .live-dot.off { background: var(--s3); color: var(--text3); border: 1px solid var(--border); }
+
+    /* confirm badge on list */
+    .conf-badge { font-family: var(--mono); font-size: 0.46rem; padding: 0.1rem 0.38rem; border-radius: 3px; text-transform: uppercase; letter-spacing: 0.04em; }
+    .conf-badge.confirmed { background: rgba(0,200,240,0.1); color: var(--cyan); border: 1px solid rgba(0,200,240,0.2); }
+    .conf-badge.potential { background: rgba(124,109,250,0.1); color: var(--purple); border: 1px solid rgba(124,109,250,0.2); }
+    .conf-badge.ended     { background: rgba(100,100,100,0.1); color: var(--text3); border: 1px solid rgba(100,100,100,0.2); }
+
+    .list-empty { padding: 2rem 1rem; text-align: center; font-family: var(--mono); font-size: 0.65rem; color: var(--text3); }
 
     .btn-new {
       width: 100%; padding: 0.7rem;
@@ -111,11 +191,33 @@
     }
     .btn-new:hover { background: rgba(0,229,160,0.14); }
 
+    /* ── RECENT DRAFTS SECTION ── */
+    .drafts-section { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+    .drafts-head {
+      display: flex; align-items: center; gap: 8px; padding: 0.75rem 1rem;
+      border-bottom: 1px solid var(--border);
+      background: linear-gradient(90deg, rgba(245,158,11,0.04), transparent);
+    }
+    .drafts-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--warn); box-shadow: 0 0 6px var(--warn); flex-shrink: 0; }
+    .draft-item {
+      display: flex; align-items: center; gap: 10px; padding: 0.6rem 1rem;
+      border-bottom: 1px solid var(--border); cursor: pointer; transition: background 0.15s;
+    }
+    .draft-item:last-child { border-bottom: none; }
+    .draft-item:hover { background: var(--s2); }
+    .draft-item-icon { width: 28px; height: 28px; border-radius: 7px; border: 1px solid var(--border2); background: var(--s3); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; }
+    .draft-item-icon img { width: 100%; height: 100%; object-fit: cover; }
+    .draft-item-info { flex: 1; min-width: 0; }
+    .draft-item-name { font-size: 0.76rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+    .draft-item-sub { font-family: var(--mono); font-size: 0.5rem; color: var(--text3); margin-top: 2px; }
+
+    /* ── FORM AREA ── */
     .form-area { display: flex; flex-direction: column; gap: 1rem; }
     .form-panel { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
     .form-header {
       display: flex; align-items: center; justify-content: space-between;
       padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); flex-wrap: wrap; gap: 10px;
+      background: linear-gradient(105deg, rgba(0,229,160,0.03) 0%, transparent 60%);
     }
     .form-title { font-size: 0.95rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
     .edit-badge {
@@ -157,6 +259,22 @@
     textarea { min-height: 90px; line-height: 1.5; }
     textarea.tall { min-height: 130px; }
 
+    /* ── CONFIRMATION STATUS PICKER ── */
+    .confirm-picker { display: flex; gap: 6px; }
+    .confirm-opt {
+      flex: 1; padding: 0.55rem 0.5rem; border-radius: 6px; border: 1px solid var(--border2);
+      background: var(--s2); color: var(--text3); font-family: var(--mono); font-size: 0.62rem;
+      font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s;
+      letter-spacing: 0.04em; text-transform: uppercase;
+    }
+    .confirm-opt:hover { border-color: var(--border); color: var(--text2); }
+    .confirm-opt.selected.confirmed { background: rgba(0,200,240,0.12); border-color: rgba(0,200,240,0.35); color: var(--cyan); }
+    .confirm-opt.selected.potential { background: rgba(124,109,250,0.12); border-color: rgba(124,109,250,0.35); color: var(--purple); }
+    .confirm-opt.selected.ended     { background: rgba(100,100,100,0.12); border-color: rgba(100,100,100,0.35); color: var(--text2); }
+    .confirm-opt.selected.tba       { background: var(--s3); border-color: var(--border); color: var(--text2); }
+    #f-confirmation-status { display: none; }
+
+    /* ── TESTNET ── */
     .testnet-builder { display: flex; flex-direction: column; gap: 8px; }
     .testnet-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; align-items: center; }
     .testnet-row input { margin: 0; }
@@ -174,6 +292,7 @@
     }
     .btn-add-testnet:hover { border-color: var(--accent); color: var(--accent); }
 
+    /* ── ROADMAP ── */
     .roadmap-builder { display: flex; flex-direction: column; gap: 10px; }
     .roadmap-card {
       background: var(--s2); border: 1px solid var(--border2); border-radius: 8px; overflow: hidden;
@@ -222,6 +341,7 @@
       border: 1px dashed var(--border); border-radius: 8px;
     }
 
+    /* ── BUTTONS ── */
     .btn-save {
       display: inline-flex; align-items: center; gap: 6px; padding: 0.62rem 1.4rem;
       background: var(--accent); color: #000; font-family: var(--mono); font-size: 0.7rem;
@@ -243,6 +363,7 @@
     }
     .btn-cancel:hover { border-color: var(--text2); color: var(--text); }
 
+    /* ── PUBLISH TOGGLE ── */
     .publish-section {
       padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
       display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px;
@@ -253,6 +374,7 @@
     .publish-label { font-size: 0.82rem; font-weight: 600; transition: color 0.25s; }
     .publish-note { font-family: var(--mono); font-size: 0.62rem; color: var(--text3); }
 
+    /* ── TOAST ── */
     .toast {
       position: fixed; bottom: 2rem; right: 2rem; padding: 0.75rem 1.25rem; border-radius: 8px;
       font-family: var(--mono); font-size: 0.7rem; font-weight: 700;
@@ -262,13 +384,15 @@
     .toast.success { background: var(--accent); color: #000; }
     .toast.error   { background: var(--red); color: #fff; }
 
+    /* ── EMPTY / LOADING ── */
     .empty-form { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; gap: 1rem; text-align: center; }
     .empty-icon { font-size: 2.5rem; }
     .empty-text { color: var(--text3); font-family: var(--mono); font-size: 0.72rem; line-height: 1.6; }
     .spinner { width: 18px; height: 18px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
     @keyframes spin { to { transform: rotate(360deg); } }
-    .list-loading { padding: 2rem; text-align: center; font-family: var(--mono); font-size: 0.68rem; color: var(--text3); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .list-loading { padding: 1.5rem; text-align: center; font-family: var(--mono); font-size: 0.68rem; color: var(--text3); display: flex; flex-direction: column; align-items: center; gap: 10px; }
 
+    /* ── LOGO UPLOAD ── */
     .logo-upload-wrap { display: flex; flex-direction: column; gap: 8px; }
     .logo-preview-row { display: flex; align-items: center; gap: 12px; }
     .logo-preview-box {
@@ -292,6 +416,7 @@
     .logo-upload-status.success { display: block; background: var(--adim); border: 1px solid var(--aborder); color: var(--accent); }
     .logo-upload-status.error   { display: block; background: var(--rdim); border: 1px solid rgba(239,68,68,0.2); color: var(--red); }
 
+    /* ── MODAL ── */
     .modal-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(7,9,11,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; }
     .modal-box { background: var(--s1); border: 1px solid var(--border2); border-radius: 14px; padding: 2rem; max-width: 420px; width: 90%; }
     .modal-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 8px; }
@@ -353,23 +478,64 @@
   </nav>
 
   <div class="wrap">
+    <!-- ── SIDEBAR ── -->
     <div class="sidebar">
+
+      <!-- Stats -->
+      <div class="stats-strip" id="stats-strip">
+        <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value green" id="stat-total">—</div></div>
+        <div class="stat-card"><div class="stat-label">Live</div><div class="stat-value cyan" id="stat-live">—</div></div>
+        <div class="stat-card"><div class="stat-label">Draft</div><div class="stat-value warn" id="stat-draft">—</div></div>
+        <div class="stat-card"><div class="stat-label">Confirmed</div><div class="stat-value blue" id="stat-confirmed">—</div></div>
+      </div>
+
+      <!-- Add button -->
       <button class="btn-new" onclick="newForm()">＋ Tambah Airdrop Baru</button>
+
+      <!-- Search -->
+      <div class="search-wrap">
+        <span class="search-icon">🔍</span>
+        <input type="text" id="search-input" placeholder="Cari proyek..." oninput="onSearch(this.value)">
+        <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
+      </div>
+
+      <!-- Filter tabs -->
+      <div class="filter-tabs">
+        <button class="ftab active" data-filter="all" onclick="setFilter('all',this)">Semua</button>
+        <button class="ftab" data-filter="live" onclick="setFilter('live',this)">● Live</button>
+        <button class="ftab draft" data-filter="draft" onclick="setFilter('draft',this)">○ Draft</button>
+      </div>
+
+      <!-- Project list -->
       <div class="panel">
         <div class="panel-head">
           <div class="ph-dot"></div>
-          <span class="ph-title">Semua Proyek</span>
+          <span class="ph-title">Proyek</span>
           <span class="ph-count" id="proj-count">—</span>
         </div>
         <div class="proj-list" id="proj-list">
           <div class="list-loading"><div class="spinner"></div><span>Memuat...</span></div>
         </div>
       </div>
+
+      <!-- Drafts / Recent unpublished -->
+      <div class="drafts-section" id="drafts-section" style="display:none">
+        <div class="drafts-head">
+          <div class="drafts-dot"></div>
+          <span class="ph-title" style="color:var(--warn)">Belum Dipublish</span>
+          <span class="ph-count" style="color:var(--warn)" id="drafts-count">0</span>
+        </div>
+        <div id="drafts-list"></div>
+      </div>
+
+      <!-- GitHub token setup -->
       <button class="btn-new" onclick="openTokenModal()" style="border-color:rgba(59,130,246,0.3);color:var(--blue);background:rgba(59,130,246,0.06)">
         🔑 Setup GitHub Token
       </button>
+
     </div>
 
+    <!-- ── FORM AREA ── -->
     <div class="form-area" id="form-area">
       <div class="panel">
         <div class="empty-form">
@@ -390,8 +556,34 @@
   const GH_BRANCH     = 'main';
   const GH_LOGOS_PATH = 'assets/logos';
 
-  // ── GOOGLE TOKEN (untuk auth notify) ─────────────────
   let _adminGoogleToken = null;
+
+  // ── STATUS OPTIONS ────────────────────────────────────
+  const STATUS_OPTIONS = [
+    'Active',
+    'Waitlist',
+    'Season 1',
+    'Season 2',
+    'Season 3',
+    'Season 4',
+    'Season 5',
+    'Seed Round',
+    'Private Round',
+    'Potential',
+    'Confirmed',
+    'Testnet',
+    'Mainnet',
+    'Listing / Selesai',
+    'Ended',
+    'TBA',
+  ];
+
+  const CONFIRM_OPTIONS = [
+    { value: 'potential',  label: '◈ Potential',  cls: 'potential' },
+    { value: 'confirmed',  label: '✓ Confirmed',  cls: 'confirmed' },
+    { value: 'ended',      label: '✕ Ended',      cls: 'ended' },
+    { value: 'tba',        label: '— TBA',        cls: 'tba' },
+  ];
 
   // ── GITHUB TOKEN ──────────────────────────────────────
   function getGHToken() { return localStorage.getItem('gh_token_airdropxi') || ''; }
@@ -408,7 +600,7 @@
     const val = document.getElementById('token-input').value.trim();
     if (!val) { showToast('Token tidak boleh kosong!', 'error'); return; }
     if (!val.startsWith('ghp_') && !val.startsWith('github_pat_')) {
-      if (!confirm('Token terlihat tidak valid (biasanya diawali "ghp_"). Simpan tetap?')) return;
+      if (!confirm('Token terlihat tidak valid. Simpan tetap?')) return;
     }
     localStorage.setItem('gh_token_airdropxi', val);
     closeTokenModal();
@@ -441,8 +633,8 @@
     );
     if (!res.ok) {
       const err = await res.json().catch(() => ({}));
-      if (res.status === 401) throw new Error('Token tidak valid atau expired. Update token kamu!');
-      if (res.status === 403) throw new Error('Token tidak punya akses repo. Pastikan centang "repo" saat buat token.');
+      if (res.status === 401) throw new Error('Token tidak valid atau expired.');
+      if (res.status === 403) throw new Error('Token tidak punya akses repo.');
       throw new Error(err.message || `GitHub API error ${res.status}`);
     }
     const data = await res.json();
@@ -483,8 +675,8 @@
     const file = e.target.files?.[0];
     if (!file) return;
     const allowed = ['image/png','image/jpeg','image/jpg','image/webp','image/svg+xml','image/gif'];
-    if (!allowed.includes(file.type)) { showToast('Format tidak didukung. Gunakan PNG, JPG, WEBP, atau SVG.', 'error'); return; }
-    if (file.size > 2 * 1024 * 1024) { showToast('Ukuran file terlalu besar. Maksimal 2MB.', 'error'); return; }
+    if (!allowed.includes(file.type)) { showToast('Format tidak didukung.', 'error'); return; }
+    if (file.size > 2 * 1024 * 1024) { showToast('File terlalu besar. Maks 2MB.', 'error'); return; }
     const statusEl  = document.getElementById('logo-upload-status');
     const uploadBtn = document.getElementById('btn-upload-logo');
     statusEl.className = 'logo-upload-status uploading';
@@ -496,8 +688,8 @@
       pendingLogoUrl = rawUrl;
       updateLogoPreview(rawUrl);
       statusEl.className = 'logo-upload-status success';
-      statusEl.textContent = '✓ Upload berhasil! Klik Simpan untuk menyimpan perubahan.';
-      showToast('✓ Gambar berhasil diupload ke GitHub!', 'success');
+      statusEl.textContent = '✓ Upload berhasil! Klik Simpan untuk menyimpan.';
+      showToast('✓ Gambar berhasil diupload!', 'success');
     } catch(err) {
       statusEl.className = 'logo-upload-status error';
       statusEl.textContent = '✕ ' + err.message;
@@ -513,53 +705,149 @@
     if (statusEl) { statusEl.className = 'logo-upload-status'; statusEl.textContent = ''; }
   }
 
-  // ── LOAD LIST ─────────────────────────────────────────
+  // ── STATE ─────────────────────────────────────────────
   let projects  = [];
   let editingId = null;
+  let searchQ   = '';
+  let filterMode = 'all'; // all | live | draft
 
+  // ── LOAD LIST ─────────────────────────────────────────
   async function loadProjects() {
     try {
       const res = await fetch('/api/admin-airdrop');
       if (!res.ok) throw new Error('Gagal fetch');
       projects = await res.json();
+      updateStats();
       renderList();
+      renderDrafts();
     } catch(e) {
       document.getElementById('proj-list').innerHTML = `<div class="list-loading" style="color:var(--red)">${e.message}</div>`;
     }
   }
 
+  function updateStats() {
+    const total     = projects.length;
+    const live      = projects.filter(p => p.published === true).length;
+    const draft     = projects.filter(p => !p.published).length;
+    const confirmed = projects.filter(p => (p.confirmation_status||'').toLowerCase().includes('confirmed')).length;
+    document.getElementById('stat-total').textContent     = total;
+    document.getElementById('stat-live').textContent      = live;
+    document.getElementById('stat-draft').textContent     = draft;
+    document.getElementById('stat-confirmed').textContent = confirmed;
+  }
+
+  function getFilteredProjects() {
+    let list = projects;
+    // filter mode
+    if (filterMode === 'live')  list = list.filter(p => p.published === true);
+    if (filterMode === 'draft') list = list.filter(p => !p.published);
+    // search
+    if (searchQ.trim()) {
+      const q = searchQ.toLowerCase();
+      list = list.filter(p =>
+        (p.name || '').toLowerCase().includes(q) ||
+        (p.status || '').toLowerCase().includes(q) ||
+        (p.tags || '').toLowerCase().includes(q) ||
+        (p.confirmation_status || '').toLowerCase().includes(q)
+      );
+    }
+    return list;
+  }
+
   function renderList() {
-    const list = document.getElementById('proj-list');
-    document.getElementById('proj-count').textContent = projects.length;
+    const list     = document.getElementById('proj-list');
+    const filtered = getFilteredProjects();
+    document.getElementById('proj-count').textContent = filtered.length + '/' + projects.length;
+
     if (!projects.length) { list.innerHTML = '<div class="list-loading">Belum ada proyek.</div>'; return; }
-    list.innerHTML = projects.map(p => {
-      const isLive = p.published === true;
+    if (!filtered.length) { list.innerHTML = '<div class="list-empty">Tidak ada hasil.</div>'; return; }
+
+    list.innerHTML = filtered.map(p => {
+      const isLive   = p.published === true;
+      const confVal  = (p.confirmation_status || '').toLowerCase();
+      const confCls  = confVal.includes('confirmed') ? 'confirmed' : confVal.includes('potential') ? 'potential' : confVal.includes('ended') ? 'ended' : '';
+      const confLbl  = confVal.includes('confirmed') ? '✓ Confirmed' : confVal.includes('potential') ? '◈ Potential' : confVal.includes('ended') ? '✕ Ended' : '';
       return `
         <div class="proj-item ${editingId == p.id ? 'active' : ''}" onclick="loadEdit(${p.id})">
-          <div style="flex:1;min-width:0">
+          <div class="proj-item-info">
             <div class="proj-item-name">${esc(p.name)}</div>
-            <div style="margin-top:4px;display:flex;gap:4px;align-items:center">
+            <div class="proj-item-badges">
               <span class="proj-item-status ${getStCls(p.status)}">${esc(p.status || 'TBA')}</span>
-              <span style="font-family:var(--mono);font-size:0.48rem;padding:0.12rem 0.38rem;border-radius:3px;
-                background:${isLive ? 'rgba(0,229,160,0.12)' : 'rgba(100,100,100,0.12)'};
-                color:${isLive ? 'var(--accent)' : 'var(--text3)'}">
-                ${isLive ? '● LIVE' : '○ DRAFT'}
-              </span>
+              <span class="live-dot ${isLive ? 'on' : 'off'}">${isLive ? '● LIVE' : '○ DRAFT'}</span>
+              ${confCls ? `<span class="conf-badge ${confCls}">${confLbl}</span>` : ''}
             </div>
           </div>
         </div>`;
     }).join('');
   }
 
+  function renderDrafts() {
+    const draftList = projects.filter(p => !p.published);
+    const section   = document.getElementById('drafts-section');
+    const listEl    = document.getElementById('drafts-list');
+    const countEl   = document.getElementById('drafts-count');
+
+    if (!draftList.length) { section.style.display = 'none'; return; }
+
+    section.style.display = 'block';
+    countEl.textContent   = draftList.length;
+
+    // show max 5 recent
+    const recent = draftList.slice(0, 5);
+    listEl.innerHTML = recent.map(p => `
+      <div class="draft-item" onclick="loadEdit(${p.id})">
+        <div class="draft-item-icon">
+          ${p.logo_url
+            ? `<img src="${esc(p.logo_url)}" onerror="this.parentElement.textContent='🪂'">`
+            : '🪂'}
+        </div>
+        <div class="draft-item-info">
+          <div class="draft-item-name">${esc(p.name)}</div>
+          <div class="draft-item-sub">${esc(p.status || 'TBA')} · Belum dipublish</div>
+        </div>
+      </div>`).join('');
+
+    if (draftList.length > 5) {
+      listEl.innerHTML += `<div style="padding:0.5rem 1rem;font-family:var(--mono);font-size:0.55rem;color:var(--text3);text-align:center">+${draftList.length - 5} draft lainnya di list atas</div>`;
+    }
+  }
+
+  // ── SEARCH & FILTER ───────────────────────────────────
+  function onSearch(val) {
+    searchQ = val;
+    const clearBtn = document.getElementById('search-clear');
+    if (clearBtn) clearBtn.classList.toggle('visible', val.length > 0);
+    renderList();
+  }
+
+  function clearSearch() {
+    searchQ = '';
+    const input = document.getElementById('search-input');
+    if (input) input.value = '';
+    const clearBtn = document.getElementById('search-clear');
+    if (clearBtn) clearBtn.classList.remove('visible');
+    renderList();
+  }
+
+  function setFilter(mode, btn) {
+    filterMode = mode;
+    document.querySelectorAll('.ftab').forEach(t => t.classList.remove('active'));
+    btn.classList.add('active');
+    renderList();
+  }
+
+  // ── HELPERS ───────────────────────────────────────────
   function getStCls(s) {
     const l = (s||'').toLowerCase();
-    if (l.includes('active')) return 'st-a';
-    if (l.includes('wait'))   return 'st-w';
+    if (l.includes('active') || l.includes('mainnet')) return 'st-a';
+    if (l.includes('wait'))        return 'st-w';
+    if (l.includes('season'))      return 'st-s';
+    if (l.includes('confirmed') || l.includes('testnet')) return 'st-c';
+    if (l.includes('potential'))   return 'st-p';
     return 'st-d';
   }
 
-  function newForm() { editingId = null; renderList(); renderForm(null); refreshRoadmapNums(); }
-
+  function newForm() { editingId = null; renderList(); renderForm(null); }
   function loadEdit(id) {
     editingId = id; renderList();
     fetch(`/api/admin-airdrop?id=${id}`)
@@ -577,6 +865,7 @@
     const d      = data || {};
     const isEdit = !!data;
     const isLive = d.published === true;
+    const confirmVal = (d.confirmation_status || 'potential').toLowerCase();
 
     let testnetLinks = [];
     if (d.testnet_links) {
@@ -601,6 +890,7 @@
           </div>
         </div>
 
+        <!-- PUBLISH TOGGLE -->
         <div class="publish-section" style="background:${isLive ? 'rgba(0,229,160,0.04)' : 'rgba(245,158,11,0.03)'}">
           <div class="publish-toggle-wrap">
             <div class="toggle-track" id="toggle-track" style="background:${isLive ? 'var(--accent)' : 'var(--border2)'}" onclick="togglePublish()">
@@ -628,9 +918,11 @@
               <input id="f-name" type="text" placeholder="e.g. Blockchain.com" value="${esc(d.name||'')}">
             </div>
             <div class="field">
-              <label>Status <span class="req">*</span></label>
+              <label>Status Airdrop <span class="req">*</span>
+                <span class="hint">— fase aktif / season</span>
+              </label>
               <select id="f-status">
-                ${['Active','Waitlist','Seed Round','Potential','Confirmed','Listing / Selesai'].map(s =>
+                ${STATUS_OPTIONS.map(s =>
                   `<option value="${s}" ${d.status===s?'selected':''}>${s}</option>`
                 ).join('')}
               </select>
@@ -643,6 +935,24 @@
               <label>Tags <span class="hint">pisah koma</span></label>
               <input id="f-tags" type="text" placeholder="DeFi, AI, Layer2" value="${esc(d.tags||'')}">
             </div>
+          </div>
+
+          <!-- CONFIRMATION STATUS -->
+          <div style="margin-top:0.875rem">
+            <label style="display:block;margin-bottom:8px">
+              Confirmation Status
+              <span class="hint">— tampil sebagai badge di bawah logo pada guide page</span>
+            </label>
+            <div class="confirm-picker" id="confirm-picker">
+              ${CONFIRM_OPTIONS.map(opt => `
+                <button type="button"
+                  class="confirm-opt ${opt.cls} ${confirmVal === opt.value || (confirmVal === '' && opt.value === 'potential') ? 'selected ' + opt.cls : ''}"
+                  data-value="${opt.value}"
+                  onclick="selectConfirm('${opt.value}')">
+                  ${opt.label}
+                </button>`).join('')}
+            </div>
+            <input type="hidden" id="f-confirmation-status" value="${esc(confirmVal || 'potential')}">
           </div>
         </div>
 
@@ -691,7 +1001,7 @@
             </div>
             <div class="field">
               <label>Tasks (EN)</label>
-              <textarea id="f-tasksen" class="tall" placeholder="1. Register | Visit https://... and click Sign Up&#10;2. Connect wallet | Connect your MetaMask">${esc(d.tasksEN||'')}</textarea>
+              <textarea id="f-tasksen" class="tall" placeholder="1. Register | Visit https://... and click Sign Up">${esc(d.tasksEN||'')}</textarea>
             </div>
           </div>
         </div>
@@ -701,7 +1011,7 @@
           <div class="sec-lbl">
             Testnet / Link Penting
             <span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400">
-              — Maksimal 5 link. Tampil biru & clickable di halaman guide.
+              — Maks 5 link. Tampil sebagai dropdown di guide page.
             </span>
           </div>
           <div class="testnet-builder" id="testnet-builder">
@@ -715,13 +1025,13 @@
           <div class="sec-lbl">
             Roadmap
             <span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400">
-              — Fase perjalanan proyek. Klik badge status untuk toggle planned → in_progress → done.
+              — Klik badge status untuk toggle: planned → in_progress → done
             </span>
           </div>
           <div class="roadmap-builder" id="roadmap-builder">
             ${roadmapItems.length
               ? roadmapItems.map((item, i) => roadmapCard(i, item)).join('')
-              : '<div class="roadmap-empty">Belum ada fase roadmap. Klik tombol di bawah untuk menambah.</div>'
+              : '<div class="roadmap-empty">Belum ada fase. Klik tombol di bawah untuk menambah.</div>'
             }
           </div>
           <button class="btn-add-roadmap" onclick="addRoadmapCard()" style="margin-top:10px">＋ Tambah Fase</button>
@@ -768,7 +1078,7 @@
               <input id="f-tge" type="text" placeholder="Q3 2026 / TBA" value="${esc(d.tge_date||'')}">
             </div>
             <div class="field" style="grid-column: span 2">
-              <label>Logo Proyek <span class="hint">PNG/JPG/WEBP/SVG, maks 2MB — upload langsung ke GitHub</span></label>
+              <label>Logo Proyek <span class="hint">PNG/JPG/WEBP/SVG, maks 2MB</span></label>
               <div class="logo-upload-wrap">
                 <div class="logo-preview-row">
                   <div class="logo-preview-box" id="logo-preview-box">🖼️</div>
@@ -792,30 +1102,12 @@
         <div class="form-sec">
           <div class="sec-lbl">Sosial Media</div>
           <div class="fg">
-            <div class="field">
-              <label for="f-twitter">Twitter / X</label>
-              <input id="f-twitter" type="url" placeholder="https://x.com/..." value="${esc(d.twitter||'')}">
-            </div>
-            <div class="field">
-              <label for="f-discord">Discord</label>
-              <input id="f-discord" type="url" placeholder="https://discord.gg/..." value="${esc(d.discord||'')}">
-            </div>
-            <div class="field">
-              <label for="f-telegram">Telegram</label>
-              <input id="f-telegram" type="url" placeholder="https://t.me/..." value="${esc(d.telegram||'')}">
-            </div>
-            <div class="field">
-              <label for="f-linkedin">LinkedIn</label>
-              <input id="f-linkedin" type="url" placeholder="https://linkedin.com/company/..." value="${esc(d.linkedin||'')}">
-            </div>
-            <div class="field">
-              <label for="f-youtube">YouTube</label>
-              <input id="f-youtube" type="url" placeholder="https://youtube.com/@..." value="${esc(d.youtube||'')}">
-            </div>
-            <div class="field">
-              <label for="f-instagram">Instagram</label>
-              <input id="f-instagram" type="url" placeholder="https://instagram.com/..." value="${esc(d.instagram||'')}">
-            </div>
+            <div class="field"><label>Twitter / X</label><input id="f-twitter" type="url" placeholder="https://x.com/..." value="${esc(d.twitter||'')}"></div>
+            <div class="field"><label>Discord</label><input id="f-discord" type="url" placeholder="https://discord.gg/..." value="${esc(d.discord||'')}"></div>
+            <div class="field"><label>Telegram</label><input id="f-telegram" type="url" placeholder="https://t.me/..." value="${esc(d.telegram||'')}"></div>
+            <div class="field"><label>LinkedIn</label><input id="f-linkedin" type="url" placeholder="https://linkedin.com/company/..." value="${esc(d.linkedin||'')}"></div>
+            <div class="field"><label>YouTube</label><input id="f-youtube" type="url" placeholder="https://youtube.com/@..." value="${esc(d.youtube||'')}"></div>
+            <div class="field"><label>Instagram</label><input id="f-instagram" type="url" placeholder="https://instagram.com/..." value="${esc(d.instagram||'')}"></div>
           </div>
         </div>
 
@@ -839,6 +1131,15 @@
     }
   }
 
+  // ── CONFIRMATION STATUS PICKER ────────────────────────
+  function selectConfirm(value) {
+    document.getElementById('f-confirmation-status').value = value;
+    document.querySelectorAll('.confirm-opt').forEach(btn => {
+      const isThis = btn.dataset.value === value;
+      btn.className = 'confirm-opt ' + btn.dataset.value + (isThis ? ' selected ' + btn.dataset.value : '');
+    });
+  }
+
   // ── PUBLISH TOGGLE ────────────────────────────────────
   function togglePublish() {
     const cb    = document.getElementById('f-published');
@@ -849,9 +1150,9 @@
     cb.checked = !cb.checked;
     const on = cb.checked;
     track.style.background = on ? 'var(--accent)' : 'var(--border2)';
-    thumb.style.left        = on ? '23px' : '3px';
-    label.style.color       = on ? 'var(--accent)' : 'var(--warn)';
-    label.textContent       = on ? '✓ Published — Tampil di index publik' : '○ Draft — Tidak tampil di index';
+    thumb.style.left       = on ? '23px' : '3px';
+    label.style.color      = on ? 'var(--accent)' : 'var(--warn)';
+    label.textContent      = on ? '✓ Published — Tampil di index publik' : '○ Draft — Tidak tampil di index';
   }
 
   // ── TESTNET ───────────────────────────────────────────
@@ -877,7 +1178,11 @@
     builder.querySelectorAll('.testnet-row').forEach(row => {
       const label = row.querySelector('.tnet-label')?.value?.trim() || '';
       const url   = row.querySelector('.tnet-url')?.value?.trim()   || '';
-      if (url) links.push({ label: label || url, url });
+      if (url) {
+        let finalUrl = url;
+        if (!/^https?:\/\//i.test(finalUrl)) finalUrl = 'https://' + finalUrl;
+        links.push({ label: label || finalUrl, url: finalUrl });
+      }
     });
     return links.length ? JSON.stringify(links) : null;
   }
@@ -905,7 +1210,7 @@
             <input type="text" class="rm-phase-label" placeholder="Phase 1" value="${esc(item.phase_label||'')}">
           </div>
           <div class="field">
-            <label>Phase Title <span class="req">*</span> <span class="hint">e.g. Testnet Launch</span></label>
+            <label>Phase Title <span class="req">*</span></label>
             <input type="text" class="rm-phase-title" placeholder="Testnet Launch" value="${esc(item.phase_title||'')}">
           </div>
           <div class="field full">
@@ -913,11 +1218,11 @@
             <textarea class="rm-phase-desc" placeholder="Deskripsi singkat fase ini...">${esc(item.phase_desc||'')}</textarea>
           </div>
           <div class="field">
-            <label>Source URL <span class="hint">link referensi roadmap</span></label>
+            <label>Source URL</label>
             <input type="url" class="rm-source-url" placeholder="https://..." value="${esc(item.source_url||'')}">
           </div>
           <div class="field">
-            <label>Source Label <span class="hint">default: Official Roadmap</span></label>
+            <label>Source Label</label>
             <input type="text" class="rm-source-label" placeholder="Official Roadmap" value="${esc(item.source_label||'Official Roadmap')}">
           </div>
         </div>
@@ -943,7 +1248,7 @@
     const emptyEl = builder.querySelector('.roadmap-empty');
     if (emptyEl) emptyEl.remove();
     const count = builder.querySelectorAll('.roadmap-card').length;
-    if (count >= 20) { showToast('Maksimal 20 fase roadmap', 'error'); return; }
+    if (count >= 20) { showToast('Maksimal 20 fase', 'error'); return; }
     builder.insertAdjacentHTML('beforeend', roadmapCard(Date.now(), {}));
     refreshRoadmapNums();
   }
@@ -954,7 +1259,7 @@
     refreshRoadmapNums();
     const builder = document.getElementById('roadmap-builder');
     if (builder && builder.querySelectorAll('.roadmap-card').length === 0) {
-      builder.innerHTML = '<div class="roadmap-empty">Belum ada fase roadmap. Klik tombol di bawah untuk menambah.</div>';
+      builder.innerHTML = '<div class="roadmap-empty">Belum ada fase. Klik tombol di bawah untuk menambah.</div>';
     }
   }
 
@@ -1001,37 +1306,39 @@
     const name = document.getElementById('f-name')?.value?.trim();
     if (!name) { showToast('Nama proyek wajib diisi!', 'error'); return; }
 
-    const isPublished  = document.getElementById('f-published')?.checked || false;
-    const logoUrl      = pendingLogoUrl || null;
-    const roadmapItems = getRoadmapItems();
+    const isPublished      = document.getElementById('f-published')?.checked || false;
+    const logoUrl          = pendingLogoUrl || null;
+    const roadmapItems     = getRoadmapItems();
+    const confirmStatus    = document.getElementById('f-confirmation-status')?.value || 'potential';
 
     const payload = {
       name,
-      status:        document.getElementById('f-status')?.value          || null,
-      published:     isPublished,
-      link:          document.getElementById('f-link')?.value?.trim()     || null,
-      tags:          document.getElementById('f-tags')?.value?.trim()     || null,
-      RaisedID:      document.getElementById('f-raisedid')?.value?.trim() || null,
-      RaisedEN:      document.getElementById('f-raiseden')?.value?.trim() || null,
-      tasksID:       document.getElementById('f-tasksid')?.value?.trim()  || null,
-      tasksEN:       document.getElementById('f-tasksen')?.value?.trim()  || null,
-      descriptionID: document.getElementById('f-descid')?.value?.trim()   || null,
-      descriptionEN: document.getElementById('f-descen')?.value?.trim()   || null,
-      ticker:        document.getElementById('f-ticker')?.value?.trim()   || null,
-      total_supply:  document.getElementById('f-supply')?.value?.trim()   || null,
-      network:       document.getElementById('f-network')?.value?.trim()  || null,
-      tge_date:      document.getElementById('f-tge')?.value?.trim()      || null,
-      logo_url:      logoUrl,
-      twitter:       document.getElementById('f-twitter')?.value?.trim()  || null,
-      discord:       document.getElementById('f-discord')?.value?.trim()  || null,
-      telegram:      document.getElementById('f-telegram')?.value?.trim() || null,
-      linkedin:      document.getElementById('f-linkedin')?.value?.trim() || null,
-      youtube:       document.getElementById('f-youtube')?.value?.trim()  || null,
-      instagram:     document.getElementById('f-instagram')?.value?.trim()|| null,
-      faqID:         document.getElementById('f-faqid')?.value?.trim()    || null,
-      faqEN:         document.getElementById('f-faqen')?.value?.trim()    || null,
-      testnet_links: getTestnetLinks(),
-      _roadmap:      roadmapItems,
+      status:               document.getElementById('f-status')?.value           || null,
+      confirmation_status:  confirmStatus,
+      published:            isPublished,
+      link:                 document.getElementById('f-link')?.value?.trim()      || null,
+      tags:                 document.getElementById('f-tags')?.value?.trim()      || null,
+      RaisedID:             document.getElementById('f-raisedid')?.value?.trim()  || null,
+      RaisedEN:             document.getElementById('f-raiseden')?.value?.trim()  || null,
+      tasksID:              document.getElementById('f-tasksid')?.value?.trim()   || null,
+      tasksEN:              document.getElementById('f-tasksen')?.value?.trim()   || null,
+      descriptionID:        document.getElementById('f-descid')?.value?.trim()    || null,
+      descriptionEN:        document.getElementById('f-descen')?.value?.trim()    || null,
+      ticker:               document.getElementById('f-ticker')?.value?.trim()    || null,
+      total_supply:         document.getElementById('f-supply')?.value?.trim()    || null,
+      network:              document.getElementById('f-network')?.value?.trim()   || null,
+      tge_date:             document.getElementById('f-tge')?.value?.trim()       || null,
+      logo_url:             logoUrl,
+      twitter:              document.getElementById('f-twitter')?.value?.trim()   || null,
+      discord:              document.getElementById('f-discord')?.value?.trim()   || null,
+      telegram:             document.getElementById('f-telegram')?.value?.trim()  || null,
+      linkedin:             document.getElementById('f-linkedin')?.value?.trim()  || null,
+      youtube:              document.getElementById('f-youtube')?.value?.trim()   || null,
+      instagram:            document.getElementById('f-instagram')?.value?.trim() || null,
+      faqID:                document.getElementById('f-faqid')?.value?.trim()     || null,
+      faqEN:                document.getElementById('f-faqen')?.value?.trim()     || null,
+      testnet_links:        getTestnetLinks(),
+      _roadmap:             roadmapItems,
     };
 
     ['btn-save','btn-save-bottom'].forEach(id => {
@@ -1055,7 +1362,6 @@
         editingId = result[0].id;
         renderList();
         loadEdit(editingId);
-
       } else if (editingId) {
         loadEdit(editingId);
       }
@@ -1070,7 +1376,7 @@
 
   // ── DELETE ────────────────────────────────────────────
   async function deleteProject(id) {
-    const p = projects.find(x => x.id === id);
+    const p = projects.find(x => x.id == id);
     if (!confirm(`Hapus "${p?.name || id}"?\nTindakan ini tidak bisa dibatalkan.`)) return;
     try {
       const res = await fetch(`/api/admin-airdrop?id=${id}`, { method: 'DELETE' });
@@ -1082,11 +1388,11 @@
     } catch(e) { showToast('Error: ' + e.message, 'error'); }
   }
 
-  // ── TOAST & HELPER ────────────────────────────────────
+  // ── TOAST & UTIL ──────────────────────────────────────
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     t.textContent = msg; t.className = `toast ${type} show`;
-    setTimeout(() => t.classList.remove('show'), 3000);
+    setTimeout(() => t.classList.remove('show'), 3200);
   }
 
   function esc(s) {
@@ -1102,9 +1408,7 @@
 
   async function handleCredentialResponse(response) {
     try {
-      // Simpan token untuk dipakai notify-subscribers
       _adminGoogleToken = response.credential;
-
       const res = await fetch('/api/verify-token', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
