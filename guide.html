@@ -250,7 +250,7 @@
   .badge-ended     { background: rgba(100,100,100,.1); color: #8aa0b4; border: 1px solid rgba(100,100,100,.28); }
   .badge-listing   { background: rgba(124,109,250,.1); color: #7c6dfa; border: 1px solid rgba(124,109,250,.28); }
   .badge-default   { background: var(--surface2); color: var(--text2); border: 1px solid var(--border); }
-  .badge-tag       { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+  .badge-tag { background: var(--surface2); color: var(--text2); border: 1px solid var(--border2); }
   [data-theme="light"] .badge-active    { color: #00924d; }
   [data-theme="light"] .badge-waitlist  { color: #d4890a; }
   [data-theme="light"] .badge-confirmed { color: #007fa0; }
@@ -913,16 +913,14 @@ function render(p, roadmapData) {
   const confirmLabel = getConfirmLabel(p.confirmation_status);
 
   const logoHtml = p.logo_url
-    ? `<div class="project-logo-wrap">
-         <img src="${esc(p.logo_url)}" class="project-logo"
-              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="${esc(p.name)}">
-         <div class="project-logo-fallback" style="display:none">🪂</div>
-         <span class="logo-confirm-badge ${confirmClass}">${confirmLabel}</span>
-       </div>`
-    : `<div class="project-logo-wrap">
-         <div class="project-logo-fallback">🪂</div>
-         <span class="logo-confirm-badge ${confirmClass}">${confirmLabel}</span>
-       </div>`;
+  ? `<div class="project-logo-wrap">
+       <img src="${esc(p.logo_url)}" class="project-logo"
+            onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="${esc(p.name)}">
+       <div class="project-logo-fallback" style="display:none">🪂</div>
+     </div>`
+  : `<div class="project-logo-wrap">
+       <div class="project-logo-fallback">🪂</div>
+     </div>`;
 
   const socials = [];
   if (p.link)      socials.push(`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="social-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Website</a>`);
@@ -945,7 +943,8 @@ function render(p, roadmapData) {
           <div class="badge-row">
            ${p.status ? `<span class="badge ${getStatusClass(p.status)}">${esc(p.status)}</span>` : ''}
            ${tags.map(tg => `<span class="badge badge-tag">${esc(tg)}</span>`).join('')}
-          </div>
+           ${confirmClass !== 'tba' ? `<span class="badge logo-confirm-badge ${confirmClass}">${confirmLabel}</span>` : ''}
+           </div>
           ${socials.length ? `<div class="social-row">${socials.join('')}</div>` : ''}
         </div>
       </div>
