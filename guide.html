@@ -943,7 +943,8 @@ function render(p, roadmapData) {
           <div class="project-eyebrow"><span class="eyebrow-dot"></span>${esc(t.eyebrow)}</div>
           <div class="project-name">${esc(p.name)}</div>
           <div class="badge-row">
-            ${tags.map(tg => `<span class="badge badge-tag">${esc(tg)}</span>`).join('')}
+           ${p.status ? `<span class="badge ${getStatusClass(p.status)}">${esc(p.status)}</span>` : ''}
+           ${tags.map(tg => `<span class="badge badge-tag">${esc(tg)}</span>`).join('')}
           </div>
           ${socials.length ? `<div class="social-row">${socials.join('')}</div>` : ''}
         </div>
