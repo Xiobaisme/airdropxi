@@ -32,47 +32,49 @@ module.exports = async function handler(req, res) {
 
   function buildAirdropsPayload(p) {
     return {
-      name:          p.name          || null,
-      status:        p.status        || null,
-      published:     p.published !== undefined ? Boolean(p.published) : false,
-      link:          p.link          || null,
-      tags:          p.tags          || null,
-      RaisedID:      p.RaisedID      || null,
-      RaisedEN:      p.RaisedEN      || null,
-      tasksID:       p.tasksID       || null,
-      tasksEN:       p.tasksEN       || null,
-      logo_url:      p.logo_url      || null,
-      testnet_links: p.testnet_links || null,
+      name:                 p.name                 || null,
+      status:               p.status               || null,
+      confirmation_status:  p.confirmation_status  || null,
+      published:            p.published !== undefined ? Boolean(p.published) : false,
+      link:                 p.link                 || null,
+      tags:                 p.tags                 || null,
+      RaisedID:             p.RaisedID             || null,
+      RaisedEN:             p.RaisedEN             || null,
+      tasksID:              p.tasksID              || null,
+      tasksEN:              p.tasksEN              || null,
+      logo_url:             p.logo_url             || null,
+      testnet_links:        p.testnet_links        || null,
     };
   }
 
   function buildProyekPayload(p, airdropsId) {
     const payload = {
-      name:          p.name          || null,
-      status:        p.status        || null,
-      published:     p.published !== undefined ? Boolean(p.published) : false,
-      link:          p.link          || null,
-      tags:          p.tags          || null,
-      RaisedID:      p.RaisedID      || null,
-      RaisedEN:      p.RaisedEN      || null,
-      tasksID:       p.tasksID       || null,
-      tasksEN:       p.tasksEN       || null,
-      descriptionID: p.descriptionID || null,
-      descriptionEN: p.descriptionEN || null,
-      ticker:        p.ticker        || null,
-      total_supply:  p.total_supply  || null,
-      network:       p.network       || null,
-      tge_date:      p.tge_date      || null,
-      logo_url:      p.logo_url      || null,
-      twitter:       p.twitter       || null,
-      discord:       p.discord       || null,
-      telegram:      p.telegram      || null,
-      linkedin:      p.linkedin      || null,
-      youtube:       p.youtube       || null,
-      instagram:     p.instagram     || null,
-      faqID:         p.faqID         || null,
-      faqEN:         p.faqEN         || null,
-      testnet_links: p.testnet_links || null,
+      name:                 p.name                 || null,
+      status:               p.status               || null,
+      confirmation_status:  p.confirmation_status  || null,
+      published:            p.published !== undefined ? Boolean(p.published) : false,
+      link:                 p.link                 || null,
+      tags:                 p.tags                 || null,
+      RaisedID:             p.RaisedID             || null,
+      RaisedEN:             p.RaisedEN             || null,
+      tasksID:              p.tasksID              || null,
+      tasksEN:              p.tasksEN              || null,
+      descriptionID:        p.descriptionID        || null,
+      descriptionEN:        p.descriptionEN        || null,
+      ticker:               p.ticker               || null,
+      total_supply:         p.total_supply         || null,
+      network:              p.network              || null,
+      tge_date:             p.tge_date             || null,
+      logo_url:             p.logo_url             || null,
+      twitter:              p.twitter              || null,
+      discord:              p.discord              || null,
+      telegram:             p.telegram             || null,
+      linkedin:             p.linkedin             || null,
+      youtube:              p.youtube              || null,
+      instagram:            p.instagram            || null,
+      faqID:                p.faqID                || null,
+      faqEN:                p.faqEN                || null,
+      testnet_links:        p.testnet_links        || null,
     };
     if (airdropsId !== undefined) payload.airdrop_id = airdropsId;
     return payload;
@@ -104,7 +106,6 @@ module.exports = async function handler(req, res) {
       const extra  = (proyekData && proyekData.length > 0) ? proyekData[0] : {};
       const merged = { ...base, ...extra, id: base.id };
 
-      // Fetch roadmap untuk project ini
       const intId = extra.airdrop_id || base.id;
       const rRoadmap = await fetch(
         `${BASE}/project_roadmaps?airdrop_id=eq.${intId}&order=sort_order.asc`,
@@ -144,12 +145,10 @@ module.exports = async function handler(req, res) {
         console.error('Sync proyek gagal:', JSON.stringify(err2));
       }
 
-       // Simpan roadmap kalau ada
       if (req.body._roadmap && Array.isArray(req.body._roadmap) && req.body._roadmap.length > 0) {
         await saveRoadmap(BASE, H, newId, req.body._roadmap);
       }
 
-      // Notify subscribers
       try {
         await fetch(`https://airdropxi.vercel.app/api/notify-subscribers`, {
           method: 'POST',
@@ -167,18 +166,17 @@ module.exports = async function handler(req, res) {
         console.warn('Notify gagal:', e.message);
       }
 
-    return res.status(201).json(Array.isArray(result1) ? result1 : [result1]);
+      return res.status(201).json(Array.isArray(result1) ? result1 : [result1]);
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
   }
- 
+
   // ── PATCH ────────────────────────────────────────────
   if (req.method === 'PATCH') {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
     try {
-      // 1. Update tabel airdrops
       const r1 = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, {
         method: 'PATCH', headers: H,
         body: JSON.stringify(buildAirdropsPayload(req.body)),
@@ -189,12 +187,10 @@ module.exports = async function handler(req, res) {
       if (text) { try { result = JSON.parse(text); } catch(e) { result = null; } }
       if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result || text) });
 
-      // 2. Ambil integer id dari airdrops
       const rCheck = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}&select=id`, { headers: H });
       const checkData = await rCheck.json();
       const intId = checkData?.[0]?.id;
 
-      // 3. Update tabel proyek
       if (intId !== undefined) {
         const controller = new AbortController();
         const timeout = setTimeout(() => controller.abort(), 8000);
@@ -211,7 +207,6 @@ module.exports = async function handler(req, res) {
           clearTimeout(timeout);
         }
 
-        // 4. Update roadmap kalau ada di payload
         if (req.body._roadmap !== undefined && intId !== undefined) {
           await saveRoadmap(BASE, H, intId, req.body._roadmap || []);
         }
@@ -261,15 +256,13 @@ module.exports = async function handler(req, res) {
   return res.status(405).json({ error: `Method ${req.method} tidak diizinkan` });
 };
 
-// ── HELPER: save roadmap (delete all + re-insert) ────
+// ── HELPER: save roadmap ─────────────────────────────
 async function saveRoadmap(BASE, H, airdropId, items) {
   try {
-    // Hapus semua roadmap lama untuk project ini
     await fetch(`${BASE}/project_roadmaps?airdrop_id=eq.${airdropId}`, {
       method: 'DELETE', headers: H,
     });
 
-    // Insert baru kalau ada isinya
     if (!items || items.length === 0) return;
 
     const rows = items
