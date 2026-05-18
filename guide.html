@@ -175,7 +175,11 @@
     position: relative; z-index: 1; padding: 52px 0 44px;
   }
 
-  .project-logo-wrap { position: relative; flex-shrink: 0; }
+  /* ── LOGO WRAP — column layout dengan status badge di bawah ── */
+  .project-logo-wrap {
+    position: relative; flex-shrink: 0;
+    display: flex; flex-direction: column; align-items: center; gap: 10px;
+  }
   .project-logo-wrap::before {
     content: ''; position: absolute; inset: -8px; border-radius: 28px;
     background: radial-gradient(ellipse, rgba(0,232,122,.15), transparent 70%);
@@ -190,11 +194,26 @@
     transition: box-shadow .35s;
   }
   [data-theme="light"] .project-logo { border-color: rgba(0,160,90,.2); box-shadow: 0 0 0 1px rgba(0,160,90,.08), 0 8px 28px rgba(0,0,0,.10); }
+
   .project-logo-fallback {
     width: 96px; height: 96px; border-radius: 22px;
     background: var(--section-icon-bg); border: 1px solid var(--section-icon-border);
     display: flex; align-items: center; justify-content: center; font-size: 40px;
   }
+
+  /* ── STATUS BADGE BAWAH LOGO ── */
+  .logo-confirm-badge {
+    font-family: var(--mono); font-size: 9px; font-weight: 700;
+    padding: 5px 14px; border-radius: 20px; letter-spacing: .08em;
+    text-transform: uppercase; white-space: nowrap;
+  }
+  .logo-confirm-badge.confirmed { background: rgba(0,200,240,.1); color: #00c8f0; border: 1px solid rgba(0,200,240,.28); }
+  .logo-confirm-badge.potential { background: rgba(124,109,250,.1); color: #7c6dfa; border: 1px solid rgba(124,109,250,.28); }
+  .logo-confirm-badge.ended     { background: rgba(100,100,100,.1); color: #8aa0b4; border: 1px solid rgba(100,100,100,.28); }
+  .logo-confirm-badge.tba       { background: var(--surface2); color: var(--text3); border: 1px solid var(--border); }
+  [data-theme="light"] .logo-confirm-badge.confirmed { color: #007fa0; }
+  [data-theme="light"] .logo-confirm-badge.potential { color: #5a4cd4; }
+  [data-theme="light"] .logo-confirm-badge.ended     { color: #6a8ca8; }
 
   .project-hero-meta { flex: 1; min-width: 0; }
   .project-eyebrow {
@@ -812,6 +831,25 @@ function getStatusClass(s) {
   return 'badge-default';
 }
 
+/* ── HELPER: confirmation_status badge ── */
+function getConfirmClass(s) {
+  if (!s) return 'tba';
+  const l = s.toLowerCase();
+  if (l.includes('confirmed')) return 'confirmed';
+  if (l.includes('potential')) return 'potential';
+  if (l.includes('ended'))     return 'ended';
+  return 'tba';
+}
+
+function getConfirmLabel(s) {
+  if (!s) return 'TBA';
+  const l = s.toLowerCase();
+  if (l.includes('confirmed')) return '✓ Confirmed';
+  if (l.includes('potential')) return '◈ Potential';
+  if (l.includes('ended'))     return '✕ Ended';
+  return s;
+}
+
 function getRoadmapStatusLabel(status, t) {
   if (status === 'done') return t.statusDone;
   if (status === 'in_progress') return t.statusInProgress;
@@ -866,15 +904,25 @@ function render(p, roadmapData) {
   const desc     = isID ? (p.descriptionID || p.descriptionEN || '') : (p.descriptionEN || p.descriptionID || '');
   const tasksRaw = isID ? (p.tasksID || p.tasksEN || '') : (p.tasksEN || p.tasksID || '');
   const faqRaw   = isID ? (p.faqID || p.faqEN || '') : (p.faqEN || p.faqID || '');
-  const tags = (p.tags || '').split(',').map(t2 => t2.trim()).filter(Boolean);
+
+  // Tags — hanya category tags, TANPA status lama
+  const tags = (p.tags || '').split(',').map(tg => tg.trim()).filter(Boolean);
+
+  // ── CONFIRMATION STATUS (bawah logo) ──
+  const confirmClass = getConfirmClass(p.confirmation_status);
+  const confirmLabel = getConfirmLabel(p.confirmation_status);
 
   const logoHtml = p.logo_url
     ? `<div class="project-logo-wrap">
          <img src="${esc(p.logo_url)}" class="project-logo"
               onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" alt="${esc(p.name)}">
          <div class="project-logo-fallback" style="display:none">🪂</div>
+         <span class="logo-confirm-badge ${confirmClass}">${confirmLabel}</span>
        </div>`
-    : `<div class="project-logo-wrap"><div class="project-logo-fallback">🪂</div></div>`;
+    : `<div class="project-logo-wrap">
+         <div class="project-logo-fallback">🪂</div>
+         <span class="logo-confirm-badge ${confirmClass}">${confirmLabel}</span>
+       </div>`;
 
   const socials = [];
   if (p.link)      socials.push(`<a href="${esc(p.link)}" target="_blank" rel="noopener" class="social-btn"><svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg> Website</a>`);
@@ -895,7 +943,6 @@ function render(p, roadmapData) {
           <div class="project-eyebrow"><span class="eyebrow-dot"></span>${esc(t.eyebrow)}</div>
           <div class="project-name">${esc(p.name)}</div>
           <div class="badge-row">
-            <span class="badge ${getStatusClass(p.status)}">${esc(p.status || 'TBA')}</span>
             ${tags.map(tg => `<span class="badge badge-tag">${esc(tg)}</span>`).join('')}
           </div>
           ${socials.length ? `<div class="social-row">${socials.join('')}</div>` : ''}
