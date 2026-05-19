@@ -930,8 +930,6 @@
   function renderFbModal(p) {
     document.getElementById('fb-modal')?.remove();
     const caption  = buildCaption(p);
-    const guideUrl = `https://airdropxi.vercel.app/guide/${p.id}`;
-    const fbUrl    = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(guideUrl)}`;
     const el = document.createElement('div');
     el.id = 'fb-modal';
     el.className = 'fb-overlay';
@@ -942,15 +940,15 @@
         <div class="fb-steps">
           <strong>Cara share:</strong><br>
           1️⃣ Klik <strong>Generate Gambar</strong> untuk buat gambar otomatis<br>
-          2️⃣ Klik <strong>Copy Caption</strong><br>
-          3️⃣ Klik <strong>Buka Facebook</strong> → jendela FB terbuka<br>
-          4️⃣ Paste caption + upload gambar → Post ✅
+          2️⃣ Klik <strong>Copy Caption</strong> (caption siap di-copy)<br>
+          3️⃣ Klik <strong>Buka Facebook</strong> → buka halaman posting<br>
+          4️⃣ Paste caption + upload gambar yang sudah di-download → Post ✅
         </div>
         <div class="fb-actions">
           <button class="btn-fb-cancel" onclick="closeFbModal()">✕ Batal</button>
-          <button class="btn-fb-open" style="background:rgba(0,229,160,0.1);border-color:rgba(0,229,160,0.25);color:var(--accent)" onclick="generateFbImage('${esc(p.name)}','${esc(p.logo_url || '')}')">🎨 Generate Gambar</button>
+          <button class="btn-fb-open" style="background:rgba(0,229,160,0.1);border-color:rgba(0,229,160,0.25);color:var(--accent)" onclick="generateFbImage('${esc(p.name)}','${esc(p.logo_url || '')}')" >🎨 Generate Gambar</button>
           <button class="btn-fb-copy"   onclick="copyFbCaption()">📋 Copy Caption</button>
-          <button class="btn-fb-open"   onclick="window.open('${fbUrl}','_blank','width=620,height=520,noopener,noreferrer')">📘 Buka Facebook</button>
+          <button class="btn-fb-open"   onclick="window.open('https://www.facebook.com','_blank','width=1200,height=800,noopener,noreferrer')">📘 Buka Facebook</button>
         </div>
       </div>`;
     el.addEventListener('click', e => { if (e.target === el) closeFbModal(); });
