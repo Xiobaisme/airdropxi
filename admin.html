@@ -257,248 +257,272 @@
       flex: 1; padding: 0.55rem 0.5rem; border-radius: 6px; border: 1px solid var(--border2);
       background: var(--s2); color: var(--text3); font-family: var(--mono); font-size: 0.62rem;
       font-weight: 700; cursor: pointer; text-align: center; transition: all 0.15s;
-      letter-spacing: 0.04em; text-transform: uppercase;
+      letter-spacing: 0.04em;
     }
-    .confirm-opt:hover { border-color: var(--border); color: var(--text2); }
-    .confirm-opt.selected.confirmed { background: rgba(0,200,240,0.12);  border-color: rgba(0,200,240,0.35);  color: var(--cyan); }
-    .confirm-opt.selected.potential { background: rgba(124,109,250,0.12); border-color: rgba(124,109,250,0.35); color: var(--purple); }
-    .confirm-opt.selected.ended     { background: rgba(100,100,100,0.12); border-color: rgba(100,100,100,0.35); color: var(--text2); }
-    .confirm-opt.selected.tba       { background: var(--s3); border-color: var(--border); color: var(--text2); }
-    #f-confirmation-status { display: none; }
-
-    /* ── TESTNET ── */
-    .testnet-builder { display: flex; flex-direction: column; gap: 8px; }
-    .testnet-row { display: grid; grid-template-columns: 1fr 2fr auto; gap: 8px; align-items: center; }
-    .testnet-row input { margin: 0; }
-    .btn-remove-testnet {
-      width: 30px; height: 30px; border-radius: 6px;
-      background: var(--rdim); border: 1px solid rgba(239,68,68,0.2);
-      color: var(--red); cursor: pointer; font-size: 1rem;
-      display: flex; align-items: center; justify-content: center; transition: all 0.15s; flex-shrink: 0;
-    }
-    .btn-remove-testnet:hover { background: rgba(239,68,68,0.15); }
-    .btn-add-testnet {
-      padding: 0.5rem 1rem; background: transparent; border: 1px dashed var(--border2);
-      border-radius: 6px; color: var(--text2); font-family: var(--mono); font-size: 0.65rem;
-      cursor: pointer; transition: all 0.2s; align-self: flex-start;
-    }
-    .btn-add-testnet:hover { border-color: var(--accent); color: var(--accent); }
-
-    /* ── ROADMAP ── */
-    .roadmap-builder { display: flex; flex-direction: column; gap: 10px; }
-    .roadmap-card { background: var(--s2); border: 1px solid var(--border2); border-radius: 8px; overflow: hidden; transition: border-color 0.2s; }
-    .roadmap-card:focus-within { border-color: rgba(59,130,246,0.4); }
-    .roadmap-card-header { display: flex; align-items: center; gap: 8px; padding: 0.6rem 0.875rem; border-bottom: 1px solid var(--border); background: var(--s3); }
-    .roadmap-drag-handle { color: var(--text3); font-size: 0.75rem; cursor: grab; user-select: none; padding: 0 2px; }
-    .roadmap-phase-num { font-family: var(--mono); font-size: 0.58rem; color: var(--text3); min-width: 56px; }
-    .roadmap-status-btn { font-family: var(--mono); font-size: 0.52rem; padding: 0.18rem 0.55rem; border-radius: 4px; cursor: pointer; border: none; transition: all 0.15s; white-space: nowrap; margin-left: auto; }
-    .roadmap-status-btn.done        { background: rgba(0,229,160,0.12); color: var(--accent); }
-    .roadmap-status-btn.in_progress { background: rgba(59,130,246,0.12); color: var(--blue); }
-    .roadmap-status-btn.planned     { background: var(--s3); color: var(--text3); border: 1px solid var(--border); }
-    .roadmap-card-body { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; padding: 0.875rem; }
-    @media (max-width: 600px) { .roadmap-card-body { grid-template-columns: 1fr; } }
-    .roadmap-card-body .field { gap: 4px; }
-    .roadmap-card-body label { font-size: 0.55rem; }
-    .roadmap-card-body input, .roadmap-card-body textarea, .roadmap-card-body select { font-size: 0.72rem; padding: 0.45rem 0.65rem; }
-    .roadmap-card-body textarea { min-height: 60px; }
-    .roadmap-card-body .field.full { grid-column: span 2; }
-    .roadmap-card-actions { display: flex; justify-content: flex-end; padding: 0 0.875rem 0.75rem; }
-    .btn-remove-roadmap { padding: 0.3rem 0.7rem; background: transparent; border: 1px solid rgba(239,68,68,0.2); border-radius: 5px; color: var(--red); font-family: var(--mono); font-size: 0.6rem; cursor: pointer; transition: all 0.15s; }
-    .btn-remove-roadmap:hover { background: var(--rdim); }
-    .btn-add-roadmap { padding: 0.5rem 1rem; background: transparent; border: 1px dashed var(--border2); border-radius: 6px; color: var(--text2); font-family: var(--mono); font-size: 0.65rem; cursor: pointer; transition: all 0.2s; align-self: flex-start; }
-    .btn-add-roadmap:hover { border-color: var(--blue); color: var(--blue); }
-    .roadmap-empty { padding: 1.25rem; text-align: center; font-family: var(--mono); font-size: 0.65rem; color: var(--text3); border: 1px dashed var(--border); border-radius: 8px; }
+    .confirm-opt:hover { border-color: var(--border); }
+    .confirm-opt.selected { background: rgba(0,229,160,0.12); border-color: var(--accent); color: var(--accent); }
+    .confirm-opt.selected.potential { background: rgba(124,109,250,0.12); border-color: var(--purple); color: var(--purple); }
+    .confirm-opt.selected.confirmed { background: rgba(0,200,240,0.12); border-color: var(--cyan); color: var(--cyan); }
+    .confirm-opt.selected.ended { background: rgba(100,100,100,0.12); border-color: var(--text3); color: var(--text3); }
 
     /* ── BUTTONS ── */
-    .btn-save { display: inline-flex; align-items: center; gap: 6px; padding: 0.62rem 1.4rem; background: var(--accent); color: #000; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; letter-spacing: 0.06em; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s, transform 0.15s; }
-    .btn-save:hover { opacity: 0.85; transform: translateY(-1px); }
-    .btn-save:disabled { opacity: 0.4; cursor: not-allowed; transform: none; }
-    .btn-delete { display: inline-flex; align-items: center; gap: 6px; padding: 0.62rem 1rem; background: var(--rdim); color: var(--red); font-family: var(--mono); font-size: 0.68rem; border: 1px solid rgba(239,68,68,0.25); border-radius: 6px; cursor: pointer; transition: all 0.2s; }
+    .btn-save, .btn-delete, .btn-cancel, .btn-upload-logo, .btn-clear-logo, .btn-add-testnet, .btn-add-roadmap, .btn-remove-testnet, .btn-remove-roadmap, .btn-fb-open, .btn-fb-copy, .btn-fb-cancel {
+      padding: 0.52rem 0.9rem; border-radius: 6px; border: 1px solid var(--border2);
+      background: var(--s2); color: var(--text); font-family: var(--mono); font-size: 0.65rem;
+      cursor: pointer; transition: all 0.15s; font-weight: 600; white-space: nowrap;
+    }
+    .btn-save { background: var(--adim); border-color: var(--aborder); color: var(--accent); }
+    .btn-save:hover { background: rgba(0,229,160,0.14); }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-delete { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.25); color: var(--red); }
     .btn-delete:hover { background: rgba(239,68,68,0.15); }
-    .btn-cancel { display: inline-flex; align-items: center; gap: 6px; padding: 0.62rem 1rem; background: transparent; color: var(--text2); font-family: var(--mono); font-size: 0.68rem; border: 1px solid var(--border2); border-radius: 6px; cursor: pointer; transition: all 0.2s; }
-    .btn-cancel:hover { border-color: var(--text2); color: var(--text); }
-
-    /* ── PUBLISH TOGGLE ── */
-    .publish-section { padding: 1rem 1.25rem; border-bottom: 1px solid var(--border); display: flex; align-items: center; justify-content: space-between; flex-wrap: wrap; gap: 12px; }
-    .publish-toggle-wrap { display: flex; align-items: center; gap: 12px; }
-    .toggle-track { position: relative; width: 44px; height: 24px; border-radius: 12px; cursor: pointer; transition: background 0.25s; flex-shrink: 0; }
-    .toggle-thumb { position: absolute; top: 3px; width: 18px; height: 18px; border-radius: 50%; background: #fff; transition: left 0.25s; pointer-events: none; }
-    .publish-label { font-size: 0.82rem; font-weight: 600; transition: color 0.25s; }
-    .publish-note { font-family: var(--mono); font-size: 0.62rem; color: var(--text3); }
-
-    /* ── TOAST ── */
-    .toast { position: fixed; bottom: 2rem; right: 2rem; padding: 0.75rem 1.25rem; border-radius: 8px; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; z-index: 9999; pointer-events: none; transform: translateY(80px); opacity: 0; transition: all 0.3s ease; }
-    .toast.show { transform: translateY(0); opacity: 1; }
-    .toast.success { background: var(--accent); color: #000; }
-    .toast.error   { background: var(--red); color: #fff; }
-
-    /* ── EMPTY / LOADING ── */
-    .empty-form { display: flex; flex-direction: column; align-items: center; justify-content: center; min-height: 380px; gap: 1rem; text-align: center; }
-    .empty-icon { font-size: 2.5rem; }
-    .empty-text { color: var(--text3); font-family: var(--mono); font-size: 0.72rem; line-height: 1.6; }
-    .spinner { width: 18px; height: 18px; border: 2px solid var(--border2); border-top-color: var(--accent); border-radius: 50%; animation: spin 0.6s linear infinite; display: inline-block; }
-    @keyframes spin { to { transform: rotate(360deg); } }
-    .list-loading { padding: 1.5rem; text-align: center; font-family: var(--mono); font-size: 0.68rem; color: var(--text3); display: flex; flex-direction: column; align-items: center; gap: 10px; }
+    .btn-cancel { background: transparent; border-color: var(--border); color: var(--text2); }
+    .btn-cancel:hover { border-color: var(--border2); color: var(--text); }
+    .btn-upload-logo, .btn-clear-logo { padding: 0.4rem 0.7rem; font-size: 0.6rem; }
+    .btn-add-testnet, .btn-add-roadmap { width: 100%; background: var(--adim); border-color: var(--aborder); color: var(--accent); }
+    .btn-add-testnet:hover, .btn-add-roadmap:hover { background: rgba(0,229,160,0.14); }
+    .btn-remove-testnet, .btn-remove-roadmap { background: rgba(239,68,68,0.1); border-color: rgba(239,68,68,0.25); color: var(--red); padding: 0.3rem 0.6rem; font-size: 0.58rem; }
+    .btn-fb-open { background: rgba(24,119,242,0.1); border-color: rgba(24,119,242,0.25); color: #5b9cf6; }
+    .btn-fb-open:hover { background: rgba(24,119,242,0.2); }
+    .btn-fb-copy { background: rgba(0,229,160,0.1); border-color: rgba(0,229,160,0.25); color: var(--accent); }
+    .btn-fb-copy:hover { background: rgba(0,229,160,0.18); }
+    .btn-fb-cancel { background: transparent; border-color: var(--border); color: var(--text2); }
+    .btn-fb-cancel:hover { border-color: var(--border2); }
 
     /* ── LOGO UPLOAD ── */
     .logo-upload-wrap { display: flex; flex-direction: column; gap: 8px; }
-    .logo-preview-row { display: flex; align-items: center; gap: 12px; }
-    .logo-preview-box { width: 52px; height: 52px; border-radius: 10px; border: 1px solid var(--border2); background: var(--s3); display: flex; align-items: center; justify-content: center; overflow: hidden; flex-shrink: 0; font-size: 1.3rem; color: var(--text3); transition: border-color 0.2s; }
-    .logo-preview-box img { width: 100%; height: 100%; object-fit: contain; }
-    .logo-preview-box.has-img { border-color: var(--aborder); }
-    .logo-upload-right { display: flex; flex-direction: column; gap: 6px; flex: 1; min-width: 0; }
-    .logo-url-display { font-family: var(--mono); font-size: 0.62rem; color: var(--text2); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; padding: 0.3rem 0.5rem; background: var(--s3); border-radius: 4px; border: 1px solid var(--border); }
-    .logo-url-display.empty { color: var(--text3); font-style: italic; }
+    .logo-preview-row { display: flex; gap: 12px; align-items: flex-start; }
+    .logo-preview-box {
+      width: 80px; height: 80px; border-radius: 8px; border: 1px dashed var(--border2);
+      background: var(--s2); display: flex; align-items: center; justify-content: center;
+      font-size: 2rem; flex-shrink: 0; overflow: hidden;
+    }
+    .logo-preview-box.has-img { border-style: solid; }
+    .logo-preview-box img { width: 100%; height: 100%; object-fit: cover; }
+    .logo-upload-right { flex: 1; display: flex; flex-direction: column; gap: 6px; }
+    .logo-url-display {
+      font-family: var(--mono); font-size: 0.62rem; color: var(--text2);
+      padding: 0.5rem; background: var(--s2); border-radius: 4px; border: 1px solid var(--border2);
+      word-break: break-all; max-height: 60px; overflow-y: auto;
+    }
+    .logo-url-display.empty { color: var(--text3); }
     .logo-upload-btns { display: flex; gap: 6px; flex-wrap: wrap; }
-    .btn-upload-logo { display: inline-flex; align-items: center; gap: 5px; padding: 0.42rem 0.85rem; background: var(--adim); border: 1px solid var(--aborder); border-radius: 6px; color: var(--accent); font-family: var(--mono); font-size: 0.64rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-    .btn-upload-logo:hover { background: rgba(0,229,160,0.14); }
-    .btn-upload-logo:disabled { opacity: 0.4; cursor: not-allowed; }
-    .btn-clear-logo { display: inline-flex; align-items: center; gap: 5px; padding: 0.42rem 0.75rem; background: transparent; border: 1px solid var(--border2); border-radius: 6px; color: var(--text3); font-family: var(--mono); font-size: 0.64rem; cursor: pointer; transition: all 0.2s; white-space: nowrap; }
-    .btn-clear-logo:hover { border-color: var(--red); color: var(--red); }
-    .logo-upload-status { font-family: var(--mono); font-size: 0.6rem; padding: 0.3rem 0.5rem; border-radius: 4px; display: none; }
-    .logo-upload-status.uploading { display: flex; align-items: center; gap: 6px; background: rgba(59,130,246,0.08); border: 1px solid rgba(59,130,246,0.2); color: var(--blue); }
-    .logo-upload-status.success { display: block; background: var(--adim); border: 1px solid var(--aborder); color: var(--accent); }
-    .logo-upload-status.error   { display: block; background: var(--rdim); border: 1px solid rgba(239,68,68,0.2); color: var(--red); }
+    .logo-upload-status {
+      font-family: var(--mono); font-size: 0.6rem; padding: 0.5rem; border-radius: 4px;
+      display: none;
+    }
+    .logo-upload-status.uploading { display: block; background: rgba(59,130,246,0.1); color: var(--blue); }
+    .logo-upload-status.success { display: block; background: rgba(0,229,160,0.1); color: var(--accent); }
+    .logo-upload-status.error { display: block; background: rgba(239,68,68,0.1); color: var(--red); }
+    .spinner {
+      display: inline-block; width: 10px; height: 10px; border: 2px solid currentColor;
+      border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── MODAL (GitHub Token) ── */
-    .modal-overlay { position: fixed; inset: 0; z-index: 500; background: rgba(7,9,11,0.85); backdrop-filter: blur(8px); display: flex; align-items: center; justify-content: center; }
-    .modal-box { background: var(--s1); border: 1px solid var(--border2); border-radius: 14px; padding: 2rem; max-width: 420px; width: 90%; }
-    .modal-title { font-size: 0.95rem; font-weight: 700; margin-bottom: 0.4rem; display: flex; align-items: center; gap: 8px; }
-    .modal-sub { font-family: var(--mono); font-size: 0.65rem; color: var(--text2); margin-bottom: 1.25rem; line-height: 1.6; }
-    .modal-sub a { color: var(--accent); text-decoration: none; }
-    .modal-sub a:hover { text-decoration: underline; }
-    .modal-input-wrap { display: flex; flex-direction: column; gap: 8px; margin-bottom: 1rem; }
-    .modal-input-wrap label { font-family: var(--mono); font-size: 0.6rem; color: var(--text2); letter-spacing: 0.06em; text-transform: uppercase; }
-    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
-    .btn-modal-save { padding: 0.55rem 1.2rem; background: var(--accent); color: #000; font-family: var(--mono); font-size: 0.7rem; font-weight: 700; border: none; border-radius: 6px; cursor: pointer; transition: opacity 0.2s; }
-    .btn-modal-save:hover { opacity: 0.85; }
-    .btn-modal-cancel { padding: 0.55rem 1rem; background: transparent; color: var(--text2); font-family: var(--mono); font-size: 0.68rem; border: 1px solid var(--border2); border-radius: 6px; cursor: pointer; }
-    .token-warning { font-family: var(--mono); font-size: 0.6rem; color: var(--text3); margin-top: 0.5rem; padding: 0.5rem 0.75rem; background: rgba(245,158,11,0.06); border: 1px solid rgba(245,158,11,0.15); border-radius: 6px; line-height: 1.5; }
+    /* ── TESTNET ── */
+    .testnet-row { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 8px; align-items: flex-end; }
+    .tnet-label, .tnet-url { width: 100%; background: var(--s2); border: 1px solid var(--border2); border-radius: 6px; color: var(--text); font-family: var(--mono); font-size: 0.76rem; padding: 0.58rem 0.75rem; outline: none; transition: border-color 0.2s; }
+    .tnet-label:focus, .tnet-url:focus { border-color: var(--accent); }
 
-    /* ── FB SHARE MODAL ── */
+    /* ── ROADMAP ── */
+    .roadmap-card {
+      background: var(--s2); border: 1px solid var(--border2); border-radius: 8px;
+      padding: 1rem; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px;
+    }
+    .roadmap-card-header { display: flex; align-items: center; gap: 8px; }
+    .roadmap-drag-handle { color: var(--text3); cursor: grab; font-size: 0.8rem; }
+    .roadmap-phase-num { font-family: var(--mono); font-size: 0.6rem; color: var(--text3); flex: 1; }
+    .roadmap-status-btn {
+      padding: 0.3rem 0.6rem; border-radius: 4px; border: 1px solid var(--border2);
+      background: transparent; color: var(--text3); font-family: var(--mono); font-size: 0.58rem;
+      cursor: pointer; transition: all 0.15s; font-weight: 600; white-space: nowrap;
+    }
+    .roadmap-status-btn.planned { border-color: rgba(100,100,100,0.3); color: var(--text3); }
+    .roadmap-status-btn.in_progress { border-color: rgba(245,158,11,0.3); color: var(--warn); }
+    .roadmap-status-btn.done { border-color: rgba(0,229,160,0.3); color: var(--accent); }
+    .roadmap-card-body { display: flex; flex-direction: column; gap: 10px; }
+    .roadmap-card-body .field { gap: 5px; }
+    .roadmap-card-body input, .roadmap-card-body textarea {
+      width: 100%; background: var(--s3); border: 1px solid var(--border);
+      border-radius: 6px; color: var(--text); font-family: var(--mono); font-size: 0.76rem;
+      padding: 0.58rem 0.75rem; outline: none; transition: border-color 0.2s;
+    }
+    .roadmap-card-body input:focus, .roadmap-card-body textarea:focus { border-color: var(--accent); }
+    .roadmap-card-body textarea { min-height: 60px; }
+    .roadmap-card-body .field.full { grid-column: 1 / -1; }
+    .roadmap-card-actions { display: flex; justify-content: flex-end; }
+    .roadmap-empty { padding: 2rem 1rem; text-align: center; font-family: var(--mono); font-size: 0.65rem; color: var(--text3); }
+
+    /* ── PUBLISH ── */
+    .publish-section {
+      padding: 1.25rem; border-bottom: 1px solid var(--border);
+      display: flex; align-items: flex-start; gap: 1.5rem; flex-wrap: wrap;
+    }
+    .publish-toggle-wrap { display: flex; align-items: center; gap: 12px; flex: 1; min-width: 250px; }
+    .toggle-track {
+      width: 50px; height: 26px; border-radius: 13px; position: relative;
+      cursor: pointer; transition: background 0.2s; flex-shrink: 0;
+      border: 1px solid var(--border2);
+    }
+    .toggle-thumb {
+      width: 22px; height: 22px; border-radius: 50%; background: var(--text2);
+      position: absolute; top: 2px; transition: left 0.2s;
+    }
+    .publish-label { font-size: 0.85rem; font-weight: 600; }
+    .publish-note { font-family: var(--mono); font-size: 0.6rem; color: var(--text3); }
+
+    /* ── FACEBOOK MODAL ── */
     .fb-overlay {
-      position: fixed; inset: 0; z-index: 800;
-      background: rgba(7,9,11,0.92); backdrop-filter: blur(14px);
-      display: flex; align-items: center; justify-content: center;
+      position: fixed; inset: 0; z-index: 1000;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; padding: 1rem;
     }
     .fb-box {
-      background: var(--s1); border: 1px solid var(--border2);
-      border-radius: 14px; padding: 1.75rem; max-width: 500px; width: 92%;
-      display: flex; flex-direction: column; gap: 1rem;
+      background: var(--s1); border: 1px solid var(--border); border-radius: 12px;
+      max-width: 500px; width: 100%; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;
     }
-    .fb-title { font-size: 0.9rem; font-weight: 700; display: flex; align-items: center; gap: 8px; }
+    .fb-title { font-size: 0.95rem; font-weight: 700; color: var(--accent); }
     .fb-textarea {
-      background: var(--s2); border: 1px solid var(--border2); border-radius: 8px;
-      padding: 1rem; font-family: var(--mono); font-size: 0.72rem;
-      color: var(--text); line-height: 1.8;
-      min-height: 220px; resize: vertical; outline: none; width: 100%;
-      transition: border-color 0.2s;
+      width: 100%; background: var(--s2); border: 1px solid var(--border2); border-radius: 6px;
+      color: var(--text); font-family: var(--mono); font-size: 0.7rem;
+      padding: 0.75rem; outline: none; transition: border-color 0.2s;
+      min-height: 150px; resize: vertical;
     }
     .fb-textarea:focus { border-color: var(--accent); }
     .fb-steps {
-      font-family: var(--mono); font-size: 0.6rem; color: var(--text2); line-height: 1.8;
-      padding: 0.65rem 0.875rem;
-      background: rgba(24,119,242,0.06); border: 1px solid rgba(24,119,242,0.18); border-radius: 6px;
+      font-family: var(--mono); font-size: 0.65rem; color: var(--text2);
+      background: var(--s2); padding: 0.75rem; border-radius: 6px; line-height: 1.6;
     }
-    .fb-steps strong { color: #5b9cf6; }
-    .fb-actions { display: flex; gap: 8px; justify-content: flex-end; flex-wrap: wrap; }
-    .btn-fb-cancel {
-      padding: 0.58rem 0.9rem; background: transparent; color: var(--text2);
-      font-family: var(--mono); font-size: 0.68rem;
-      border: 1px solid var(--border2); border-radius: 6px; cursor: pointer; transition: all 0.2s;
+    .fb-actions { display: flex; gap: 8px; flex-wrap: wrap; }
+
+    /* ── EMPTY FORM ── */
+    .empty-form {
+      display: flex; flex-direction: column; align-items: center; justify-content: center;
+      padding: 3rem 2rem; text-align: center; gap: 1rem;
     }
-    .btn-fb-cancel:hover { border-color: var(--text2); color: var(--text); }
-    .btn-fb-copy {
-      padding: 0.58rem 1.1rem; background: var(--adim); border: 1px solid var(--aborder);
-      border-radius: 6px; color: var(--accent); font-family: var(--mono); font-size: 0.7rem;
-      cursor: pointer; transition: all 0.2s;
+    .empty-icon { font-size: 3rem; }
+    .empty-text { font-size: 0.85rem; color: var(--text2); line-height: 1.5; }
+
+    /* ── TOAST ── */
+    .toast {
+      position: fixed; bottom: 20px; right: 20px; z-index: 2000;
+      background: var(--s1); border: 1px solid var(--border); border-radius: 8px;
+      padding: 0.75rem 1.25rem; font-size: 0.8rem; color: var(--text);
+      font-family: var(--mono); opacity: 0; transform: translateY(100px);
+      transition: all 0.3s; pointer-events: none;
     }
-    .btn-fb-copy:hover { background: rgba(0,229,160,0.15); }
-    .btn-fb-open {
-      padding: 0.58rem 1.2rem; background: #1877F2; border: none;
-      border-radius: 6px; color: #fff; font-family: var(--mono); font-size: 0.7rem;
-      font-weight: 700; cursor: pointer; transition: opacity 0.2s; letter-spacing: 0.04em;
+    .toast.show { opacity: 1; transform: translateY(0); pointer-events: auto; }
+    .toast.success { border-color: rgba(0,229,160,0.3); background: rgba(0,229,160,0.08); color: var(--accent); }
+    .toast.error { border-color: rgba(239,68,68,0.3); background: rgba(239,68,68,0.08); color: var(--red); }
+
+    /* ── MODAL ── */
+    .modal {
+      position: fixed; inset: 0; z-index: 999;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; padding: 1rem;
     }
-    .btn-fb-open:hover { opacity: 0.85; }
+    .modal-box {
+      background: var(--s1); border: 1px solid var(--border); border-radius: 12px;
+      max-width: 400px; width: 100%; padding: 1.5rem; display: flex; flex-direction: column; gap: 1rem;
+    }
+    .modal-title { font-size: 0.95rem; font-weight: 700; }
+    .modal-input {
+      width: 100%; background: var(--s2); border: 1px solid var(--border2); border-radius: 6px;
+      color: var(--text); font-family: var(--mono); font-size: 0.76rem;
+      padding: 0.58rem 0.75rem; outline: none; transition: border-color 0.2s;
+    }
+    .modal-input:focus { border-color: var(--accent); }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* ── PREVIEW CONTAINER ── */
+    #fb-preview-container {
+      width: 100%; max-height: 300px; overflow-y: auto;
+      border: 1px solid var(--border2); border-radius: 6px; padding: 8px;
+      background: var(--s2);
+    }
+    #fb-preview-container img {
+      width: 100%; height: auto; border-radius: 4px;
+    }
   </style>
 </head>
 <body>
 
-<!-- GITHUB TOKEN MODAL -->
-<div class="modal-overlay hidden" id="token-modal">
-  <div class="modal-box">
-    <div class="modal-title">🔑 GitHub Token</div>
-    <div class="modal-sub">
-      Token diperlukan untuk upload gambar ke repo GitHub kamu.<br><br>
-      Buat di: <a href="https://github.com/settings/tokens/new" target="_blank">github.com/settings/tokens</a>
-      <br>Centang permission: <strong style="color:var(--accent)">repo</strong> (Full control).<br><br>
-      Token disimpan hanya di <code style="color:var(--accent)">localStorage</code> browser ini.
-    </div>
-    <div class="modal-input-wrap">
-      <label>Personal Access Token (Classic)</label>
-      <input type="password" id="token-input" placeholder="ghp_xxxxxxxxxxxxxxxxxxxx">
-    </div>
-    <div class="token-warning">⚠️ Jangan share token ini ke siapapun. Ini hanya tersimpan di browser kamu.</div>
-    <br>
-    <div class="modal-actions">
-      <button class="btn-modal-cancel" onclick="closeTokenModal()">Batal</button>
-      <button class="btn-modal-save" onclick="saveToken()">Simpan Token</button>
-    </div>
-  </div>
-</div>
-
-<!-- LOGIN -->
 <div id="login-section">
   <div class="login-card">
-    <div class="login-logo">⚡ AirdropXI</div>
-    <div class="login-title">🔐 Admin Access</div>
-    <div class="login-sub">Login dengan akun Google yang diizinkan.</div>
-    <div id="g_id_onload"></div>
+    <div class="login-logo">AirdropXI</div>
+    <div class="login-title">Admin Panel</div>
+    <div class="login-sub">Login dengan Google untuk akses</div>
+    <div id="g_id_onload" data-client_id="1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com" data-callback="handleCredentialResponse"></div>
   </div>
 </div>
 
-<!-- ADMIN CONTENT -->
 <div id="admin-content" class="hidden">
   <nav>
     <div class="nav-left">
-      <a href="index.html" class="nav-logo">⚡ AirdropXI</a>
+      <a href="#" class="nav-logo">AirdropXI</a>
       <span class="nav-badge">ADMIN</span>
     </div>
-    <a href="index.html" class="nav-back">← Dashboard</a>
   </nav>
+
+  <div id="token-modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-title">🔑 Setup GitHub Token</div>
+      <input type="password" id="token-input" class="modal-input" placeholder="ghp_xxxxxxxxxxxx" spellcheck="false">
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeTokenModal()">Batal</button>
+        <button class="btn-save" onclick="saveToken()">Simpan</button>
+      </div>
+    </div>
+  </div>
 
   <div class="wrap">
     <div class="sidebar">
-      <div class="stats-strip" id="stats-strip">
-        <div class="stat-card"><div class="stat-label">Total</div><div class="stat-value green" id="stat-total">—</div></div>
-        <div class="stat-card"><div class="stat-label">Live</div><div class="stat-value cyan" id="stat-live">—</div></div>
-        <div class="stat-card"><div class="stat-label">Draft</div><div class="stat-value warn" id="stat-draft">—</div></div>
-        <div class="stat-card"><div class="stat-label">Confirmed</div><div class="stat-value blue" id="stat-confirmed">—</div></div>
+      <div class="stats-strip">
+        <div class="stat-card">
+          <div class="stat-label">Total</div>
+          <div class="stat-value green" id="stat-total">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Live</div>
+          <div class="stat-value blue" id="stat-live">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Draft</div>
+          <div class="stat-value warn" id="stat-draft">0</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-label">Confirmed</div>
+          <div class="stat-value cyan" id="stat-confirmed">0</div>
+        </div>
       </div>
-      <button class="btn-new" onclick="newForm()">＋ Tambah Airdrop Baru</button>
+
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
-        <input type="text" id="search-input" placeholder="Cari proyek..." oninput="onSearch(this.value)">
+        <input type="text" id="search-input" class="search-input" placeholder="Cari proyek..." spellcheck="false" oninput="onSearch(this.value)">
         <button class="search-clear" id="search-clear" onclick="clearSearch()">✕</button>
       </div>
+
       <div class="filter-tabs">
-        <button class="ftab active" data-filter="all" onclick="setFilter('all',this)">Semua</button>
-        <button class="ftab" data-filter="live" onclick="setFilter('live',this)">● Live</button>
-        <button class="ftab draft" data-filter="draft" onclick="setFilter('draft',this)">○ Draft</button>
+        <button class="ftab active" onclick="setFilter('all', this)">Semua</button>
+        <button class="ftab" onclick="setFilter('live', this)">Live</button>
+        <button class="ftab draft" onclick="setFilter('draft', this)">Draft</button>
       </div>
+
       <div class="panel">
         <div class="panel-head">
-          <div class="ph-dot"></div>
+          <span class="ph-dot"></span>
           <span class="ph-title">Proyek</span>
-          <span class="ph-count" id="proj-count">—</span>
+          <span class="ph-count" id="proj-count">0/0</span>
         </div>
-        <div class="proj-list" id="proj-list">
-          <div class="list-loading"><div class="spinner"></div><span>Memuat...</span></div>
-        </div>
+        <div class="proj-list" id="proj-list"></div>
       </div>
-      <div class="drafts-section" id="drafts-section" style="display:none">
+
+      <button class="btn-new" onclick="newForm()">➕ Tambah Airdrop Baru</button>
+
+      <div id="drafts-section" class="drafts-section" style="display:none">
         <div class="drafts-head">
-          <div class="drafts-dot"></div>
+          <span class="drafts-dot"></span>
           <span class="ph-title" style="color:var(--warn)">Belum Dipublish</span>
           <span class="ph-count" style="color:var(--warn)" id="drafts-count">0</span>
         </div>
@@ -527,6 +551,8 @@
   const GH_REPO       = 'airdropxi';
   const GH_BRANCH     = 'main';
   const GH_LOGOS_PATH = 'assets/logos';
+  // TEMPLATE IMAGE URL - sesuaikan dengan URL hosting Anda
+  const FB_TEMPLATE_URL = 'airdrop-template.png'; // Ganti dengan URL publik dari gambar template
   let _adminGoogleToken = null;
 
   const STATUS_OPTIONS = ['Active','Waitlist','Season 1','Season 2','Season 3','Season 4','Season 5','Seed Round','Private Round','Potential','Confirmed','Testnet','Mainnet','Listing / Selesai','Ended','TBA'];
@@ -802,7 +828,7 @@
     const net    = p.network || 'TBA';
     const status = p.status  || 'TBA';
     const slug   = name.replace(/\s+/g,'').toLowerCase().replace(/[^a-z0-9]/g,'');
-    const url    = `https://airdropxi.vercel.app/guide/${p.id}`;
+    
     return [
       `🚀 ${name}`,
       ``,
@@ -814,7 +840,6 @@
       `📍 ${status}`,
       ``,
       `🔍 Selengkapnya di AirdropXI`,
-      `👉 ${url}`,
       ``,
       `#airdrop #crypto #web3 #${slug}`,
     ].join('\n');
@@ -823,7 +848,6 @@
   function openFbShare(id) {
     const cached = projects.find(x => x.id == id);
     if (!cached) { showToast('Project tidak ditemukan', 'error'); return; }
-    // Kalau field detail belum ada, fetch dulu
     if (!cached.descriptionID && !cached.descriptionEN && !cached.network) {
       showToast('⏳ Memuat data project...', 'success');
       fetch(`/api/admin-airdrop?id=${id}`)
@@ -832,6 +856,74 @@
         .catch(() => renderFbModal(cached));
     } else {
       renderFbModal(cached);
+    }
+  }
+
+  // GENERATE GAMBAR DENGAN TEMPLATE
+  async function generateFbImage(projectName, logoUrl) {
+    showToast('⏳ Generating gambar untuk Facebook...', 'success');
+    try {
+      // Load template image
+      const templateImg = new Image();
+      templateImg.crossOrigin = 'anonymous';
+      
+      await new Promise((resolve, reject) => {
+        templateImg.onload = resolve;
+        templateImg.onerror = reject;
+        templateImg.src = FB_TEMPLATE_URL;
+      });
+
+      // Create canvas
+      const canvas = document.createElement('canvas');
+      canvas.width = 1200;
+      canvas.height = 630;
+      const ctx = canvas.getContext('2d');
+
+      // Draw template background
+      ctx.drawImage(templateImg, 0, 0, 1200, 630);
+
+      // Draw logo if available (top right area)
+      if (logoUrl) {
+        try {
+          const logoImg = new Image();
+          logoImg.crossOrigin = 'anonymous';
+          await new Promise((resolve, reject) => {
+            logoImg.onload = resolve;
+            logoImg.onerror = reject;
+            logoImg.src = logoUrl;
+          });
+          // Position logo di area kosong (bisa disesuaikan)
+          ctx.drawImage(logoImg, 900, 50, 200, 200);
+        } catch(e) {
+          console.log('Logo tidak bisa dimuat');
+        }
+      }
+
+      // Draw project name overlay (di area "NEW AIRDROP")
+      ctx.fillStyle = '#FFFFFF';
+      ctx.font = 'bold 80px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
+      ctx.shadowBlur = 10;
+      ctx.shadowOffsetX = 2;
+      ctx.shadowOffsetY = 2;
+      ctx.fillText(projectName.slice(0, 20), 400, 400);
+
+      // Download
+      canvas.toBlob(blob => {
+        const url = URL.createObjectURL(blob);
+        const a = document.createElement('a');
+        a.href = url;
+        a.download = `${projectName.replace(/\s+/g, '-')}-facebook-post.png`;
+        document.body.appendChild(a);
+        a.click();
+        document.body.removeChild(a);
+        URL.revokeObjectURL(url);
+        showToast('✓ Gambar berhasil dibuat! Silakan upload ke Facebook.', 'success');
+      }, 'image/png');
+    } catch(err) {
+      showToast('Error: ' + err.message, 'error');
     }
   }
 
@@ -849,13 +941,14 @@
         <textarea class="fb-textarea" id="fb-caption-area" spellcheck="false">${esc(caption)}</textarea>
         <div class="fb-steps">
           <strong>Cara share:</strong><br>
-          1️⃣ Edit caption di atas kalau perlu<br>
+          1️⃣ Klik <strong>Generate Gambar</strong> untuk buat gambar otomatis<br>
           2️⃣ Klik <strong>Copy Caption</strong><br>
           3️⃣ Klik <strong>Buka Facebook</strong> → jendela FB terbuka<br>
-          4️⃣ Paste caption di kolom postingan → Post ✅
+          4️⃣ Paste caption + upload gambar → Post ✅
         </div>
         <div class="fb-actions">
           <button class="btn-fb-cancel" onclick="closeFbModal()">✕ Batal</button>
+          <button class="btn-fb-open" style="background:rgba(0,229,160,0.1);border-color:rgba(0,229,160,0.25);color:var(--accent)" onclick="generateFbImage('${esc(p.name)}','${esc(p.logo_url || '')}')">🎨 Generate Gambar</button>
           <button class="btn-fb-copy"   onclick="copyFbCaption()">📋 Copy Caption</button>
           <button class="btn-fb-open"   onclick="window.open('${fbUrl}','_blank','width=620,height=520,noopener,noreferrer')">📘 Buka Facebook</button>
         </div>
@@ -997,8 +1090,8 @@
 
         <div class="form-sec">
           <div class="sec-lbl">Tokenomics</div>
-          <div class="fg c3">
-            <div class="field"><label>Ticker</label><input id="f-ticker" type="text" placeholder="$BLC" value="${esc(d.ticker||'')}"></div>
+          <div class="fg">
+            <div class="field"><label>Ticker / Symbol</label><input id="f-ticker" type="text" placeholder="BTC / ETH" value="${esc(d.ticker||'')}"></div>
             <div class="field"><label>Total Supply</label><input id="f-supply" type="text" placeholder="1,000,000,000" value="${esc(d.total_supply||'')}"></div>
             <div class="field"><label>Network</label><input id="f-network" type="text" placeholder="Ethereum / Solana" value="${esc(d.network||'')}"></div>
             <div class="field"><label>TGE / Listing Date</label><input id="f-tge" type="text" placeholder="Q3 2026 / TBA" value="${esc(d.tge_date||'')}"></div>
@@ -1246,8 +1339,7 @@
       showToast(editingId ? '✓ Berhasil diupdate!' : '✓ Proyek ditambahkan!', 'success');
       await loadProjects();
       if (isNew && Array.isArray(result) && result[0]) {
-        editingId = result[0].id; renderList(); loadEdit(editingId);
-      } else if (editingId) {
+        editingId = result[0].id;
         loadEdit(editingId);
       }
     } catch(e) {
