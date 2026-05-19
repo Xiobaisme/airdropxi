@@ -860,7 +860,7 @@
   }
 
   // GENERATE GAMBAR DENGAN TEMPLATE
-  async function generateFbImage(projectName, logoUrl) {
+  async function generateFbImage(projectName, description, logoUrl) {
     showToast('⏳ Generating gambar untuk Facebook...', 'success');
     try {
       // Load template image
@@ -892,23 +892,61 @@
             logoImg.onerror = reject;
             logoImg.src = logoUrl;
           });
-          // Position logo di area kosong (bisa disesuaikan)
-          ctx.drawImage(logoImg, 900, 50, 200, 200);
+          // Position logo di area kosong
+          ctx.drawImage(logoImg, 900, 50, 150, 150);
         } catch(e) {
           console.log('Logo tidak bisa dimuat');
         }
       }
 
-      // Draw project name overlay (di area "NEW AIRDROP")
+      // Draw project name overlay
       ctx.fillStyle = '#FFFFFF';
-      ctx.font = 'bold 80px "Plus Jakarta Sans", sans-serif';
-      ctx.textAlign = 'center';
-      ctx.textBaseline = 'middle';
+      ctx.font = 'bold 72px "Plus Jakarta Sans", sans-serif';
+      ctx.textAlign = 'left';
+      ctx.textBaseline = 'top';
       ctx.shadowColor = 'rgba(0, 0, 0, 0.8)';
       ctx.shadowBlur = 10;
       ctx.shadowOffsetX = 2;
       ctx.shadowOffsetY = 2;
-      ctx.fillText(projectName.slice(0, 20), 400, 400);
+      ctx.fillText(projectName.slice(0, 25), 80, 320);
+
+      // Draw description dengan word wrap
+      if (description && description.trim()) {
+        ctx.fillStyle = '#DCEAF0';
+        ctx.font = '20px "Plus Jakarta Sans", sans-serif';
+        ctx.textAlign = 'left';
+        ctx.textBaseline = 'top';
+        ctx.shadowColor = 'rgba(0, 0, 0, 0.6)';
+        ctx.shadowBlur = 8;
+        ctx.shadowOffsetX = 1;
+        ctx.shadowOffsetY = 1;
+        
+        const maxWidth = 700;
+        const lineHeight = 28;
+        const words = description.split(' ');
+        let line = '';
+        let y = 420;
+        const maxLines = 3;
+        let lineCount = 0;
+        
+        for (let i = 0; i < words.length && lineCount < maxLines; i++) {
+          const testLine = line + (line ? ' ' : '') + words[i];
+          const metrics = ctx.measureText(testLine);
+          
+          if (metrics.width > maxWidth && line) {
+            ctx.fillText(line, 80, y);
+            line = words[i];
+            y += lineHeight;
+            lineCount++;
+          } else {
+            line = testLine;
+          }
+        }
+        
+        if (line && lineCount < maxLines) {
+          ctx.fillText(line, 80, y);
+        }
+      }
 
       // Download
       canvas.toBlob(blob => {
@@ -946,7 +984,7 @@
         </div>
         <div class="fb-actions">
           <button class="btn-fb-cancel" onclick="closeFbModal()">✕ Batal</button>
-          <button class="btn-fb-open" style="background:rgba(0,229,160,0.1);border-color:rgba(0,229,160,0.25);color:var(--accent)" onclick="generateFbImage('${esc(p.name)}','${esc(p.logo_url || '')}')" >🎨 Generate Gambar</button>
+          <button class="btn-fb-open" style="background:rgba(0,229,160,0.1);border-color:rgba(0,229,160,0.25);color:var(--accent)" onclick="generateFbImage('${esc(p.name)}','${esc((p.descriptionID || p.descriptionEN || '').slice(0, 150))}','${esc(p.logo_url || '')}')" >🎨 Generate Gambar</button>
           <button class="btn-fb-copy"   onclick="copyFbCaption()">📋 Copy Caption</button>
           <button class="btn-fb-open"   onclick="window.open('https://www.facebook.com','_blank','width=1200,height=800,noopener,noreferrer')">📘 Buka Facebook</button>
         </div>
