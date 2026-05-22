@@ -757,9 +757,32 @@
 
   // ── FACEBOOK SHARE ────────────────────────────────────
   function openFbShare(id) {
+    const p = projects.find(x => x.id == id);
+    if (!p) return;
+
+    const name   = p.name || '—';
+    const slug   = name.toLowerCase().replace(/[^a-z0-9]/g,'');
+    const raised = p.RaisedID || p.RaisedEN || 'Undisclosed';
+    const cat    = p.tags    || 'Crypto / Web3';
+    const net    = p.network || 'TBA';
+    const status = p.status  || 'TBA';
+    const desc   = (p.descriptionID || p.descriptionEN || 'Proyek airdrop menarik!')
+                    .replace(/\n+/g,' ').trim().slice(0,200);
+
+    const caption = `🚀 ${name}\n\n${desc}\n\n💰 ${raised}\n📂 ${cat}\n🌐 ${net}\n📍 ${status}\n\nSelengkapnya di AirdropXI\n\n#airdrop #crypto #web3 #${slug}`;
+
+    navigator.clipboard.writeText(caption).catch(() => {
+      const ta = document.createElement('textarea');
+      ta.value = caption; document.body.appendChild(ta);
+      ta.select(); document.execCommand('copy');
+      document.body.removeChild(ta);
+    });
+
+    showToast('✓ Caption di-copy! Paste di Facebook.', 'success');
+
     const ogUrl = `https://airdropxi.vercel.app/api/og?id=${id}`;
     const fbUrl = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogUrl)}`;
-    window.open(fbUrl, '_blank', 'width=600,height=500');
+    setTimeout(() => window.open(fbUrl, '_blank', 'width=600,height=500'), 800);
   }
 
   // ── RENDER FORM ───────────────────────────────────────
