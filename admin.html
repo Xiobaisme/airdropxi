@@ -463,6 +463,12 @@
         <div class="proj-list" id="proj-list"></div>
       </div>
 
+      <!-- ✅ TOMBOL DASHBOARD STATS (di atas Tambah Airdrop Baru) -->
+      <button class="btn-new" onclick="showStats()"
+        style="border-color:rgba(124,109,250,0.3);color:var(--purple);background:rgba(124,109,250,0.06)">
+        📊 Dashboard Stats
+      </button>
+
       <button class="btn-new" onclick="newForm()">➕ Tambah Airdrop Baru</button>
 
       <div id="drafts-section" class="drafts-section" style="display:none">
@@ -756,55 +762,137 @@
   }
 
   // ── FACEBOOK SHARE ────────────────────────────────────
-function openFbShare(id) {
-  fetch(`/api/admin-airdrop?id=${id}`)
-    .then(r => r.json())
-    .then(p => _renderFbModal(p))
-    .catch(() => {
-      const p = projects.find(x => x.id == id) || {};
-      _renderFbModal(p);
+  function openFbShare(id) {
+    fetch(`/api/admin-airdrop?id=${id}`)
+      .then(r => r.json())
+      .then(p => _renderFbModal(p))
+      .catch(() => {
+        const p = projects.find(x => x.id == id) || {};
+        _renderFbModal(p);
+      });
+  }
+
+  function _renderFbModal(p) {
+    const name   = p.name || '—';
+    const slug   = name.toLowerCase().replace(/[^a-z0-9]/g,'');
+    const raised = p.RaisedID || p.RaisedEN || 'Undisclosed';
+    const cat    = p.tags    || 'Crypto / Web3';
+    const net    = p.network || 'TBA';
+    const status = p.status  || 'TBA';
+    const desc   = (p.descriptionID || p.descriptionEN || 'Proyek airdrop menarik!').trim();
+    const id     = p.id;
+
+    const caption = `🚀 ${name}\n\n${desc}\n\n💰 ${raised}\n📂 ${cat}\n🌐 ${net}\n📍 ${status}\n\nSelengkapnya di AirdropXI\n\n#airdrop #crypto #web3 #${slug}`;
+    const ogUrl   = `https://airdropxi.vercel.app/api/og?id=${id}`;
+    const fbUrl   = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogUrl)}`;
+
+    document.getElementById('fb-mini-modal')?.remove();
+
+    const modal = document.createElement('div');
+    modal.id = 'fb-mini-modal';
+    modal.style.cssText = `position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:1rem`;
+    modal.innerHTML = `
+      <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:1.5rem;max-width:480px;width:100%;display:flex;flex-direction:column;gap:1rem">
+        <div style="font-family:var(--mono);font-size:0.7rem;color:var(--accent);font-weight:700">📘 Share FB — ${esc(name)}</div>
+        <textarea id="fb-caption-text" style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:0.68rem;padding:0.75rem;min-height:180px;outline:none;resize:vertical" spellcheck="false">${caption}</textarea>
+        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3)">1️⃣ Klik <strong style="color:var(--accent)">Copy Caption</strong> → 2️⃣ Klik <strong style="color:#5b9cf6">Buka Facebook</strong> → 3️⃣ Paste di kolom FB</div>
+        <div style="display:flex;gap:8px;flex-wrap:wrap">
+          <button onclick="document.getElementById('fb-mini-modal').remove()" style="padding:0.5rem 0.9rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--mono);font-size:0.62rem;cursor:pointer">✕ Tutup</button>
+          <button onclick="
+            const ta=document.getElementById('fb-caption-text');
+            ta.select();
+            navigator.clipboard.writeText(ta.value).catch(()=>{document.execCommand('copy')});
+            this.textContent='✓ Copied!';
+            setTimeout(()=>this.textContent='📋 Copy Caption',2000)
+          " style="padding:0.5rem 0.9rem;border-radius:6px;border:1px solid rgba(0,229,160,0.3);background:rgba(0,229,160,0.1);color:var(--accent);font-family:var(--mono);font-size:0.62rem;cursor:pointer;font-weight:700">📋 Copy Caption</button>
+          <button onclick="window.open('${fbUrl}','_blank','width=600,height=500')" style="padding:0.5rem 0.9rem;border-radius:6px;border:1px solid rgba(24,119,242,0.3);background:rgba(24,119,242,0.1);color:#5b9cf6;font-family:var(--mono);font-size:0.62rem;cursor:pointer;font-weight:700">📘 Buka Facebook</button>
+        </div>
+      </div>`;
+    modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
+    document.body.appendChild(modal);
+  }
+
+  // ── DASHBOARD STATS ───────────────────────────────────
+  async function showStats() {
+    editingId = null; renderList();
+    document.getElementById('form-area').innerHTML = `
+      <div class="panel">
+        <div class="panel-head">
+          <span class="ph-dot" style="background:var(--purple);box-shadow:0 0 6px var(--purple)"></span>
+          <span class="ph-title">Dashboard Stats</span>
+        </div>
+        <div id="stats-content" style="padding:1.25rem">
+          <div style="font-family:var(--mono);font-size:0.65rem;color:var(--text3)">⏳ Loading...</div>
+        </div>
+      </div>`;
+
+    const byStatus = {}, byConfirm = {}, byNetwork = {}, byTag = {};
+
+    projects.forEach(p => {
+      const s = p.status || 'TBA';
+      byStatus[s] = (byStatus[s] || 0) + 1;
+      const c = p.confirmation_status || 'unknown';
+      byConfirm[c] = (byConfirm[c] || 0) + 1;
+      const n = p.network || 'Unknown';
+      byNetwork[n] = (byNetwork[n] || 0) + 1;
+      (p.tags || '').split(',').forEach(t => {
+        const tag = t.trim().toLowerCase();
+        if (tag) byTag[tag] = (byTag[tag] || 0) + 1;
+      });
     });
-}
 
-function _renderFbModal(p) {
-  const name   = p.name || '—';
-  const slug   = name.toLowerCase().replace(/[^a-z0-9]/g,'');
-  const raised = p.RaisedID || p.RaisedEN || 'Undisclosed';
-  const cat    = p.tags    || 'Crypto / Web3';
-  const net    = p.network || 'TBA';
-  const status = p.status  || 'TBA';
-  const desc   = (p.descriptionID || p.descriptionEN || 'Proyek airdrop menarik!').trim();
-  const id     = p.id;
+    const topViewed = [...projects]
+      .filter(p => p.view_count > 0)
+      .sort((a,b) => (b.view_count||0) - (a.view_count||0))
+      .slice(0, 5);
 
-  const caption = `🚀 ${name}\n\n${desc}\n\n💰 ${raised}\n📂 ${cat}\n🌐 ${net}\n📍 ${status}\n\nSelengkapnya di AirdropXI\n\n#airdrop #crypto #web3 #${slug}`;
-  const ogUrl   = `https://airdropxi.vercel.app/api/og?id=${id}`;
-  const fbUrl   = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogUrl)}`;
+    const sortedStatus  = Object.entries(byStatus).sort((a,b) => b[1]-a[1]);
+    const sortedConfirm = Object.entries(byConfirm).sort((a,b) => b[1]-a[1]);
+    const sortedNetwork = Object.entries(byNetwork).sort((a,b) => b[1]-a[1]).slice(0,8);
+    const sortedTags    = Object.entries(byTag).sort((a,b) => b[1]-a[1]).slice(0,10);
 
-  document.getElementById('fb-mini-modal')?.remove();
+    const bar = (label, val, max, color) => `
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:6px">
+        <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text2);width:120px;flex-shrink:0;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(label)}</div>
+        <div style="flex:1;background:var(--s3);border-radius:3px;height:8px;overflow:hidden">
+          <div style="width:${Math.round((val/max)*100)}%;background:${color};height:100%;border-radius:3px"></div>
+        </div>
+        <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text3);width:24px;text-align:right">${val}</div>
+      </div>`;
 
-  const modal = document.createElement('div');
-  modal.id = 'fb-mini-modal';
-  modal.style.cssText = `position:fixed;inset:0;z-index:3000;background:rgba(0,0,0,0.7);display:flex;align-items:center;justify-content:center;padding:1rem`;
-  modal.innerHTML = `
-    <div style="background:var(--s1);border:1px solid var(--border);border-radius:12px;padding:1.5rem;max-width:480px;width:100%;display:flex;flex-direction:column;gap:1rem">
-      <div style="font-family:var(--mono);font-size:0.7rem;color:var(--accent);font-weight:700">📘 Share FB — ${esc(name)}</div>
-      <textarea id="fb-caption-text" style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:6px;color:var(--text);font-family:var(--mono);font-size:0.68rem;padding:0.75rem;min-height:180px;outline:none;resize:vertical" spellcheck="false">${caption}</textarea>
-      <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3)">1️⃣ Klik <strong style="color:var(--accent)">Copy Caption</strong> → 2️⃣ Klik <strong style="color:#5b9cf6">Buka Facebook</strong> → 3️⃣ Paste di kolom FB</div>
-      <div style="display:flex;gap:8px;flex-wrap:wrap">
-        <button onclick="document.getElementById('fb-mini-modal').remove()" style="padding:0.5rem 0.9rem;border-radius:6px;border:1px solid var(--border);background:transparent;color:var(--text2);font-family:var(--mono);font-size:0.62rem;cursor:pointer">✕ Tutup</button>
-        <button onclick="
-          const ta=document.getElementById('fb-caption-text');
-          ta.select();
-          navigator.clipboard.writeText(ta.value).catch(()=>{document.execCommand('copy')});
-          this.textContent='✓ Copied!';
-          setTimeout(()=>this.textContent='📋 Copy Caption',2000)
-        " style="padding:0.5rem 0.9rem;border-radius:6px;border:1px solid rgba(0,229,160,0.3);background:rgba(0,229,160,0.1);color:var(--accent);font-family:var(--mono);font-size:0.62rem;cursor:pointer;font-weight:700">📋 Copy Caption</button>
-        <button onclick="window.open('${fbUrl}','_blank','width=600,height=500')" style="padding:0.5rem 0.9rem;border-radius:6px;border:1px solid rgba(24,119,242,0.3);background:rgba(24,119,242,0.1);color:#5b9cf6;font-family:var(--mono);font-size:0.62rem;cursor:pointer;font-weight:700">📘 Buka Facebook</button>
-      </div>
-    </div>`;
-  modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
-  document.body.appendChild(modal);
-}
+    const card = (title, color, content) => `
+      <div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:1rem;display:flex;flex-direction:column;gap:10px">
+        <div style="font-family:var(--mono);font-size:0.58rem;color:${color};letter-spacing:0.1em;text-transform:uppercase">${title}</div>
+        ${content}
+      </div>`;
+
+    document.getElementById('stats-content').innerHTML = `
+      <div style="display:grid;grid-template-columns:1fr 1fr;gap:1rem">
+        ${card('🏆 Most Viewed', 'var(--warn)',
+          topViewed.length
+            ? topViewed.map((p,i) => `
+              <div style="display:flex;align-items:center;gap:8px;cursor:pointer" onclick="loadEdit(${p.id})">
+                <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);width:16px">#${i+1}</div>
+                <div style="flex:1;font-size:0.75rem;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis">${esc(p.name)}</div>
+                <div style="font-family:var(--mono);font-size:0.6rem;color:var(--warn)">${p.view_count} views</div>
+              </div>`).join('')
+            : '<div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3)">Belum ada data view</div>'
+        )}
+        ${card('📊 By Status', 'var(--accent)',
+          sortedStatus.length ? sortedStatus.map(([s,v]) => bar(s, v, sortedStatus[0][1], 'var(--accent)')).join('') : '<div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3)">Belum ada data</div>'
+        )}
+        ${card('✓ By Confirmation', 'var(--cyan)',
+          sortedConfirm.length ? sortedConfirm.map(([s,v]) => bar(s, v, sortedConfirm[0][1], 'var(--cyan)')).join('') : '<div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3)">Belum ada data</div>'
+        )}
+        ${card('🌐 By Network', 'var(--blue)',
+          sortedNetwork.length ? sortedNetwork.map(([s,v]) => bar(s, v, sortedNetwork[0][1], 'var(--blue)')).join('') : '<div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3)">Belum ada data</div>'
+        )}
+        ${card('🏷️ Top Tags', 'var(--purple)',
+          sortedTags.length ? sortedTags.map(([s,v]) => bar(s, v, sortedTags[0][1], 'var(--purple)')).join('') : '<div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3)">Belum ada data</div>'
+        )}
+      </div>`;
+  }
+
   // ── RENDER FORM ───────────────────────────────────────
   function renderForm(data) {
     const d      = data || {};
