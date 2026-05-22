@@ -18,6 +18,11 @@ module.exports = async function handler(req, res) {
     'Authorization': `Bearer ${SUPA_KEY}`,
     'Content-Type': 'application/json',
   };
+
+  // ✅ No-cache — biar serverless function selalu dieksekusi, ga di-cache
+  res.setHeader('Cache-Control', 'no-store, no-cache, must-revalidate');
+  res.setHeader('Pragma', 'no-cache');
+
   try {
     const r = await fetch(
       `${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}&limit=1`,
