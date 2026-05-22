@@ -756,10 +756,17 @@
   }
 
   // ── FACEBOOK SHARE ────────────────────────────────────
- function openFbShare(id) {
-  const p = projects.find(x => x.id == id);
-  if (!p) return;
+function openFbShare(id) {
+  fetch(`/api/admin-airdrop?id=${id}`)
+    .then(r => r.json())
+    .then(p => _renderFbModal(p))
+    .catch(() => {
+      const p = projects.find(x => x.id == id) || {};
+      _renderFbModal(p);
+    });
+}
 
+function _renderFbModal(p) {
   const name   = p.name || '—';
   const slug   = name.toLowerCase().replace(/[^a-z0-9]/g,'');
   const raised = p.RaisedID || p.RaisedEN || 'Undisclosed';
@@ -767,11 +774,12 @@
   const net    = p.network || 'TBA';
   const status = p.status  || 'TBA';
   const desc   = (p.descriptionID || p.descriptionEN || 'Proyek airdrop menarik!').trim();
+  const id     = p.id;
+
   const caption = `🚀 ${name}\n\n${desc}\n\n💰 ${raised}\n📂 ${cat}\n🌐 ${net}\n📍 ${status}\n\nSelengkapnya di AirdropXI\n\n#airdrop #crypto #web3 #${slug}`;
   const ogUrl   = `https://airdropxi.vercel.app/api/og?id=${id}`;
   const fbUrl   = `https://www.facebook.com/sharer/sharer.php?u=${encodeURIComponent(ogUrl)}`;
 
-  // Hapus modal lama kalau ada
   document.getElementById('fb-mini-modal')?.remove();
 
   const modal = document.createElement('div');
@@ -797,7 +805,6 @@
   modal.addEventListener('click', e => { if(e.target===modal) modal.remove(); });
   document.body.appendChild(modal);
 }
-
   // ── RENDER FORM ───────────────────────────────────────
   function renderForm(data) {
     const d      = data || {};
