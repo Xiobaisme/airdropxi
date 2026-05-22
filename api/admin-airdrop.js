@@ -104,7 +104,8 @@ module.exports = async function handler(req, res) {
 
       const base   = airdropsData[0];
       const extra  = (proyekData && proyekData.length > 0) ? proyekData[0] : {};
-      const merged = { ...base, ...extra, id: base.id };
+      // ✅ Preserve view_count dari airdrops, jangan di-overwrite proyek
+      const merged = { ...base, ...extra, id: base.id, view_count: base.view_count || 0 };
 
       const intId = extra.airdrop_id || base.id;
       const rRoadmap = await fetch(
@@ -150,6 +151,7 @@ module.exports = async function handler(req, res) {
       }
 
       try {
+        // ✅ Sekarang kirim field lengkap ke notify
         await fetch(`https://airdropxi.vercel.app/api/notify-subscribers`, {
           method: 'POST',
           headers: {
@@ -159,7 +161,11 @@ module.exports = async function handler(req, res) {
           body: JSON.stringify({
             projectName: req.body.name,
             projectUrl:  `https://airdropxi.vercel.app/guide/${newId}`,
-            description: req.body.descriptionID || req.body.descriptionEN || '',
+            description: req.body.descriptionEN || req.body.descriptionID || '',
+            raised:      req.body.RaisedEN      || req.body.RaisedID      || null,
+            tags:        req.body.tags          || null,
+            network:     req.body.network       || null,
+            status:      req.body.status        || null,
           }),
         });
       } catch(e) {
