@@ -363,10 +363,13 @@ nav {
   min-height: 86vh;
   display: grid;
   grid-template-columns: 1fr 1fr;
-  align-items:center; gap:60px;
+  align-items: center;
+  gap: 60px;
   padding: 80px 40px 60px;
-  max-width: 1360px; margin:0 auto;
+  max-width: 1360px;
+  margin: 0 auto;
 }
+
 .hero-badge {
   display: inline-flex; align-items:center; gap:8px;
   background: rgba(0,232,122,.08);
@@ -378,6 +381,7 @@ nav {
   animation: fadeUp .8s ease both;
 }
 .hero-badge-dot { width:6px; height:6px; background:var(--g); border-radius:50%; animation:ldot 2s infinite; }
+
 .hero h1 {
   font-size: clamp(40px, 5vw, 68px);
   font-weight:800; line-height:1.05;
@@ -396,6 +400,7 @@ nav {
   animation: fadeUp .8s .2s ease both;
 }
 .hero-btns { display:flex; gap:12px; animation:fadeUp .8s .3s ease both; }
+
 .btn-primary {
   background: linear-gradient(135deg, var(--g), var(--c));
   color:#000; font-weight:700; font-size:12px;
@@ -406,6 +411,7 @@ nav {
   display:flex; align-items:center; gap:7px;
 }
 .btn-primary:hover { transform:translateY(-2px); box-shadow:0 16px 40px rgba(0,232,122,.3); }
+
 .btn-ghost {
   background:transparent; color:var(--text);
   font-weight:600; font-size:12px; padding:13px 26px;
@@ -414,6 +420,7 @@ nav {
   transition:all .3s; font-family:'Plus Jakarta Sans',sans-serif;
 }
 .btn-ghost:hover { border-color:var(--g); color:var(--g); background:rgba(0,232,122,.05); }
+
 .hero-stats {
   display:flex; gap:28px; margin-top:44px;
   animation: fadeUp .8s .4s ease both;
@@ -426,61 +433,38 @@ nav {
 .hstat-lbl { font-size:10px; color:var(--text2); text-transform:uppercase; letter-spacing:1px; margin-top:2px; }
 
 /* ==========================================
-   8. CRYPTO UNIVERSE
+   8. OWL MASCOT
    ========================================== */
-.hero-visual {
-  position:relative; display:flex; justify-content:center;
+.hero-owl-wrap {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 3;
   animation: fadeUp .8s .2s ease both;
 }
-.universe-container {
-  position:relative; width:400px; height:400px;
-  display:flex; align-items:center; justify-content:center;
-}
-.sun-btc {
-  width:64px; height:64px; background:#f7931a;
-  border-radius:50%; display:flex; align-items:center; justify-content:center;
-  box-shadow: 0 0 36px rgba(247,147,26,.4), inset 0 0 12px rgba(255,255,255,.3);
-  z-index:10; animation:orbFloat 4s ease-in-out infinite;
-}
-.sun-btc img { width:38px; height:38px; }
-.orbit-ring {
-  position:absolute; border-radius:50%;
-  border:1px dashed var(--border);
-  top:50%; left:50%;
-  transform:translate(-50%,-50%);
-}
-.ring-1 { width:190px; height:190px; animation:spin 16s linear infinite; }
-.ring-2 { width:300px; height:300px; border:1px solid rgba(0,200,240,.12); animation:spinReverse 26s linear infinite; }
-.ring-3 { width:420px; height:420px; animation:spin 36s linear infinite; }
-.planet {
-  position:absolute; width:32px; height:32px;
-  background:var(--bg3); border-radius:50%;
-  border:1px solid var(--border-h);
-  display:flex; align-items:center; justify-content:center;
-  top:0; left:50%; margin-left:-16px; margin-top:-16px;
-}
-.planet img { width:18px; height:18px; border-radius:50%; }
-.planet-counter  { animation:spinReverse 16s linear infinite; }
-.planet-counter-2{ animation:spin 26s linear infinite; }
-.planet-counter-3{ animation:spinReverse 36s linear infinite; }
-.float-card {
-  position:absolute; background:var(--bg2);
-  border:1px solid var(--border); border-radius:var(--radius);
-  padding:12px 16px; backdrop-filter:blur(20px);
-  font-size:12px; white-space:nowrap; z-index:20;
-  box-shadow: var(--shadow);
-}
-.float-card-1 { top:5%; left:-18%; animation:fc1 7s ease-in-out infinite; }
-.float-card-2 { bottom:10%; right:-12%; animation:fc2 8s ease-in-out infinite; }
-.fc-title { font-weight:700; color:var(--g); font-family:'JetBrains Mono',monospace; font-size:10px; }
-.fc-val { color:var(--text); font-weight:700; font-size:14px; margin-top:2px; }
-.fc-sub { color:var(--text2); font-size:10px; margin-top:1px; }
 
-@keyframes spin { to { transform:translate(-50%,-50%) rotate(360deg); } }
-@keyframes spinReverse { to { transform:translate(-50%,-50%) rotate(-360deg); } }
-@keyframes orbFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
-@keyframes fc1 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(6px,-10px)} }
-@keyframes fc2 { 0%,100%{transform:translate(0,0)} 50%{transform:translate(-8px,8px)} }
+.hero-owl-img {
+  width: 100%;
+  max-width: 500px;
+  border-radius: 28px;
+  filter:
+    drop-shadow(0 0 60px rgba(0,232,122,0.45))
+    drop-shadow(0 0 120px rgba(0,200,240,0.2));
+  animation: owlFloat 5s ease-in-out infinite;
+  transition: filter 0.3s;
+}
+
+.hero-owl-img:hover {
+  filter:
+    drop-shadow(0 0 80px rgba(0,232,122,0.65))
+    drop-shadow(0 0 160px rgba(0,200,240,0.35));
+}
+
+@keyframes owlFloat {
+  0%, 100% { transform: translateY(0px); }
+  50%       { transform: translateY(-16px); }
+}
+
 @keyframes fadeUp { from{opacity:0;transform:translateY(22px)} to{opacity:1;transform:translateY(0)} }
 
 /* ==========================================
@@ -600,11 +584,11 @@ section {
   border-radius:var(--radius-pill); text-transform:uppercase;
   letter-spacing:1px; font-family:'JetBrains Mono',monospace;
 }
-.st-active { background:rgba(0,232,122,.1); color:var(--g); border:1px solid rgba(0,232,122,.25); }
-.st-waitlist{ background:rgba(245,158,11,.1); color:#f59e0b; border:1px solid rgba(245,158,11,.25); }
-.st-mint { background:rgba(59,130,246,.1); color:#60a5fa; border:1px solid rgba(59,130,246,.25); }
-.st-listing { background:rgba(124,109,250,.1); color:var(--accent); border:1px solid rgba(124,109,250,.25); }
-.st-default { background:rgba(100,116,139,.1); color:#94a3b8; border:1px solid rgba(100,116,139,.2); }
+.st-active   { background:rgba(0,232,122,.1); color:var(--g); border:1px solid rgba(0,232,122,.25); }
+.st-waitlist { background:rgba(245,158,11,.1); color:#f59e0b; border:1px solid rgba(245,158,11,.25); }
+.st-mint     { background:rgba(59,130,246,.1); color:#60a5fa; border:1px solid rgba(59,130,246,.25); }
+.st-listing  { background:rgba(124,109,250,.1); color:var(--accent); border:1px solid rgba(124,109,250,.25); }
+.st-default  { background:rgba(100,116,139,.1); color:#94a3b8; border:1px solid rgba(100,116,139,.2); }
 .acard-tags { display:flex; flex-wrap:wrap; gap:5px; margin-bottom:14px; }
 .atag {
   font-size:9px; font-weight:700; padding:3px 8px;
@@ -798,14 +782,20 @@ footer {
 .reveal.visible { opacity: 1; transform: translateY(0); }
 
 /* ==========================================
-   17. RESPONSIVE — TABLET
+   17. RESPONSIVE — TABLET (≤1024px)
    ========================================== */
 @media (max-width: 1024px) {
-  .hero { grid-template-columns: 1fr; padding: 48px 24px; gap: 44px; min-height: auto; text-align: center; }
+  .hero {
+    grid-template-columns: 1fr;
+    padding: 48px 24px;
+    gap: 44px;
+    min-height: auto;
+    text-align: center;
+  }
   .hero-sub { max-width: 100%; margin-left: auto; margin-right: auto; }
   .hero-btns { justify-content: center; }
   .hero-stats { justify-content: center; }
-  .hero-visual { transform: scale(.88); }
+  .hero-owl-wrap { max-width: 420px; margin: 0 auto; }
   .dash-grid { grid-template-columns: repeat(2, 1fr); }
 }
 
@@ -813,7 +803,7 @@ footer {
    18. RESPONSIVE — MOBILE (≤768px)
    ========================================== */
 @media (max-width: 768px) {
-  /* Navbar mobile */
+  /* Navbar */
   nav { padding: 0 16px; }
   .nav-links { display: none; }
   .nav-right  { display: none; }
@@ -822,7 +812,7 @@ footer {
   /* Sections */
   section { padding: 44px 16px; }
 
-  /* ── HERO: override grid jadi flex ── */
+  /* Hero */
   .hero {
     display: flex !important;
     flex-direction: column !important;
@@ -833,8 +823,20 @@ footer {
     overflow: hidden !important;
     box-sizing: border-box !important;
     text-align: center;
-    gap: 32px;
+    gap: 24px;
     min-height: auto;
+  }
+
+  /* Owl di atas konten di mobile */
+  .hero-owl-wrap {
+    order: -1;
+    max-width: 300px;
+    width: 88%;
+    margin: 0 auto;
+  }
+
+  .hero-owl-img {
+    border-radius: 20px;
   }
 
   .hero > div:first-child {
@@ -844,9 +846,8 @@ footer {
     box-sizing: border-box !important;
   }
 
-  /* ── H1: font kecil aman untuk 360-430px ── */
   .hero h1 {
-    font-size: clamp(22px, 6.5vw, 34px) !important;
+    font-size: clamp(24px, 7.5vw, 38px) !important;
     letter-spacing: -0.5px !important;
     line-height: 1.15 !important;
     word-break: break-word !important;
@@ -885,14 +886,11 @@ footer {
   }
 
   .hero-badge {
-    max-width: 90%;
+    max-width: 100%;
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
   }
-
-  .hero-visual { transform: scale(.75); margin-top: -20px; }
-  .float-card-1, .float-card-2 { display: none; }
 
   /* Hero stats */
   .hero-stats {
@@ -904,57 +902,32 @@ footer {
   .hstat { min-width: 80px; }
   .hstat-num { font-size: 20px; word-break: break-word; }
 
-  /* ── TICKER: tetap animasi, hanya di-clip ── */
-  .pticker-wrap,
-  .nticker-wrap {
+  /* Ticker */
+  .pticker-wrap, .nticker-wrap {
     overflow: hidden !important;
     max-width: 100vw !important;
   }
-  /* TIDAK matikan animasi scrollX */
   .pticker-inner { animation: scrollX 220s linear infinite !important; }
   .nticker-inner { animation: scrollX 38s linear infinite !important; }
 
-  /* Fix semua teks overflow */
-  .section-title,
-  .section-sub,
-  .acard-name,
-  .acard-status,
-  .atag,
-  .tasks-body,
-  .g-title,
-  .g-desc,
-  .g-list li,
-  .dash-label,
-  .nav-logo,
-  .fc-title,
-  .fc-val,
-  .fc-sub,
-  .st-item-text,
-  .footer-brand p,
-  .footer-links a {
+  /* Text overflow fixes */
+  .section-title, .section-sub, .acard-name, .acard-status,
+  .atag, .tasks-body, .g-title, .g-desc, .g-list li,
+  .dash-label, .nav-logo, .st-item-text,
+  .footer-brand p, .footer-links a {
     word-break: break-word;
     overflow-wrap: break-word;
     white-space: normal;
   }
 
-  /* Badge dan tag */
-  .atag,
-  .st-badge-wrap .st-item {
-    white-space: normal;
-    word-break: break-word;
-  }
+  .atag, .st-badge-wrap .st-item { white-space: normal; word-break: break-word; }
 
   /* AI quick buttons */
   .ai-quick-btns {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 8px;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: auto; flex-wrap: nowrap;
+    padding-bottom: 8px; -webkit-overflow-scrolling: touch;
   }
-  .ai-qbtn {
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
+  .ai-qbtn { white-space: nowrap; flex-shrink: 0; }
 
   /* Stat card */
   .dash-card { word-break: break-word; }
@@ -962,21 +935,16 @@ footer {
 
   /* Filter buttons */
   .filter-btns {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 8px;
-    -webkit-overflow-scrolling: touch;
+    overflow-x: auto; flex-wrap: nowrap;
+    padding-bottom: 8px; -webkit-overflow-scrolling: touch;
   }
-  .fbtn {
-    white-space: nowrap;
-    flex-shrink: 0;
-  }
+  .fbtn { white-space: nowrap; flex-shrink: 0; }
 
-  /* Guide card */
-  .g-list li      { flex-wrap: wrap; }
+  /* Guide */
+  .g-list li { flex-wrap: wrap; }
   .g-list li strong { min-width: auto; }
 
-  /* Grid adjustments */
+  /* Grids */
   .dash-grid          { grid-template-columns: 1fr 1fr; }
   .guide-grid         { grid-template-columns: 1fr; }
   #airdrop-container  { grid-template-columns: 1fr; }
@@ -999,98 +967,28 @@ footer {
   .dash-grid { grid-template-columns: 1fr; }
 
   .hero h1 {
-    font-size: clamp(20px, 6vw, 28px) !important;
+    font-size: clamp(22px, 7vw, 32px) !important;
     letter-spacing: -0.3px !important;
   }
+
+  .hero-owl-wrap { max-width: 260px; }
 
   .hero-btns { flex-direction: column; }
   .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
   .hero-stats { gap: 12px; }
 
-  /* Overflow lock */
-  body, html {
-    overflow-x: hidden;
-    width: 100%;
-  }
-  .container, section, .hero, footer {
-    overflow-x: hidden;
-  }
+  body, html { overflow-x: hidden; width: 100%; }
+  .container, section, .hero, footer { overflow-x: hidden; }
 
-  /* Airdrop cards */
-  .acard         { padding: 16px; }
-  .acard-top     { flex-wrap: wrap; gap: 10px; }
-  .acard-status  { white-space: normal; text-align: center; }
-  .acard-tags    {
-    overflow-x: auto;
-    flex-wrap: nowrap;
-    padding-bottom: 6px;
-    -webkit-overflow-scrolling: touch;
+  .acard { padding: 16px; }
+  .acard-top { flex-wrap: wrap; gap: 10px; }
+  .acard-status { white-space: normal; text-align: center; }
+  .acard-tags {
+    overflow-x: auto; flex-wrap: nowrap;
+    padding-bottom: 6px; -webkit-overflow-scrolling: touch;
   }
-  .acard-raised  { flex-wrap: wrap; }
-  .raised-ico    { flex-shrink: 0; }
-  .prog-meta     { flex-wrap: wrap; gap: 4px; }
-  .tasks-body    { max-height: 100px; overflow-y: auto; }
-}
-
-/* ==========================================
-   MOBILE FIX — HERO TEXT OVERFLOW
-   ========================================== */
-@media (max-width: 768px) {
-
-  /* Root clamp override untuk hero h1 */
-  .hero h1 {
-    font-size: clamp(24px, 7.5vw, 38px) !important;
-    letter-spacing: -0.5px !important;
-    word-break: break-word;
-    overflow-wrap: break-word;
-    width: 100%;
-    max-width: 100%;
-  }
-
-  /* Hero section width lock */
-  .hero {
-    width: 100%;
-    max-width: 100vw;
-    overflow: hidden;
-    padding-left: 16px !important;
-    padding-right: 16px !important;
-    box-sizing: border-box;
-  }
-
-  /* Hero children width lock */
-  .hero > div:first-child {
-    width: 100%;
-    max-width: 100%;
-    overflow: hidden;
-  }
-
-  /* Hero sub teks */
-  .hero-sub {
-    font-size: 12px !important;
-    width: 100%;
-    max-width: 100%;
-    overflow-wrap: break-word;
-    word-break: break-word;
-  }
-
-  /* Docs banner */
-  #hero-docs-banner {
-    width: 100%;
-    box-sizing: border-box;
-    overflow: hidden;
-  }
-
-  /* Badge */
-  .hero-badge {
-    max-width: 100%;
-    overflow: hidden;
-    text-overflow: ellipsis;
-  }
-}
-
-@media (max-width: 480px) {
-  .hero h1 {
-    font-size: clamp(22px, 7vw, 32px) !important;
-    letter-spacing: -0.3px !important;
-  }
+  .acard-raised { flex-wrap: wrap; }
+  .raised-ico { flex-shrink: 0; }
+  .prog-meta { flex-wrap: wrap; gap: 4px; }
+  .tasks-body { max-height: 100px; overflow-y: auto; }
 }
