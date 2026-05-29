@@ -3436,13 +3436,17 @@ const glossaryData = [
 {term:'Cope',badge:'r',cat:'Slang',def:{id:'Menolak menerima kenyataan bahwa investasinya gagal dan mencari berbagai pembenaran.',en:'Refusing to accept that an investment failed and seeking various justifications.'}},
 ];
 
-let docLang = localStorage.getItem('axi-doc-lang') || 'id';
-
+// Parse lang dari URL: /en/docs.html atau /id/docs.html
+const _docPathLang = window.location.pathname.split('/').find(p => p === 'en' || p === 'id');
+let docLang = _docPathLang || localStorage.getItem('axi-doc-lang') || 'id';
 function setDocLang(l) {
   docLang = l;
   localStorage.setItem('axi-doc-lang', l);
   const btnId = document.getElementById('d-btn-id');
   const btnEn = document.getElementById('d-btn-en');
+  // Update URL ke /id/docs.html atau /en/docs.html
+  const newPath = '/' + l + '/docs.html' + window.location.hash;
+  window.history.replaceState(null, '', newPath);
   if(btnId) btnId.className = 'lbtn' + (l==='id'?' active':'');
   if(btnEn) btnEn.className = 'lbtn' + (l==='en'?' active':'');
   document.querySelectorAll('[data-'+l+']').forEach(el => {
