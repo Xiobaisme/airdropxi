@@ -15,7 +15,7 @@ module.exports = async function handler(req, res) {
     'Prefer': 'return=representation',
   };
 
-  const { id } = req.query;
+  const { id, exchange_id, type } = req.query;
 
   function serializeError(val) {
     if (!val) return 'Unknown error';
@@ -30,6 +30,170 @@ module.exports = async function handler(req, res) {
     return JSON.stringify(val);
   }
 
+  // ─────────────────────────────────────────────
+  // EXCHANGE DETAILS HANDLER
+  // ─────────────────────────────────────────────
+  if (type === 'exchange-details') {
+    // GET (ambil satu atau semua exchange_details + join exchanges)
+    if (req.method === 'GET') {
+      try {
+        if (id) {
+          // Ambil berdasarkan id exchange_details
+          const r = await fetch(`${BASE}/exchange_details?id=eq.${encodeURIComponent(id)}&select=*`, { headers: H });
+          const data = await r.json();
+          if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
+          if (!data || data.length === 0) return res.status(404).json({ error: 'Exchange detail tidak ditemukan' });
+          // Join dengan exchanges untuk mendapatkan nama exchange
+          const detail = data[0];
+          const exRes = await fetch(`${BASE}/exchanges?id=eq.${detail.exchange_id}&select=exchange_name`, { headers: H });
+          const exData = await exRes.json();
+          if (exRes.ok && exData && exData[0]) {
+            detail.exchange_name = exData[0].exchange_name;
+          }
+          return res.status(200).json(detail);
+        } 
+        else if (exchange_id) {
+          // Ambil berdasarkan exchange_id (foreign key)
+          const r = await fetch(`${BASE}/exchange_details?exchange_id=eq.${encodeURIComponent(exchange_id)}&select=*`, { headers: H });
+          const data = await r.json();
+          if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
+          if (!data || data.length === 0) return res.status(404).json({ error: 'Exchange detail tidak ditemukan untuk exchange_id tersebut' });
+          const detail = data[0];
+          const exRes = await fetch(`${BASE}/exchanges?id=eq.${detail.exchange_id}&select=exchange_name`, { headers: H });
+          const exData = await exRes.json();
+          if (exRes.ok && exData && exData[0]) {
+            detail.exchange_name = exData[0].exchange_name;
+          }
+          return res.status(200).json(detail);
+        }
+        else {
+          // Ambil semua exchange_details + nama exchange
+          const r = await fetch(`${BASE}/exchange_details?select=*`, { headers: H });
+          const data = await r.json();
+          if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
+          // Enrich dengan nama exchange
+          const enriched = await Promise.all(data.map(async (detail) => {
+            const exRes = await fetch(`${BASE}/exchanges?id=eq.${detail.exchange_id}&select=exchange_name`, { headers: H });
+            const exData = await exRes.json();
+            if (exRes.ok && exData && exData[0]) {
+              detail.exchange_name = exData[0].exchange_name;
+            }
+            return detail;
+          }));
+          return res.status(200).json(enriched);
+        }
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
+    // PATCH (update exchange_details berdasarkan id atau exchange_id)
+    if (req.method === 'PATCH') {
+      if (!id && !exchange_id) {
+        return res.status(400).json({ error: 'Query param "id" (uuid exchange_details) atau "exchange_id" wajib ada' });
+      }
+
+      try {
+        let targetFilter = '';
+        if (id) targetFilter = `id=eq.${encodeURIComponent(id)}`;
+        else targetFilter = `exchange_id=eq.${encodeURIComponent(exchange_id)}`;
+
+        const payload = {
+          about:        req.body.about        ?? null,
+          website:      req.body.website      ?? null,
+          twitter:      req.body.twitter      ?? null,
+          telegram:     req.body.telegram     ?? null,
+          discord:      req.body.discord      ?? null,
+          instagram:    req.body.instagram    ?? null,
+          facebook:     req.body.facebook     ?? null,
+          linkedin:     req.body.linkedin     ?? null,
+          github:       req.body.github       ?? null,
+          youtube:      req.body.youtube      ?? null,
+          medium:       req.body.medium       ?? null,
+          updated_at:   new Date().toISOString(),
+        };
+
+        const r = await fetch(`${BASE}/exchange_details?${targetFilter}`, {
+          method: 'PATCH',
+          headers: H,
+          body: JSON.stringify(payload),
+        });
+
+        const text = await r.text();
+        let result = null;
+        if (text) { try { result = JSON.parse(text); } catch(e) { result = null; } }
+        if (!r.ok) return res.status(r.status).json({ error: serializeError(result || text) });
+
+        return res.status(200).json({ success: true, updated: result });
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
+    // POST (buat exchange_details baru, biasanya tidak diperlukan karena sudah di-create otomatis)
+    if (req.method === 'POST') {
+      if (!req.body.exchange_id) {
+        return res.status(400).json({ error: 'Field "exchange_id" wajib diisi' });
+      }
+      try {
+        const payload = {
+          exchange_id:  req.body.exchange_id,
+          about:        req.body.about        ?? null,
+          website:      req.body.website      ?? null,
+          twitter:      req.body.twitter      ?? null,
+          telegram:     req.body.telegram     ?? null,
+          discord:      req.body.discord      ?? null,
+          instagram:    req.body.instagram    ?? null,
+          facebook:     req.body.facebook     ?? null,
+          linkedin:     req.body.linkedin     ?? null,
+          github:       req.body.github       ?? null,
+          youtube:      req.body.youtube      ?? null,
+          medium:       req.body.medium       ?? null,
+        };
+        const r = await fetch(`${BASE}/exchange_details`, {
+          method: 'POST',
+          headers: H,
+          body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
+        return res.status(201).json(data);
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
+    // DELETE
+    if (req.method === 'DELETE') {
+      if (!id && !exchange_id) {
+        return res.status(400).json({ error: 'Query param "id" atau "exchange_id" wajib ada' });
+      }
+      try {
+        let targetFilter = '';
+        if (id) targetFilter = `id=eq.${encodeURIComponent(id)}`;
+        else targetFilter = `exchange_id=eq.${encodeURIComponent(exchange_id)}`;
+
+        const r = await fetch(`${BASE}/exchange_details?${targetFilter}`, {
+          method: 'DELETE',
+          headers: H,
+        });
+        if (!r.ok) {
+          const err = await r.json().catch(() => ({}));
+          return res.status(r.status).json({ error: serializeError(err) });
+        }
+        return res.status(200).json({ success: true });
+      } catch (e) {
+        return res.status(500).json({ error: e.message });
+      }
+    }
+
+    res.setHeader('Allow', ['GET', 'POST', 'PATCH', 'DELETE']);
+    return res.status(405).json({ error: `Method ${req.method} tidak diizinkan untuk exchange-details` });
+  }
+
+  // ============================================================
+  // LANJUTKAN KODE ASLI UNTUK AIRDROPS & PROYEK (TIDAK BERUBAH)
+  // ============================================================
   function buildAirdropsPayload(p) {
     return {
       name:                 p.name                 || null,
@@ -80,7 +244,7 @@ module.exports = async function handler(req, res) {
     return payload;
   }
 
-  // ── GET ──────────────────────────────────────────────
+  // ── GET (airdrop) ─────────────────────────────────────────
   if (req.method === 'GET') {
     try {
       if (!id) {
@@ -104,7 +268,6 @@ module.exports = async function handler(req, res) {
 
       const base   = airdropsData[0];
       const extra  = (proyekData && proyekData.length > 0) ? proyekData[0] : {};
-      // ✅ Preserve view_count dari airdrops, jangan di-overwrite proyek
       const merged = { ...base, ...extra, id: base.id, view_count: base.view_count || 0 };
 
       const intId = extra.airdrop_id || base.id;
@@ -151,7 +314,6 @@ module.exports = async function handler(req, res) {
       }
 
       try {
-        // ✅ Sekarang kirim field lengkap ke notify
         await fetch(`https://airdropxi.vercel.app/api/notify-subscribers`, {
           method: 'POST',
           headers: {
@@ -178,7 +340,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // ── PATCH ────────────────────────────────────────────
+  // ── PATCH (airdrop) ───────────────────────────────────────────
   if (req.method === 'PATCH') {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
@@ -225,7 +387,7 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // ── DELETE ───────────────────────────────────────────
+  // ── DELETE (airdrop) ───────────────────────────────────────────
   if (req.method === 'DELETE') {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
@@ -262,7 +424,7 @@ module.exports = async function handler(req, res) {
   return res.status(405).json({ error: `Method ${req.method} tidak diizinkan` });
 };
 
-// ── HELPER: save roadmap ─────────────────────────────
+// ── HELPER: save roadmap ─────────────────────────────────
 async function saveRoadmap(BASE, H, airdropId, items) {
   try {
     await fetch(`${BASE}/project_roadmaps?airdrop_id=eq.${airdropId}`, {
