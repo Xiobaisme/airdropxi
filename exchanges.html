@@ -5,15 +5,15 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
     <meta name="robots" content="index, follow">
     <link rel="canonical" href="https://airdropxi.vercel.app/exchanges.html">
-    <meta name="description" content="Daftar exchange crypto terpercaya di AirdropXI. Find the best and most trusted crypto exchanges listed on AirdropXI.">
+    <meta name="description" content="Institutional-grade exchange intelligence. Analyze, compare, and navigate the top 100 CEX & DEX by liquidity, jurisdiction, and market depth.">
     <meta name="keywords" content="crypto exchange, exchange terpercaya, DEX, CEX, trading crypto">
-    <meta property="og:title" content="Crypto Exchanges — AirdropXI">
-    <meta property="og:description" content="Temukan exchange crypto terbaik. Discover the best crypto exchanges.">
+    <meta property="og:title" content="Exchange Intelligence — AirdropXI">
+    <meta property="og:description" content="Institutional-grade exchange intelligence. Top 100 CEX & DEX.">
     <meta property="og:url" content="https://airdropxi.vercel.app/exchanges.html">
     <meta property="og:type" content="website">
     <meta property="og:image" content="https://airdropxi.vercel.app/logo.png">
     <link rel="icon" type="image/png" href="logo.png">
-    <title>exchanges Crypto — AirdropXI</title>
+    <title>Exchange Intelligence — AirdropXI</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600&display=swap" rel="stylesheet">
     <style>
@@ -51,7 +51,6 @@
         }
 
         * { font-family: 'Space Grotesk', sans-serif; }
-        
         body {
             background-color: var(--bg);
             color: var(--text);
@@ -60,8 +59,6 @@
             display: flex;
             flex-direction: column;
         }
-
-        /* Grid background */
         body::before {
             content: '';
             position: fixed;
@@ -73,7 +70,6 @@
             pointer-events: none;
             z-index: 0;
         }
-
         body::after {
             content: '';
             position: fixed;
@@ -86,7 +82,6 @@
             pointer-events: none;
             z-index: 0;
         }
-
         nav {
             background: var(--nav);
             backdrop-filter: blur(16px);
@@ -96,7 +91,6 @@
             z-index: 50;
             transition: background 0.3s;
         }
-
         .ticker-wrap {
             background: rgba(0,0,0,0.3);
             border-bottom: 1px solid var(--border2);
@@ -105,9 +99,7 @@
             display: flex;
             align-items: center;
         }
-        [data-theme="light"] .ticker-wrap {
-            background: rgba(255,255,255,0.4);
-        }
+        [data-theme="light"] .ticker-wrap { background: rgba(255,255,255,0.4); }
         .ticker-track {
             display: flex;
             gap: 2.5rem;
@@ -129,7 +121,6 @@
         .ticker-item .up { color: #22c55e; }
         .ticker-item .down { color: #ef4444; }
 
-        /* Table & Components (existing) */
         table { border-collapse: separate; border-spacing: 0; width: 100%; }
         thead th {
             font-family: 'JetBrains Mono', monospace;
@@ -144,6 +135,7 @@
         tbody tr {
             border-bottom: 1px solid var(--border2);
             transition: background 0.2s;
+            cursor: pointer;
         }
         tbody tr:hover { background: var(--green3); }
         tbody td { padding: 12px; vertical-align: middle; }
@@ -161,9 +153,9 @@
             color: var(--text3);
             background: var(--green3);
         }
-        .rank-badge.gold { border-color: rgba(250,204,21,0.4); color: #fbbf24; background: rgba(250,204,21,0.08); }
+        .rank-badge.gold   { border-color: rgba(250,204,21,0.4);  color: #fbbf24; background: rgba(250,204,21,0.08); }
         .rank-badge.silver { border-color: rgba(209,213,219,0.4); color: #d1d5db; background: rgba(209,213,219,0.08); }
-        .rank-badge.bronze { border-color: rgba(180,83,9,0.4); color: #f97316; background: rgba(180,83,9,0.08); }
+        .rank-badge.bronze { border-color: rgba(180,83,9,0.4);    color: #f97316; background: rgba(180,83,9,0.08); }
         .logo-img {
             width: 32px; height: 32px;
             border-radius: 50%;
@@ -196,16 +188,8 @@
             background: var(--green3);
             white-space: nowrap;
         }
-        .tab-active {
-            background: var(--green2);
-            color: var(--green);
-            border: 1px solid var(--border);
-        }
-        .tab-inactive {
-            background: transparent;
-            color: var(--text2);
-            border: 1px solid var(--border2);
-        }
+        .tab-active  { background: var(--green2); color: var(--green); border: 1px solid var(--border); }
+        .tab-inactive { background: transparent; color: var(--text2); border: 1px solid var(--border2); }
         .card {
             background: var(--card);
             border: 1px solid var(--border);
@@ -259,8 +243,179 @@
         .mode-btn:hover { background: var(--green2); }
         .fade-in { animation: fadeIn 0.4s ease both; }
         @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
-        
-        /* ----- RESPONSIVE FOOTER (FIXED) ----- */
+
+        /* ── DETAIL PAGE ── */
+        #detail-view {
+            display: none;
+            animation: fadeIn 0.3s ease both;
+        }
+        #detail-view.active { display: block; }
+        #list-view { display: block; }
+        #list-view.hidden-view { display: none; }
+
+        .detail-hero {
+            background: var(--green3);
+            border: 1px solid var(--border);
+            border-radius: 16px;
+            padding: 28px 32px;
+            display: flex;
+            align-items: center;
+            gap: 24px;
+            flex-wrap: wrap;
+            margin-bottom: 24px;
+        }
+        .detail-logo {
+            width: 72px; height: 72px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            object-fit: cover;
+            background: var(--bg2);
+            flex-shrink: 0;
+        }
+        .detail-logo-placeholder {
+            width: 72px; height: 72px;
+            border-radius: 16px;
+            border: 1px solid var(--border);
+            background: var(--green3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 28px;
+            font-weight: 700;
+            color: var(--green);
+            flex-shrink: 0;
+        }
+        .detail-meta-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+            gap: 12px;
+            margin-bottom: 24px;
+        }
+        .detail-meta-card {
+            background: var(--green3);
+            border: 1px solid var(--border2);
+            border-radius: 10px;
+            padding: 14px 16px;
+        }
+        .detail-meta-label {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 9px;
+            letter-spacing: 0.14em;
+            color: var(--green);
+            text-transform: uppercase;
+            margin-bottom: 6px;
+        }
+        .detail-meta-value {
+            font-size: 14px;
+            font-weight: 600;
+            color: var(--text);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .detail-section {
+            background: var(--card);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 20px 24px;
+            margin-bottom: 16px;
+            backdrop-filter: blur(20px);
+        }
+        .detail-section-title {
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 10px;
+            letter-spacing: 0.14em;
+            color: var(--green);
+            text-transform: uppercase;
+            margin-bottom: 14px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .detail-section-title::after {
+            content: '';
+            flex: 1;
+            height: 1px;
+            background: var(--border2);
+        }
+        .detail-about {
+            font-size: 14px;
+            color: var(--text2);
+            line-height: 1.75;
+        }
+        .social-link {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 14px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--green3);
+            color: var(--text2);
+            font-size: 12px;
+            font-weight: 500;
+            text-decoration: none;
+            transition: all 0.2s;
+            margin: 4px;
+        }
+        .social-link:hover {
+            border-color: var(--green);
+            color: var(--green);
+            background: var(--green2);
+        }
+        .back-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 8px 16px;
+            border-radius: 8px;
+            border: 1px solid var(--border);
+            background: var(--green3);
+            color: var(--text2);
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.2s;
+            margin-bottom: 20px;
+            font-family: 'JetBrains Mono', monospace;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+        }
+        .back-btn:hover { border-color: var(--green); color: var(--green); }
+
+        .token-pill {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 12px;
+            border-radius: 999px;
+            border: 1px solid var(--border);
+            background: var(--green3);
+            font-size: 13px;
+            font-weight: 600;
+            color: var(--green);
+        }
+        .token-pill img {
+            width: 20px; height: 20px;
+            border-radius: 50%;
+            object-fit: cover;
+        }
+        .website-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 10px 20px;
+            border-radius: 10px;
+            border: 1px solid var(--green);
+            background: var(--green2);
+            color: var(--green);
+            font-size: 13px;
+            font-weight: 600;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .website-btn:hover { background: var(--green); color: #000; }
+
+        /* ── FOOTER ── */
         footer {
             position: relative;
             z-index: 10;
@@ -270,11 +425,7 @@
             border-top: 1px solid var(--border);
             width: 100%;
         }
-        .footer-container {
-            max-width: 1280px;
-            margin: 0 auto;
-            padding: 2rem 1.5rem 1.8rem;
-        }
+        .footer-container { max-width: 1280px; margin: 0 auto; padding: 2rem 1.5rem 1.8rem; }
         .dyor-badge {
             background: var(--green3);
             border: 1px solid var(--border);
@@ -302,12 +453,7 @@
             color: transparent;
             margin-bottom: 0.5rem;
         }
-        .footer-brand p {
-            font-size: 0.8rem;
-            color: var(--text2);
-            line-height: 1.4;
-            max-width: 260px;
-        }
+        .footer-brand p { font-size: 0.8rem; color: var(--text2); line-height: 1.4; max-width: 260px; }
         .footer-links-section h4 {
             font-family: 'JetBrains Mono', monospace;
             font-size: 0.7rem;
@@ -326,15 +472,8 @@
             margin-bottom: 0.65rem;
             transition: all 0.2s;
         }
-        .footer-links-section a:hover {
-            color: var(--green);
-            transform: translateX(4px);
-        }
-        .footer-links-section svg {
-            width: 14px;
-            height: 14px;
-            opacity: 0.7;
-        }
+        .footer-links-section a:hover { color: var(--green); transform: translateX(4px); }
+        .footer-links-section svg { width: 14px; height: 14px; opacity: 0.7; }
         .newsletter-block {
             border-top: 1px solid var(--border2);
             padding-top: 1.8rem;
@@ -345,32 +484,12 @@
             align-items: flex-start;
             gap: 1.5rem;
         }
-        .newsletter-info {
-            flex: 1;
-            min-width: 200px;
-        }
-        .newsletter-info h4 {
-            font-size: 1rem;
-            font-weight: 700;
-            margin-bottom: 0.3rem;
-            color: var(--text);
-        }
-        .newsletter-info .newsletter-desc {
-            font-size: 0.7rem;
-            font-family: 'JetBrains Mono', monospace;
-            color: var(--text2);
-        }
-        .subscribe-form {
-            flex: 1;
-            min-width: 240px;
-            display: flex;
-            flex-wrap: wrap;
-            gap: 0.7rem;
-            align-items: center;
-        }
+        .newsletter-info { flex: 1; min-width: 200px; }
+        .newsletter-info h4 { font-size: 1rem; font-weight: 700; margin-bottom: 0.3rem; color: var(--text); }
+        .newsletter-info .newsletter-desc { font-size: 0.7rem; font-family: 'JetBrains Mono', monospace; color: var(--text2); }
+        .subscribe-form { flex: 1; min-width: 240px; display: flex; flex-wrap: wrap; gap: 0.7rem; align-items: center; }
         .subscribe-form input {
-            flex: 2;
-            min-width: 160px;
+            flex: 2; min-width: 160px;
             background: var(--green3);
             border: 1px solid var(--border2);
             border-radius: 12px;
@@ -381,9 +500,7 @@
             outline: none;
             transition: all 0.2s;
         }
-        .subscribe-form input:focus {
-            border-color: var(--green);
-        }
+        .subscribe-form input:focus { border-color: var(--green); }
         .subscribe-btn {
             background: linear-gradient(105deg, var(--green), #3b82f6);
             color: #000;
@@ -397,15 +514,7 @@
             transition: 0.2s;
             white-space: nowrap;
         }
-        .subscribe-btn:hover {
-            opacity: 0.85;
-            transform: scale(0.98);
-        }
-        #sub-msg {
-            font-size: 0.7rem;
-            margin-top: 0.5rem;
-            font-family: monospace;
-        }
+        .subscribe-btn:hover { opacity: 0.85; transform: scale(0.98); }
         .copyright {
             font-size: 0.65rem;
             text-align: center;
@@ -416,35 +525,9 @@
             font-family: monospace;
         }
         @media (min-width: 768px) {
-            .footer-grid {
-                grid-template-columns: 1.2fr 1fr 1fr;
-                gap: 2rem;
-            }
-            .newsletter-block {
-                flex-direction: row;
-                align-items: center;
-            }
+            .footer-grid { grid-template-columns: 1.2fr 1fr 1fr; gap: 2rem; }
         }
-        @media (max-width: 640px) {
-            .footer-container {
-                padding: 1.8rem 1.2rem;
-            }
-            .subscribe-form {
-                flex-direction: column;
-                align-items: stretch;
-            }
-            .subscribe-btn {
-                text-align: center;
-            }
-            .dyor-badge {
-                font-size: 0.6rem;
-            }
-        }
-        main {
-            flex: 1;
-            position: relative;
-            z-index: 1;
-        }
+        main { flex: 1; position: relative; z-index: 1; }
         .table-wrap { overflow-x: auto; -webkit-overflow-scrolling: touch; }
         .skeleton {
             background: linear-gradient(90deg, var(--green3) 25%, var(--green2) 50%, var(--green3) 75%);
@@ -478,69 +561,116 @@
         </div>
     </div>
 </nav>
+
 <main>
 <div class="max-w-6xl mx-auto px-4 py-10">
-    <div class="flex items-center gap-2 text-xs mb-8" style="color:var(--text2)">
-        <a href="/" class="hover:text-green-400 transition">Home</a>
-        <span style="color:var(--border)">›</span>
-        <span style="color:var(--green)">Exchanges</span>
-    </div>
-    <div class="mb-8 fade-in">
-        <div class="flex items-center gap-3 mb-2">
-            <span class="pulse-dot"></span>
-            <span class="text-xs font-mono" style="color:var(--text3)" id="liveLabel">LIVE DATA</span>
+
+    <!-- ── LIST VIEW ── -->
+    <div id="list-view">
+        <div class="flex items-center gap-2 text-xs mb-8" style="color:var(--text2)">
+            <a href="/" class="hover:text-green-400 transition">Home</a>
+            <span style="color:var(--border)">›</span>
+            <span style="color:var(--green)">Exchanges</span>
         </div>
-        <h1 id="pageTitle" class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2"><span style="color:var(--green)">PASAR</span> BURSA</h1>
-        <p id="pageSubtitle" class="text-sm" style="color:var(--text2)">Data real-time bursa crypto terpercaya · Top 100 CEX & DEX</p>
-    </div>
-    <div class="flex gap-3 mb-8 flex-wrap fade-in">
-        <div class="stat-card"><p class="text-xs font-mono mb-1" style="color:var(--text3)" id="statCexLabel">CEX Listed</p><p class="text-2xl font-bold" style="color:var(--text)" id="statCex">—</p></div>
-        <div class="stat-card"><p class="text-xs font-mono mb-1" style="color:var(--text3)" id="statDexLabel">DEX Listed</p><p class="text-2xl font-bold" style="color:var(--text)" id="statDex">—</p></div>
-        <div class="stat-card"><p class="text-xs font-mono mb-1" style="color:var(--text3)" id="statTotalLabel">Total Exchanges</p><p class="text-2xl font-bold" style="color:var(--text)" id="statTotal">—</p></div>
-    </div>
-    <div class="card fade-in">
-        <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 border-b" style="border-color:var(--border2)">
-            <div class="flex gap-2">
-                <button id="cexTab" onclick="setActiveTab('cex')" class="tab-active px-5 py-2 rounded-full text-sm font-semibold transition-all">CEX</button>
-                <button id="dexTab" onclick="setActiveTab('dex')" class="tab-inactive px-5 py-2 rounded-full text-sm font-semibold transition-all">DEX</button>
+        <div class="mb-8 fade-in">
+            <div class="flex items-center gap-3 mb-2">
+                <span class="pulse-dot"></span>
+                <span class="text-xs font-mono" style="color:var(--text3)" id="liveLabel">LIVE DATA</span>
             </div>
-            <div class="relative max-w-xs w-full"><svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color:var(--text2)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg><input type="text" id="searchInput" class="search-input" placeholder="Cari exchange..." oninput="filterTable()"></div>
+            <h1 id="pageTitle" class="text-3xl md:text-4xl font-extrabold tracking-tight mb-2">
+                <span style="color:var(--green)">EXCHANGE</span> INTELLIGENCE
+            </h1>
+            <p id="pageSubtitle" class="text-sm" style="color:var(--text2)">
+                Institutional-grade directory. Vetted infrastructure, jurisdiction data, and market-fit analysis across Top 100 CEX & DEX.
+            </p>
         </div>
-        <div class="table-wrap">
-            <div id="loadingState" class="p-6"><div class="space-y-3">${Array(8).fill('').map(() => `<div class="flex items-center gap-3"><div class="skeleton w-8 h-8 rounded-lg"></div><div class="skeleton w-8 h-8 rounded-full"></div><div class="skeleton h-4 rounded flex-1"></div><div class="skeleton h-4 rounded w-24 hidden md:block"></div><div class="skeleton h-4 rounded w-32 hidden md:block"></div><div class="skeleton h-6 rounded-full w-20"></div></div>`).join('')}</div></div>
-            <div id="errorState" class="hidden text-center py-16"><p class="text-4xl mb-3">😢</p><p class="font-semibold" style="color:var(--text)">Gagal mengambil data</p><p class="text-sm mt-1" style="color:var(--text2)">Periksa koneksi internet kamu</p><button onclick="loadData()" class="mt-4 px-5 py-2 rounded-full text-sm text-green-400 border border-green-400/30 hover:bg-green-500/10 transition">Coba lagi</button></div>
-            <div id="emptyState" class="hidden text-center py-16"><p class="text-4xl mb-3">🔍</p><p class="font-semibold" style="color:var(--text)" id="emptyMsg">Tidak ditemukan</p></div>
-            <table id="table" class="hidden"><thead><tr><th id="thRank" style="min-width:56px">RANK</th><th id="thExchange" style="min-width:180px">EXCHANGE</th><th id="thCountry" class="hidden md:table-cell" style="min-width:120px">NEGARA</th><th id="thAdvantage" class="hidden lg:table-cell" style="min-width:200px">KELEBIHAN</th><th id="thSuitable" style="min-width:140px">COCOK UNTUK</th></tr></thead><tbody id="tbody"></tbody></table>
+        <div class="flex gap-3 mb-8 flex-wrap fade-in">
+            <div class="stat-card"><p class="text-xs font-mono mb-1" style="color:var(--text3)" id="statCexLabel">CEX Listed</p><p class="text-2xl font-bold" style="color:var(--text)" id="statCex">—</p></div>
+            <div class="stat-card"><p class="text-xs font-mono mb-1" style="color:var(--text3)" id="statDexLabel">DEX Listed</p><p class="text-2xl font-bold" style="color:var(--text)" id="statDex">—</p></div>
+            <div class="stat-card"><p class="text-xs font-mono mb-1" style="color:var(--text3)" id="statTotalLabel">Total Exchanges</p><p class="text-2xl font-bold" style="color:var(--text)" id="statTotal">—</p></div>
         </div>
-        <div class="flex items-center justify-between px-4 py-3 border-t" style="border-color:var(--border2)"><p class="text-xs font-mono" style="color:var(--text2)" id="footerCount">—</p><a href="https://coinmarketcap.com" target="_blank" class="text-xs" style="color:var(--text2)">Source: CoinMarketCap</a></div>
+        <div class="card fade-in">
+            <div class="flex flex-col md:flex-row md:items-center justify-between gap-3 p-4 border-b" style="border-color:var(--border2)">
+                <div class="flex gap-2">
+                    <button id="cexTab" onclick="setActiveTab('cex')" class="tab-active px-5 py-2 rounded-full text-sm font-semibold transition-all">CEX</button>
+                    <button id="dexTab" onclick="setActiveTab('dex')" class="tab-inactive px-5 py-2 rounded-full text-sm font-semibold transition-all">DEX</button>
+                </div>
+                <div class="relative max-w-xs w-full">
+                    <svg class="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4" style="color:var(--text2)" fill="none" stroke="currentColor" stroke-width="2" viewBox="0 0 24 24"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>
+                    <input type="text" id="searchInput" class="search-input" placeholder="Search exchange..." oninput="filterTable()">
+                </div>
+            </div>
+            <div class="table-wrap">
+                <div id="loadingState" class="p-6">
+                    <div class="space-y-3">${Array(8).fill('').map(() => `<div class="flex items-center gap-3"><div class="skeleton w-8 h-8 rounded-lg"></div><div class="skeleton w-8 h-8 rounded-full"></div><div class="skeleton h-4 rounded flex-1"></div><div class="skeleton h-4 rounded w-24 hidden md:block"></div><div class="skeleton h-4 rounded w-32 hidden md:block"></div><div class="skeleton h-6 rounded-full w-20"></div></div>`).join('')}</div>
+                </div>
+                <div id="errorState" class="hidden text-center py-16">
+                    <p class="text-4xl mb-3">😢</p>
+                    <p class="font-semibold" style="color:var(--text)">Failed to load exchange data</p>
+                    <p class="text-sm mt-1" style="color:var(--text2)">Check your internet connection</p>
+                    <button onclick="loadData()" class="mt-4 px-5 py-2 rounded-full text-sm text-green-400 border border-green-400/30 hover:bg-green-500/10 transition">Retry</button>
+                </div>
+                <div id="emptyState" class="hidden text-center py-16">
+                    <p class="text-4xl mb-3">🔍</p>
+                    <p class="font-semibold" style="color:var(--text)" id="emptyMsg">No exchange found</p>
+                </div>
+                <table id="table" class="hidden">
+                    <thead>
+                        <tr>
+                            <th id="thRank" style="min-width:56px">RANK</th>
+                            <th id="thExchange" style="min-width:180px">EXCHANGE</th>
+                            <th id="thCountry" class="hidden md:table-cell" style="min-width:120px">JURISDICTION</th>
+                            <th id="thAdvantage" class="hidden lg:table-cell" style="min-width:200px">KEY ADVANTAGE</th>
+                            <th id="thSuitable" style="min-width:140px">BEST FOR</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+            </div>
+            <div class="flex items-center justify-between px-4 py-3 border-t" style="border-color:var(--border2)">
+                <p class="text-xs font-mono" style="color:var(--text2)" id="footerCount">—</p>
+                <a href="https://coinmarketcap.com" target="_blank" class="text-xs" style="color:var(--text2)">Source: CoinMarketCap</a>
+            </div>
+        </div>
     </div>
+
+    <!-- ── DETAIL VIEW ── -->
+    <div id="detail-view">
+        <div class="flex items-center gap-2 text-xs mb-6" style="color:var(--text2)">
+            <a href="/" class="hover:text-green-400 transition">Home</a>
+            <span style="color:var(--border)">›</span>
+            <a href="#" onclick="closeDetail(); return false;" class="hover:text-green-400 transition">Exchanges</a>
+            <span style="color:var(--border)">›</span>
+            <span style="color:var(--green)" id="breadcrumb-name">—</span>
+        </div>
+        <button class="back-btn" onclick="closeDetail()">← Back to Exchanges</button>
+        <div id="detail-content">
+            <!-- filled by JS -->
+        </div>
+    </div>
+
 </div>
 </main>
 
-<!-- ========== FIXED RESPONSIVE FOOTER ========== -->
+<!-- FOOTER -->
 <footer>
     <div class="footer-container">
-        <div class="dyor-badge" id="footer-dyor">⚠️ DYOR — Semua informasi hanya untuk edukasi. Selalu lakukan riset sendiri sebelum berinvestasi.</div>
-        
+        <div class="dyor-badge">⚠️ DYOR — All information is for educational purposes only. Always conduct your own research before investing.</div>
         <div class="footer-grid">
-            <!-- Brand -->
             <div class="footer-brand">
-                 <h3>Airdrop<span>XI</span></h3>
-                <p id="footer-desc">Curated airdrop opportunities with structured data and snapshot optimization.</p>
+                <h3>AirdropXI</h3>
+                <p>Curated airdrop opportunities with structured data and snapshot optimization.</p>
             </div>
-            <!-- Navigate -->
             <div class="footer-links-section">
-                <h4 id="footer-nav-h"> NAVIGATE</h4>
-                <a href="#airdrops" id="f-explore">Explore Airdrops</a>
-                <a href="#guide" id="f-guide">Guide & Tutorial</a>
+                <h4>NAVIGATE</h4>
+                <a href="/">🏠 Home</a>
                 <a href="docs.html">📖 Documentation</a>
                 <a href="unlocks.html">🔓 Token Unlocks</a>
                 <a href="exchanges.html">📊 Exchanges</a>
                 <a href="reward.html" style="color:var(--green);">🎁 Reward</a>
             </div>
-            <!-- Social Media -->
             <div class="footer-links-section">
-                <h4 id="footer-comm-h">SOCIAL MEDIA</h4>
+                <h4>SOCIAL MEDIA</h4>
                 <a href="https://x.com/xiobai06" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-4.714-6.231-5.401 6.231H2.736l7.73-8.835L1.254 2.25H8.08l4.253 5.622zm-1.161 17.52h1.833L7.084 4.126H5.117z"/></svg>
                     Twitter / X
@@ -553,60 +683,348 @@
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M19.59 6.69a4.83 4.83 0 0 1-3.77-4.25V2h-3.45v13.67a2.89 2.89 0 0 1-2.88 2.5 2.89 2.89 0 0 1-2.89-2.89 2.89 2.89 0 0 1 2.89-2.89c.28 0 .54.04.79.1V9.01a6.27 6.27 0 0 0-.79-.05 6.34 6.34 0 0 0-6.34 6.34 6.34 6.34 0 0 0 6.34 6.34 6.34 6.34 0 0 0 6.33-6.34V8.69a8.18 8.18 0 0 0 4.78 1.52V6.76a4.85 4.85 0 0 1-1.01-.07z"/></svg>
                     TikTok
                 </a>
-                <a href="https://www.facebook.com/profile.php?id=61589062246319" target="_blank" rel="noopener">
-                    <svg viewBox="0 0 24 24" fill="currentColor"><path d="M24 12.073c0-6.627-5.373-12-12-12s-12 5.373-12 12c0 5.99 4.388 10.954 10.125 11.854v-8.385H7.078v-3.47h3.047V9.43c0-3.007 1.792-4.669 4.533-4.669 1.312 0 2.686.235 2.686.235v2.953H15.83c-1.491 0-1.956.925-1.956 1.874v2.25h3.328l-.532 3.47h-2.796v8.385C19.612 23.027 24 18.062 24 12.073z"/></svg>
-                    Facebook
-                </a>
                 <a href="https://github.com/Xiobaisme" target="_blank" rel="noopener">
                     <svg viewBox="0 0 24 24" fill="currentColor"><path d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"/></svg>
                     GitHub
                 </a>
             </div>
         </div>
-
-        <!-- Newsletter Area (Responsive) -->
         <div class="newsletter-block">
             <div class="newsletter-info">
-                <h4>📬 Dapat notif airdrop baru</h4>
-                <div class="newsletter-desc">Subscribe dan kamu bakal langsung dikabarin tiap ada airdrop baru.</div>
+                <h4>📬 Get notified on new airdrops</h4>
+                <div class="newsletter-desc">Subscribe and get instant alerts for every new airdrop listing.</div>
             </div>
             <div class="subscribe-form">
-                <input type="email" id="sub-email" placeholder="emailkamu@gmail.com" autocomplete="email">
+                <input type="email" id="sub-email" placeholder="youremail@gmail.com" autocomplete="email">
                 <button class="subscribe-btn" onclick="subscribeEmail()">Subscribe ⚡</button>
             </div>
         </div>
-        <div id="sub-msg" style="font-family:monospace; font-size:0.7rem; margin-top:0.7rem; text-align:center; display:none;"></div>
+        <div id="sub-msg" style="font-family:monospace;font-size:0.7rem;margin-top:0.7rem;text-align:center;display:none;"></div>
         <div class="copyright">© 2025 AirdropXI — Educational & research portal. Not financial advice.</div>
     </div>
 </footer>
 
 <script>
-    // theme + language + data logic (preserved & enhanced)
-    let theme = localStorage.getItem('xi-theme') || 'dark';
+// ── THEME ──
+let theme = localStorage.getItem('xi-theme') || 'dark';
+document.documentElement.setAttribute('data-theme', theme);
+document.getElementById('themeIcon').textContent = theme === 'dark' ? '🌙' : '☀️';
+function toggleTheme() {
+    theme = theme === 'dark' ? 'light' : 'dark';
     document.documentElement.setAttribute('data-theme', theme);
     document.getElementById('themeIcon').textContent = theme === 'dark' ? '🌙' : '☀️';
-    function toggleTheme() { theme = theme === 'dark' ? 'light' : 'dark'; document.documentElement.setAttribute('data-theme', theme); document.getElementById('themeIcon').textContent = theme === 'dark' ? '🌙' : '☀️'; localStorage.setItem('xi-theme', theme); }
-    let lang = localStorage.getItem('xi-lang') || 'id';
-    const i18n = { id: { title: '<span style="color:var(--green)">PASAR</span> BURSA', subtitle: 'Data real-time bursa crypto terpercaya · Top 100 CEX & DEX', live: 'LIVE DATA', statCex: 'CEX Terdaftar', statDex: 'DEX Terdaftar', statTotal: 'Total Exchange', rank: 'RANK', exchange: 'EXCHANGE', country: 'NEGARA', advantage: 'KELEBIHAN', suitable: 'COCOK UNTUK', search: 'Cari exchange...', empty: 'Exchange tidak ditemukan', source: 'Sumber: CoinMarketCap', lang: 'EN' }, en: { title: '<span style="color:var(--green)">MARKET</span> EXCHANGES', subtitle: 'Real-time crypto exchange data · Top 100 CEX & DEX', live: 'LIVE DATA', statCex: 'CEX Listed', statDex: 'DEX Listed', statTotal: 'Total Exchanges', rank: 'RANK', exchange: 'EXCHANGE', country: 'COUNTRY', advantage: 'FEATURES', suitable: 'BEST FOR', search: 'Search exchange...', empty: 'No exchange found', source: 'Source: CoinMarketCap', lang: 'ID' } };
-    function applyLang() { const t = i18n[lang]; document.getElementById('pageTitle').innerHTML = t.title; document.getElementById('pageSubtitle').textContent = t.subtitle; document.getElementById('liveLabel').textContent = t.live; document.getElementById('statCexLabel').textContent = t.statCex; document.getElementById('statDexLabel').textContent = t.statDex; document.getElementById('statTotalLabel').textContent = t.statTotal; document.getElementById('thRank').textContent = t.rank; document.getElementById('thExchange').textContent = t.exchange; document.getElementById('thCountry').textContent = t.country; document.getElementById('thAdvantage').textContent = t.advantage; document.getElementById('thSuitable').textContent = t.suitable; document.getElementById('searchInput').placeholder = t.search; document.getElementById('emptyMsg').textContent = t.empty; document.getElementById('langBtn').textContent = t.lang; updateFooterCount(); }
-    function toggleLang() { lang = lang === 'id' ? 'en' : 'id'; localStorage.setItem('xi-lang', lang); applyLang(); }
+    localStorage.setItem('xi-theme', theme);
+}
+
+// ── LANG ──
+let lang = localStorage.getItem('xi-lang') || 'id';
+function applyLang() {
+    document.getElementById('langBtn').textContent = lang === 'id' ? 'EN' : 'ID';
+}
+function toggleLang() {
+    lang = lang === 'id' ? 'en' : 'id';
+    localStorage.setItem('xi-lang', lang);
     applyLang();
-    const tickers = [{ s: 'BTC', p: '$83,240', c: '+1.2%', up: true },{ s: 'ETH', p: '$1,580', c: '-0.4%', up: false },{ s: 'BNB', p: '$592', c: '+0.8%', up: true },{ s: 'SOL', p: '$130', c: '+2.1%', up: true },{ s: 'XRP', p: '$2.21', c: '-0.6%', up: false },{ s: 'ADA', p: '$0.68', c: '+0.3%', up: true },{ s: 'DOGE', p: '$0.158', c: '-1.1%', up: false },{ s: 'AVAX', p: '$23.4', c: '+0.9%', up: true },{ s: 'MATIC', p: '$0.42', c: '-0.2%', up: false },{ s: 'DOT', p: '$4.10', c: '+1.5%', up: true }];
-    const tickerHTML = [...tickers, ...tickers].map(t => `<span class="ticker-item"><span class="font-bold" style="color:var(--text)">${t.s}</span> <span>${t.p}</span> <span class="${t.up ? 'up' : 'down'}">${t.c}</span> <span style="color:var(--border)">|</span></span>`).join('');
-    document.getElementById('tickerTrack').innerHTML = tickerHTML;
-    let allData = [], currentType = 'cex', searchQuery = '';
-    async function loadData() { showLoading(); try { const res = await fetch('https://airdropxi.vercel.app/api/exchanges'); if(!res.ok) throw new Error(); const data = await res.json(); if(!data.length) throw new Error(); allData = data; updateStats(); renderTable(); hideLoading(); } catch(e) { showError(); } }
-    function updateStats() { const cex = allData.filter(d => d.type === 'cex').length, dex = allData.filter(d => d.type === 'dex').length; document.getElementById('statCex').textContent = cex; document.getElementById('statDex').textContent = dex; document.getElementById('statTotal').textContent = allData.length; }
-    function getRankClass(rank) { if(rank===1) return 'gold'; if(rank===2) return 'silver'; if(rank===3) return 'bronze'; return ''; }
-    function renderTable() { const tbody = document.getElementById('tbody'); let filtered = allData.filter(d => d.type === currentType); if(searchQuery) { const q = searchQuery.toLowerCase(); filtered = filtered.filter(d => d.exchange_name?.toLowerCase().includes(q) || d.country?.toLowerCase().includes(q) || d.best_for?.toLowerCase().includes(q)); } if(!filtered.length) { document.getElementById('table').classList.add('hidden'); document.getElementById('emptyState').classList.remove('hidden'); updateFooterCount(0,0); return; } document.getElementById('emptyState').classList.add('hidden'); document.getElementById('table').classList.remove('hidden'); tbody.innerHTML = filtered.map(item => { const rc = getRankClass(item.rank); const logoHtml = item.logo_url ? `<img src="${item.logo_url}" class="logo-img" alt="${item.exchange_name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="logo-placeholder" style="display:none">${item.exchange_name?.[0] || '?'}</div>` : `<div class="logo-placeholder">${item.exchange_name?.[0] || '?'}</div>`; return `<tr><td><div class="rank-badge ${rc}">${item.rank}</div></td><td><div class="flex items-center gap-3">${logoHtml}<span class="font-semibold text-sm" style="color:var(--text)">${item.exchange_name}</span></div></td><td class="hidden md:table-cell text-sm" style="color:var(--text2)">${item.country || '—'}</td><td class="hidden lg:table-cell text-sm" style="color:var(--text2)">${item.key_features || '—'}</td><td><span class="tag">${item.best_for || '—'}</span></td></tr>`; }).join(''); updateFooterCount(filtered.length, allData.filter(d => d.type === currentType).length); }
-    function updateFooterCount(shown, total) { const el = document.getElementById('footerCount'); if(shown === undefined) { el.textContent = '—'; return; } el.textContent = `Menampilkan ${shown} dari ${total} exchange`; }
-    function filterTable() { searchQuery = document.getElementById('searchInput').value; renderTable(); }
-    function setActiveTab(type) { currentType = type; searchQuery = ''; document.getElementById('searchInput').value = ''; document.getElementById('cexTab').className = (type === 'cex') ? 'tab-active px-5 py-2 rounded-full text-sm font-semibold' : 'tab-inactive px-5 py-2 rounded-full text-sm font-semibold'; document.getElementById('dexTab').className = (type === 'dex') ? 'tab-active px-5 py-2 rounded-full text-sm font-semibold' : 'tab-inactive px-5 py-2 rounded-full text-sm font-semibold'; if(allData.length) renderTable(); }
-    function showLoading() { document.getElementById('loadingState').classList.remove('hidden'); document.getElementById('errorState').classList.add('hidden'); document.getElementById('emptyState').classList.add('hidden'); document.getElementById('table').classList.add('hidden'); }
-    function hideLoading() { document.getElementById('loadingState').classList.add('hidden'); }
-    function showError() { document.getElementById('loadingState').classList.add('hidden'); document.getElementById('errorState').classList.remove('hidden'); }
-    loadData();
-    async function subscribeEmail() { const input = document.getElementById('sub-email'); const msgDiv = document.getElementById('sub-msg'); const email = input.value.trim(); if (!email || !email.includes('@')) { msgDiv.style.display='block'; msgDiv.style.color='#ff2d55'; msgDiv.textContent='✕ Masukkan email yang valid'; return; } msgDiv.style.display='block'; msgDiv.style.color='var(--text2)'; msgDiv.textContent='Mendaftarkan...'; try { const r = await fetch('/api/subscribe', { method:'POST', headers:{'Content-Type':'application/json'}, body: JSON.stringify({email}) }); const d = await r.json(); if(r.ok) { msgDiv.style.color='var(--green)'; msgDiv.textContent='✓ Berhasil! Kamu akan dapat notif airdrop baru.'; input.value=''; } else if(r.status===409) { msgDiv.style.color='#f59e0b'; msgDiv.textContent='⚠ Email sudah terdaftar.'; } else { msgDiv.style.color='#ff2d55'; msgDiv.textContent='✕ '+(d.error||'Gagal, coba lagi.'); } } catch(e) { msgDiv.style.color='#ff2d55'; msgDiv.textContent='✕ Gagal konek ke server.'; } }
+}
+applyLang();
+
+// ── TICKER ──
+const tickers = [
+    {s:'BTC',p:'$83,240',c:'+1.2%',up:true},{s:'ETH',p:'$1,580',c:'-0.4%',up:false},
+    {s:'BNB',p:'$592',c:'+0.8%',up:true},{s:'SOL',p:'$130',c:'+2.1%',up:true},
+    {s:'XRP',p:'$2.21',c:'-0.6%',up:false},{s:'ADA',p:'$0.68',c:'+0.3%',up:true},
+    {s:'DOGE',p:'$0.158',c:'-1.1%',up:false},{s:'AVAX',p:'$23.4',c:'+0.9%',up:true},
+    {s:'MATIC',p:'$0.42',c:'-0.2%',up:false},{s:'DOT',p:'$4.10',c:'+1.5%',up:true}
+];
+const tickerHTML = [...tickers,...tickers].map(t =>
+    `<span class="ticker-item"><span class="font-bold" style="color:var(--text)">${t.s}</span> <span>${t.p}</span> <span class="${t.up?'up':'down'}">${t.c}</span> <span style="color:var(--border)">|</span></span>`
+).join('');
+document.getElementById('tickerTrack').innerHTML = tickerHTML;
+
+// ── DATA ──
+let allData = [], currentType = 'cex', searchQuery = '';
+
+async function loadData() {
+    showLoading();
+    try {
+        const res = await fetch('https://airdropxi.vercel.app/api/exchanges');
+        if (!res.ok) throw new Error();
+        const data = await res.json();
+        if (!data.length) throw new Error();
+        allData = data;
+        updateStats();
+        renderTable();
+        hideLoading();
+        handleURLParam();
+    } catch(e) {
+        showError();
+    }
+}
+
+function updateStats() {
+    const cex = allData.filter(d => d.type === 'cex').length;
+    const dex = allData.filter(d => d.type === 'dex').length;
+    document.getElementById('statCex').textContent   = cex;
+    document.getElementById('statDex').textContent   = dex;
+    document.getElementById('statTotal').textContent = allData.length;
+}
+
+function getRankClass(rank) {
+    if (rank === 1) return 'gold';
+    if (rank === 2) return 'silver';
+    if (rank === 3) return 'bronze';
+    return '';
+}
+
+function slugify(name) {
+    return (name || '').toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+}
+
+function renderTable() {
+    const tbody = document.getElementById('tbody');
+    let filtered = allData.filter(d => d.type === currentType);
+    if (searchQuery) {
+        const q = searchQuery.toLowerCase();
+        filtered = filtered.filter(d =>
+            d.exchange_name?.toLowerCase().includes(q) ||
+            d.country?.toLowerCase().includes(q) ||
+            d.best_for?.toLowerCase().includes(q)
+        );
+    }
+    if (!filtered.length) {
+        document.getElementById('table').classList.add('hidden');
+        document.getElementById('emptyState').classList.remove('hidden');
+        updateFooterCount(0, 0);
+        return;
+    }
+    document.getElementById('emptyState').classList.add('hidden');
+    document.getElementById('table').classList.remove('hidden');
+    tbody.innerHTML = filtered.map(item => {
+        const rc = getRankClass(item.rank);
+        const slug = slugify(item.exchange_name);
+        const logoHtml = item.logo_url
+            ? `<img src="${item.logo_url}" class="logo-img" alt="${item.exchange_name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="logo-placeholder" style="display:none">${item.exchange_name?.[0]||'?'}</div>`
+            : `<div class="logo-placeholder">${item.exchange_name?.[0]||'?'}</div>`;
+        return `<tr onclick="openDetail('${slug}')" title="View ${item.exchange_name} details">
+            <td><div class="rank-badge ${rc}">${item.rank}</div></td>
+            <td><div class="flex items-center gap-3">
+                ${logoHtml}
+                <div>
+                    <span class="font-semibold text-sm" style="color:var(--text)">${item.exchange_name}</span>
+                    ${item.year_founded ? `<div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);margin-top:2px">Est. ${item.year_founded}</div>` : ''}
+                </div>
+            </div></td>
+            <td class="hidden md:table-cell text-sm" style="color:var(--text2)">${item.country || '—'}</td>
+            <td class="hidden lg:table-cell text-sm" style="color:var(--text2)">${item.key_features || '—'}</td>
+            <td><span class="tag">${item.best_for || '—'}</span></td>
+        </tr>`;
+    }).join('');
+    updateFooterCount(filtered.length, allData.filter(d => d.type === currentType).length);
+}
+
+function updateFooterCount(shown, total) {
+    const el = document.getElementById('footerCount');
+    if (shown === undefined) { el.textContent = '—'; return; }
+    el.textContent = `Showing ${shown} of ${total} exchanges`;
+}
+
+function filterTable() {
+    searchQuery = document.getElementById('searchInput').value;
+    renderTable();
+}
+
+function setActiveTab(type) {
+    currentType = type;
+    searchQuery = '';
+    document.getElementById('searchInput').value = '';
+    document.getElementById('cexTab').className = (type === 'cex')
+        ? 'tab-active px-5 py-2 rounded-full text-sm font-semibold'
+        : 'tab-inactive px-5 py-2 rounded-full text-sm font-semibold';
+    document.getElementById('dexTab').className = (type === 'dex')
+        ? 'tab-active px-5 py-2 rounded-full text-sm font-semibold'
+        : 'tab-inactive px-5 py-2 rounded-full text-sm font-semibold';
+    if (allData.length) renderTable();
+}
+
+function showLoading() {
+    document.getElementById('loadingState').classList.remove('hidden');
+    document.getElementById('errorState').classList.add('hidden');
+    document.getElementById('emptyState').classList.add('hidden');
+    document.getElementById('table').classList.add('hidden');
+}
+function hideLoading() { document.getElementById('loadingState').classList.add('hidden'); }
+function showError() {
+    document.getElementById('loadingState').classList.add('hidden');
+    document.getElementById('errorState').classList.remove('hidden');
+}
+
+// ── DETAIL VIEW ──
+function openDetail(slug) {
+    const ex = allData.find(d => slugify(d.exchange_name) === slug);
+    if (!ex) return;
+
+    // update URL
+    const url = new URL(window.location);
+    url.searchParams.set('exchange', slug);
+    history.pushState({ exchange: slug }, '', url);
+
+    renderDetailView(ex);
+}
+
+function renderDetailView(ex) {
+    document.getElementById('list-view').classList.add('hidden-view');
+    document.getElementById('detail-view').classList.add('active');
+    document.getElementById('breadcrumb-name').textContent = ex.exchange_name;
+    window.scrollTo(0, 0);
+
+    const logoHtml = ex.logo_url
+        ? `<img src="${ex.logo_url}" class="detail-logo" alt="${ex.exchange_name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="detail-logo-placeholder" style="display:none">${ex.exchange_name?.[0]||'?'}</div>`
+        : `<div class="detail-logo-placeholder">${ex.exchange_name?.[0]||'?'}</div>`;
+
+    // native token pill
+    let tokenHtml = '—';
+    if (ex.native_token) {
+        const tokenLogoHtml = ex.native_token_logo
+            ? `<img src="${ex.native_token_logo}" onerror="this.style.display='none'">`
+            : '';
+        const tokenLink = ex.native_token_link
+            ? `<a href="${ex.native_token_link}" target="_blank" rel="noopener" style="text-decoration:none">`
+            : '';
+        const tokenClose = ex.native_token_link ? '</a>' : '';
+        tokenHtml = `${tokenLink}<span class="token-pill">${tokenLogoHtml}<span>${ex.native_token}</span></span>${tokenClose}`;
+    }
+
+    // socials
+    const socialItems = [
+        { key: 'social_twitter', label: 'Twitter / X', icon: '𝕏' },
+        { key: 'social_telegram', label: 'Telegram', icon: '✈' },
+        { key: 'social_discord', label: 'Discord', icon: '💬' },
+        { key: 'social_reddit', label: 'Reddit', icon: '🟠' },
+        { key: 'social_linkedin', label: 'LinkedIn', icon: '🔗' },
+        { key: 'social_youtube', label: 'YouTube', icon: '▶' },
+        { key: 'social_instagram', label: 'Instagram', icon: '📷' },
+        { key: 'social_github', label: 'GitHub', icon: '🐙' },
+    ];
+    const socialsHtml = socialItems
+        .filter(s => ex[s.key])
+        .map(s => `<a href="${ex[s.key]}" target="_blank" rel="noopener" class="social-link">${s.icon} ${s.label}</a>`)
+        .join('') || '<span style="color:var(--text2);font-size:13px">No socials listed</span>';
+
+    document.getElementById('detail-content').innerHTML = `
+        <div class="detail-hero">
+            ${logoHtml}
+            <div style="flex:1;min-width:0">
+                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px">
+                    <h1 style="font-size:28px;font-weight:800;color:var(--text)">${ex.exchange_name}</h1>
+                    <span class="tag">${ex.type?.toUpperCase() || 'CEX'}</span>
+                    ${ex.rank ? `<span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2)">RANK #${ex.rank}</span>` : ''}
+                </div>
+                <p style="font-size:14px;color:var(--text2);line-height:1.6;max-width:600px">${ex.key_features || 'Leading cryptocurrency exchange platform.'}</p>
+                <div style="margin-top:14px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                    ${ex.website ? `<a href="${ex.website}" target="_blank" rel="noopener" class="website-btn">🌐 Visit Website ↗</a>` : ''}
+                    ${ex.best_for ? `<span class="tag">${ex.best_for}</span>` : ''}
+                </div>
+            </div>
+        </div>
+
+        <div class="detail-meta-grid">
+            <div class="detail-meta-card">
+                <div class="detail-meta-label">Jurisdiction</div>
+                <div class="detail-meta-value">🌍 ${ex.country || '—'}</div>
+            </div>
+            <div class="detail-meta-card">
+                <div class="detail-meta-label">Year Founded</div>
+                <div class="detail-meta-value">📅 ${ex.year_founded || '—'}</div>
+            </div>
+            <div class="detail-meta-card">
+                <div class="detail-meta-label">Native Token</div>
+                <div class="detail-meta-value">${tokenHtml}</div>
+            </div>
+            <div class="detail-meta-card">
+                <div class="detail-meta-label">Exchange Type</div>
+                <div class="detail-meta-value">⚡ ${ex.type?.toUpperCase() || '—'}</div>
+            </div>
+            ${ex.headquarters ? `<div class="detail-meta-card">
+                <div class="detail-meta-label">Headquarters</div>
+                <div class="detail-meta-value">🏢 ${ex.headquarters}</div>
+            </div>` : ''}
+            ${ex.ceo ? `<div class="detail-meta-card">
+                <div class="detail-meta-label">CEO / Founder</div>
+                <div class="detail-meta-value">👤 ${ex.ceo}</div>
+            </div>` : ''}
+        </div>
+
+        ${ex.about ? `
+        <div class="detail-section">
+            <div class="detail-section-title">About ${ex.exchange_name}</div>
+            <p class="detail-about">${ex.about}</p>
+        </div>` : ''}
+
+        <div class="detail-section">
+            <div class="detail-section-title">Socials & Community</div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">
+                ${socialsHtml}
+            </div>
+        </div>
+
+        ${ex.regulatory_info ? `
+        <div class="detail-section">
+            <div class="detail-section-title">Regulatory & Compliance</div>
+            <p class="detail-about">${ex.regulatory_info}</p>
+        </div>` : ''}
+    `;
+}
+
+function closeDetail() {
+    document.getElementById('detail-view').classList.remove('active');
+    document.getElementById('list-view').classList.remove('hidden-view');
+    const url = new URL(window.location);
+    url.searchParams.delete('exchange');
+    history.pushState({}, '', url);
+    window.scrollTo(0, 0);
+}
+
+// handle back button
+window.addEventListener('popstate', () => {
+    const params = new URLSearchParams(window.location.search);
+    const slug   = params.get('exchange');
+    if (slug && allData.length) {
+        const ex = allData.find(d => slugify(d.exchange_name) === slug);
+        if (ex) { renderDetailView(ex); return; }
+    }
+    document.getElementById('detail-view').classList.remove('active');
+    document.getElementById('list-view').classList.remove('hidden-view');
+});
+
+function handleURLParam() {
+    const params = new URLSearchParams(window.location.search);
+    const slug   = params.get('exchange');
+    if (!slug) return;
+    const ex = allData.find(d => slugify(d.exchange_name) === slug);
+    if (ex) renderDetailView(ex);
+}
+
+// ── SUBSCRIBE ──
+async function subscribeEmail() {
+    const input  = document.getElementById('sub-email');
+    const msgDiv = document.getElementById('sub-msg');
+    const email  = input.value.trim();
+    if (!email || !email.includes('@')) {
+        msgDiv.style.display = 'block'; msgDiv.style.color = '#ff2d55';
+        msgDiv.textContent = '✕ Enter a valid email'; return;
+    }
+    msgDiv.style.display = 'block'; msgDiv.style.color = 'var(--text2)';
+    msgDiv.textContent = 'Subscribing...';
+    try {
+        const r = await fetch('/api/subscribe', { method: 'POST', headers: {'Content-Type':'application/json'}, body: JSON.stringify({email}) });
+        const d = await r.json();
+        if (r.ok) { msgDiv.style.color = 'var(--green)'; msgDiv.textContent = '✓ Subscribed! You\'ll get notified on new airdrops.'; input.value = ''; }
+        else if (r.status === 409) { msgDiv.style.color = '#f59e0b'; msgDiv.textContent = '⚠ Email already registered.'; }
+        else { msgDiv.style.color = '#ff2d55'; msgDiv.textContent = '✕ ' + (d.error || 'Failed, try again.'); }
+    } catch(e) { msgDiv.style.color = '#ff2d55'; msgDiv.textContent = '✕ Connection failed.'; }
+}
+
+loadData();
 </script>
 </body>
 </html>
