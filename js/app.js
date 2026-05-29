@@ -612,7 +612,7 @@ async function loadPrices() {
   const el = document.getElementById('price-ticker');
   if (!el) return;
   try {
-    const r = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=100&page=1&sparkline=false');
+    const r = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&ids=bitcoin,ethereum,solana,sui,binancecoin,hyperliquid&order=market_cap_desc&sparkline=false');
     if (!r.ok) throw new Error('rate limit');
     const data = await r.json();
     let html = '';
