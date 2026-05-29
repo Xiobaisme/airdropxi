@@ -76,7 +76,7 @@
     .wrap {
       position: relative; z-index: 1; max-width: 1160px; margin: 0 auto;
       padding: 1.25rem 1.25rem 5rem;
-      display: grid; grid-template-columns: 290px 1fr; gap: 1.25rem;
+      display: grid; grid-template-columns: 340px 1fr; gap: 1.25rem;
     }
     @media (max-width: 800px) { .wrap { grid-template-columns: 1fr; } }
 
@@ -1350,17 +1350,66 @@ function renderExchangePanel() {
     return;
   }
 
-  // Buat tampilan dua kolom: daftar exchange di kiri, form edit di kanan
+  // Variabel untuk filter (akan didefinisikan di dalam scope)
+  let currentExchangeFilter = 'all';
+  let currentExchangeSearch = '';
+
+  // Fungsi render ulang daftar exchange (closure)
+  const renderExchangeListWithFilter = () => {
+    let filtered = [...exchangeListData];
+    if (currentExchangeFilter !== 'all') {
+      filtered = filtered.filter(ex => (ex.type || 'cex').toLowerCase() === currentExchangeFilter);
+    }
+    if (currentExchangeSearch.trim()) {
+      const q = currentExchangeSearch.toLowerCase();
+      filtered = filtered.filter(ex => ex.exchange_name?.toLowerCase().includes(q));
+    }
+    const listContainer = document.getElementById('exchange-list-panel');
+    if (!listContainer) return;
+    if (!filtered.length) {
+      listContainer.innerHTML = '<div class="list-empty" style="padding:2rem;text-align:center">Tidak ada exchange ditemukan</div>';
+    } else {
+      listContainer.innerHTML = filtered.map(ex => `
+        <div class="proj-item ${currentEditExchangeId === ex.exchange_id ? 'active' : ''}" 
+             onclick="selectExchangeForEdit(${ex.exchange_id})">
+          <div class="proj-item-info">
+            <div class="proj-item-name">${esc(ex.exchange_name)}</div>
+            <div class="proj-item-badges">
+              <span class="proj-item-status st-c">${ex.website ? '🌐' : '⚙️'}</span>
+              <span class="live-dot ${ex.about ? 'on' : 'off'}">${ex.about ? '●' : '○'}</span>
+              ${ex.type ? `<span class="tag" style="font-size:9px;padding:2px 8px;background:${ex.type === 'cex' ? 'rgba(0,229,160,0.1)' : 'rgba(124,109,250,0.1)'}">${ex.type.toUpperCase()}</span>` : ''}
+            </div>
+          </div>
+        </div>
+      `).join('');
+    }
+    const countSpan = document.querySelector('#exchange-list-header .ph-count');
+    if (countSpan) countSpan.textContent = filtered.length;
+  };
+
+  // Render UI dengan filter dan search
   formArea.innerHTML = `
-    <div style="display:grid; grid-template-columns: 280px 1fr; gap: 1rem;">
-      <!-- Daftar exchange -->
-      <div class="panel" style="overflow:auto; max-height:70vh;">
-        <div class="panel-head">
+    <div style="display:grid; grid-template-columns: 340px 1fr; gap: 1rem;">
+      <!-- Panel kiri: daftar exchange dengan filter -->
+      <div class="panel" style="display:flex; flex-direction:column; overflow:hidden;">
+        <div class="panel-head" id="exchange-list-header">
           <span class="ph-dot" style="background:var(--accent)"></span>
-          <span class="ph-title">Daftar Exchange</span>
+          <span class="ph-title">DAFTAR EXCHANGE</span>
           <span class="ph-count">${exchangeListData.length}</span>
         </div>
-        <div id="exchange-list-panel" style="max-height:500px; overflow-y:auto;">
+        <div style="padding: 12px; border-bottom: 1px solid var(--border2);">
+          <div style="margin-bottom: 12px;">
+            <input type="text" id="exchange-search-input" placeholder="🔍 Cari exchange..." 
+                   style="width:100%; background:var(--s2); border:1px solid var(--border2); border-radius:8px; 
+                          padding:8px 12px; color:var(--text); font-size:13px; outline:none;">
+          </div>
+          <div style="display:flex; gap:8px;">
+            <button data-filter="all" class="exchange-filter-btn ftab active" style="flex:1;">Semua</button>
+            <button data-filter="cex" class="exchange-filter-btn ftab" style="flex:1;">🏦 CEX</button>
+            <button data-filter="dex" class="exchange-filter-btn ftab" style="flex:1;">🔄 DEX</button>
+          </div>
+        </div>
+        <div id="exchange-list-panel" style="flex:1; overflow-y:auto; max-height: 450px;">
           ${exchangeListData.map(ex => `
             <div class="proj-item ${currentEditExchangeId === ex.exchange_id ? 'active' : ''}" 
                  onclick="selectExchangeForEdit(${ex.exchange_id})">
@@ -1369,6 +1418,7 @@ function renderExchangePanel() {
                 <div class="proj-item-badges">
                   <span class="proj-item-status st-c">${ex.website ? '🌐' : '⚙️'}</span>
                   <span class="live-dot ${ex.about ? 'on' : 'off'}">${ex.about ? '●' : '○'}</span>
+                  ${ex.type ? `<span class="tag" style="font-size:9px;padding:2px 8px;">${ex.type.toUpperCase()}</span>` : ''}
                 </div>
               </div>
             </div>
@@ -1376,7 +1426,7 @@ function renderExchangePanel() {
         </div>
       </div>
 
-      <!-- Form edit detail -->
+      <!-- Panel kanan: form edit -->
       <div class="panel" id="exchange-edit-panel">
         <div class="empty-form">
           <div class="empty-icon">🖊️</div>
@@ -1385,6 +1435,26 @@ function renderExchangePanel() {
       </div>
     </div>
   `;
+
+  // Pasang event listener untuk filter dan pencarian
+  const searchInput = document.getElementById('exchange-search-input');
+  const filterBtns = document.querySelectorAll('.exchange-filter-btn');
+  const updateFilterAndRender = () => { renderExchangeListWithFilter(); };
+  if (searchInput) {
+    searchInput.addEventListener('input', (e) => {
+      currentExchangeSearch = e.target.value;
+      updateFilterAndRender();
+    });
+  }
+  filterBtns.forEach(btn => {
+    btn.addEventListener('click', () => {
+      const filterValue = btn.dataset.filter;
+      currentExchangeFilter = filterValue;
+      filterBtns.forEach(b => b.classList.remove('active'));
+      btn.classList.add('active');
+      updateFilterAndRender();
+    });
+  });
 }
 
 async function selectExchangeForEdit(exchangeId) {
