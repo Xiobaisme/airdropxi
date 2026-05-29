@@ -4,10 +4,15 @@
 
 let allData = [], currentLang = 'id', activeFilter = 'all', visibleCount = 9;
 
-// Restore bahasa dari localStorage sebelum apapun
+// Restore bahasa dari URL path dulu, fallback ke localStorage
 (function () {
-  const saved = localStorage.getItem('axi-lang');
-  if (saved === 'en' || saved === 'id') currentLang = saved;
+  const _pathLang = window.location.pathname.replace(/\//g, '');
+  if (_pathLang === 'en' || _pathLang === 'id') {
+    currentLang = _pathLang;
+  } else {
+    const saved = localStorage.getItem('axi-lang');
+    if (saved === 'en' || saved === 'id') currentLang = saved;
+  }
 })();
 
 async function init() {
@@ -204,6 +209,12 @@ function setLang(l) {
   currentLang = l;
   localStorage.setItem('axi-lang', l);
 
+  // Update URL ke /id atau /en tanpa reload
+  const currentPath = window.location.pathname.replace(/\//g, '');
+  if (currentPath !== l) {
+    window.history.replaceState(null, '', '/' + l);
+  }
+
   ['btn-id','btn-en','m-btn-id','m-btn-en'].forEach(id => {
     const el = document.getElementById(id);
     if (!el) return;
@@ -301,7 +312,7 @@ function applyAILang(l) {
   const qKeys = ['aiQ1','aiQ2','aiQ3','aiQ4'];
   const pKeys = ['aiP1','aiP2','aiP3','aiP4'];
   qbtns.forEach((btn, i) => {
-    if (qKeys[i]) btn.innerHTML     = t[qKeys[i]];
+    if (qKeys[i]) btn.innerHTML      = t[qKeys[i]];
     if (pKeys[i]) btn.dataset.prompt = t[pKeys[i]];
   });
   const input = document.getElementById('aiInput');
@@ -315,17 +326,17 @@ function setFilter(el, f) {
   document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   activeFilter = f;
-  visibleCount = 9; // [CHANGED] reset ke awal setiap ganti filter
+  visibleCount = 9;
   renderCards();
 }
 
 function filterCards() {
-  visibleCount = 9; // [CHANGED] reset ke awal setiap search baru
+  visibleCount = 9;
   renderCards();
 }
 
 function showMore() {
-  visibleCount += 9; // [CHANGED] tambah 9 card lagi
+  visibleCount += 9;
   renderCards();
 }
 
@@ -337,7 +348,6 @@ function esc(s) {
     .replace(/"/g,'&quot;');
 }
 
-// Semua kemungkinan nilai status "ended/listed" dari Supabase
 const LISTED_STATUSES = [
   'listing / selesai',
   'listing/selesai',
@@ -414,7 +424,6 @@ function renderCards() {
     return;
   }
 
-  // Update float cards dari data pertama
   const first = allData[0];
   if (first) {
     const fcLatest = document.getElementById('fc-latest');
@@ -423,10 +432,10 @@ function renderCards() {
     if (fcRaised) fcRaised.textContent = first.RaisedEN || first.RaisedID || 'N/A';
   }
 
-  // [CHANGED] Ambil hanya sebanyak visibleCount
-  const visible = filtered.slice(0, visibleCount);
+  const visible   = filtered.slice(0, visibleCount);
   const remaining = filtered.length - visibleCount;
 
+  // Guide URL pakai lang prefix: /guide/en/3 atau /guide/id/3
   cont.innerHTML = visible.map((item, i) => {
     const raised = currentLang === 'id'
       ? (item.RaisedID || item.RaisedEN || t.unknown)
@@ -455,13 +464,13 @@ function renderCards() {
         .join('');
     }
 
-    // Progress random tapi stabil per item (pakai idx sebagai seed)
     if (item._prog === undefined) {
       item._prog = 20 + ((item.idx || item.id || i) * 37) % 75;
     }
     const prog = item._prog;
 
-    const guideUrl = `/guide/${encodeURIComponent(item.id)}`;
+    // Guide URL dengan lang prefix
+    const guideUrl = `/guide/${currentLang}/${encodeURIComponent(item.id)}`;
 
     const logoHtml = item.logo_url
       ? `<img src="${esc(item.logo_url)}" alt="${esc(item.name)}"
@@ -506,13 +515,12 @@ function renderCards() {
           <div class="tasks-body">${esc(taskPreview || tasks.substring(0, 120))}</div>
         </div>
 
-        <a href="/guide/${encodeURIComponent(item.id)}"
-   class="acard-btn"
-   onclick="event.stopPropagation()">⚡ ${t.cta}</a>
+        <a href="${guideUrl}"
+           class="acard-btn"
+           onclick="event.stopPropagation()">⚡ ${t.cta}</a>
       </div>`;
   }).join('');
 
-  // [CHANGED] Tombol Show More — muncul hanya kalau masih ada sisa
   if (remaining > 0) {
     cont.innerHTML += `
       <div style="grid-column:1/-1;text-align:center;margin-top:8px;padding-bottom:4px">
@@ -537,7 +545,7 @@ function updateDash() {
   let active = 0, listing = 0, waitlist = 0;
   allData.forEach(item => {
     const s = (item.status || '').toLowerCase().trim();
-    if (isListed(s))            listing++;
+    if (isListed(s))                 listing++;
     else if (s.includes('waitlist')) waitlist++;
     else                             active++;
   });
@@ -549,7 +557,6 @@ function updateDash() {
   animateNum('hs-total',      allData.length);
   animateNum('hs-active',     active);
 
-  // Float card stats
   setElText('fc-raised', `${allData.length} Projects`);
   if (allData[0]) setElText('fc-latest', allData[0].name || '—');
 }
@@ -764,6 +771,6 @@ if (window.location.pathname.includes('unlocks.html')) {
 }
 
 // ==========================================
-// INIT — satu entry point, tidak ada duplikat
+// INIT
 // ==========================================
 init();
