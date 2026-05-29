@@ -895,16 +895,17 @@ function renderDetailView(ex) {
     }
 
     // socials
-    const socialItems = [
-        { key: 'social_twitter', label: 'Twitter / X', icon: '𝕏' },
-        { key: 'social_telegram', label: 'Telegram', icon: '✈' },
-        { key: 'social_discord', label: 'Discord', icon: '💬' },
-        { key: 'social_reddit', label: 'Reddit', icon: '🟠' },
-        { key: 'social_linkedin', label: 'LinkedIn', icon: '🔗' },
-        { key: 'social_youtube', label: 'YouTube', icon: '▶' },
-        { key: 'social_instagram', label: 'Instagram', icon: '📷' },
-        { key: 'social_github', label: 'GitHub', icon: '🐙' },
-    ];
+   const socialItems = [
+  { key: 'twitter', label: 'Twitter / X', icon: '𝕏' },
+  { key: 'telegram', label: 'Telegram', icon: '✈' },
+  { key: 'discord', label: 'Discord', icon: '💬' },
+  { key: 'instagram', label: 'Instagram', icon: '📷' },
+  { key: 'facebook', label: 'Facebook', icon: '📘' },
+  { key: 'linkedin', label: 'LinkedIn', icon: '🔗' },
+  { key: 'github', label: 'GitHub', icon: '🐙' },
+  { key: 'youtube', label: 'YouTube', icon: '▶' },
+  { key: 'medium', label: 'Medium', icon: '📝' },
+];
     const socialsHtml = socialItems
         .filter(s => ex[s.key])
         .map(s => `<a href="${ex[s.key]}" target="_blank" rel="noopener" class="social-link">${s.icon} ${s.label}</a>`)
