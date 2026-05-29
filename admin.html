@@ -484,6 +484,11 @@
         style="border-color:rgba(59,130,246,0.3);color:var(--blue);background:rgba(59,130,246,0.06)">
         🔑 Setup GitHub Token
       </button>
+      <!-- TOMBOL UPDATE EXCHANGE DETAILS (ditempatkan di sidebar, bukan di modal) -->
+      <button class="btn-new" onclick="showExchangePanel()"
+       style="border-color:rgba(0,229,160,0.3);color:var(--accent);background:rgba(0,229,160,0.06)">
+       🔄 Update Exchange Details
+    </button>
     </div>
 
     <div class="form-area" id="form-area">
@@ -1308,7 +1313,176 @@
       alert('Verifikasi gagal. Coba lagi nanti.');
     }
   }
+  
+// ─────────────────────────────────────────────────────────
+// PANEL EDIT EXCHANGE DETAILS (tanpa mengganggu airdrop)
+// ─────────────────────────────────────────────────────────
+let exchangeListData = [];      // menyimpan data exchange + details
+let currentEditExchangeId = null; // exchange_id yang sedang diedit
 
+async function showExchangePanel() {
+  // Reset state airdrop agar tidak bentrok (tapi tidak menghapus data)
+  editingId = null;
+  currentEditExchangeId = null;
+  // Load data exchanges
+  await loadExchangeList();
+  // Tampilkan UI list dan form kosong
+  renderExchangePanel();
+}
+
+async function loadExchangeList() {
+  try {
+    const res = await fetch('/api/admin-airdrop?type=exchange-details');
+    if (!res.ok) throw new Error('Gagal fetch exchange details');
+    exchangeListData = await res.json();
+    // data sudah berisi: id (uuid), exchange_id, exchange_name, about, website, twitter, dll
+  } catch(e) {
+    exchangeListData = [];
+    console.error(e);
+    showToast('Gagal load exchange: ' + e.message, 'error');
+  }
+}
+
+function renderExchangePanel() {
+  const formArea = document.getElementById('form-area');
+  if (!exchangeListData.length) {
+    formArea.innerHTML = `<div class="panel"><div class="empty-form">Tidak ada data exchange. Pastikan tabel exchanges sudah diisi.</div></div>`;
+    return;
+  }
+
+  // Buat tampilan dua kolom: daftar exchange di kiri, form edit di kanan
+  formArea.innerHTML = `
+    <div style="display:grid; grid-template-columns: 280px 1fr; gap: 1rem;">
+      <!-- Daftar exchange -->
+      <div class="panel" style="overflow:auto; max-height:70vh;">
+        <div class="panel-head">
+          <span class="ph-dot" style="background:var(--accent)"></span>
+          <span class="ph-title">Daftar Exchange</span>
+          <span class="ph-count">${exchangeListData.length}</span>
+        </div>
+        <div id="exchange-list-panel" style="max-height:500px; overflow-y:auto;">
+          ${exchangeListData.map(ex => `
+            <div class="proj-item ${currentEditExchangeId === ex.exchange_id ? 'active' : ''}" 
+                 onclick="selectExchangeForEdit(${ex.exchange_id})">
+              <div class="proj-item-info">
+                <div class="proj-item-name">${esc(ex.exchange_name)}</div>
+                <div class="proj-item-badges">
+                  <span class="proj-item-status st-c">${ex.website ? '🌐' : '⚙️'}</span>
+                  <span class="live-dot ${ex.about ? 'on' : 'off'}">${ex.about ? '●' : '○'}</span>
+                </div>
+              </div>
+            </div>
+          `).join('')}
+        </div>
+      </div>
+
+      <!-- Form edit detail -->
+      <div class="panel" id="exchange-edit-panel">
+        <div class="empty-form">
+          <div class="empty-icon">🖊️</div>
+          <div class="empty-text">Klik salah satu exchange di samping untuk mengedit detailnya</div>
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+async function selectExchangeForEdit(exchangeId) {
+  currentEditExchangeId = exchangeId;
+  // Cari data exchange yang dipilih
+  const exchange = exchangeListData.find(e => e.exchange_id === exchangeId);
+  if (!exchange) return;
+  // Update active state di list (refresh list panel saja)
+  const listContainer = document.getElementById('exchange-list-panel');
+  if (listContainer) {
+    listContainer.innerHTML = exchangeListData.map(ex => `
+      <div class="proj-item ${currentEditExchangeId === ex.exchange_id ? 'active' : ''}" 
+           onclick="selectExchangeForEdit(${ex.exchange_id})">
+        <div class="proj-item-info">
+          <div class="proj-item-name">${esc(ex.exchange_name)}</div>
+          <div class="proj-item-badges">
+            <span class="proj-item-status st-c">${ex.website ? '🌐' : '⚙️'}</span>
+            <span class="live-dot ${ex.about ? 'on' : 'off'}">${ex.about ? '●' : '○'}</span>
+          </div>
+        </div>
+      </div>
+    `).join('');
+  }
+  // Render form edit
+  renderExchangeEditForm(exchange);
+}
+
+function renderExchangeEditForm(ex) {
+  const editPanel = document.getElementById('exchange-edit-panel');
+  if (!editPanel) return;
+  editPanel.innerHTML = `
+    <div class="form-header">
+      <div class="form-title">✏️ Edit: ${esc(ex.exchange_name)}</div>
+      <div class="form-actions">
+        <button class="btn-save" id="btn-save-exchange-detail" onclick="saveExchangeDetail(${ex.exchange_id})">💾 Simpan</button>
+      </div>
+    </div>
+    <div class="form-sec">
+      <div class="sec-lbl">About Exchange</div>
+      <textarea id="exchange-about-field" rows="5" placeholder="Deskripsi lengkap exchange...">${esc(ex.about || '')}</textarea>
+    </div>
+    <div class="form-sec">
+      <div class="sec-lbl">Website & Social Media</div>
+      <div class="fg">
+        <div class="field"><label>Website</label><input id="exchange-website-field" type="url" value="${esc(ex.website || '')}"></div>
+        <div class="field"><label>Twitter</label><input id="exchange-twitter-field" type="url" value="${esc(ex.twitter || '')}"></div>
+        <div class="field"><label>Telegram</label><input id="exchange-telegram-field" type="url" value="${esc(ex.telegram || '')}"></div>
+        <div class="field"><label>Discord</label><input id="exchange-discord-field" type="url" value="${esc(ex.discord || '')}"></div>
+        <div class="field"><label>Instagram</label><input id="exchange-instagram-field" type="url" value="${esc(ex.instagram || '')}"></div>
+        <div class="field"><label>Facebook</label><input id="exchange-facebook-field" type="url" value="${esc(ex.facebook || '')}"></div>
+        <div class="field"><label>LinkedIn</label><input id="exchange-linkedin-field" type="url" value="${esc(ex.linkedin || '')}"></div>
+        <div class="field"><label>GitHub</label><input id="exchange-github-field" type="url" value="${esc(ex.github || '')}"></div>
+        <div class="field"><label>YouTube</label><input id="exchange-youtube-field" type="url" value="${esc(ex.youtube || '')}"></div>
+        <div class="field"><label>Medium</label><input id="exchange-medium-field" type="url" value="${esc(ex.medium || '')}"></div>
+      </div>
+    </div>
+  `;
+}
+
+async function saveExchangeDetail(exchangeId) {
+  const payload = {
+    about:     document.getElementById('exchange-about-field')?.value?.trim() || null,
+    website:   document.getElementById('exchange-website-field')?.value?.trim() || null,
+    twitter:   document.getElementById('exchange-twitter-field')?.value?.trim() || null,
+    telegram:  document.getElementById('exchange-telegram-field')?.value?.trim() || null,
+    discord:   document.getElementById('exchange-discord-field')?.value?.trim() || null,
+    instagram: document.getElementById('exchange-instagram-field')?.value?.trim() || null,
+    facebook:  document.getElementById('exchange-facebook-field')?.value?.trim() || null,
+    linkedin:  document.getElementById('exchange-linkedin-field')?.value?.trim() || null,
+    github:    document.getElementById('exchange-github-field')?.value?.trim() || null,
+    youtube:   document.getElementById('exchange-youtube-field')?.value?.trim() || null,
+    medium:    document.getElementById('exchange-medium-field')?.value?.trim() || null,
+  };
+  const btn = document.getElementById('btn-save-exchange-detail');
+  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>'; }
+  try {
+    const res = await fetch(`/api/admin-airdrop?type=exchange-details&exchange_id=${exchangeId}`, {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(payload)
+    });
+    if (!res.ok) {
+      const err = await res.json();
+      throw new Error(err.error || 'Gagal simpan');
+    }
+    showToast('✓ Detail exchange tersimpan!', 'success');
+    // Refresh data exchangeListData
+    await loadExchangeList();
+    // Refresh tampilan panel (tetap pilih exchange yang sama)
+    await selectExchangeForEdit(exchangeId);
+    // Refresh daftar exchange di panel kiri (optional, sudah di-selectExchangeForEdit)
+  } catch(e) {
+    showToast('Error: ' + e.message, 'error');
+  } finally {
+    if (btn) { btn.disabled = false; btn.innerHTML = '💾 Simpan'; }
+  }
+}
+  
   window.onload = function() {
     google.accounts.id.initialize({ client_id: YOUR_CLIENT_ID, callback: handleCredentialResponse });
     google.accounts.id.renderButton(document.getElementById('g_id_onload'), { theme: 'outline', size: 'large' });
