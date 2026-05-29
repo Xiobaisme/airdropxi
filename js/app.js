@@ -626,7 +626,18 @@ async function loadPrices() {
       const sign = ch >= 0 ? '+' : '';
       html += `<div class="ptick"><img src="${c.image}" alt="${c.symbol}" onerror="this.style.display='none'"><span class="ptick-sym">${c.symbol}</span><span class="ptick-price">${price}</span><span class="${cls}">${sign}${ch}%</span></div>`;
     });
+    if (window.innerWidth >= 768) {
+  el.innerHTML = html;
+  el.style.animation = 'none';
+  el.style.display = 'flex';
+  el.style.flexWrap = 'wrap';
+  el.style.justifyContent = 'center';
+  el.style.gap = '8px';
+  el.style.padding = '4px 12px';
+  el.style.transform = 'none';
+} else {
     el.innerHTML = html + html;
+  }
   } catch(e) {
     el.innerHTML = '<span style="padding:0 20px;font-family:\'JetBrains Mono\',monospace;font-size:11px;color:#ff2d55">Reconnecting to market data...</span>';
   }
@@ -635,7 +646,6 @@ loadPrices(); setInterval(loadPrices, 300000);
 
 // ==========================================
 // H. AI AGENT CHATBOT
-// ==========================================
 (function () {
   let aiOpen = false, aiLoading = false;
   const aiHistory = [];
