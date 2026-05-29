@@ -992,3 +992,25 @@ footer {
   .prog-meta { flex-wrap: wrap; gap: 4px; }
   .tasks-body { max-height: 100px; overflow-y: auto; }
 }
+/* ==========================================
+   PRICE TICKER — DESKTOP STATIC GRID
+   ========================================== */
+@media (min-width: 768px) {
+  .pticker-wrap {
+    overflow: visible;
+    height: auto;
+    min-height: 36px;
+    white-space: normal;
+  }
+  .pticker-inner {
+    animation: none !important;
+    transform: none !important;
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    gap: 4px !important;
+    padding: 4px 12px !important;
+    white-space: normal !important;
+    width: 100% !important;
+  }
+}
