@@ -646,6 +646,7 @@ loadPrices(); setInterval(loadPrices, 300000);
 
 // ==========================================
 // H. AI AGENT CHATBOT
+// ==========================================
 (function () {
   let aiOpen = false, aiLoading = false;
   const aiHistory = [];
