@@ -45,10 +45,11 @@ module.exports = async function handler(req, res) {
           if (!data || data.length === 0) return res.status(404).json({ error: 'Exchange detail tidak ditemukan' });
           // Join dengan exchanges untuk mendapatkan nama exchange
           const detail = data[0];
-          const exRes = await fetch(`${BASE}/exchanges?id=eq.${detail.exchange_id}&select=exchange_name`, { headers: H });
+          const exRes = await fetch(`${BASE}/exchanges?id=eq.${detail.exchange_id}&select=exchange_name,type`, { headers: H });
           const exData = await exRes.json();
           if (exRes.ok && exData && exData[0]) {
             detail.exchange_name = exData[0].exchange_name;
+            detail.type = exData[0].type || 'cex';
           }
           return res.status(200).json(detail);
         } 
@@ -59,10 +60,11 @@ module.exports = async function handler(req, res) {
           if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
           if (!data || data.length === 0) return res.status(404).json({ error: 'Exchange detail tidak ditemukan untuk exchange_id tersebut' });
           const detail = data[0];
-          const exRes = await fetch(`${BASE}/exchanges?id=eq.${detail.exchange_id}&select=exchange_name`, { headers: H });
+          const exRes = await fetch(`${BASE}/exchanges?id=eq.${detail.exchange_id}&select=exchange_name,type`, { headers: H });
           const exData = await exRes.json();
           if (exRes.ok && exData && exData[0]) {
             detail.exchange_name = exData[0].exchange_name;
+            detail.type = exData[0].type || 'cex';
           }
           return res.status(200).json(detail);
         }
@@ -72,12 +74,13 @@ module.exports = async function handler(req, res) {
           const data = await r.json();
           if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
           // Enrich dengan nama exchange
-          const enriched = await Promise.all(data.map(async (detail) => {
-            const exRes = await fetch(`${BASE}/exchanges?id=eq.${detail.exchange_id}&select=exchange_name`, { headers: H });
-            const exData = await exRes.json();
-            if (exRes.ok && exData && exData[0]) {
-              detail.exchange_name = exData[0].exchange_name;
-            }
+         const enriched = await Promise.all(data.map(async (detail) => {
+         const exRes = await fetch(`${BASE}/exchanges?id=eq.${detail.exchange_id}&select=exchange_name,type`, { headers: H });
+         const exData = await exRes.json();
+         if (exRes.ok && exData && exData[0]) {
+         detail.exchange_name = exData[0].exchange_name;  // ← jangan dihapus
+         detail.type = exData[0].type || 'cex';
+          }
             return detail;
           }));
           return res.status(200).json(enriched);
