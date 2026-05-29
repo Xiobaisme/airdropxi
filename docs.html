@@ -475,12 +475,12 @@ html, body {
 <div class="reading-bar"><div class="reading-fill" id="readFill"></div></div>
 
 <nav class="docs-nav">
-  <a class="nav-logo" href="index.html">
+    <a class="nav-logo" href="/" onclick="handleBack(event)">
     <img src="logo.png" alt="AirdropXI">
     Airdrop<span class="logo-g">XI</span><span class="logo-sep">/ Docs</span>
   </a>
   <div class="nav-actions">
-    <a class="nav-back" href="index.html">
+      <a class="nav-back" href="/" onclick="handleBack(event)">
       <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M19 12H5M12 5l-7 7 7 7"/></svg>
       <span id="back-label">Kembali</span>
     </a>
@@ -3330,6 +3330,11 @@ async function subscribeEmail() {
 </style>
 
 <script>
+function handleBack(e) {
+  e.preventDefault();
+  window.location.href = '/' + docLang;
+}
+
 const glossaryData = [
 // ── FARMING & AIRDROP ──
 {term:'Airdrop',badge:'c',cat:'Farming',def:{id:'Distribusi token gratis dari project ke wallet berdasarkan snapshot atau aktivitas on-chain.',en:'Free token distribution from a project to wallets based on snapshots or on-chain activity.'}},
