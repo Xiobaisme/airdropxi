@@ -253,54 +253,54 @@
         #list-view { display: block; }
         #list-view.hidden-view { display: none; }
 
-        /* ── DETAIL HERO ── */
+        /* ── DETAIL HERO — compact ── */
         .detail-hero {
             background: var(--green3);
             border: 1px solid var(--border);
-            border-radius: 16px;
-            padding: 32px 36px;
+            border-radius: 14px;
+            padding: 20px 24px;
             display: flex;
             align-items: center;
-            gap: 28px;
+            gap: 18px;
             flex-wrap: wrap;
-            margin-bottom: 24px;
+            margin-bottom: 14px;
         }
         .detail-logo {
-            width: 88px; height: 88px;
-            border-radius: 20px;
+            width: 64px; height: 64px;
+            border-radius: 14px;
             border: 1px solid var(--border);
             object-fit: cover;
             background: var(--bg2);
             flex-shrink: 0;
         }
         .detail-logo-placeholder {
-            width: 88px; height: 88px;
-            border-radius: 20px;
+            width: 64px; height: 64px;
+            border-radius: 14px;
             border: 1px solid var(--border);
             background: var(--green3);
             display: flex;
             align-items: center;
             justify-content: center;
-            font-size: 36px;
+            font-size: 28px;
             font-weight: 700;
             color: var(--green);
             flex-shrink: 0;
         }
 
-        /* ── META GRID ── */
+        /* ── META GRID — compact ── */
         .detail-meta-grid {
             display: grid;
             grid-template-columns: repeat(4, 1fr);
-            gap: 12px;
-            margin-bottom: 24px;
+            gap: 8px;
+            margin-bottom: 14px;
         }
         @media (max-width: 900px) { .detail-meta-grid { grid-template-columns: repeat(2, 1fr); } }
         @media (max-width: 500px) { .detail-meta-grid { grid-template-columns: 1fr; } }
         .detail-meta-card {
             background: var(--green3);
             border: 1px solid var(--border2);
-            border-radius: 12px;
-            padding: 18px 20px;
+            border-radius: 10px;
+            padding: 12px 14px;
         }
         .detail-meta-label {
             font-family: 'JetBrains Mono', monospace;
@@ -308,24 +308,24 @@
             letter-spacing: 0.16em;
             color: var(--green);
             text-transform: uppercase;
-            margin-bottom: 8px;
+            margin-bottom: 6px;
         }
         .detail-meta-value {
-            font-size: 15px;
+            font-size: 13px;
             font-weight: 600;
             color: var(--text);
             display: flex;
             align-items: center;
-            gap: 8px;
+            gap: 6px;
         }
 
-        /* ── DETAIL SECTION (About, Socials, etc) ── */
+        /* ── DETAIL SECTION — compact ── */
         .detail-section {
             background: var(--card);
             border: 1px solid var(--border);
-            border-radius: 14px;
-            padding: 28px 32px;
-            margin-bottom: 16px;
+            border-radius: 12px;
+            padding: 18px 22px;
+            margin-bottom: 10px;
             backdrop-filter: blur(20px);
         }
         .detail-section-title {
@@ -334,7 +334,7 @@
             letter-spacing: 0.14em;
             color: var(--green);
             text-transform: uppercase;
-            margin-bottom: 20px;
+            margin-bottom: 14px;
             display: flex;
             align-items: center;
             gap: 10px;
@@ -346,11 +346,11 @@
             background: var(--border2);
         }
 
-        /* ── ABOUT: WIKIPEDIA STYLE ── */
+        /* ── ABOUT: Wikipedia style — compact ── */
         .about-block { display: flex; flex-direction: column; gap: 0; }
         .about-heading-block {
-            margin-top: 32px;
-            padding-top: 28px;
+            margin-top: 20px;
+            padding-top: 18px;
             border-top: 1px solid var(--border2);
         }
         .about-heading-block:first-child {
@@ -359,38 +359,37 @@
             border-top: none;
         }
         .about-h2 {
-            font-size: 22px;
+            font-size: 15px;
             font-weight: 700;
             color: var(--text);
-            margin-bottom: 12px;
+            margin-bottom: 8px;
             line-height: 1.3;
         }
         .about-body {
-            font-size: 15px;
+            font-size: 13px;
             color: var(--text2);
-            line-height: 1.8;
+            line-height: 1.75;
         }
-        /* fallback if about is plain text (no headings) */
         .about-plain {
-            font-size: 15px;
+            font-size: 13px;
             color: var(--text2);
-            line-height: 1.8;
+            line-height: 1.75;
         }
 
         .social-link {
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 9px 16px;
+            padding: 7px 13px;
             border-radius: 8px;
             border: 1px solid var(--border);
             background: var(--green3);
             color: var(--text2);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 500;
             text-decoration: none;
             transition: all 0.2s;
-            margin: 4px;
+            margin: 3px;
         }
         .social-link:hover {
             border-color: var(--green);
@@ -401,15 +400,15 @@
             display: inline-flex;
             align-items: center;
             gap: 8px;
-            padding: 8px 16px;
+            padding: 7px 14px;
             border-radius: 8px;
             border: 1px solid var(--border);
             background: var(--green3);
             color: var(--text2);
-            font-size: 12px;
+            font-size: 11px;
             cursor: pointer;
             transition: all 0.2s;
-            margin-bottom: 20px;
+            margin-bottom: 16px;
             font-family: 'JetBrains Mono', monospace;
             text-transform: uppercase;
             letter-spacing: 0.08em;
@@ -419,30 +418,30 @@
         .token-pill {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 6px 12px;
+            gap: 6px;
+            padding: 4px 10px;
             border-radius: 999px;
             border: 1px solid var(--border);
             background: var(--green3);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             color: var(--green);
         }
         .token-pill img {
-            width: 20px; height: 20px;
+            width: 16px; height: 16px;
             border-radius: 50%;
             object-fit: cover;
         }
         .website-btn {
             display: inline-flex;
             align-items: center;
-            gap: 8px;
-            padding: 10px 20px;
-            border-radius: 10px;
+            gap: 7px;
+            padding: 8px 16px;
+            border-radius: 8px;
             border: 1px solid var(--green);
             background: var(--green2);
             color: var(--green);
-            font-size: 13px;
+            font-size: 12px;
             font-weight: 600;
             text-decoration: none;
             transition: all 0.2s;
@@ -571,7 +570,7 @@
         }
         @keyframes shimmer { 0% { background-position: 200% 0; } 100% { background-position: -200% 0; } }
 
-        /* ── LANG SWITCHER PILL (detail page) ── */
+        /* ── LANG SWITCHER PILL ── */
         .lang-pill-wrap {
             display: inline-flex;
             gap: 4px;
@@ -698,8 +697,7 @@
 
     <!-- ── DETAIL VIEW ── -->
     <div id="detail-view">
-        <!-- Breadcrumb -->
-        <div class="flex items-center gap-2 text-xs mb-6" style="color:var(--text2)">
+        <div class="flex items-center gap-2 text-xs mb-5" style="color:var(--text2)">
             <a href="/" class="hover:text-green-400 transition">Home</a>
             <span style="color:var(--border)">›</span>
             <a href="#" onclick="closeDetail(); return false;" class="hover:text-green-400 transition" id="breadExchanges">Exchanges</a>
@@ -707,8 +705,7 @@
             <span style="color:var(--green)" id="breadcrumb-name">—</span>
         </div>
 
-        <!-- Back button + lang switcher row -->
-        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:12px;margin-bottom:20px">
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;margin-bottom:14px">
             <button class="back-btn" onclick="closeDetail()" id="backBtn">← Back to Exchanges</button>
             <div class="lang-pill-wrap">
                 <button class="lang-pill" id="detailLangEN" onclick="setDetailLang('en')">EN</button>
@@ -716,9 +713,7 @@
             </div>
         </div>
 
-        <div id="detail-content">
-            <!-- filled by JS -->
-        </div>
+        <div id="detail-content"></div>
     </div>
 
 </div>
@@ -788,9 +783,9 @@ function toggleTheme() {
     localStorage.setItem('xi-theme', theme);
 }
 
-// ── LANG (global toggle + detail lang) ──
+// ── LANG ──
 let lang = localStorage.getItem('xi-lang') || 'id';
-let detailLang = lang; // lang di halaman detail, default ikut global
+let detailLang = lang;
 
 function applyLang() {
     document.getElementById('langBtn').textContent = lang === 'id' ? 'EN' : 'ID';
@@ -799,21 +794,15 @@ function toggleLang() {
     lang = lang === 'id' ? 'en' : 'id';
     localStorage.setItem('xi-lang', lang);
     applyLang();
-    // kalau lagi di detail, refresh about text
-    if (currentDetailExchange) {
-        setDetailLang(lang);
-    }
+    if (currentDetailExchange) setDetailLang(lang);
 }
 applyLang();
 
-// detail lang switcher
 function setDetailLang(l) {
     detailLang = l;
     document.getElementById('detailLangEN').classList.toggle('active', l === 'en');
     document.getElementById('detailLangID').classList.toggle('active', l === 'id');
-    if (currentDetailExchange) {
-        renderAboutSection(currentDetailExchange);
-    }
+    if (currentDetailExchange) renderAboutSection(currentDetailExchange);
 }
 
 // ── TICKER ──
@@ -840,7 +829,6 @@ async function loadData() {
         if (!res.ok) throw new Error();
         const data = await res.json();
         if (!data.length) throw new Error();
-        // Urutkan berdasarkan rank ascending, null/0 ke bawah
         allData = data.sort((a, b) => {
             const ra = a.rank || 9999;
             const rb = b.rank || 9999;
@@ -952,18 +940,32 @@ function showError() {
     document.getElementById('errorState').classList.remove('hidden');
 }
 
-// ─────────────────────────────────────────────
-// ABOUT PARSER — Wikipedia-style heading blocks
-// Format yang didukung:
-//   "What Is Binance? Teks jawaban..."
-//   "## What Is Binance?\nTeks jawaban..."
-//   "# What Is Binance?\nTeks jawaban..."
-//   Plain text biasa (tanpa heading)
-// ─────────────────────────────────────────────
+// ── ABOUT PARSER ──
+// Handles:
+//   1. JSON array dari admin panel: [{"title":"...","content":"..."}]
+//   2. Markdown headings: ## Heading\nBody
+//   3. Question pattern: "What Is X? Answer..."
+//   4. Plain text
 function parseAbout(text) {
     if (!text || !text.trim()) return null;
 
-    // Cek apakah ada markdown headings (## atau #)
+    // 1. JSON array dari admin panel
+    if (text.trim().startsWith('[')) {
+        try {
+            const parsed = JSON.parse(text);
+            if (Array.isArray(parsed)) {
+                return {
+                    type: 'sections',
+                    blocks: parsed.map(s => ({
+                        heading: s.title || null,
+                        body: s.content || ''
+                    }))
+                };
+            }
+        } catch(e) {}
+    }
+
+    // 2. Markdown headings (## atau #)
     if (/^#{1,3}\s/m.test(text)) {
         const blocks = [];
         const lines  = text.split('\n');
@@ -977,7 +979,6 @@ function parseAbout(text) {
                 if (current) {
                     current.body += (current.body ? '\n' : '') + line;
                 } else {
-                    // teks sebelum heading pertama → jadi block tanpa heading
                     if (line.trim()) {
                         if (!blocks.length) blocks.push({ heading: null, body: line });
                         else blocks[blocks.length-1].body += '\n' + line;
@@ -989,12 +990,9 @@ function parseAbout(text) {
         return { type: 'sections', blocks: blocks.map(b => ({ ...b, body: b.body.trim() })) };
     }
 
-    // Cek pola "Question? Answer text." — heading dipisah tanda tanya
-    // Contoh: "What Is Binance? Binance is the world's largest..."
-    // Deteksi: kalimat diawali huruf kapital, mengandung tanda tanya, diikuti teks panjang
+    // 3. Question pattern: "What Is X? Answer..."
     const qPattern = /([A-Z][^?]{5,80}\?)\s+([A-Z])/g;
     if (qPattern.test(text)) {
-        // Split berdasarkan pola "Pertanyaan? Jawaban..."
         const blocks   = [];
         const segments = text.split(/(?=[A-Z][^?]{5,80}\?\s+[A-Z])/);
         for (const seg of segments) {
@@ -1010,48 +1008,43 @@ function parseAbout(text) {
         if (blocks.length > 1) return { type: 'sections', blocks };
     }
 
-    // Plain text — tampilkan apa adanya
+    // 4. Plain text
     return { type: 'plain', text };
 }
 
-function renderAboutHTML(aboutData, exchangeName) {
+function renderAboutHTML(aboutData) {
     if (!aboutData) return '';
     if (aboutData.type === 'plain') {
         return `<p class="about-plain">${aboutData.text}</p>`;
     }
-    // sections
     return aboutData.blocks.map((block, i) => `
         <div class="about-heading-block${i === 0 ? ' first' : ''}">
             ${block.heading ? `<h2 class="about-h2">${block.heading}</h2>` : ''}
-            ${block.body ? `<p class="about-body">${block.body.replace(/\n\n/g,'</p><p class="about-body" style="margin-top:12px">').replace(/\n/g,' ')}</p>` : ''}
+            ${block.body ? `<p class="about-body">${block.body.replace(/\n\n/g,'</p><p class="about-body" style="margin-top:10px">').replace(/\n/g,' ')}</p>` : ''}
         </div>
     `).join('');
 }
 
 function renderAboutSection(ex) {
-    const isEN = detailLang === 'en';
-    // Ambil about sesuai lang — field: about_en / about_id, fallback ke about
+    const isEN     = detailLang === 'en';
     const rawAbout = (isEN ? (ex.about_en || ex.about) : (ex.about_id || ex.about)) || '';
-    const aboutData = parseAbout(rawAbout);
     const sectionEl = document.getElementById('about-section');
     if (!sectionEl) return;
 
-    if (!rawAbout) {
-        sectionEl.style.display = 'none';
-        return;
-    }
+    if (!rawAbout) { sectionEl.style.display = 'none'; return; }
     sectionEl.style.display = '';
+
     const titleEl = sectionEl.querySelector('.about-section-name');
     if (titleEl) titleEl.textContent = isEN ? `About ${ex.exchange_name}` : `Tentang ${ex.exchange_name}`;
+
     const bodyEl = document.getElementById('about-body');
-    if (bodyEl) bodyEl.innerHTML = renderAboutHTML(aboutData, ex.exchange_name);
+    if (bodyEl) bodyEl.innerHTML = renderAboutHTML(parseAbout(rawAbout));
 }
 
 // ── DETAIL VIEW ──
 function openDetail(slug) {
     const ex = allData.find(d => slugify(d.exchange_name) === slug);
     if (!ex) return;
-    // update URL
     const url = new URL(window.location);
     url.searchParams.set('exchange', slug);
     history.pushState({ exchange: slug }, '', url);
@@ -1060,7 +1053,7 @@ function openDetail(slug) {
 
 function renderDetailView(ex) {
     currentDetailExchange = ex;
-    detailLang = lang; // reset ke global lang
+    detailLang = lang;
 
     document.getElementById('list-view').classList.add('hidden-view');
     document.getElementById('detail-view').classList.add('active');
@@ -1073,7 +1066,7 @@ function renderDetailView(ex) {
         ? `<img src="${ex.logo_url}" class="detail-logo" alt="${ex.exchange_name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="detail-logo-placeholder" style="display:none">${ex.exchange_name?.[0]||'?'}</div>`
         : `<div class="detail-logo-placeholder">${ex.exchange_name?.[0]||'?'}</div>`;
 
-    // native token pill
+    // native token
     let tokenHtml = '—';
     if (ex.native_token) {
         const tLogoHtml = ex.native_token_logo ? `<img src="${ex.native_token_logo}" onerror="this.style.display='none'">` : '';
@@ -1099,7 +1092,6 @@ function renderDetailView(ex) {
         .map(s => `<a href="${ex[s.key]}" target="_blank" rel="noopener" class="social-link">${s.icon} ${s.label}</a>`)
         .join('') || '<span style="color:var(--text2);font-size:13px">No socials listed</span>';
 
-    // Cek apakah ada about text
     const hasAbout = !!(ex.about || ex.about_en || ex.about_id);
 
     document.getElementById('detail-content').innerHTML = `
@@ -1107,20 +1099,20 @@ function renderDetailView(ex) {
         <div class="detail-hero">
             ${logoHtml}
             <div style="flex:1;min-width:0">
-                <div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;margin-bottom:8px">
-                    <h1 style="font-size:32px;font-weight:800;color:var(--text)">${ex.exchange_name}</h1>
+                <div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:6px">
+                    <h1 style="font-size:22px;font-weight:800;color:var(--text)">${ex.exchange_name}</h1>
                     <span class="tag">${ex.type?.toUpperCase() || 'CEX'}</span>
-                    ${ex.rank ? `<span style="font-family:'JetBrains Mono',monospace;font-size:12px;padding:4px 10px;border-radius:6px;border:1px solid rgba(250,204,21,0.3);background:rgba(250,204,21,0.06);color:#fbbf24">RANK #${ex.rank}</span>` : ''}
+                    ${ex.rank ? `<span style="font-family:'JetBrains Mono',monospace;font-size:11px;padding:3px 8px;border-radius:5px;border:1px solid rgba(250,204,21,0.3);background:rgba(250,204,21,0.06);color:#fbbf24">RANK #${ex.rank}</span>` : ''}
                 </div>
-                <p style="font-size:15px;color:var(--text2);line-height:1.65;max-width:680px">${ex.key_features || 'Leading cryptocurrency exchange platform.'}</p>
-                <div style="margin-top:16px;display:flex;gap:10px;flex-wrap:wrap;align-items:center">
+                <p style="font-size:13px;color:var(--text2);line-height:1.6;max-width:640px">${ex.key_features || 'Leading cryptocurrency exchange platform.'}</p>
+                <div style="margin-top:12px;display:flex;gap:8px;flex-wrap:wrap;align-items:center">
                     ${ex.website ? `<a href="${ex.website}" target="_blank" rel="noopener" class="website-btn">🌐 Visit Website ↗</a>` : ''}
                     ${ex.best_for ? `<span class="tag">${ex.best_for}</span>` : ''}
                 </div>
             </div>
         </div>
 
-        <!-- META GRID: 4 kolom full width -->
+        <!-- META GRID -->
         <div class="detail-meta-grid">
             <div class="detail-meta-card">
                 <div class="detail-meta-label">Jurisdiction</div>
@@ -1138,32 +1130,22 @@ function renderDetailView(ex) {
                 <div class="detail-meta-label">Exchange Type</div>
                 <div class="detail-meta-value">⚡ ${ex.type?.toUpperCase() || '—'}</div>
             </div>
-            ${ex.headquarters ? `<div class="detail-meta-card">
-                <div class="detail-meta-label">Headquarters</div>
-                <div class="detail-meta-value">🏢 ${ex.headquarters}</div>
-            </div>` : ''}
-            ${ex.ceo ? `<div class="detail-meta-card">
-                <div class="detail-meta-label">CEO / Founder</div>
-                <div class="detail-meta-value">👤 ${ex.ceo}</div>
-            </div>` : ''}
+            ${ex.headquarters ? `<div class="detail-meta-card"><div class="detail-meta-label">Headquarters</div><div class="detail-meta-value">🏢 ${ex.headquarters}</div></div>` : ''}
+            ${ex.ceo ? `<div class="detail-meta-card"><div class="detail-meta-label">CEO / Founder</div><div class="detail-meta-value">👤 ${ex.ceo}</div></div>` : ''}
         </div>
 
-        <!-- ABOUT SECTION — Wikipedia style -->
+        <!-- ABOUT -->
         <div class="detail-section" id="about-section" style="${hasAbout ? '' : 'display:none'}">
             <div class="detail-section-title">
                 <span class="about-section-name">About ${ex.exchange_name}</span>
             </div>
-            <div class="about-block" id="about-body">
-                <!-- filled by renderAboutSection() -->
-            </div>
+            <div class="about-block" id="about-body"></div>
         </div>
 
         <!-- SOCIALS -->
         <div class="detail-section">
             <div class="detail-section-title">Socials &amp; Community</div>
-            <div style="display:flex;flex-wrap:wrap;gap:4px">
-                ${socialsHtml}
-            </div>
+            <div style="display:flex;flex-wrap:wrap;gap:4px">${socialsHtml}</div>
         </div>
 
         ${ex.regulatory_info ? `
@@ -1173,7 +1155,6 @@ function renderDetailView(ex) {
         </div>` : ''}
     `;
 
-    // Render about dengan lang yang aktif
     renderAboutSection(ex);
 }
 
@@ -1187,7 +1168,6 @@ function closeDetail() {
     window.scrollTo(0, 0);
 }
 
-// handle back button
 window.addEventListener('popstate', () => {
     const params = new URLSearchParams(window.location.search);
     const slug   = params.get('exchange');
