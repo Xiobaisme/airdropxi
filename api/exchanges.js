@@ -25,40 +25,39 @@ export default async function handler(req, res) {
 
     // Transformasi: flatten exchange_details ke level utama
     const transformed = data.map(ex => {
-      const details = ex.exchange_details || {};
-      return {
-        // dari tabel exchanges
-        id: ex.id,
-        rank: details.rank || ex.rank,
-        exchange_name: ex.exchange_name,
-        logo_url: ex.logo_url,
-        country: ex.country,
-        key_features: ex.key_features,
-        best_for: ex.best_for,
-        type: ex.type || 'cex',
-        year_founded: details.year_founded || null,
-        headquarters: details.headquarters || null,
-        ceo: details.ceo || null,
-        regulatory_info: details.regulatory_info || null,
-        // dari exchange_details
-        about: details.about || null,
-        about_id: details.about_id || null,
-        about_en: details.about_en || null,
-        website: details.website || null,
-        twitter: details.twitter || null,
-        telegram: details.telegram || null,
-        discord: details.discord || null,
-        instagram: details.instagram || null,
-        facebook: details.facebook || null,
-        linkedin: details.linkedin || null,
-        github: details.github || null,
-        youtube: details.youtube || null,
-        medium: details.medium || null,
-        native_token: details.native_token || null,
-        native_token_logo: details.native_token_logo || null,
-        native_token_link: details.native_token_link || null,
-      };
-    });
+  const details = ex.exchange_details || {};
+  return {
+    id: ex.id,
+    rank: details.rank || ex.rank,
+    exchange_name: ex.exchange_name,
+    logo_url: ex.logo_url,
+    country: ex.country,
+    key_features: ex.key_features,
+    best_for: ex.best_for,
+    type: ex.type || 'cex',
+    // dari exchange_details
+    year_founded: details.year_founded || null,
+    headquarters: details.headquarters || null,
+    ceo: details.ceo || null,
+    regulatory_info: details.regulatory_info || null,
+    native_token: details.native_token || null,
+    native_token_logo: details.native_token_logo || null,
+    native_token_link: details.native_token_link || null,
+    about: details.about || null,
+    about_id: details.about_id || null,
+    about_en: details.about_en || null,
+    website: details.website || null,
+    twitter: details.twitter || null,
+    telegram: details.telegram || null,
+    discord: details.discord || null,
+    instagram: details.instagram || null,
+    facebook: details.facebook || null,
+    linkedin: details.linkedin || null,
+    github: details.github || null,
+    youtube: details.youtube || null,
+    blog: details.blog || null,           // ✅ ganti medium → blog
+  };
+});
 
     res.status(200).json(transformed);
   } catch (err) {
