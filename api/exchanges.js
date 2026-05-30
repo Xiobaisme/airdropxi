@@ -29,7 +29,7 @@ export default async function handler(req, res) {
       return {
         // dari tabel exchanges
         id: ex.id,
-        rank: ex.rank,
+        rank: details.rank || ex.rank,
         exchange_name: ex.exchange_name,
         logo_url: ex.logo_url,
         country: ex.country,
@@ -42,6 +42,8 @@ export default async function handler(req, res) {
         regulatory_info: details.regulatory_info || null,
         // dari exchange_details
         about: details.about || null,
+        about_id: details.about_id || null,
+        about_en: details.about_en || null,
         website: details.website || null,
         twitter: details.twitter || null,
         telegram: details.telegram || null,
