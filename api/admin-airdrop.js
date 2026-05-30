@@ -463,3 +463,52 @@ async function saveRoadmap(BASE, H, airdropId, items) {
     console.warn('saveRoadmap error:', e.message);
   }
 }
+
+function clearTokenLogo() {
+  document.getElementById('ex-native-token-logo').value = '';
+  document.getElementById('ex-token-logo-url-display').textContent = 'Belum ada logo';
+  const preview = document.getElementById('ex-token-logo-preview');
+  if (preview) preview.innerHTML = '🪙';
+  const status = document.getElementById('ex-token-logo-status');
+  if (status) { status.className = 'logo-upload-status'; status.textContent = ''; }
+}
+
+async function handleTokenLogoUpload(e) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const allowed = ['image/png','image/jpeg','image/jpg','image/webp','image/svg+xml','image/gif'];
+  if (!allowed.includes(file.type)) { showToast('Format tidak didukung.', 'error'); return; }
+  if (file.size > 2 * 1024 * 1024) { showToast('File terlalu besar. Maks 2MB.', 'error'); return; }
+
+  const statusEl = document.getElementById('ex-token-logo-status');
+  statusEl.className = 'logo-upload-status uploading';
+  statusEl.innerHTML = '<span class="spinner"></span> Mengupload...';
+
+  try {
+    const tokenName = document.getElementById('ex-native-token')?.value?.trim() || 'token';
+    const url = await uploadImageToGitHub(file, tokenName + '-logo');
+    document.getElementById('ex-native-token-logo').value = url;
+    document.getElementById('ex-token-logo-url-display').textContent = url;
+    const preview = document.getElementById('ex-token-logo-preview');
+    if (preview) preview.innerHTML = `<img src="${url}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+    statusEl.className = 'logo-upload-status success';
+    statusEl.textContent = '✓ Upload berhasil!';
+    showToast('✓ Token logo terupload!', 'success');
+  } catch(err) {
+    statusEl.className = 'logo-upload-status error';
+    statusEl.textContent = '✕ ' + err.message;
+    showToast('Upload gagal: ' + err.message, 'error');
+  } finally {
+    e.target.value = '';
+  }
+}
+
+
+// Init token logo preview kalau udah ada
+const existingTokenLogo = ex.native_token_logo;
+if (existingTokenLogo) {
+  document.getElementById('ex-native-token-logo').value = existingTokenLogo;
+  document.getElementById('ex-token-logo-url-display').textContent = existingTokenLogo;
+  const preview = document.getElementById('ex-token-logo-preview');
+  if (preview) preview.innerHTML = `<img src="${existingTokenLogo}" style="width:100%;height:100%;object-fit:cover;border-radius:50%">`;
+}
