@@ -65,7 +65,6 @@ module.exports = async function handler(req, res) {
           return res.status(200).json(detail);
         }
         else {
-          // Ambil semua — include rank, about_id, about_en
           const r = await fetch(`${BASE}/exchange_details?select=*`, { headers: H });
           const data = await r.json();
           if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
@@ -85,7 +84,7 @@ module.exports = async function handler(req, res) {
       }
     }
 
-    // PATCH — ✅ tambah rank, about_id, about_en
+    // PATCH — semua field termasuk yang baru dari frontend
     if (req.method === 'PATCH') {
       if (!id && !exchange_id) {
         return res.status(400).json({ error: 'Query param "id" atau "exchange_id" wajib ada' });
@@ -96,11 +95,10 @@ module.exports = async function handler(req, res) {
         if (id) targetFilter = `id=eq.${encodeURIComponent(id)}`;
         else    targetFilter = `exchange_id=eq.${encodeURIComponent(exchange_id)}`;
 
-        // Hanya masukkan field yang dikirim (tidak overwrite dengan null kalau tidak ada)
         const body = req.body;
         const payload = {};
 
-        // Field lama
+        // Field lama (sosial media)
         if ('about'     in body) payload.about     = body.about     ?? null;
         if ('website'   in body) payload.website   = body.website   ?? null;
         if ('twitter'   in body) payload.twitter   = body.twitter   ?? null;
@@ -113,10 +111,21 @@ module.exports = async function handler(req, res) {
         if ('youtube'   in body) payload.youtube   = body.youtube   ?? null;
         if ('medium'    in body) payload.medium    = body.medium    ?? null;
 
-        // ✅ Field baru
-        if ('rank'     in body) payload.rank     = body.rank     ? parseInt(body.rank, 10) : null;
+        // Field about sections (ID & EN)
+        if ('rank'     in body) payload.rank     = body.rank ? parseInt(body.rank, 10) : null;
         if ('about_id' in body) payload.about_id = body.about_id ?? null;
         if ('about_en' in body) payload.about_en = body.about_en ?? null;
+
+        // Field baru info detail exchange
+        if ('year_founded'      in body) payload.year_founded      = body.year_founded      ?? null;
+        if ('headquarters'      in body) payload.headquarters      = body.headquarters      ?? null;
+        if ('ceo'               in body) payload.ceo               = body.ceo               ?? null;
+        if ('native_token'      in body) payload.native_token      = body.native_token      ?? null;
+        if ('native_token_logo' in body) payload.native_token_logo = body.native_token_logo ?? null;
+        if ('native_token_link' in body) payload.native_token_link = body.native_token_link ?? null;
+        if ('regulatory_info'   in body) payload.regulatory_info   = body.regulatory_info   ?? null;
+        // 'blog' disimpan sebagai 'medium' tidak — simpan sebagai field tersendiri
+        if ('blog'              in body) payload.blog              = body.blog              ?? null;
 
         payload.updated_at = new Date().toISOString();
 
@@ -144,21 +153,29 @@ module.exports = async function handler(req, res) {
       }
       try {
         const payload = {
-          exchange_id:  req.body.exchange_id,
-          rank:         req.body.rank      ? parseInt(req.body.rank, 10) : null,
-          about:        req.body.about     ?? null,
-          about_id:     req.body.about_id  ?? null,
-          about_en:     req.body.about_en  ?? null,
-          website:      req.body.website   ?? null,
-          twitter:      req.body.twitter   ?? null,
-          telegram:     req.body.telegram  ?? null,
-          discord:      req.body.discord   ?? null,
-          instagram:    req.body.instagram ?? null,
-          facebook:     req.body.facebook  ?? null,
-          linkedin:     req.body.linkedin  ?? null,
-          github:       req.body.github    ?? null,
-          youtube:      req.body.youtube   ?? null,
-          medium:       req.body.medium    ?? null,
+          exchange_id:        req.body.exchange_id,
+          rank:               req.body.rank             ? parseInt(req.body.rank, 10) : null,
+          about:              req.body.about             ?? null,
+          about_id:           req.body.about_id          ?? null,
+          about_en:           req.body.about_en          ?? null,
+          website:            req.body.website           ?? null,
+          twitter:            req.body.twitter           ?? null,
+          telegram:           req.body.telegram          ?? null,
+          discord:            req.body.discord           ?? null,
+          instagram:          req.body.instagram         ?? null,
+          facebook:           req.body.facebook          ?? null,
+          linkedin:           req.body.linkedin          ?? null,
+          github:             req.body.github            ?? null,
+          youtube:            req.body.youtube           ?? null,
+          medium:             req.body.medium            ?? null,
+          blog:               req.body.blog              ?? null,
+          year_founded:       req.body.year_founded      ?? null,
+          headquarters:       req.body.headquarters      ?? null,
+          ceo:                req.body.ceo               ?? null,
+          native_token:       req.body.native_token      ?? null,
+          native_token_logo:  req.body.native_token_logo ?? null,
+          native_token_link:  req.body.native_token_link ?? null,
+          regulatory_info:    req.body.regulatory_info   ?? null,
         };
         const r = await fetch(`${BASE}/exchange_details`, {
           method: 'POST',
@@ -202,53 +219,60 @@ module.exports = async function handler(req, res) {
   }
 
   // ============================================================
-  // AIRDROP & PROYEK — TIDAK BERUBAH
+  // AIRDROP & PROYEK
   // ============================================================
+
+  // buildAirdropsPayload — field yang disimpan di tabel airdrops
   function buildAirdropsPayload(p) {
     return {
-      name:                 p.name                 || null,
-      status:               p.status               || null,
-      confirmation_status:  p.confirmation_status  || null,
-      published:            p.published !== undefined ? Boolean(p.published) : false,
-      link:                 p.link                 || null,
-      tags:                 p.tags                 || null,
-      RaisedID:             p.RaisedID             || null,
-      RaisedEN:             p.RaisedEN             || null,
-      tasksID:              p.tasksID              || null,
-      tasksEN:              p.tasksEN              || null,
-      logo_url:             p.logo_url             || null,
-      testnet_links:        p.testnet_links        || null,
+      name:                p.name                || null,
+      status:              p.status              || null,
+      confirmation_status: p.confirmation_status || null,
+      published:           p.published !== undefined ? Boolean(p.published) : false,
+      link:                p.link                || null,
+      tags:                p.tags                || null,
+      RaisedID:            p.RaisedID            || null,
+      RaisedEN:            p.RaisedEN            || null,
+      tasksID:             p.tasksID             || null,
+      tasksEN:             p.tasksEN             || null,
+      logo_url:            p.logo_url            || null,
+      testnet_links:       p.testnet_links       || null,
     };
   }
 
+  // buildProyekPayload — field yang disimpan di tabel proyek (termasuk sosmed & detail)
   function buildProyekPayload(p, airdropsId) {
     const payload = {
-      name:                 p.name                 || null,
-      status:               p.status               || null,
-      confirmation_status:  p.confirmation_status  || null,
-      published:            p.published !== undefined ? Boolean(p.published) : false,
-      link:                 p.link                 || null,
-      tags:                 p.tags                 || null,
-      RaisedID:             p.RaisedID             || null,
-      RaisedEN:             p.RaisedEN             || null,
-      tasksID:              p.tasksID              || null,
-      tasksEN:              p.tasksEN              || null,
-      descriptionID:        p.descriptionID        || null,
-      descriptionEN:        p.descriptionEN        || null,
-      ticker:               p.ticker               || null,
-      total_supply:         p.total_supply         || null,
-      network:              p.network              || null,
-      tge_date:             p.tge_date             || null,
-      logo_url:             p.logo_url             || null,
-      twitter:              p.twitter              || null,
-      discord:              p.discord              || null,
-      telegram:             p.telegram             || null,
-      linkedin:             p.linkedin             || null,
-      youtube:              p.youtube              || null,
-      instagram:            p.instagram            || null,
-      faqID:                p.faqID                || null,
-      faqEN:                p.faqEN                || null,
-      testnet_links:        p.testnet_links        || null,
+      name:                p.name                || null,
+      status:              p.status              || null,
+      confirmation_status: p.confirmation_status || null,
+      published:           p.published !== undefined ? Boolean(p.published) : false,
+      link:                p.link                || null,
+      tags:                p.tags                || null,
+      RaisedID:            p.RaisedID            || null,
+      RaisedEN:            p.RaisedEN            || null,
+      tasksID:             p.tasksID             || null,
+      tasksEN:             p.tasksEN             || null,
+      descriptionID:       p.descriptionID       || null,
+      descriptionEN:       p.descriptionEN       || null,
+      ticker:              p.ticker              || null,
+      total_supply:        p.total_supply        || null,
+      network:             p.network             || null,
+      tge_date:            p.tge_date            || null,
+      logo_url:            p.logo_url            || null,
+      // Sosial media — disimpan di proyek
+      twitter:             p.twitter             || null,
+      discord:             p.discord             || null,
+      telegram:            p.telegram            || null,
+      linkedin:            p.linkedin            || null,
+      youtube:             p.youtube             || null,
+      instagram:           p.instagram           || null,
+      facebook:            p.facebook            || null,
+      github:              p.github              || null,
+      // FAQ
+      faqID:               p.faqID               || null,
+      faqEN:               p.faqEN               || null,
+      testnet_links:       p.testnet_links       || null,
     };
     if (airdropsId !== undefined) payload.airdrop_id = airdropsId;
     return payload;
