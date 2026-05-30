@@ -1378,14 +1378,14 @@
   }
 
   // ═══════════════════════════════════════════════════════════
-  // EXCHANGE PANEL — multi-section about_id / about_en
+  // EXCHANGE PANEL — PATCHED v2 (CEO multi photo upload)
   // ═══════════════════════════════════════════════════════════
-  let exchangeListData       = [];
-  let currentEditExchangeId  = null;
-  let _exCurrentFilter       = 'all';
-  let _exCurrentSearch       = '';
+  let exchangeListData      = [];
+  let currentEditExchangeId = null;
+  let _exCurrentFilter      = 'all';
+  let _exCurrentSearch      = '';
 
-  // ── Parse / serialize about sections ─────────────────────
+  // ── About sections ────────────────────────────────────────
   function parseAboutSections(raw) {
     if (!raw) return [];
     try {
@@ -1413,9 +1413,7 @@
     return `
       <div class="about-section-row">
         <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
-          <span style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;flex:1;">
-            Bagian ${idx + 1}
-          </span>
+          <span style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;flex:1;">Bagian ${idx + 1}</span>
           <button type="button" class="btn-remove-about" onclick="removeAboutSection(this)">✕ Hapus</button>
         </div>
         <input type="text" class="about-sec-title" placeholder="Judul bagian (e.g. Who Are the Founders?)" value="${esc(title)}">
@@ -1455,12 +1453,241 @@
     container.innerHTML = sections.map((s, i) => aboutSectionRowHTML(i, s.title || '', s.content || '')).join('');
   }
 
-  // ── Filter & list helpers ─────────────────────────────────
-  function _filteredExchangeList() {
-    let list = [...exchangeListData];
-    if (_exCurrentFilter !== 'all') {
-      list = list.filter(ex => (ex.type || 'cex').toLowerCase() === _exCurrentFilter);
+  // ── CEO builder ───────────────────────────────────────────
+  // Format di DB (kolom ceo): JSON array
+  // [{"name":"CZ","title":"Founder & CEO","photo":"https://..."}]
+  // Kalau string lama (bukan JSON array), otomatis migrate ke 1 entry tanpa foto
+
+  function parseCeoList(raw) {
+    if (!raw) return [];
+    try {
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (Array.isArray(parsed)) {
+        // Support format lama: array of strings
+        return parsed.map(item =>
+          typeof item === 'string'
+            ? { name: item, title: '', photo: '' }
+            : { name: item.name || '', title: item.title || '', photo: item.photo || '' }
+        );
+      }
+      // Object tunggal
+      if (typeof parsed === 'object' && parsed !== null)
+        return [{ name: parsed.name || '', title: parsed.title || '', photo: parsed.photo || '' }];
+    } catch(e) {
+      // Plain string lama
+      if (typeof raw === 'string' && raw.trim())
+        return [{ name: raw.trim(), title: '', photo: '' }];
     }
+    return [];
+  }
+
+  function serializeCeoList() {
+    const container = document.getElementById('ceo-builder');
+    if (!container) return null;
+    const items = [];
+    container.querySelectorAll('.ceo-card').forEach(card => {
+      const name  = card.querySelector('.ceo-name-input')?.value?.trim()  || '';
+      const title = card.querySelector('.ceo-title-input')?.value?.trim() || '';
+      const photo = card.querySelector('.ceo-photo-hidden')?.value?.trim() || '';
+      if (name) items.push({ name, title, photo: photo || null });
+    });
+    return items.length ? JSON.stringify(items) : null;
+  }
+
+  function ceoCardHTML(idx, item) {
+    item = item || { name: '', title: '', photo: '' };
+    const uid = `ceo-${idx}-${Date.now()}`;
+    const hasPhoto = !!item.photo;
+    return `
+      <div class="ceo-card" id="${uid}"
+           style="background:var(--s2);border:1px solid var(--border2);border-radius:10px;
+                  padding:14px;display:flex;gap:14px;align-items:flex-start;position:relative">
+        <!-- Avatar kiri -->
+        <div style="display:flex;flex-direction:column;align-items:center;gap:6px;flex-shrink:0">
+          <div class="ceo-photo-preview"
+               style="width:64px;height:64px;border-radius:50%;border:2px dashed var(--border2);
+                      background:var(--s3);display:flex;align-items:center;justify-content:center;
+                      font-size:26px;overflow:hidden;cursor:pointer;transition:border-color 0.2s"
+               onclick="triggerCeoPhotoUpload('${uid}')"
+               title="Klik untuk upload foto">
+            ${hasPhoto
+              ? `<img src="${esc(item.photo)}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='👤'">`
+              : '👤'}
+          </div>
+          <input type="file" id="ceo-file-${uid}" accept="image/*" style="display:none"
+                 onchange="handleCeoPhotoUpload(event,'${uid}')">
+          <button type="button"
+                  onclick="triggerCeoPhotoUpload('${uid}')"
+                  style="font-family:var(--mono);font-size:0.5rem;padding:3px 8px;border-radius:4px;
+                         border:1px solid var(--aborder);background:var(--adim);color:var(--accent);
+                         cursor:pointer;white-space:nowrap">⬆ Foto</button>
+          ${hasPhoto ? `
+          <button type="button"
+                  onclick="clearCeoPhoto('${uid}')"
+                  style="font-family:var(--mono);font-size:0.5rem;padding:3px 8px;border-radius:4px;
+                         border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.08);
+                         color:var(--red);cursor:pointer">✕ Hapus</button>` : ''}
+          <div class="ceo-photo-status-${uid}" style="font-family:var(--mono);font-size:0.48rem;
+               text-align:center;display:none;max-width:64px;word-break:break-all"></div>
+        </div>
+        <!-- Fields kanan -->
+        <div style="flex:1;display:flex;flex-direction:column;gap:8px;min-width:0">
+          <div class="field" style="gap:4px">
+            <label style="font-family:var(--mono);font-size:0.58rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em">
+              Nama <span style="color:var(--red)">*</span>
+            </label>
+            <input type="text" class="ceo-name-input"
+                   placeholder="Changpeng Zhao (CZ)"
+                   value="${esc(item.name)}"
+                   style="width:100%;background:var(--s3);border:1px solid var(--border);border-radius:6px;
+                          color:var(--text);font-family:var(--mono);font-size:0.76rem;
+                          padding:0.5rem 0.7rem;outline:none;transition:border-color 0.2s"
+                   onfocus="this.style.borderColor='var(--accent)'"
+                   onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <div class="field" style="gap:4px">
+            <label style="font-family:var(--mono);font-size:0.58rem;color:var(--text2);text-transform:uppercase;letter-spacing:0.06em">
+              Jabatan <span style="font-family:var(--mono);font-size:0.52rem;color:var(--text3);text-transform:none;letter-spacing:0">opsional</span>
+            </label>
+            <input type="text" class="ceo-title-input"
+                   placeholder="Founder & CEO"
+                   value="${esc(item.title)}"
+                   style="width:100%;background:var(--s3);border:1px solid var(--border);border-radius:6px;
+                          color:var(--text);font-family:var(--mono);font-size:0.76rem;
+                          padding:0.5rem 0.7rem;outline:none;transition:border-color 0.2s"
+                   onfocus="this.style.borderColor='var(--accent)'"
+                   onblur="this.style.borderColor='var(--border)'">
+          </div>
+          <input type="hidden" class="ceo-photo-hidden" value="${esc(item.photo || '')}">
+        </div>
+        <!-- Hapus card -->
+        <button type="button" onclick="removeCeoCard('${uid}')"
+                style="position:absolute;top:10px;right:10px;padding:3px 8px;border-radius:4px;
+                       border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.08);
+                       color:var(--red);font-family:var(--mono);font-size:0.52rem;cursor:pointer">✕</button>
+      </div>`;
+  }
+
+  function renderCeoBuilder(rawData) {
+    const container = document.getElementById('ceo-builder');
+    if (!container) return;
+    const list = parseCeoList(rawData);
+    if (!list.length) {
+      container.innerHTML = `<div style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);padding:0.5rem 0">
+        Belum ada CEO/Founder. Klik tombol di bawah untuk menambah.</div>`;
+      return;
+    }
+    container.innerHTML = list.map((item, i) => ceoCardHTML(i, item)).join('');
+  }
+
+  function addCeoCard() {
+    const container = document.getElementById('ceo-builder');
+    if (!container) return;
+    // Hapus pesan empty jika ada
+    const empty = container.querySelector('div[style*="Belum ada"]');
+    if (empty) empty.remove();
+    const idx = container.querySelectorAll('.ceo-card').length;
+    if (idx >= 10) { showToast('Maksimal 10 CEO/Founder', 'error'); return; }
+    container.insertAdjacentHTML('beforeend', ceoCardHTML(idx + Date.now(), {}));
+  }
+
+  function removeCeoCard(uid) {
+    const card = document.getElementById(uid);
+    const container = card?.parentElement;
+    card?.remove();
+    if (container && !container.querySelectorAll('.ceo-card').length) {
+      container.innerHTML = `<div style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);padding:0.5rem 0">
+        Belum ada CEO/Founder. Klik tombol di bawah untuk menambah.</div>`;
+    }
+  }
+
+  function triggerCeoPhotoUpload(uid) {
+    document.getElementById(`ceo-file-${uid}`)?.click();
+  }
+
+  async function handleCeoPhotoUpload(e, uid) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ['image/png','image/jpeg','image/jpg','image/webp','image/gif'];
+    if (!allowed.includes(file.type)) { showToast('Format tidak didukung.', 'error'); return; }
+    if (file.size > 2 * 1024 * 1024) { showToast('File terlalu besar. Maks 2MB.', 'error'); return; }
+
+    const card      = document.getElementById(uid);
+    const preview   = card?.querySelector('.ceo-photo-preview');
+    const hidden    = card?.querySelector('.ceo-photo-hidden');
+    const statusEl  = card?.querySelector(`.ceo-photo-status-${uid}`);
+    const nameInput = card?.querySelector('.ceo-name-input');
+
+    if (statusEl) {
+      statusEl.style.display = 'block';
+      statusEl.style.color   = 'var(--blue)';
+      statusEl.textContent   = '⏳ Upload...';
+    }
+
+    try {
+      const personName = nameInput?.value?.trim() || 'ceo';
+      const rawUrl = await uploadImageToGitHub(file, `ceo-${personName}`);
+
+      if (preview) {
+        preview.innerHTML = `<img src="${rawUrl}" style="width:100%;height:100%;object-fit:cover" onerror="this.parentElement.innerHTML='👤'">`;
+      }
+      if (hidden) hidden.value = rawUrl;
+
+      // Tambah tombol hapus foto kalau belum ada
+      const avatarCol = preview?.parentElement;
+      if (avatarCol && !avatarCol.querySelector('.ceo-clear-photo-btn')) {
+        const clearBtn = document.createElement('button');
+        clearBtn.type = 'button';
+        clearBtn.className = 'ceo-clear-photo-btn';
+        clearBtn.textContent = '✕ Hapus';
+        clearBtn.style.cssText = 'font-family:var(--mono);font-size:0.5rem;padding:3px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.08);color:var(--red);cursor:pointer';
+        clearBtn.onclick = () => clearCeoPhoto(uid);
+        // Insert setelah tombol upload
+        const uploadBtn = avatarCol.querySelector('button');
+        uploadBtn?.insertAdjacentElement('afterend', clearBtn);
+      }
+
+      if (statusEl) {
+        statusEl.style.color = 'var(--accent)';
+        statusEl.textContent = '✓ OK';
+        setTimeout(() => { statusEl.style.display = 'none'; }, 2000);
+      }
+      showToast('✓ Foto diupload!', 'success');
+    } catch(err) {
+      if (statusEl) {
+        statusEl.style.color = 'var(--red)';
+        statusEl.textContent = '✕ Gagal';
+      }
+      showToast('Upload gagal: ' + err.message, 'error');
+    } finally {
+      e.target.value = '';
+    }
+  }
+
+  function clearCeoPhoto(uid) {
+    const card    = document.getElementById(uid);
+    const preview = card?.querySelector('.ceo-photo-preview');
+    const hidden  = card?.querySelector('.ceo-photo-hidden');
+    if (preview) preview.innerHTML = '👤';
+    if (hidden)  hidden.value = '';
+    // Hapus tombol clear
+    card?.querySelector('.ceo-clear-photo-btn')?.remove();
+  }
+
+  // ── List sort & filter ────────────────────────────────────
+  function _sortedExchangeList(list) {
+    return [...list].sort((a, b) => {
+      const ra = a.rank != null ? Number(a.rank) : 99999;
+      const rb = b.rank != null ? Number(b.rank) : 99999;
+      if (ra !== rb) return ra - rb;
+      return (a.exchange_name || '').localeCompare(b.exchange_name || '');
+    });
+  }
+
+  function _filteredExchangeList() {
+    let list = _sortedExchangeList(exchangeListData);
+    if (_exCurrentFilter !== 'all')
+      list = list.filter(ex => (ex.type || 'cex').toLowerCase() === _exCurrentFilter);
     if (_exCurrentSearch.trim()) {
       const q = _exCurrentSearch.toLowerCase();
       list = list.filter(ex => (ex.exchange_name || '').toLowerCase().includes(q));
@@ -1471,31 +1698,52 @@
   function _renderExchangeListItems() {
     const container = document.getElementById('exchange-list-panel');
     if (!container) return;
-    const filtered = _filteredExchangeList();
-    const countEl  = document.getElementById('ex-list-count');
+    const filtered  = _filteredExchangeList();
+    const countEl   = document.getElementById('ex-list-count');
     if (countEl) countEl.textContent = `${filtered.length}/${exchangeListData.length}`;
-
     if (!filtered.length) {
       container.innerHTML = '<div class="list-empty">Tidak ada exchange ditemukan</div>';
       return;
     }
-    container.innerHTML = filtered.map(ex => `
-      <div class="proj-item ${currentEditExchangeId === ex.exchange_id ? 'active' : ''}"
-           onclick="selectExchangeForEdit(${ex.exchange_id})">
-        <div class="proj-item-info">
-          <div class="proj-item-name">${esc(ex.exchange_name || '—')}</div>
-          <div class="proj-item-badges">
-            ${ex.rank ? `<span class="proj-item-status st-c">#${ex.rank}</span>` : ''}
-            <span class="live-dot ${(ex.about_id || ex.about_en || ex.about) ? 'on' : 'off'}">
-              ${(ex.about_id || ex.about_en || ex.about) ? '● INFO' : '○ EMPTY'}
-            </span>
-            ${ex.type ? `<span class="proj-item-status ${ex.type==='cex'?'st-a':'st-p'}">${ex.type.toUpperCase()}</span>` : ''}
+    container.innerHTML = filtered.map(ex => {
+      const hasInfo   = !!(ex.about_id || ex.about_en || ex.about);
+      const exType    = (ex.type || 'cex').toLowerCase();
+      const rankLabel = ex.rank != null ? `#${ex.rank}` : null;
+      return `
+        <div class="proj-item ${currentEditExchangeId === ex.exchange_id ? 'active' : ''}"
+             onclick="selectExchangeForEdit(${ex.exchange_id})" style="position:relative">
+          <div class="proj-item-info">
+            <div class="proj-item-name">${esc(ex.exchange_name || '—')}</div>
+            <div class="proj-item-badges">
+              ${rankLabel ? `<span class="proj-item-status st-c">${rankLabel}</span>` : ''}
+              <span class="live-dot ${hasInfo ? 'on' : 'off'}">${hasInfo ? '● INFO' : '○ EMPTY'}</span>
+              <span class="proj-item-status ${exType === 'cex' ? 'st-a' : exType === 'dex' ? 'st-p' : 'st-w'}">${exType.toUpperCase()}</span>
+            </div>
           </div>
-        </div>
-      </div>`).join('');
+          <button onclick="event.stopPropagation();deleteExchange(${ex.exchange_id},'${esc(ex.exchange_name||'')}')"
+                  style="flex-shrink:0;padding:4px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.25);
+                         background:rgba(239,68,68,0.08);color:var(--red);font-family:var(--mono);font-size:0.52rem;
+                         cursor:pointer;white-space:nowrap;margin-left:4px" title="Hapus exchange">🗑</button>
+        </div>`;
+    }).join('');
   }
 
-  // ── Main panel ────────────────────────────────────────────
+  async function deleteExchange(exchangeId, name) {
+    if (!confirm(`Hapus exchange "${name}"?\nTindakan ini tidak bisa dibatalkan.`)) return;
+    try {
+      const res = await fetch(`/api/admin-airdrop?type=exchange-details&id=${exchangeId}`, { method: 'DELETE' });
+      if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error || 'Gagal hapus'); }
+      showToast(`✓ Exchange "${name}" dihapus`, 'success');
+      if (currentEditExchangeId === exchangeId) {
+        currentEditExchangeId = null;
+        const ep = document.getElementById('exchange-edit-panel');
+        if (ep) ep.innerHTML = `<div class="empty-form"><div class="empty-icon">🏦</div><div class="empty-text">Pilih exchange di kiri<br>untuk edit detail</div></div>`;
+      }
+      await loadExchangeList();
+      _renderExchangeListItems();
+    } catch(e) { showToast('Error: ' + e.message, 'error'); }
+  }
+
   async function showExchangePanel() {
     editingId = null;
     currentEditExchangeId = null;
@@ -1509,8 +1757,9 @@
   async function loadExchangeList() {
     try {
       const res = await fetch('/api/admin-airdrop?type=exchange-details');
-      if (!res.ok) throw new Error('Gagal fetch exchange details');
-      exchangeListData = await res.json();
+      if (!res.ok) throw new Error('Gagal fetch');
+      const raw = await res.json();
+      exchangeListData = Array.isArray(raw) ? raw : [];
     } catch(e) {
       exchangeListData = [];
       showToast('Gagal load exchange: ' + e.message, 'error');
@@ -1519,9 +1768,7 @@
 
   function renderExchangePanel() {
     document.getElementById('form-area').innerHTML = `
-      <div style="display:grid;grid-template-columns:280px 1fr;gap:1rem;align-items:start;">
-
-        <!-- Kiri: daftar exchange -->
+      <div style="display:grid;grid-template-columns:290px 1fr;gap:1rem;align-items:start;">
         <div class="panel" style="overflow:hidden;">
           <div class="panel-head">
             <span class="ph-dot"></span>
@@ -1534,30 +1781,30 @@
               style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:6px;
                      padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:0.7rem;outline:none;">
           </div>
-          <div style="display:flex;gap:4px;padding:8px 12px;border-bottom:1px solid var(--border);">
-            <button class="ftab active" id="ex-ftab-all" onclick="setExFilter('all',this)">Semua</button>
-            <button class="ftab"        id="ex-ftab-cex" onclick="setExFilter('cex',this)">🏦 CEX</button>
-            <button class="ftab"        id="ex-ftab-dex" onclick="setExFilter('dex',this)">🔄 DEX</button>
+          <div style="display:flex;gap:4px;padding:8px 12px;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+            <button class="ftab active" id="ex-ftab-all"    onclick="setExFilter('all',this)">Semua</button>
+            <button class="ftab"        id="ex-ftab-cex"    onclick="setExFilter('cex',this)">🏦 CEX</button>
+            <button class="ftab"        id="ex-ftab-dex"    onclick="setExFilter('dex',this)">🔄 DEX</button>
+            <button class="ftab"        id="ex-ftab-hybrid" onclick="setExFilter('hybrid',this)">⚡ Hybrid</button>
+          </div>
+          <div style="padding:8px 12px;border-bottom:1px solid var(--border);">
+            <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">📌 Urut by rank · 🗑 untuk hapus</div>
           </div>
           <div id="exchange-list-panel" class="ex-list-scroll"></div>
         </div>
-
-        <!-- Kanan: form edit -->
         <div class="panel" id="exchange-edit-panel">
           <div class="empty-form">
             <div class="empty-icon">🏦</div>
             <div class="empty-text">Klik exchange di kiri<br>untuk edit detail & about sections</div>
           </div>
         </div>
-
       </div>`;
-
     _renderExchangeListItems();
   }
 
   function setExFilter(mode, btn) {
     _exCurrentFilter = mode;
-    ['ex-ftab-all','ex-ftab-cex','ex-ftab-dex'].forEach(id => {
+    ['ex-ftab-all','ex-ftab-cex','ex-ftab-dex','ex-ftab-hybrid'].forEach(id => {
       document.getElementById(id)?.classList.remove('active');
     });
     btn.classList.add('active');
@@ -1567,42 +1814,89 @@
   async function selectExchangeForEdit(exchangeId) {
     currentEditExchangeId = exchangeId;
     _renderExchangeListItems();
-    const exchange = exchangeListData.find(e => e.exchange_id === exchangeId);
-    if (!exchange) return;
-    renderExchangeEditForm(exchange);
+    try {
+      const res  = await fetch(`/api/admin-airdrop?type=exchange-details&exchange_id=${exchangeId}`);
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || 'Gagal load');
+      const idx = exchangeListData.findIndex(e => e.exchange_id === exchangeId);
+      if (idx >= 0) exchangeListData[idx] = data;
+      renderExchangeEditForm(data);
+    } catch(e) {
+      const fallback = exchangeListData.find(e => e.exchange_id === exchangeId);
+      if (fallback) renderExchangeEditForm(fallback);
+      else showToast('Gagal load detail: ' + e.message, 'error');
+    }
+  }
+
+  function _exTypeColor(type) {
+    const t = (type || 'cex').toLowerCase();
+    if (t === 'cex')    return { bg:'rgba(0,229,160,0.1)',   border:'rgba(0,229,160,0.3)',   color:'var(--accent)' };
+    if (t === 'dex')    return { bg:'rgba(124,109,250,0.1)', border:'rgba(124,109,250,0.3)', color:'var(--purple)' };
+    if (t === 'hybrid') return { bg:'rgba(245,158,11,0.1)',  border:'rgba(245,158,11,0.3)',  color:'var(--warn)' };
+    return { bg:'var(--s2)', border:'var(--border2)', color:'var(--text2)' };
+  }
+
+  function selectExType(type) {
+    document.getElementById('ex-type').value = type;
+    ['cex','dex','hybrid'].forEach(t => {
+      const btn = document.getElementById(`extype-btn-${t}`);
+      if (!btn) return;
+      const c = _exTypeColor(t);
+      const active = t === type;
+      btn.style.background  = active ? c.bg     : 'var(--s2)';
+      btn.style.borderColor = active ? c.border : 'var(--border2)';
+      btn.style.color       = active ? c.color  : 'var(--text3)';
+    });
   }
 
   function renderExchangeEditForm(ex) {
     const editPanel = document.getElementById('exchange-edit-panel');
     if (!editPanel) return;
-
-    // Reset token logo state untuk exchange ini
     pendingTokenLogoUrl = ex.native_token_logo || null;
+    const exType    = (ex.type || 'cex').toLowerCase();
+    const typeColor = _exTypeColor(exType);
 
     editPanel.innerHTML = `
       <div class="form-header">
         <div class="form-title">
           ✏️ ${esc(ex.exchange_name || '—')}
-          <span class="edit-badge">${(ex.type || 'CEX').toUpperCase()}</span>
+          <span style="font-family:var(--mono);font-size:0.58rem;padding:0.2rem 0.5rem;
+                       background:${typeColor.bg};border:1px solid ${typeColor.border};
+                       border-radius:4px;color:${typeColor.color}">${exType.toUpperCase()}</span>
         </div>
         <div class="form-actions">
+          <button class="btn-delete" onclick="deleteExchange(${ex.exchange_id},'${esc(ex.exchange_name||'')}')">🗑 Hapus</button>
           <button class="btn-save" id="btn-save-ex" onclick="saveExchangeDetail(${ex.exchange_id})">💾 Simpan</button>
         </div>
       </div>
-
       <div class="ex-edit-scroll">
 
-        <!-- RANK + WEBSITE -->
+        <!-- INFO UMUM -->
         <div class="form-sec">
           <div class="sec-lbl">Info Umum</div>
-          <div class="fg" style="grid-template-columns:140px 1fr;">
+          <div class="fg" style="grid-template-columns:120px 1fr 1fr;">
             <div class="field">
-              <label>Rank <span class="hint">#1 = teratas</span></label>
-              <input id="ex-rank" type="number" min="1" placeholder="e.g. 1" value="${esc(ex.rank||'')}">
+              <label>Rank <span class="hint">#1 teratas</span></label>
+              <input id="ex-rank" type="number" min="1" placeholder="1" value="${esc(ex.rank != null ? ex.rank : '')}">
             </div>
             <div class="field">
               <label>Website</label>
               <input id="ex-website" type="url" placeholder="https://..." value="${esc(ex.website||'')}">
+            </div>
+            <div class="field">
+              <label>Exchange Type</label>
+              <div style="display:flex;gap:6px;height:38px;align-items:stretch">
+                ${['cex','dex','hybrid'].map(t => {
+                  const c = _exTypeColor(t);
+                  const active = exType === t;
+                  return `<button type="button" id="extype-btn-${t}" onclick="selectExType('${t}')"
+                    style="flex:1;border-radius:6px;border:1px solid ${active ? c.border : 'var(--border2)'};
+                           background:${active ? c.bg : 'var(--s2)'};color:${active ? c.color : 'var(--text3)'};
+                           font-family:var(--mono);font-size:0.6rem;font-weight:700;cursor:pointer;
+                           transition:all 0.15s;letter-spacing:0.04em">${t.toUpperCase()}</button>`;
+                }).join('')}
+                <input type="hidden" id="ex-type" value="${esc(exType)}">
+              </div>
             </div>
           </div>
         </div>
@@ -1611,119 +1905,140 @@
         <div class="form-sec">
           <div class="sec-lbl">Info Detail</div>
           <div class="fg">
-            <div class="field"><label>Year Founded</label>      <input id="ex-year-founded"  type="text" placeholder="2017"           value="${esc(ex.year_founded||'')}"></div>
-            <div class="field"><label>Headquarters</label>      <input id="ex-headquarters"  type="text" placeholder="Cayman Islands" value="${esc(ex.headquarters||'')}"></div>
-            <div class="field"><label>CEO / Founder</label>     <input id="ex-ceo"           type="text" placeholder="CZ / SBF"       value="${esc(ex.ceo||'')}"></div>
-            <div class="field"><label>Native Token</label>      <input id="ex-native-token"  type="text" placeholder="BNB"            value="${esc(ex.native_token||'')}"></div>
             <div class="field">
+              <label>Year Founded</label>
+              <input id="ex-year-founded" type="text" placeholder="2017" value="${esc(ex.year_founded||'')}">
+            </div>
+            <div class="field">
+              <label>Headquarters</label>
+              <input id="ex-headquarters" type="text" placeholder="Cayman Islands" value="${esc(ex.headquarters||'')}">
+            </div>
+            <div class="field">
+              <label>Native Token</label>
+              <input id="ex-native-token" type="text" placeholder="BNB" value="${esc(ex.native_token||'')}">
+            </div>
+            <div class="field">
+              <label>Token Link URL</label>
+              <input id="ex-native-token-link" type="url" placeholder="https://coinmarketcap.com/..." value="${esc(ex.native_token_link||'')}">
+            </div>
+            <div class="field s2">
               <label>Token Logo</label>
-              <div style="display:flex;flex-direction:column;gap:6px">
-                <div style="display:flex;gap:8px;align-items:center">
-                  <div id="ex-token-logo-preview" style="width:40px;height:40px;border-radius:50%;border:1px dashed var(--border2);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0">🪙</div>
-                  <div style="flex:1;font-family:var(--mono);font-size:0.58rem;color:var(--text3);word-break:break-all" id="ex-token-logo-url-display">Belum ada logo</div>
-                </div>
-                <div style="display:flex;gap:6px">
-                  <input type="file" id="ex-token-logo-file" accept="image/*" style="display:none" onchange="handleTokenLogoUpload(event)">
-                  <button type="button" class="btn-upload-logo" onclick="document.getElementById('ex-token-logo-file').click()">⬆ Upload</button>
+              <div style="display:flex;gap:10px;align-items:center;flex-wrap:wrap">
+                <div id="ex-token-logo-preview"
+                     style="width:48px;height:48px;border-radius:50%;border:1px dashed var(--border2);
+                            background:var(--s2);display:flex;align-items:center;justify-content:center;
+                            font-size:20px;overflow:hidden;flex-shrink:0">🪙</div>
+                <div style="flex:1;font-family:var(--mono);font-size:0.56rem;color:var(--text3);
+                            word-break:break-all;min-width:0" id="ex-token-logo-url-display">Belum ada logo</div>
+                <div style="display:flex;gap:6px;flex-shrink:0">
+                  <input type="file" id="ex-token-logo-file" accept="image/*" style="display:none"
+                         onchange="handleTokenLogoUpload(event)">
+                  <button type="button" class="btn-upload-logo"
+                          onclick="document.getElementById('ex-token-logo-file').click()">⬆ Upload</button>
                   <button type="button" class="btn-clear-logo" onclick="clearTokenLogo()">✕</button>
                 </div>
-                <div id="ex-token-logo-status" class="logo-upload-status"></div>
               </div>
+              <div id="ex-token-logo-status" class="logo-upload-status" style="margin-top:4px"></div>
               <input type="hidden" id="ex-native-token-logo" value="${esc(ex.native_token_logo||'')}">
             </div>
-            <div class="field"><label>Token Link URL</label>    <input id="ex-native-token-link" type="url" placeholder="https://..."  value="${esc(ex.native_token_link||'')}"></div>
-            <div class="field s2"><label>Regulatory Info</label><textarea id="ex-regulatory" placeholder="Licensed in X, regulated by Y...">${esc(ex.regulatory_info||'')}</textarea></div>
           </div>
+        </div>
+
+        <!-- CEO / FOUNDER BUILDER -->
+        <div class="form-sec">
+          <div class="sec-lbl">CEO / Founder
+            <span style="text-transform:none;letter-spacing:0;font-size:0.52rem;color:var(--text3);font-weight:400;margin-left:4px;">
+              — foto upload ke GitHub, maks 10 orang
+            </span>
+          </div>
+          <div id="ceo-builder" style="display:flex;flex-direction:column;gap:10px;"></div>
+          <button type="button"
+                  onclick="addCeoCard()"
+                  style="width:100%;margin-top:10px;padding:0.6rem;background:var(--adim);
+                         border:1px dashed var(--aborder);border-radius:6px;color:var(--accent);
+                         font-family:var(--mono);font-size:0.65rem;cursor:pointer;transition:all 0.2s"
+                  onmouseover="this.style.background='rgba(0,229,160,0.14)'"
+                  onmouseout="this.style.background='var(--adim)'">
+            ＋ Tambah CEO / Founder
+          </button>
         </div>
 
         <!-- ABOUT ID -->
         <div class="form-sec">
-          <div class="sec-lbl">
-            About (Bahasa Indonesia)
-            <span style="text-transform:none;letter-spacing:0;font-size:0.52rem;color:var(--text3);font-weight:400;margin-left:4px;">
-              — tiap bagian punya judul + isi sendiri
-            </span>
+          <div class="sec-lbl">About (Bahasa Indonesia)
+            <span style="text-transform:none;letter-spacing:0;font-size:0.52rem;color:var(--text3);font-weight:400;margin-left:4px;">— tiap bagian punya judul + isi sendiri</span>
           </div>
           <div id="about-id-builder" style="display:flex;flex-direction:column;gap:10px;"></div>
-          <button type="button" class="btn-add-about" onclick="addAboutSection('about-id-builder')">
-            ＋ Tambah Bagian (ID)
-          </button>
+          <button type="button" class="btn-add-about" onclick="addAboutSection('about-id-builder')">＋ Tambah Bagian (ID)</button>
         </div>
 
         <!-- ABOUT EN -->
         <div class="form-sec">
-          <div class="sec-lbl">
-            About (English)
-            <span style="text-transform:none;letter-spacing:0;font-size:0.52rem;color:var(--text3);font-weight:400;margin-left:4px;">
-              — each section has its own title + content
-            </span>
+          <div class="sec-lbl">About (English)
+            <span style="text-transform:none;letter-spacing:0;font-size:0.52rem;color:var(--text3);font-weight:400;margin-left:4px;">— each section has its own title + content</span>
           </div>
           <div id="about-en-builder" style="display:flex;flex-direction:column;gap:10px;"></div>
-          <button type="button" class="btn-add-about" onclick="addAboutSection('about-en-builder')">
-            ＋ Add Section (EN)
-          </button>
+          <button type="button" class="btn-add-about" onclick="addAboutSection('about-en-builder')">＋ Add Section (EN)</button>
         </div>
 
         <!-- SOCIAL MEDIA -->
         <div class="form-sec">
           <div class="sec-lbl">Social Media</div>
           <div class="fg">
-            <div class="field"><label>Twitter</label>  <input id="ex-twitter"   type="url" placeholder="https://twitter.com/..." value="${esc(ex.twitter||'')}"></div>
-            <div class="field"><label>Telegram</label> <input id="ex-telegram"  type="url" placeholder="https://t.me/..."        value="${esc(ex.telegram||'')}"></div>
-            <div class="field"><label>Discord</label>  <input id="ex-discord"   type="url" placeholder="https://discord.gg/..."  value="${esc(ex.discord||'')}"></div>
-            <div class="field"><label>Instagram</label><input id="ex-instagram" type="url" placeholder="https://instagram.com/..." value="${esc(ex.instagram||'')}"></div>
-            <div class="field"><label>Facebook</label> <input id="ex-facebook"  type="url" placeholder="https://facebook.com/..." value="${esc(ex.facebook||'')}"></div>
-            <div class="field"><label>LinkedIn</label> <input id="ex-linkedin"  type="url" placeholder="https://linkedin.com/..."  value="${esc(ex.linkedin||'')}"></div>
-            <div class="field"><label>GitHub</label>   <input id="ex-github"    type="url" placeholder="https://github.com/..."   value="${esc(ex.github||'')}"></div>
-            <div class="field"><label>YouTube</label>  <input id="ex-youtube"   type="url" placeholder="https://youtube.com/..."  value="${esc(ex.youtube||'')}"></div>
-            <div class="field"><label>Medium</label>   <input id="ex-medium"    type="url" placeholder="https://medium.com/..."   value="${esc(ex.medium||'')}"></div>
-            <div class="field"><label>Blog</label>     <input id="ex-blog"      type="url" placeholder="https://blog.exchange.com/" value="${esc(ex.blog||'')}"></div>
+            <div class="field"><label>Twitter</label>   <input id="ex-twitter"   type="url" placeholder="https://twitter.com/..."    value="${esc(ex.twitter||'')}"></div>
+            <div class="field"><label>Telegram</label>  <input id="ex-telegram"  type="url" placeholder="https://t.me/..."           value="${esc(ex.telegram||'')}"></div>
+            <div class="field"><label>Discord</label>   <input id="ex-discord"   type="url" placeholder="https://discord.gg/..."     value="${esc(ex.discord||'')}"></div>
+            <div class="field"><label>Instagram</label> <input id="ex-instagram" type="url" placeholder="https://instagram.com/..."  value="${esc(ex.instagram||'')}"></div>
+            <div class="field"><label>Facebook</label>  <input id="ex-facebook"  type="url" placeholder="https://facebook.com/..."   value="${esc(ex.facebook||'')}"></div>
+            <div class="field"><label>LinkedIn</label>  <input id="ex-linkedin"  type="url" placeholder="https://linkedin.com/..."   value="${esc(ex.linkedin||'')}"></div>
+            <div class="field"><label>GitHub</label>    <input id="ex-github"    type="url" placeholder="https://github.com/..."     value="${esc(ex.github||'')}"></div>
+            <div class="field"><label>YouTube</label>   <input id="ex-youtube"   type="url" placeholder="https://youtube.com/..."    value="${esc(ex.youtube||'')}"></div>
+            <div class="field"><label>Medium</label>    <input id="ex-medium"    type="url" placeholder="https://medium.com/..."     value="${esc(ex.medium||'')}"></div>
+            <div class="field"><label>Blog</label>      <input id="ex-blog"      type="url" placeholder="https://blog.exchange.com/" value="${esc(ex.blog||'')}"></div>
           </div>
         </div>
 
         <!-- SIMPAN BOTTOM -->
         <div class="form-sec">
-          <button class="btn-save" onclick="saveExchangeDetail(${ex.exchange_id})" style="width:100%;">
-            💾 Simpan Semua Perubahan
-          </button>
+          <button class="btn-save" onclick="saveExchangeDetail(${ex.exchange_id})" style="width:100%;">💾 Simpan Semua Perubahan</button>
         </div>
 
       </div>`;
 
-    // Init token logo preview dengan data existing
     initTokenLogoPreview(ex.native_token_logo || null);
-
-    // Populate about builders dengan data existing
+    renderCeoBuilder(ex.ceo || null);
     renderAboutBuilder('about-id-builder', ex.about_id || null);
     renderAboutBuilder('about-en-builder', ex.about_en || null);
   }
 
   async function saveExchangeDetail(exchangeId) {
-    // Ambil nilai native_token_logo dari hidden field (sudah diupdate oleh handleTokenLogoUpload)
     const nativeTokenLogo = document.getElementById('ex-native-token-logo')?.value?.trim() || null;
+    const exTypeVal       = document.getElementById('ex-type')?.value?.trim() || 'cex';
+    const ceoValue        = serializeCeoList();
 
     const payload = {
-      rank:               document.getElementById('ex-rank')?.value?.trim() ? parseInt(document.getElementById('ex-rank').value, 10) : null,
-      website:            document.getElementById('ex-website')?.value?.trim()           || null,
-      year_founded:       document.getElementById('ex-year-founded')?.value?.trim()      || null,
-      headquarters:       document.getElementById('ex-headquarters')?.value?.trim()      || null,
-      ceo:                document.getElementById('ex-ceo')?.value?.trim()               || null,
-      native_token:       document.getElementById('ex-native-token')?.value?.trim()      || null,
-      native_token_logo:  nativeTokenLogo,
-      native_token_link:  document.getElementById('ex-native-token-link')?.value?.trim() || null,
-      regulatory_info:    document.getElementById('ex-regulatory')?.value?.trim()        || null,
-      twitter:            document.getElementById('ex-twitter')?.value?.trim()           || null,
-      telegram:           document.getElementById('ex-telegram')?.value?.trim()          || null,
-      discord:            document.getElementById('ex-discord')?.value?.trim()           || null,
-      instagram:          document.getElementById('ex-instagram')?.value?.trim()         || null,
-      facebook:           document.getElementById('ex-facebook')?.value?.trim()          || null,
-      linkedin:           document.getElementById('ex-linkedin')?.value?.trim()          || null,
-      github:             document.getElementById('ex-github')?.value?.trim()            || null,
-      youtube:            document.getElementById('ex-youtube')?.value?.trim()           || null,
-      medium:             document.getElementById('ex-medium')?.value?.trim()            || null,
-      blog:               document.getElementById('ex-blog')?.value?.trim()              || null,
-      about_id:           serializeAboutSections('about-id-builder'),
-      about_en:           serializeAboutSections('about-en-builder'),
+      rank:              document.getElementById('ex-rank')?.value?.trim()
+                           ? parseInt(document.getElementById('ex-rank').value, 10) : null,
+      website:           document.getElementById('ex-website')?.value?.trim()           || null,
+      year_founded:      document.getElementById('ex-year-founded')?.value?.trim()      || null,
+      headquarters:      document.getElementById('ex-headquarters')?.value?.trim()      || null,
+      ceo:               ceoValue,
+      native_token:      document.getElementById('ex-native-token')?.value?.trim()      || null,
+      native_token_logo: nativeTokenLogo,
+      native_token_link: document.getElementById('ex-native-token-link')?.value?.trim() || null,
+      twitter:           document.getElementById('ex-twitter')?.value?.trim()           || null,
+      telegram:          document.getElementById('ex-telegram')?.value?.trim()          || null,
+      discord:           document.getElementById('ex-discord')?.value?.trim()           || null,
+      instagram:         document.getElementById('ex-instagram')?.value?.trim()         || null,
+      facebook:          document.getElementById('ex-facebook')?.value?.trim()          || null,
+      linkedin:          document.getElementById('ex-linkedin')?.value?.trim()          || null,
+      github:            document.getElementById('ex-github')?.value?.trim()            || null,
+      youtube:           document.getElementById('ex-youtube')?.value?.trim()           || null,
+      medium:            document.getElementById('ex-medium')?.value?.trim()            || null,
+      blog:              document.getElementById('ex-blog')?.value?.trim()              || null,
+      about_id:          serializeAboutSections('about-id-builder'),
+      about_en:          serializeAboutSections('about-en-builder'),
+      exchange_type:     exTypeVal,
     };
 
     const btns = document.querySelectorAll('#btn-save-ex, #exchange-edit-panel .btn-save');
@@ -1740,12 +2055,13 @@
         throw new Error(err.error || 'Gagal simpan');
       }
       showToast('✓ Detail exchange tersimpan!', 'success');
-
       await loadExchangeList();
       _renderExchangeListItems();
       const updated = exchangeListData.find(e => e.exchange_id === exchangeId);
-      if (updated) renderExchangeEditForm(updated);
-
+      if (updated) {
+        updated.type = exTypeVal;
+        renderExchangeEditForm(updated);
+      }
     } catch(e) {
       showToast('Error: ' + e.message, 'error');
     } finally {
