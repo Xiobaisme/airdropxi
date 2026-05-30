@@ -43,7 +43,6 @@
       background-size: 48px 48px; pointer-events: none;
     }
 
-    /* ── LOGIN ── */
     #login-section {
       position: fixed; inset: 0; z-index: 999;
       display: flex; align-items: center; justify-content: center; background: var(--bg);
@@ -56,7 +55,6 @@
     .login-title { font-size: 1.1rem; font-weight: 700; margin-bottom: 0.4rem; }
     .login-sub { font-size: 0.82rem; color: var(--text2); margin-bottom: 1.5rem; }
 
-    /* ── NAV ── */
     nav {
       position: sticky; top: 0; z-index: 100;
       background: rgba(7,9,11,0.92); backdrop-filter: blur(20px);
@@ -72,7 +70,6 @@
       border-radius: 4px; color: var(--red); letter-spacing: 0.08em;
     }
 
-    /* ── LAYOUT ── */
     .wrap {
       position: relative; z-index: 1; max-width: 1160px; margin: 0 auto;
       padding: 1.25rem 1.25rem 5rem;
@@ -80,10 +77,8 @@
     }
     @media (max-width: 800px) { .wrap { grid-template-columns: 1fr; } }
 
-    /* ── SIDEBAR ── */
     .sidebar { display: flex; flex-direction: column; gap: 0.875rem; }
 
-    /* ── STATS STRIP ── */
     .stats-strip { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; }
     .stat-card {
       background: var(--s1); border: 1px solid var(--border); border-radius: 8px;
@@ -97,7 +92,6 @@
     .stat-value.warn  { color: var(--warn); }
     .stat-value.cyan  { color: var(--cyan); }
 
-    /* ── SEARCH ── */
     .search-wrap { position: relative; }
     .search-icon { position: absolute; left: 10px; top: 50%; transform: translateY(-50%); color: var(--text3); font-size: 0.75rem; pointer-events: none; }
     #search-input {
@@ -115,7 +109,6 @@
     .search-clear:hover { color: var(--text); }
     .search-clear.visible { display: block; }
 
-    /* ── FILTER TABS ── */
     .filter-tabs { display: flex; gap: 4px; flex-wrap: wrap; }
     .ftab {
       font-family: var(--mono); font-size: 0.54rem; padding: 0.22rem 0.6rem; border-radius: 4px;
@@ -126,14 +119,12 @@
     .ftab.active { background: var(--adim); border-color: var(--aborder); color: var(--accent); }
     .ftab.active.draft { background: rgba(245,158,11,0.08); border-color: rgba(245,158,11,0.25); color: var(--warn); }
 
-    /* ── PANEL ── */
     .panel { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
     .panel-head { display: flex; align-items: center; gap: 8px; padding: 0.75rem 1rem; border-bottom: 1px solid var(--border); }
     .ph-dot { width: 6px; height: 6px; border-radius: 50%; background: var(--accent); box-shadow: 0 0 6px var(--accent); flex-shrink: 0; }
     .ph-title { font-family: var(--mono); font-size: 0.6rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; flex: 1; }
     .ph-count { font-family: var(--mono); font-size: 0.65rem; color: var(--accent); }
 
-    /* ── PROJECT LIST ── */
     .proj-list { max-height: 440px; overflow-y: auto; }
     .proj-list::-webkit-scrollbar { width: 3px; }
     .proj-list::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
@@ -164,7 +155,6 @@
     .conf-badge.ended     { background: rgba(100,100,100,0.1); color: var(--text3);  border: 1px solid rgba(100,100,100,0.2); }
     .list-empty { padding: 2rem 1rem; text-align: center; font-family: var(--mono); font-size: 0.65rem; color: var(--text3); }
 
-    /* ── SHARE PILL ── */
     .share-pill {
       display: inline-flex; align-items: center; gap: 3px;
       padding: 0.12rem 0.5rem; background: rgba(24,119,242,0.1);
@@ -182,7 +172,6 @@
     }
     .btn-new:hover { background: rgba(0,229,160,0.14); }
 
-    /* ── DRAFTS ── */
     .drafts-section { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
     .drafts-head {
       display: flex; align-items: center; gap: 8px; padding: 0.75rem 1rem;
@@ -202,7 +191,6 @@
     .draft-item-name { font-size: 0.76rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
     .draft-item-sub { font-family: var(--mono); font-size: 0.5rem; color: var(--text3); margin-top: 2px; }
 
-    /* ── FORM AREA ── */
     .form-area { display: flex; flex-direction: column; gap: 1rem; }
     .form-panel { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
     .form-header {
@@ -244,7 +232,6 @@
     textarea { min-height: 90px; line-height: 1.5; }
     textarea.tall { min-height: 130px; }
 
-    /* ── CONFIRM PICKER ── */
     .confirm-picker { display: flex; gap: 6px; }
     .confirm-opt {
       flex: 1; padding: 0.55rem 0.5rem; border-radius: 6px; border: 1px solid var(--border2);
@@ -257,7 +244,6 @@
     .confirm-opt.selected.confirmed{ background: rgba(0,200,240,0.12);   border-color: var(--cyan);   color: var(--cyan); }
     .confirm-opt.selected.ended    { background: rgba(100,100,100,0.12); border-color: var(--text3);  color: var(--text3); }
 
-    /* ── BUTTONS ── */
     .btn-save, .btn-delete, .btn-cancel, .btn-upload-logo, .btn-clear-logo,
     .btn-add-testnet, .btn-add-roadmap, .btn-remove-testnet, .btn-remove-roadmap, .btn-fb {
       padding: 0.52rem 0.9rem; border-radius: 6px; border: 1px solid var(--border2);
@@ -278,7 +264,6 @@
     .btn-fb { background: rgba(24,119,242,0.1); border-color: rgba(24,119,242,0.25); color: #5b9cf6; }
     .btn-fb:hover { background: rgba(24,119,242,0.2); }
 
-    /* ── LOGO UPLOAD ── */
     .logo-upload-wrap { display: flex; flex-direction: column; gap: 8px; }
     .logo-preview-row { display: flex; gap: 12px; align-items: flex-start; }
     .logo-preview-box {
@@ -306,7 +291,6 @@
     }
     @keyframes spin { to { transform: rotate(360deg); } }
 
-    /* ── TESTNET ── */
     .testnet-row { display: grid; grid-template-columns: 1fr 1fr 40px; gap: 8px; align-items: flex-end; }
     .tnet-label, .tnet-url {
       width: 100%; background: var(--s2); border: 1px solid var(--border2); border-radius: 6px;
@@ -315,7 +299,6 @@
     }
     .tnet-label:focus, .tnet-url:focus { border-color: var(--accent); }
 
-    /* ── ROADMAP ── */
     .roadmap-card {
       background: var(--s2); border: 1px solid var(--border2); border-radius: 8px;
       padding: 1rem; margin-bottom: 10px; display: flex; flex-direction: column; gap: 10px;
@@ -343,7 +326,6 @@
     .roadmap-card-actions { display: flex; justify-content: flex-end; }
     .roadmap-empty { padding: 2rem 1rem; text-align: center; font-family: var(--mono); font-size: 0.65rem; color: var(--text3); }
 
-    /* ── PUBLISH ── */
     .publish-section {
       padding: 1.25rem; border-bottom: 1px solid var(--border);
       display: flex; align-items: flex-start; gap: 1.5rem; flex-wrap: wrap;
@@ -360,7 +342,6 @@
     .publish-label { font-size: 0.85rem; font-weight: 600; }
     .publish-note { font-family: var(--mono); font-size: 0.6rem; color: var(--text3); }
 
-    /* ── EMPTY FORM ── */
     .empty-form {
       display: flex; flex-direction: column; align-items: center; justify-content: center;
       padding: 3rem 2rem; text-align: center; gap: 1rem;
@@ -368,7 +349,6 @@
     .empty-icon { font-size: 3rem; }
     .empty-text { font-size: 0.85rem; color: var(--text2); line-height: 1.5; }
 
-    /* ── TOAST ── */
     .toast {
       position: fixed; bottom: 20px; right: 20px; z-index: 2000;
       background: var(--s1); border: 1px solid var(--border); border-radius: 8px;
@@ -380,7 +360,6 @@
     .toast.success { border-color: rgba(0,229,160,0.3); background: rgba(0,229,160,0.08); color: var(--accent); }
     .toast.error   { border-color: rgba(239,68,68,0.3);  background: rgba(239,68,68,0.08);  color: var(--red); }
 
-    /* ── MODAL (GitHub Token) ── */
     .modal {
       position: fixed; inset: 0; z-index: 999;
       background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
@@ -398,6 +377,45 @@
     }
     .modal-input:focus { border-color: var(--accent); }
     .modal-actions { display: flex; gap: 8px; justify-content: flex-end; }
+
+    /* ── ABOUT SECTION BUILDER ── */
+    .about-section-row {
+      background: var(--s3); border: 1px solid var(--border2); border-radius: 8px;
+      padding: 12px; display: flex; flex-direction: column; gap: 8px;
+    }
+    .about-sec-title {
+      width: 100%; background: var(--s2); border: 1px solid var(--border2); border-radius: 6px;
+      color: var(--text); font-family: var(--mono); font-size: 0.76rem;
+      padding: 0.5rem 0.75rem; outline: none; transition: border-color 0.2s;
+    }
+    .about-sec-title:focus { border-color: var(--accent); }
+    .about-sec-content {
+      width: 100%; background: var(--s2); border: 1px solid var(--border2); border-radius: 6px;
+      color: var(--text); font-family: var(--mono); font-size: 0.76rem;
+      padding: 0.5rem 0.75rem; outline: none; transition: border-color 0.2s;
+      min-height: 90px; resize: vertical; line-height: 1.5;
+    }
+    .about-sec-content:focus { border-color: var(--accent); }
+    .btn-add-about {
+      width: 100%; padding: 0.6rem; margin-top: 10px;
+      background: var(--adim); border: 1px dashed var(--aborder);
+      border-radius: 6px; color: var(--accent); font-family: var(--mono); font-size: 0.65rem;
+      cursor: pointer; transition: all 0.2s;
+    }
+    .btn-add-about:hover { background: rgba(0,229,160,0.14); }
+    .btn-remove-about {
+      padding: 2px 8px; border-radius: 4px;
+      border: 1px solid rgba(239,68,68,0.3); background: rgba(239,68,68,0.08);
+      color: var(--red); font-family: var(--mono); font-size: 0.54rem; cursor: pointer;
+    }
+
+    /* exchange panel scrollable list */
+    .ex-list-scroll { max-height: 520px; overflow-y: auto; }
+    .ex-list-scroll::-webkit-scrollbar { width: 3px; }
+    .ex-list-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+    .ex-edit-scroll { max-height: calc(100vh - 160px); overflow-y: auto; }
+    .ex-edit-scroll::-webkit-scrollbar { width: 3px; }
+    .ex-edit-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
   </style>
 </head>
 <body>
@@ -463,7 +481,6 @@
         <div class="proj-list" id="proj-list"></div>
       </div>
 
-      <!-- ✅ TOMBOL DASHBOARD STATS (di atas Tambah Airdrop Baru) -->
       <button class="btn-new" onclick="showStats()"
         style="border-color:rgba(124,109,250,0.3);color:var(--purple);background:rgba(124,109,250,0.06)">
         📊 Dashboard Stats
@@ -484,11 +501,11 @@
         style="border-color:rgba(59,130,246,0.3);color:var(--blue);background:rgba(59,130,246,0.06)">
         🔑 Setup GitHub Token
       </button>
-      <!-- TOMBOL UPDATE EXCHANGE DETAILS (ditempatkan di sidebar, bukan di modal) -->
+
       <button class="btn-new" onclick="showExchangePanel()"
-       style="border-color:rgba(0,229,160,0.3);color:var(--accent);background:rgba(0,229,160,0.06)">
-       🔄 Update Exchange Details
-    </button>
+        style="border-color:rgba(0,229,160,0.3);color:var(--accent);background:rgba(0,229,160,0.06)">
+        🔄 Update Exchange Details
+      </button>
     </div>
 
     <div class="form-area" id="form-area">
@@ -1070,7 +1087,6 @@
     }
   }
 
-  // ── CONFIRMATION STATUS PICKER ────────────────────────
   function selectConfirm(value) {
     document.getElementById('f-confirmation-status').value = value;
     document.querySelectorAll('.confirm-opt').forEach(btn => {
@@ -1079,7 +1095,6 @@
     });
   }
 
-  // ── PUBLISH TOGGLE ────────────────────────────────────
   function togglePublish() {
     const cb    = document.getElementById('f-published');
     const track = document.getElementById('toggle-track');
@@ -1094,7 +1109,6 @@
     label.textContent      = on ? '✓ Published — Tampil di index publik' : '○ Draft — Tidak tampil di index';
   }
 
-  // ── TESTNET ───────────────────────────────────────────
   function testnetRow(i, label, url) {
     return `<div class="testnet-row" id="trow-${i}">
       <input type="text" placeholder="Label (e.g. Testnet App)" value="${esc(label)}" class="tnet-label">
@@ -1124,7 +1138,6 @@
     return links.length ? JSON.stringify(links) : null;
   }
 
-  // ── ROADMAP ───────────────────────────────────────────
   const RM_STATUSES = ['planned','in_progress','done'];
   const RM_LABELS   = { planned: '○ Planned', in_progress: '⟳ In Progress', done: '✓ Done' };
 
@@ -1205,7 +1218,6 @@
       </div>`;
   }
 
-  // ── SAVE ──────────────────────────────────────────────
   async function saveForm() {
     const name = document.getElementById('f-name')?.value?.trim();
     if (!name) { showToast('Nama proyek wajib diisi!', 'error'); return; }
@@ -1262,7 +1274,6 @@
     }
   }
 
-  // ── DELETE ────────────────────────────────────────────
   async function deleteProject(id) {
     const p = projects.find(x => x.id == id);
     if (!confirm(`Hapus "${p?.name || id}"?\nTindakan ini tidak bisa dibatalkan.`)) return;
@@ -1275,7 +1286,6 @@
     } catch(e) { showToast('Error: ' + e.message, 'error'); }
   }
 
-  // ── TOAST & UTIL ──────────────────────────────────────
   function showToast(msg, type = 'success') {
     const t = document.getElementById('toast');
     t.textContent = msg; t.className = `toast ${type} show`;
@@ -1313,246 +1323,343 @@
       alert('Verifikasi gagal. Coba lagi nanti.');
     }
   }
-  
-// ─────────────────────────────────────────────────────────
-// PANEL EDIT EXCHANGE DETAILS (tanpa mengganggu airdrop)
-// ─────────────────────────────────────────────────────────
-let exchangeListData = [];      // menyimpan data exchange + details
-let currentEditExchangeId = null; // exchange_id yang sedang diedit
 
-async function showExchangePanel() {
-  // Reset state airdrop agar tidak bentrok (tapi tidak menghapus data)
-  editingId = null;
-  currentEditExchangeId = null;
-  // Load data exchanges
-  await loadExchangeList();
-  // Tampilkan UI list dan form kosong
-  renderExchangePanel();
-}
+  // ═══════════════════════════════════════════════════════════
+  // EXCHANGE PANEL — multi-section about_id / about_en
+  // ═══════════════════════════════════════════════════════════
+  let exchangeListData       = [];
+  let currentEditExchangeId  = null;
+  let _exCurrentFilter       = 'all';
+  let _exCurrentSearch       = '';
 
-async function loadExchangeList() {
-  try {
-    const res = await fetch('/api/admin-airdrop?type=exchange-details');
-    if (!res.ok) throw new Error('Gagal fetch exchange details');
-    exchangeListData = await res.json();
-    // data sudah berisi: id (uuid), exchange_id, exchange_name, about, website, twitter, dll
-  } catch(e) {
-    exchangeListData = [];
-    console.error(e);
-    showToast('Gagal load exchange: ' + e.message, 'error');
-  }
-}
-
-function renderExchangePanel() {
-  const formArea = document.getElementById('form-area');
-  if (!exchangeListData.length) {
-    formArea.innerHTML = `<div class="panel"><div class="empty-form">Tidak ada data exchange. Pastikan tabel exchanges sudah diisi.</div></div>`;
-    return;
+  // ── Parse / serialize about sections ─────────────────────
+  function parseAboutSections(raw) {
+    if (!raw) return [];
+    try {
+      const parsed = typeof raw === 'string' ? JSON.parse(raw) : raw;
+      if (Array.isArray(parsed)) return parsed;
+      return [{ title: 'About', content: String(raw) }];
+    } catch(e) {
+      return [{ title: 'About', content: String(raw) }];
+    }
   }
 
-  // Variabel untuk filter (akan didefinisikan di dalam scope)
-  let currentExchangeFilter = 'all';
-  let currentExchangeSearch = '';
+  function serializeAboutSections(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return null;
+    const sections = [];
+    container.querySelectorAll('.about-section-row').forEach(row => {
+      const title   = row.querySelector('.about-sec-title')?.value?.trim()   || '';
+      const content = row.querySelector('.about-sec-content')?.value?.trim() || '';
+      if (title || content) sections.push({ title, content });
+    });
+    return sections.length ? JSON.stringify(sections) : null;
+  }
 
-  // Fungsi render ulang daftar exchange (closure)
-  const renderExchangeListWithFilter = () => {
-    let filtered = [...exchangeListData];
-    if (currentExchangeFilter !== 'all') {
-      filtered = filtered.filter(ex => (ex.type || 'cex').toLowerCase() === currentExchangeFilter);
+  function aboutSectionRowHTML(idx, title, content) {
+    return `
+      <div class="about-section-row">
+        <div style="display:flex;align-items:center;gap:8px;margin-bottom:4px;">
+          <span style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;flex:1;">
+            Bagian ${idx + 1}
+          </span>
+          <button type="button" class="btn-remove-about" onclick="removeAboutSection(this)">✕ Hapus</button>
+        </div>
+        <input type="text" class="about-sec-title" placeholder="Judul bagian (e.g. Who Are the Founders?)" value="${esc(title)}">
+        <textarea class="about-sec-content" placeholder="Isi konten bagian ini...">${esc(content)}</textarea>
+      </div>`;
+  }
+
+  function addAboutSection(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const count = container.querySelectorAll('.about-section-row').length;
+    if (count >= 15) { showToast('Maksimal 15 bagian', 'error'); return; }
+    container.insertAdjacentHTML('beforeend', aboutSectionRowHTML(count, '', ''));
+    refreshAboutNums(containerId);
+  }
+
+  function removeAboutSection(btn) {
+    const row = btn.closest('.about-section-row');
+    const container = row?.parentElement;
+    row?.remove();
+    if (container) refreshAboutNums(container.id);
+  }
+
+  function refreshAboutNums(containerId) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    container.querySelectorAll('.about-section-row').forEach((row, idx) => {
+      const label = row.querySelector('span');
+      if (label) label.textContent = `Bagian ${idx + 1}`;
+    });
+  }
+
+  function renderAboutBuilder(containerId, rawData) {
+    const container = document.getElementById(containerId);
+    if (!container) return;
+    const sections = parseAboutSections(rawData);
+    container.innerHTML = sections.map((s, i) => aboutSectionRowHTML(i, s.title || '', s.content || '')).join('');
+  }
+
+  // ── Filter & list helpers ─────────────────────────────────
+  function _filteredExchangeList() {
+    let list = [...exchangeListData];
+    if (_exCurrentFilter !== 'all') {
+      list = list.filter(ex => (ex.type || 'cex').toLowerCase() === _exCurrentFilter);
     }
-    if (currentExchangeSearch.trim()) {
-      const q = currentExchangeSearch.toLowerCase();
-      filtered = filtered.filter(ex => ex.exchange_name?.toLowerCase().includes(q));
+    if (_exCurrentSearch.trim()) {
+      const q = _exCurrentSearch.toLowerCase();
+      list = list.filter(ex => (ex.exchange_name || '').toLowerCase().includes(q));
     }
-    const listContainer = document.getElementById('exchange-list-panel');
-    if (!listContainer) return;
+    return list;
+  }
+
+  function _renderExchangeListItems() {
+    const container = document.getElementById('exchange-list-panel');
+    if (!container) return;
+    const filtered = _filteredExchangeList();
+    const countEl  = document.getElementById('ex-list-count');
+    if (countEl) countEl.textContent = `${filtered.length}/${exchangeListData.length}`;
+
     if (!filtered.length) {
-      listContainer.innerHTML = '<div class="list-empty" style="padding:2rem;text-align:center">Tidak ada exchange ditemukan</div>';
-    } else {
-      listContainer.innerHTML = filtered.map(ex => `
-        <div class="proj-item ${currentEditExchangeId === ex.exchange_id ? 'active' : ''}" 
-             onclick="selectExchangeForEdit(${ex.exchange_id})">
-          <div class="proj-item-info">
-            <div class="proj-item-name">${esc(ex.exchange_name)}</div>
-            <div class="proj-item-badges">
-              <span class="proj-item-status st-c">${ex.website ? '🌐' : '⚙️'}</span>
-              <span class="live-dot ${ex.about ? 'on' : 'off'}">${ex.about ? '●' : '○'}</span>
-              ${ex.type ? `<span class="tag" style="font-size:9px;padding:2px 8px;background:${ex.type === 'cex' ? 'rgba(0,229,160,0.1)' : 'rgba(124,109,250,0.1)'}">${ex.type.toUpperCase()}</span>` : ''}
-            </div>
-          </div>
-        </div>
-      `).join('');
+      container.innerHTML = '<div class="list-empty">Tidak ada exchange ditemukan</div>';
+      return;
     }
-    const countSpan = document.querySelector('#exchange-list-header .ph-count');
-    if (countSpan) countSpan.textContent = filtered.length;
-  };
-
-  // Render UI dengan filter dan search
-  formArea.innerHTML = `
-    <div style="display:grid; grid-template-columns: 340px 1fr; gap: 1rem;">
-      <!-- Panel kiri: daftar exchange dengan filter -->
-      <div class="panel" style="display:flex; flex-direction:column; overflow:hidden;">
-        <div class="panel-head" id="exchange-list-header">
-          <span class="ph-dot" style="background:var(--accent)"></span>
-          <span class="ph-title">DAFTAR EXCHANGE</span>
-          <span class="ph-count">${exchangeListData.length}</span>
-        </div>
-        <div style="padding: 12px; border-bottom: 1px solid var(--border2);">
-          <div style="margin-bottom: 12px;">
-            <input type="text" id="exchange-search-input" placeholder="🔍 Cari exchange..." 
-                   style="width:100%; background:var(--s2); border:1px solid var(--border2); border-radius:8px; 
-                          padding:8px 12px; color:var(--text); font-size:13px; outline:none;">
-          </div>
-          <div style="display:flex; gap:8px;">
-            <button data-filter="all" class="exchange-filter-btn ftab active" style="flex:1;">Semua</button>
-            <button data-filter="cex" class="exchange-filter-btn ftab" style="flex:1;">🏦 CEX</button>
-            <button data-filter="dex" class="exchange-filter-btn ftab" style="flex:1;">🔄 DEX</button>
-          </div>
-        </div>
-        <div id="exchange-list-panel" style="flex:1; overflow-y:auto; max-height: 450px;">
-          ${exchangeListData.map(ex => `
-            <div class="proj-item ${currentEditExchangeId === ex.exchange_id ? 'active' : ''}" 
-                 onclick="selectExchangeForEdit(${ex.exchange_id})">
-              <div class="proj-item-info">
-                <div class="proj-item-name">${esc(ex.exchange_name)}</div>
-                <div class="proj-item-badges">
-                  <span class="proj-item-status st-c">${ex.website ? '🌐' : '⚙️'}</span>
-                  <span class="live-dot ${ex.about ? 'on' : 'off'}">${ex.about ? '●' : '○'}</span>
-                  ${ex.type ? `<span class="tag" style="font-size:9px;padding:2px 8px;">${ex.type.toUpperCase()}</span>` : ''}
-                </div>
-              </div>
-            </div>
-          `).join('')}
-        </div>
-      </div>
-
-      <!-- Panel kanan: form edit -->
-      <div class="panel" id="exchange-edit-panel">
-        <div class="empty-form">
-          <div class="empty-icon">🖊️</div>
-          <div class="empty-text">Klik salah satu exchange di samping untuk mengedit detailnya</div>
-        </div>
-      </div>
-    </div>
-  `;
-
-  // Pasang event listener untuk filter dan pencarian
-  const searchInput = document.getElementById('exchange-search-input');
-  const filterBtns = document.querySelectorAll('.exchange-filter-btn');
-  const updateFilterAndRender = () => { renderExchangeListWithFilter(); };
-  if (searchInput) {
-    searchInput.addEventListener('input', (e) => {
-      currentExchangeSearch = e.target.value;
-      updateFilterAndRender();
-    });
-  }
-  filterBtns.forEach(btn => {
-    btn.addEventListener('click', () => {
-      const filterValue = btn.dataset.filter;
-      currentExchangeFilter = filterValue;
-      filterBtns.forEach(b => b.classList.remove('active'));
-      btn.classList.add('active');
-      updateFilterAndRender();
-    });
-  });
-}
-
-async function selectExchangeForEdit(exchangeId) {
-  currentEditExchangeId = exchangeId;
-  // Cari data exchange yang dipilih
-  const exchange = exchangeListData.find(e => e.exchange_id === exchangeId);
-  if (!exchange) return;
-  // Update active state di list (refresh list panel saja)
-  const listContainer = document.getElementById('exchange-list-panel');
-  if (listContainer) {
-    listContainer.innerHTML = exchangeListData.map(ex => `
-      <div class="proj-item ${currentEditExchangeId === ex.exchange_id ? 'active' : ''}" 
+    container.innerHTML = filtered.map(ex => `
+      <div class="proj-item ${currentEditExchangeId === ex.exchange_id ? 'active' : ''}"
            onclick="selectExchangeForEdit(${ex.exchange_id})">
         <div class="proj-item-info">
-          <div class="proj-item-name">${esc(ex.exchange_name)}</div>
+          <div class="proj-item-name">${esc(ex.exchange_name || '—')}</div>
           <div class="proj-item-badges">
-            <span class="proj-item-status st-c">${ex.website ? '🌐' : '⚙️'}</span>
-            <span class="live-dot ${ex.about ? 'on' : 'off'}">${ex.about ? '●' : '○'}</span>
+            ${ex.rank ? `<span class="proj-item-status st-c">#${ex.rank}</span>` : ''}
+            <span class="live-dot ${(ex.about_id || ex.about_en || ex.about) ? 'on' : 'off'}">
+              ${(ex.about_id || ex.about_en || ex.about) ? '● INFO' : '○ EMPTY'}
+            </span>
+            ${ex.type ? `<span class="proj-item-status ${ex.type==='cex'?'st-a':'st-p'}">${ex.type.toUpperCase()}</span>` : ''}
           </div>
         </div>
-      </div>
-    `).join('');
+      </div>`).join('');
   }
-  // Render form edit
-  renderExchangeEditForm(exchange);
-}
 
-function renderExchangeEditForm(ex) {
-  const editPanel = document.getElementById('exchange-edit-panel');
-  if (!editPanel) return;
-  editPanel.innerHTML = `
-    <div class="form-header">
-      <div class="form-title">✏️ Edit: ${esc(ex.exchange_name)}</div>
-      <div class="form-actions">
-        <button class="btn-save" id="btn-save-exchange-detail" onclick="saveExchangeDetail(${ex.exchange_id})">💾 Simpan</button>
-      </div>
-    </div>
-    <div class="form-sec">
-      <div class="sec-lbl">About Exchange</div>
-      <textarea id="exchange-about-field" rows="5" placeholder="Deskripsi lengkap exchange...">${esc(ex.about || '')}</textarea>
-    </div>
-    <div class="form-sec">
-      <div class="sec-lbl">Website & Social Media</div>
-      <div class="fg">
-        <div class="field"><label>Website</label><input id="exchange-website-field" type="url" value="${esc(ex.website || '')}"></div>
-        <div class="field"><label>Twitter</label><input id="exchange-twitter-field" type="url" value="${esc(ex.twitter || '')}"></div>
-        <div class="field"><label>Telegram</label><input id="exchange-telegram-field" type="url" value="${esc(ex.telegram || '')}"></div>
-        <div class="field"><label>Discord</label><input id="exchange-discord-field" type="url" value="${esc(ex.discord || '')}"></div>
-        <div class="field"><label>Instagram</label><input id="exchange-instagram-field" type="url" value="${esc(ex.instagram || '')}"></div>
-        <div class="field"><label>Facebook</label><input id="exchange-facebook-field" type="url" value="${esc(ex.facebook || '')}"></div>
-        <div class="field"><label>LinkedIn</label><input id="exchange-linkedin-field" type="url" value="${esc(ex.linkedin || '')}"></div>
-        <div class="field"><label>GitHub</label><input id="exchange-github-field" type="url" value="${esc(ex.github || '')}"></div>
-        <div class="field"><label>YouTube</label><input id="exchange-youtube-field" type="url" value="${esc(ex.youtube || '')}"></div>
-        <div class="field"><label>Medium</label><input id="exchange-medium-field" type="url" value="${esc(ex.medium || '')}"></div>
-      </div>
-    </div>
-  `;
-}
-
-async function saveExchangeDetail(exchangeId) {
-  const payload = {
-    about:     document.getElementById('exchange-about-field')?.value?.trim() || null,
-    website:   document.getElementById('exchange-website-field')?.value?.trim() || null,
-    twitter:   document.getElementById('exchange-twitter-field')?.value?.trim() || null,
-    telegram:  document.getElementById('exchange-telegram-field')?.value?.trim() || null,
-    discord:   document.getElementById('exchange-discord-field')?.value?.trim() || null,
-    instagram: document.getElementById('exchange-instagram-field')?.value?.trim() || null,
-    facebook:  document.getElementById('exchange-facebook-field')?.value?.trim() || null,
-    linkedin:  document.getElementById('exchange-linkedin-field')?.value?.trim() || null,
-    github:    document.getElementById('exchange-github-field')?.value?.trim() || null,
-    youtube:   document.getElementById('exchange-youtube-field')?.value?.trim() || null,
-    medium:    document.getElementById('exchange-medium-field')?.value?.trim() || null,
-  };
-  const btn = document.getElementById('btn-save-exchange-detail');
-  if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span>'; }
-  try {
-    const res = await fetch(`/api/admin-airdrop?type=exchange-details&exchange_id=${exchangeId}`, {
-      method: 'PATCH',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(payload)
-    });
-    if (!res.ok) {
-      const err = await res.json();
-      throw new Error(err.error || 'Gagal simpan');
-    }
-    showToast('✓ Detail exchange tersimpan!', 'success');
-    // Refresh data exchangeListData
+  // ── Main panel ────────────────────────────────────────────
+  async function showExchangePanel() {
+    editingId = null;
+    currentEditExchangeId = null;
+    _exCurrentFilter = 'all';
+    _exCurrentSearch = '';
+    renderList(); // reset active di sidebar airdrop
     await loadExchangeList();
-    // Refresh tampilan panel (tetap pilih exchange yang sama)
-    await selectExchangeForEdit(exchangeId);
-    // Refresh daftar exchange di panel kiri (optional, sudah di-selectExchangeForEdit)
-  } catch(e) {
-    showToast('Error: ' + e.message, 'error');
-  } finally {
-    if (btn) { btn.disabled = false; btn.innerHTML = '💾 Simpan'; }
+    renderExchangePanel();
   }
-}
-  
+
+  async function loadExchangeList() {
+    try {
+      const res = await fetch('/api/admin-airdrop?type=exchange-details');
+      if (!res.ok) throw new Error('Gagal fetch exchange details');
+      exchangeListData = await res.json();
+    } catch(e) {
+      exchangeListData = [];
+      showToast('Gagal load exchange: ' + e.message, 'error');
+    }
+  }
+
+  function renderExchangePanel() {
+    // Panel exchange pakai full width di form-area (override wrap grid tidak perlu,
+    // cukup isi form-area dengan 2-kolom sendiri)
+    document.getElementById('form-area').innerHTML = `
+      <div style="display:grid;grid-template-columns:280px 1fr;gap:1rem;align-items:start;">
+
+        <!-- Kiri: daftar exchange -->
+        <div class="panel" style="overflow:hidden;">
+          <div class="panel-head">
+            <span class="ph-dot"></span>
+            <span class="ph-title">Exchange</span>
+            <span class="ph-count" id="ex-list-count">${exchangeListData.length}/${exchangeListData.length}</span>
+          </div>
+          <div style="padding:10px 12px;border-bottom:1px solid var(--border);">
+            <input type="text" id="ex-search" placeholder="🔍 Cari exchange..."
+              oninput="_exCurrentSearch=this.value;_renderExchangeListItems()"
+              style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:6px;
+                     padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:0.7rem;outline:none;">
+          </div>
+          <div style="display:flex;gap:4px;padding:8px 12px;border-bottom:1px solid var(--border);">
+            <button class="ftab active" id="ex-ftab-all" onclick="setExFilter('all',this)">Semua</button>
+            <button class="ftab"        id="ex-ftab-cex" onclick="setExFilter('cex',this)">🏦 CEX</button>
+            <button class="ftab"        id="ex-ftab-dex" onclick="setExFilter('dex',this)">🔄 DEX</button>
+          </div>
+          <div id="exchange-list-panel" class="ex-list-scroll"></div>
+        </div>
+
+        <!-- Kanan: form edit -->
+        <div class="panel" id="exchange-edit-panel">
+          <div class="empty-form">
+            <div class="empty-icon">🏦</div>
+            <div class="empty-text">Klik exchange di kiri<br>untuk edit detail & about sections</div>
+          </div>
+        </div>
+
+      </div>`;
+
+    _renderExchangeListItems();
+  }
+
+  function setExFilter(mode, btn) {
+    _exCurrentFilter = mode;
+    ['ex-ftab-all','ex-ftab-cex','ex-ftab-dex'].forEach(id => {
+      document.getElementById(id)?.classList.remove('active');
+    });
+    btn.classList.add('active');
+    _renderExchangeListItems();
+  }
+
+  async function selectExchangeForEdit(exchangeId) {
+    currentEditExchangeId = exchangeId;
+    _renderExchangeListItems(); // update active state, filter tetap
+    const exchange = exchangeListData.find(e => e.exchange_id === exchangeId);
+    if (!exchange) return;
+    renderExchangeEditForm(exchange);
+  }
+
+  function renderExchangeEditForm(ex) {
+    const editPanel = document.getElementById('exchange-edit-panel');
+    if (!editPanel) return;
+
+    editPanel.innerHTML = `
+      <div class="form-header">
+        <div class="form-title">
+          ✏️ ${esc(ex.exchange_name || '—')}
+          <span class="edit-badge">${(ex.type || 'CEX').toUpperCase()}</span>
+        </div>
+        <div class="form-actions">
+          <button class="btn-save" id="btn-save-ex" onclick="saveExchangeDetail(${ex.exchange_id})">💾 Simpan</button>
+        </div>
+      </div>
+
+      <div class="ex-edit-scroll">
+
+        <!-- RANK + WEBSITE -->
+        <div class="form-sec">
+          <div class="sec-lbl">Info Umum</div>
+          <div class="fg" style="grid-template-columns:140px 1fr;">
+            <div class="field">
+              <label>Rank <span class="hint">#1 = teratas</span></label>
+              <input id="ex-rank" type="number" min="1" placeholder="e.g. 1" value="${esc(ex.rank||'')}">
+            </div>
+            <div class="field">
+              <label>Website</label>
+              <input id="ex-website" type="url" placeholder="https://..." value="${esc(ex.website||'')}">
+            </div>
+          </div>
+        </div>
+
+        <!-- ABOUT ID -->
+        <div class="form-sec">
+          <div class="sec-lbl">
+            About (Bahasa Indonesia)
+            <span style="text-transform:none;letter-spacing:0;font-size:0.52rem;color:var(--text3);font-weight:400;margin-left:4px;">
+              — tiap bagian punya judul + isi sendiri
+            </span>
+          </div>
+          <div id="about-id-builder" style="display:flex;flex-direction:column;gap:10px;"></div>
+          <button type="button" class="btn-add-about" onclick="addAboutSection('about-id-builder')">
+            ＋ Tambah Bagian (ID)
+          </button>
+        </div>
+
+        <!-- ABOUT EN -->
+        <div class="form-sec">
+          <div class="sec-lbl">
+            About (English)
+            <span style="text-transform:none;letter-spacing:0;font-size:0.52rem;color:var(--text3);font-weight:400;margin-left:4px;">
+              — each section has its own title + content
+            </span>
+          </div>
+          <div id="about-en-builder" style="display:flex;flex-direction:column;gap:10px;"></div>
+          <button type="button" class="btn-add-about" onclick="addAboutSection('about-en-builder')">
+            ＋ Add Section (EN)
+          </button>
+        </div>
+
+        <!-- SOCIAL MEDIA -->
+        <div class="form-sec">
+          <div class="sec-lbl">Social Media</div>
+          <div class="fg">
+            <div class="field"><label>Twitter</label>  <input id="ex-twitter"   type="url" placeholder="https://twitter.com/..." value="${esc(ex.twitter||'')}"></div>
+            <div class="field"><label>Telegram</label> <input id="ex-telegram"  type="url" placeholder="https://t.me/..."        value="${esc(ex.telegram||'')}"></div>
+            <div class="field"><label>Discord</label>  <input id="ex-discord"   type="url" placeholder="https://discord.gg/..."  value="${esc(ex.discord||'')}"></div>
+            <div class="field"><label>Instagram</label><input id="ex-instagram" type="url" placeholder="https://instagram.com/..." value="${esc(ex.instagram||'')}"></div>
+            <div class="field"><label>Facebook</label> <input id="ex-facebook"  type="url" placeholder="https://facebook.com/..." value="${esc(ex.facebook||'')}"></div>
+            <div class="field"><label>LinkedIn</label> <input id="ex-linkedin"  type="url" placeholder="https://linkedin.com/..."  value="${esc(ex.linkedin||'')}"></div>
+            <div class="field"><label>GitHub</label>   <input id="ex-github"    type="url" placeholder="https://github.com/..."   value="${esc(ex.github||'')}"></div>
+            <div class="field"><label>YouTube</label>  <input id="ex-youtube"   type="url" placeholder="https://youtube.com/..."  value="${esc(ex.youtube||'')}"></div>
+            <div class="field"><label>Medium</label>   <input id="ex-medium"    type="url" placeholder="https://medium.com/..."   value="${esc(ex.medium||'')}"></div>
+          </div>
+        </div>
+
+        <!-- SIMPAN BOTTOM -->
+        <div class="form-sec">
+          <button class="btn-save" onclick="saveExchangeDetail(${ex.exchange_id})" style="width:100%;">
+            💾 Simpan Semua Perubahan
+          </button>
+        </div>
+
+      </div>`;
+
+    // Populate about builders dengan data existing
+    renderAboutBuilder('about-id-builder', ex.about_id || null);
+    renderAboutBuilder('about-en-builder', ex.about_en || null);
+  }
+
+  async function saveExchangeDetail(exchangeId) {
+    const payload = {
+      rank:      document.getElementById('ex-rank')?.value?.trim()
+                   ? parseInt(document.getElementById('ex-rank').value, 10) : null,
+      website:   document.getElementById('ex-website')?.value?.trim()   || null,
+      twitter:   document.getElementById('ex-twitter')?.value?.trim()   || null,
+      telegram:  document.getElementById('ex-telegram')?.value?.trim()  || null,
+      discord:   document.getElementById('ex-discord')?.value?.trim()   || null,
+      instagram: document.getElementById('ex-instagram')?.value?.trim() || null,
+      facebook:  document.getElementById('ex-facebook')?.value?.trim()  || null,
+      linkedin:  document.getElementById('ex-linkedin')?.value?.trim()  || null,
+      github:    document.getElementById('ex-github')?.value?.trim()    || null,
+      youtube:   document.getElementById('ex-youtube')?.value?.trim()   || null,
+      medium:    document.getElementById('ex-medium')?.value?.trim()    || null,
+      about_id:  serializeAboutSections('about-id-builder'),
+      about_en:  serializeAboutSections('about-en-builder'),
+    };
+
+    // Disable semua tombol simpan di panel exchange
+    const btns = document.querySelectorAll('#btn-save-ex, #exchange-edit-panel .btn-save');
+    btns.forEach(b => { b.disabled = true; b.innerHTML = '<span class="spinner"></span> Menyimpan...'; });
+
+    try {
+      const res = await fetch(`/api/admin-airdrop?type=exchange-details&exchange_id=${exchangeId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) {
+        const err = await res.json().catch(() => ({}));
+        throw new Error(err.error || 'Gagal simpan');
+      }
+      showToast('✓ Detail exchange tersimpan!', 'success');
+
+      // Refresh data lokal
+      await loadExchangeList();
+      // Update list (filter & active state tetap)
+      _renderExchangeListItems();
+      // Re-render form dengan data terbaru
+      const updated = exchangeListData.find(e => e.exchange_id === exchangeId);
+      if (updated) renderExchangeEditForm(updated);
+
+    } catch(e) {
+      showToast('Error: ' + e.message, 'error');
+    } finally {
+      btns.forEach(b => { b.disabled = false; b.innerHTML = '💾 Simpan'; });
+    }
+  }
+
   window.onload = function() {
     google.accounts.id.initialize({ client_id: YOUR_CLIENT_ID, callback: handleCredentialResponse });
     google.accounts.id.renderButton(document.getElementById('g_id_onload'), { theme: 'outline', size: 'large' });
