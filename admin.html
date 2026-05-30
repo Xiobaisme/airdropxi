@@ -1063,12 +1063,15 @@
         <div class="form-sec">
           <div class="sec-lbl">Sosial Media</div>
           <div class="fg">
-            <div class="field"><label>Twitter / X</label>  <input id="f-twitter"   type="url" placeholder="https://x.com/..."                    value="${esc(d.twitter||'')}"></div>
-            <div class="field"><label>Discord</label>       <input id="f-discord"   type="url" placeholder="https://discord.gg/..."               value="${esc(d.discord||'')}"></div>
-            <div class="field"><label>Telegram</label>      <input id="f-telegram"  type="url" placeholder="https://t.me/..."                     value="${esc(d.telegram||'')}"></div>
-            <div class="field"><label>LinkedIn</label>      <input id="f-linkedin"  type="url" placeholder="https://linkedin.com/company/..."     value="${esc(d.linkedin||'')}"></div>
-            <div class="field"><label>YouTube</label>       <input id="f-youtube"   type="url" placeholder="https://youtube.com/@..."             value="${esc(d.youtube||'')}"></div>
-            <div class="field"><label>Instagram</label>     <input id="f-instagram" type="url" placeholder="https://instagram.com/..."            value="${esc(d.instagram||'')}"></div>
+           <div class="field"><label>Twitter</label>    <input id="ex-twitter"   type="url" placeholder="https://twitter.com/..."  value="${esc(ex.twitter||'')}"></div>
+           <div class="field"><label>Telegram</label>   <input id="ex-telegram"  type="url" placeholder="https://t.me/..."         value="${esc(ex.telegram||'')}"></div>
+           <div class="field"><label>Discord</label>    <input id="ex-discord"   type="url" placeholder="https://discord.gg/..."   value="${esc(ex.discord||'')}"></div>
+           <div class="field"><label>Instagram</label>  <input id="ex-instagram" type="url" placeholder="https://instagram.com/..." value="${esc(ex.instagram||'')}"></div>
+           <div class="field"><label>Facebook</label>   <input id="ex-facebook"  type="url" placeholder="https://facebook.com/..."  value="${esc(ex.facebook||'')}"></div>
+           <div class="field"><label>LinkedIn</label>   <input id="ex-linkedin"  type="url" placeholder="https://linkedin.com/..."  value="${esc(ex.linkedin||'')}"></div>
+           <div class="field"><label>GitHub</label>     <input id="ex-github"    type="url" placeholder="https://github.com/..."    value="${esc(ex.github||'')}"></div>
+           <div class="field"><label>YouTube</label>    <input id="ex-youtube"   type="url" placeholder="https://youtube.com/..."   value="${esc(ex.youtube||'')}"></div>
+           <div class="field"><label>Blog</label>       <input id="ex-blog"      type="url" placeholder="https://blog.exchange.com/" value="${esc(ex.blog||'')}"></div>
           </div>
         </div>
 
@@ -1553,6 +1556,35 @@
           </div>
         </div>
 
+        <!-- INFO DETAIL -->
+       <div class="form-sec">
+       <div class="sec-lbl">Info Detail</div>
+       <div class="fg">
+       <div class="field"><label>Year Founded</label>      <input id="ex-year-founded"  type="text" placeholder="2017"           value="${esc(ex.year_founded||'')}"></div>
+       <div class="field"><label>Headquarters</label>      <input id="ex-headquarters"  type="text" placeholder="Cayman Islands" value="${esc(ex.headquarters||'')}"></div>
+       <div class="field"><label>CEO / Founder</label>     <input id="ex-ceo"           type="text" placeholder="CZ / SBF"       value="${esc(ex.ceo||'')}"></div>
+       <div class="field"><label>Native Token</label>      <input id="ex-native-token"  type="text" placeholder="BNB"            value="${esc(ex.native_token||'')}"></div>
+       <div class="field">
+       <label>Token Logo</label>
+      <div style="display:flex;flex-direction:column;gap:6px">
+     <div style="display:flex;gap:8px;align-items:center">
+      <div id="ex-token-logo-preview" style="width:40px;height:40px;border-radius:50%;border:1px dashed var(--border2);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0">🪙</div>
+      <div style="flex:1;font-family:var(--mono);font-size:0.58rem;color:var(--text3);word-break:break-all" id="ex-token-logo-url-display">Belum ada logo</div>
+     </div>
+    <div style="display:flex;gap:6px">
+      <input type="file" id="ex-token-logo-file" accept="image/*" style="display:none" onchange="handleTokenLogoUpload(event)">
+      <button type="button" class="btn-upload-logo" onclick="document.getElementById('ex-token-logo-file').click()">⬆ Upload</button>
+      <button type="button" class="btn-clear-logo" onclick="clearTokenLogo()">✕</button>
+    </div>
+    <div id="ex-token-logo-status" class="logo-upload-status"></div>
+  </div>
+  <input type="hidden" id="ex-native-token-logo">
+</div>
+      <div class="field"><label>Token Link URL</label>    <input id="ex-native-token-link" type="url" placeholder="https://..."  value="${esc(ex.native_token_link||'')}"></div>
+     <div class="field s2"><label>Regulatory Info</label><textarea id="ex-regulatory" placeholder="Licensed in X, regulated by Y...">${esc(ex.regulatory_info||'')}</textarea></div>
+  </div>
+</div>
+
         <!-- ABOUT ID -->
         <div class="form-sec">
           <div class="sec-lbl">
@@ -1613,20 +1645,26 @@
 
   async function saveExchangeDetail(exchangeId) {
     const payload = {
-      rank:      document.getElementById('ex-rank')?.value?.trim()
-                   ? parseInt(document.getElementById('ex-rank').value, 10) : null,
-      website:   document.getElementById('ex-website')?.value?.trim()   || null,
-      twitter:   document.getElementById('ex-twitter')?.value?.trim()   || null,
-      telegram:  document.getElementById('ex-telegram')?.value?.trim()  || null,
-      discord:   document.getElementById('ex-discord')?.value?.trim()   || null,
-      instagram: document.getElementById('ex-instagram')?.value?.trim() || null,
-      facebook:  document.getElementById('ex-facebook')?.value?.trim()  || null,
-      linkedin:  document.getElementById('ex-linkedin')?.value?.trim()  || null,
-      github:    document.getElementById('ex-github')?.value?.trim()    || null,
-      youtube:   document.getElementById('ex-youtube')?.value?.trim()   || null,
-      medium:    document.getElementById('ex-medium')?.value?.trim()    || null,
-      about_id:  serializeAboutSections('about-id-builder'),
-      about_en:  serializeAboutSections('about-en-builder'),
+    rank:               document.getElementById('ex-rank')?.value?.trim() ? parseInt(document.getElementById('ex-rank').value, 10) : null,
+    website:            document.getElementById('ex-website')?.value?.trim()        || null,
+    year_founded:       document.getElementById('ex-year-founded')?.value?.trim()   || null,
+    headquarters:       document.getElementById('ex-headquarters')?.value?.trim()   || null,
+    ceo:                document.getElementById('ex-ceo')?.value?.trim()            || null,
+    native_token:       document.getElementById('ex-native-token')?.value?.trim()   || null,
+    native_token_logo:  document.getElementById('ex-native-token-logo')?.value?.trim() || null,
+    native_token_link:  document.getElementById('ex-native-token-link')?.value?.trim() || null,
+    regulatory_info:    document.getElementById('ex-regulatory')?.value?.trim()     || null,
+    twitter:            document.getElementById('ex-twitter')?.value?.trim()        || null,
+    telegram:           document.getElementById('ex-telegram')?.value?.trim()       || null,
+    discord:            document.getElementById('ex-discord')?.value?.trim()        || null,
+    instagram:          document.getElementById('ex-instagram')?.value?.trim()      || null,
+    facebook:           document.getElementById('ex-facebook')?.value?.trim()       || null,
+    linkedin:           document.getElementById('ex-linkedin')?.value?.trim()       || null,
+    github:             document.getElementById('ex-github')?.value?.trim()         || null,
+    youtube:            document.getElementById('ex-youtube')?.value?.trim()        || null,
+    blog:               document.getElementById('ex-blog')?.value?.trim()           || null,
+    about_id:           serializeAboutSections('about-id-builder'),
+    about_en:           serializeAboutSections('about-en-builder'),
     };
 
     // Disable semua tombol simpan di panel exchange
