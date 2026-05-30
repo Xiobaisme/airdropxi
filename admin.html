@@ -598,7 +598,7 @@
     });
   }
 
-  // ── LOGO UPLOAD ───────────────────────────────────────
+  // ── LOGO UPLOAD (airdrop project) ─────────────────────
   let pendingLogoUrl = null;
   function initLogoUpload(existingUrl) { pendingLogoUrl = existingUrl || null; updateLogoPreview(existingUrl); }
   function updateLogoPreview(url) {
@@ -649,6 +649,55 @@
   function clearLogo() {
     pendingLogoUrl = null; updateLogoPreview(null);
     const statusEl = document.getElementById('logo-upload-status');
+    if (statusEl) { statusEl.className = 'logo-upload-status'; statusEl.textContent = ''; }
+  }
+
+  // ── TOKEN LOGO UPLOAD (exchange native token) ─────────
+  let pendingTokenLogoUrl = null;
+  function initTokenLogoPreview(url) {
+    pendingTokenLogoUrl = url || null;
+    updateTokenLogoPreview(url);
+  }
+  function updateTokenLogoPreview(url) {
+    const preview = document.getElementById('ex-token-logo-preview');
+    const display = document.getElementById('ex-token-logo-url-display');
+    const hidden  = document.getElementById('ex-native-token-logo');
+    if (!preview) return;
+    if (url) {
+      preview.innerHTML = `<img src="${esc(url)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%;" onerror="this.parentElement.innerHTML='🪙'">`;
+      if (display) { display.textContent = url; display.style.color = 'var(--text2)'; }
+    } else {
+      preview.innerHTML = '🪙';
+      if (display) { display.textContent = 'Belum ada logo'; display.style.color = 'var(--text3)'; }
+    }
+    if (hidden) hidden.value = url || '';
+  }
+  async function handleTokenLogoUpload(e) {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const allowed = ['image/png','image/jpeg','image/jpg','image/webp','image/svg+xml','image/gif'];
+    if (!allowed.includes(file.type)) { showToast('Format tidak didukung.', 'error'); return; }
+    if (file.size > 2 * 1024 * 1024) { showToast('File terlalu besar. Maks 2MB.', 'error'); return; }
+    const statusEl = document.getElementById('ex-token-logo-status');
+    if (statusEl) { statusEl.className = 'logo-upload-status uploading'; statusEl.innerHTML = '<span class="spinner"></span> Mengupload...'; }
+    try {
+      const tokenName = document.getElementById('ex-native-token')?.value?.trim() || 'token';
+      const rawUrl = await uploadImageToGitHub(file, tokenName + '-logo');
+      pendingTokenLogoUrl = rawUrl;
+      updateTokenLogoPreview(rawUrl);
+      if (statusEl) { statusEl.className = 'logo-upload-status success'; statusEl.textContent = '✓ Upload berhasil!'; }
+      showToast('✓ Token logo diupload!', 'success');
+    } catch(err) {
+      if (statusEl) { statusEl.className = 'logo-upload-status error'; statusEl.textContent = '✕ ' + err.message; }
+      showToast('Upload gagal: ' + err.message, 'error');
+    } finally {
+      e.target.value = '';
+    }
+  }
+  function clearTokenLogo() {
+    pendingTokenLogoUrl = null;
+    updateTokenLogoPreview(null);
+    const statusEl = document.getElementById('ex-token-logo-status');
     if (statusEl) { statusEl.className = 'logo-upload-status'; statusEl.textContent = ''; }
   }
 
@@ -915,7 +964,7 @@
       </div>`;
   }
 
-  // ── RENDER FORM ───────────────────────────────────────
+  // ── RENDER FORM AIRDROP ───────────────────────────────
   function renderForm(data) {
     const d      = data || {};
     const isEdit = !!data;
@@ -1039,7 +1088,7 @@
             <div class="field"><label>Total Supply</label>  <input id="f-supply"  type="text" placeholder="1,000,000,000"    value="${esc(d.total_supply||'')}"></div>
             <div class="field"><label>Network</label>        <input id="f-network" type="text" placeholder="Ethereum / Solana" value="${esc(d.network||'')}"></div>
             <div class="field"><label>TGE / Listing Date</label><input id="f-tge"  type="text" placeholder="Q3 2026 / TBA"   value="${esc(d.tge_date||'')}"></div>
-            <div class="field" style="grid-column:span 2">
+            <div class="field s2">
               <label>Logo Proyek <span class="hint">PNG/JPG/WEBP/SVG, maks 2MB</span></label>
               <div class="logo-upload-wrap">
                 <div class="logo-preview-row">
@@ -1056,22 +1105,20 @@
                 <div class="logo-upload-status" id="logo-upload-status"></div>
               </div>
             </div>
-            <input type="hidden" id="f-logo">
           </div>
         </div>
 
         <div class="form-sec">
           <div class="sec-lbl">Sosial Media</div>
           <div class="fg">
-           <div class="field"><label>Twitter</label>    <input id="ex-twitter"   type="url" placeholder="https://twitter.com/..."  value="${esc(ex.twitter||'')}"></div>
-           <div class="field"><label>Telegram</label>   <input id="ex-telegram"  type="url" placeholder="https://t.me/..."         value="${esc(ex.telegram||'')}"></div>
-           <div class="field"><label>Discord</label>    <input id="ex-discord"   type="url" placeholder="https://discord.gg/..."   value="${esc(ex.discord||'')}"></div>
-           <div class="field"><label>Instagram</label>  <input id="ex-instagram" type="url" placeholder="https://instagram.com/..." value="${esc(ex.instagram||'')}"></div>
-           <div class="field"><label>Facebook</label>   <input id="ex-facebook"  type="url" placeholder="https://facebook.com/..."  value="${esc(ex.facebook||'')}"></div>
-           <div class="field"><label>LinkedIn</label>   <input id="ex-linkedin"  type="url" placeholder="https://linkedin.com/..."  value="${esc(ex.linkedin||'')}"></div>
-           <div class="field"><label>GitHub</label>     <input id="ex-github"    type="url" placeholder="https://github.com/..."    value="${esc(ex.github||'')}"></div>
-           <div class="field"><label>YouTube</label>    <input id="ex-youtube"   type="url" placeholder="https://youtube.com/..."   value="${esc(ex.youtube||'')}"></div>
-           <div class="field"><label>Blog</label>       <input id="ex-blog"      type="url" placeholder="https://blog.exchange.com/" value="${esc(ex.blog||'')}"></div>
+            <div class="field"><label>Twitter</label>   <input id="f-twitter"   type="url" placeholder="https://twitter.com/..."   value="${esc(d.twitter||'')}"></div>
+            <div class="field"><label>Telegram</label>  <input id="f-telegram"  type="url" placeholder="https://t.me/..."          value="${esc(d.telegram||'')}"></div>
+            <div class="field"><label>Discord</label>   <input id="f-discord"   type="url" placeholder="https://discord.gg/..."    value="${esc(d.discord||'')}"></div>
+            <div class="field"><label>Instagram</label> <input id="f-instagram" type="url" placeholder="https://instagram.com/..." value="${esc(d.instagram||'')}"></div>
+            <div class="field"><label>Facebook</label>  <input id="f-facebook"  type="url" placeholder="https://facebook.com/..."  value="${esc(d.facebook||'')}"></div>
+            <div class="field"><label>LinkedIn</label>  <input id="f-linkedin"  type="url" placeholder="https://linkedin.com/..."  value="${esc(d.linkedin||'')}"></div>
+            <div class="field"><label>GitHub</label>    <input id="f-github"    type="url" placeholder="https://github.com/..."    value="${esc(d.github||'')}"></div>
+            <div class="field"><label>YouTube</label>   <input id="f-youtube"   type="url" placeholder="https://youtube.com/..."   value="${esc(d.youtube||'')}"></div>
           </div>
         </div>
 
@@ -1242,12 +1289,15 @@
       network:             document.getElementById('f-network')?.value?.trim()       || null,
       tge_date:            document.getElementById('f-tge')?.value?.trim()           || null,
       logo_url:            pendingLogoUrl || null,
+      // Sosial media — ID cocok dengan elemen di renderForm
       twitter:             document.getElementById('f-twitter')?.value?.trim()       || null,
-      discord:             document.getElementById('f-discord')?.value?.trim()       || null,
       telegram:            document.getElementById('f-telegram')?.value?.trim()      || null,
-      linkedin:            document.getElementById('f-linkedin')?.value?.trim()      || null,
-      youtube:             document.getElementById('f-youtube')?.value?.trim()       || null,
+      discord:             document.getElementById('f-discord')?.value?.trim()       || null,
       instagram:           document.getElementById('f-instagram')?.value?.trim()     || null,
+      facebook:            document.getElementById('f-facebook')?.value?.trim()      || null,
+      linkedin:            document.getElementById('f-linkedin')?.value?.trim()      || null,
+      github:              document.getElementById('f-github')?.value?.trim()        || null,
+      youtube:             document.getElementById('f-youtube')?.value?.trim()       || null,
       faqID:               document.getElementById('f-faqid')?.value?.trim()         || null,
       faqEN:               document.getElementById('f-faqen')?.value?.trim()         || null,
       testnet_links:       getTestnetLinks(),
@@ -1451,7 +1501,7 @@
     currentEditExchangeId = null;
     _exCurrentFilter = 'all';
     _exCurrentSearch = '';
-    renderList(); // reset active di sidebar airdrop
+    renderList();
     await loadExchangeList();
     renderExchangePanel();
   }
@@ -1468,8 +1518,6 @@
   }
 
   function renderExchangePanel() {
-    // Panel exchange pakai full width di form-area (override wrap grid tidak perlu,
-    // cukup isi form-area dengan 2-kolom sendiri)
     document.getElementById('form-area').innerHTML = `
       <div style="display:grid;grid-template-columns:280px 1fr;gap:1rem;align-items:start;">
 
@@ -1518,7 +1566,7 @@
 
   async function selectExchangeForEdit(exchangeId) {
     currentEditExchangeId = exchangeId;
-    _renderExchangeListItems(); // update active state, filter tetap
+    _renderExchangeListItems();
     const exchange = exchangeListData.find(e => e.exchange_id === exchangeId);
     if (!exchange) return;
     renderExchangeEditForm(exchange);
@@ -1527,6 +1575,9 @@
   function renderExchangeEditForm(ex) {
     const editPanel = document.getElementById('exchange-edit-panel');
     if (!editPanel) return;
+
+    // Reset token logo state untuk exchange ini
+    pendingTokenLogoUrl = ex.native_token_logo || null;
 
     editPanel.innerHTML = `
       <div class="form-header">
@@ -1557,33 +1608,33 @@
         </div>
 
         <!-- INFO DETAIL -->
-       <div class="form-sec">
-       <div class="sec-lbl">Info Detail</div>
-       <div class="fg">
-       <div class="field"><label>Year Founded</label>      <input id="ex-year-founded"  type="text" placeholder="2017"           value="${esc(ex.year_founded||'')}"></div>
-       <div class="field"><label>Headquarters</label>      <input id="ex-headquarters"  type="text" placeholder="Cayman Islands" value="${esc(ex.headquarters||'')}"></div>
-       <div class="field"><label>CEO / Founder</label>     <input id="ex-ceo"           type="text" placeholder="CZ / SBF"       value="${esc(ex.ceo||'')}"></div>
-       <div class="field"><label>Native Token</label>      <input id="ex-native-token"  type="text" placeholder="BNB"            value="${esc(ex.native_token||'')}"></div>
-       <div class="field">
-       <label>Token Logo</label>
-      <div style="display:flex;flex-direction:column;gap:6px">
-     <div style="display:flex;gap:8px;align-items:center">
-      <div id="ex-token-logo-preview" style="width:40px;height:40px;border-radius:50%;border:1px dashed var(--border2);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0">🪙</div>
-      <div style="flex:1;font-family:var(--mono);font-size:0.58rem;color:var(--text3);word-break:break-all" id="ex-token-logo-url-display">Belum ada logo</div>
-     </div>
-    <div style="display:flex;gap:6px">
-      <input type="file" id="ex-token-logo-file" accept="image/*" style="display:none" onchange="handleTokenLogoUpload(event)">
-      <button type="button" class="btn-upload-logo" onclick="document.getElementById('ex-token-logo-file').click()">⬆ Upload</button>
-      <button type="button" class="btn-clear-logo" onclick="clearTokenLogo()">✕</button>
-    </div>
-    <div id="ex-token-logo-status" class="logo-upload-status"></div>
-  </div>
-  <input type="hidden" id="ex-native-token-logo">
-</div>
-      <div class="field"><label>Token Link URL</label>    <input id="ex-native-token-link" type="url" placeholder="https://..."  value="${esc(ex.native_token_link||'')}"></div>
-     <div class="field s2"><label>Regulatory Info</label><textarea id="ex-regulatory" placeholder="Licensed in X, regulated by Y...">${esc(ex.regulatory_info||'')}</textarea></div>
-  </div>
-</div>
+        <div class="form-sec">
+          <div class="sec-lbl">Info Detail</div>
+          <div class="fg">
+            <div class="field"><label>Year Founded</label>      <input id="ex-year-founded"  type="text" placeholder="2017"           value="${esc(ex.year_founded||'')}"></div>
+            <div class="field"><label>Headquarters</label>      <input id="ex-headquarters"  type="text" placeholder="Cayman Islands" value="${esc(ex.headquarters||'')}"></div>
+            <div class="field"><label>CEO / Founder</label>     <input id="ex-ceo"           type="text" placeholder="CZ / SBF"       value="${esc(ex.ceo||'')}"></div>
+            <div class="field"><label>Native Token</label>      <input id="ex-native-token"  type="text" placeholder="BNB"            value="${esc(ex.native_token||'')}"></div>
+            <div class="field">
+              <label>Token Logo</label>
+              <div style="display:flex;flex-direction:column;gap:6px">
+                <div style="display:flex;gap:8px;align-items:center">
+                  <div id="ex-token-logo-preview" style="width:40px;height:40px;border-radius:50%;border:1px dashed var(--border2);background:var(--s2);display:flex;align-items:center;justify-content:center;font-size:18px;overflow:hidden;flex-shrink:0">🪙</div>
+                  <div style="flex:1;font-family:var(--mono);font-size:0.58rem;color:var(--text3);word-break:break-all" id="ex-token-logo-url-display">Belum ada logo</div>
+                </div>
+                <div style="display:flex;gap:6px">
+                  <input type="file" id="ex-token-logo-file" accept="image/*" style="display:none" onchange="handleTokenLogoUpload(event)">
+                  <button type="button" class="btn-upload-logo" onclick="document.getElementById('ex-token-logo-file').click()">⬆ Upload</button>
+                  <button type="button" class="btn-clear-logo" onclick="clearTokenLogo()">✕</button>
+                </div>
+                <div id="ex-token-logo-status" class="logo-upload-status"></div>
+              </div>
+              <input type="hidden" id="ex-native-token-logo" value="${esc(ex.native_token_logo||'')}">
+            </div>
+            <div class="field"><label>Token Link URL</label>    <input id="ex-native-token-link" type="url" placeholder="https://..."  value="${esc(ex.native_token_link||'')}"></div>
+            <div class="field s2"><label>Regulatory Info</label><textarea id="ex-regulatory" placeholder="Licensed in X, regulated by Y...">${esc(ex.regulatory_info||'')}</textarea></div>
+          </div>
+        </div>
 
         <!-- ABOUT ID -->
         <div class="form-sec">
@@ -1626,6 +1677,7 @@
             <div class="field"><label>GitHub</label>   <input id="ex-github"    type="url" placeholder="https://github.com/..."   value="${esc(ex.github||'')}"></div>
             <div class="field"><label>YouTube</label>  <input id="ex-youtube"   type="url" placeholder="https://youtube.com/..."  value="${esc(ex.youtube||'')}"></div>
             <div class="field"><label>Medium</label>   <input id="ex-medium"    type="url" placeholder="https://medium.com/..."   value="${esc(ex.medium||'')}"></div>
+            <div class="field"><label>Blog</label>     <input id="ex-blog"      type="url" placeholder="https://blog.exchange.com/" value="${esc(ex.blog||'')}"></div>
           </div>
         </div>
 
@@ -1638,36 +1690,42 @@
 
       </div>`;
 
+    // Init token logo preview dengan data existing
+    initTokenLogoPreview(ex.native_token_logo || null);
+
     // Populate about builders dengan data existing
     renderAboutBuilder('about-id-builder', ex.about_id || null);
     renderAboutBuilder('about-en-builder', ex.about_en || null);
   }
 
   async function saveExchangeDetail(exchangeId) {
+    // Ambil nilai native_token_logo dari hidden field (sudah diupdate oleh handleTokenLogoUpload)
+    const nativeTokenLogo = document.getElementById('ex-native-token-logo')?.value?.trim() || null;
+
     const payload = {
-    rank:               document.getElementById('ex-rank')?.value?.trim() ? parseInt(document.getElementById('ex-rank').value, 10) : null,
-    website:            document.getElementById('ex-website')?.value?.trim()        || null,
-    year_founded:       document.getElementById('ex-year-founded')?.value?.trim()   || null,
-    headquarters:       document.getElementById('ex-headquarters')?.value?.trim()   || null,
-    ceo:                document.getElementById('ex-ceo')?.value?.trim()            || null,
-    native_token:       document.getElementById('ex-native-token')?.value?.trim()   || null,
-    native_token_logo:  document.getElementById('ex-native-token-logo')?.value?.trim() || null,
-    native_token_link:  document.getElementById('ex-native-token-link')?.value?.trim() || null,
-    regulatory_info:    document.getElementById('ex-regulatory')?.value?.trim()     || null,
-    twitter:            document.getElementById('ex-twitter')?.value?.trim()        || null,
-    telegram:           document.getElementById('ex-telegram')?.value?.trim()       || null,
-    discord:            document.getElementById('ex-discord')?.value?.trim()        || null,
-    instagram:          document.getElementById('ex-instagram')?.value?.trim()      || null,
-    facebook:           document.getElementById('ex-facebook')?.value?.trim()       || null,
-    linkedin:           document.getElementById('ex-linkedin')?.value?.trim()       || null,
-    github:             document.getElementById('ex-github')?.value?.trim()         || null,
-    youtube:            document.getElementById('ex-youtube')?.value?.trim()        || null,
-    blog:               document.getElementById('ex-blog')?.value?.trim()           || null,
-    about_id:           serializeAboutSections('about-id-builder'),
-    about_en:           serializeAboutSections('about-en-builder'),
+      rank:               document.getElementById('ex-rank')?.value?.trim() ? parseInt(document.getElementById('ex-rank').value, 10) : null,
+      website:            document.getElementById('ex-website')?.value?.trim()           || null,
+      year_founded:       document.getElementById('ex-year-founded')?.value?.trim()      || null,
+      headquarters:       document.getElementById('ex-headquarters')?.value?.trim()      || null,
+      ceo:                document.getElementById('ex-ceo')?.value?.trim()               || null,
+      native_token:       document.getElementById('ex-native-token')?.value?.trim()      || null,
+      native_token_logo:  nativeTokenLogo,
+      native_token_link:  document.getElementById('ex-native-token-link')?.value?.trim() || null,
+      regulatory_info:    document.getElementById('ex-regulatory')?.value?.trim()        || null,
+      twitter:            document.getElementById('ex-twitter')?.value?.trim()           || null,
+      telegram:           document.getElementById('ex-telegram')?.value?.trim()          || null,
+      discord:            document.getElementById('ex-discord')?.value?.trim()           || null,
+      instagram:          document.getElementById('ex-instagram')?.value?.trim()         || null,
+      facebook:           document.getElementById('ex-facebook')?.value?.trim()          || null,
+      linkedin:           document.getElementById('ex-linkedin')?.value?.trim()          || null,
+      github:             document.getElementById('ex-github')?.value?.trim()            || null,
+      youtube:            document.getElementById('ex-youtube')?.value?.trim()           || null,
+      medium:             document.getElementById('ex-medium')?.value?.trim()            || null,
+      blog:               document.getElementById('ex-blog')?.value?.trim()              || null,
+      about_id:           serializeAboutSections('about-id-builder'),
+      about_en:           serializeAboutSections('about-en-builder'),
     };
 
-    // Disable semua tombol simpan di panel exchange
     const btns = document.querySelectorAll('#btn-save-ex, #exchange-edit-panel .btn-save');
     btns.forEach(b => { b.disabled = true; b.innerHTML = '<span class="spinner"></span> Menyimpan...'; });
 
@@ -1683,11 +1741,8 @@
       }
       showToast('✓ Detail exchange tersimpan!', 'success');
 
-      // Refresh data lokal
       await loadExchangeList();
-      // Update list (filter & active state tetap)
       _renderExchangeListItems();
-      // Re-render form dengan data terbaru
       const updated = exchangeListData.find(e => e.exchange_id === exchangeId);
       if (updated) renderExchangeEditForm(updated);
 
