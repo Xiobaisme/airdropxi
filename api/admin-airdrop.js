@@ -139,6 +139,15 @@ module.exports = async function handler(req, res) {
         let result = null;
         if (text) { try { result = JSON.parse(text); } catch(e) { result = null; } }
         if (!r.ok) return res.status(r.status).json({ error: serializeError(result || text) });
+        if (body.exchange_type && exchange_id) {
+       try {
+       await fetch(`${BASE}/exchanges?id=eq.${encodeURIComponent(exchange_id)}`, {
+      method: 'PATCH',
+      headers: H,
+      body: JSON.stringify({ type: body.exchange_type }),
+    });
+  } catch(e2) { console.warn('Update exchange type gagal:', e2.message); }
+}
 
         return res.status(200).json({ success: true, updated: result });
       } catch (e) {
