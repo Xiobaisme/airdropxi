@@ -506,7 +506,12 @@
         style="border-color:rgba(0,229,160,0.3);color:var(--accent);background:rgba(0,229,160,0.06)">
         🔄 Update Exchange Details
       </button>
-    </div>
+    
+   <button class="btn-new" onclick="showManageExchanges()"
+     style="border-color:rgba(0,200,240,0.3);color:var(--cyan);background:rgba(0,200,240,0.06)">
+     🏦 Manage Exchanges
+  </button>
+</div>
 
     <div class="form-area" id="form-area">
       <div class="panel">
@@ -2068,6 +2073,209 @@
       btns.forEach(b => { b.disabled = false; b.innerHTML = '💾 Simpan'; });
     }
   }
+  
+  // ═══════════════════════════════════════════════════════════
+// MANAGE EXCHANGES — CRUD tabel `exchanges`
+// ═══════════════════════════════════════════════════════════
+let _exManageList = [];
+let _exManageEditId = null;
+
+async function showManageExchanges() {
+  editingId = null; renderList();
+  await _loadManageExchanges();
+  _renderManageExchangesPanel();
+}
+
+async function _loadManageExchanges() {
+  try {
+    const res = await fetch('/api/admin-airdrop?type=exchanges');
+    if (!res.ok) throw new Error('Gagal fetch');
+    const raw = await res.json();
+    _exManageList = Array.isArray(raw) ? raw : [];
+  } catch(e) {
+    _exManageList = [];
+    showToast('Gagal load exchanges: ' + e.message, 'error');
+  }
+}
+
+function _renderManageExchangesPanel() {
+  document.getElementById('form-area').innerHTML = `
+    <div style="display:grid;grid-template-columns:300px 1fr;gap:1rem;align-items:start;">
+      <div class="panel">
+        <div class="panel-head">
+          <span class="ph-dot" style="background:var(--cyan);box-shadow:0 0 6px var(--cyan)"></span>
+          <span class="ph-title">Exchanges</span>
+          <span class="ph-count" id="exm-count">${_exManageList.length}</span>
+        </div>
+        <div style="padding:8px 12px;border-bottom:1px solid var(--border);">
+          <input type="text" placeholder="🔍 Cari..." id="exm-search"
+            oninput="_renderExManageList()"
+            style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:6px;
+                   padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:0.7rem;outline:none;">
+        </div>
+        <div id="exm-list" class="ex-list-scroll"></div>
+      </div>
+      <div class="panel" id="exm-edit-panel">
+        <div class="empty-form">
+          <div class="empty-icon">🏦</div>
+          <div class="empty-text">Pilih exchange untuk edit<br>atau tambah baru</div>
+        </div>
+      </div>
+    </div>
+    <div style="margin-top:0.75rem">
+      <button class="btn-new" onclick="_showExManageForm(null)">➕ Tambah Exchange Baru</button>
+    </div>`;
+  _renderExManageList();
+}
+
+function _renderExManageList() {
+  const container = document.getElementById('exm-list');
+  if (!container) return;
+  const q = (document.getElementById('exm-search')?.value || '').toLowerCase();
+  const filtered = [..._exManageList]
+    .filter(e => !q || (e.exchange_name||'').toLowerCase().includes(q))
+    .sort((a,b) => (a.rank||9999)-(b.rank||9999));
+  document.getElementById('exm-count').textContent = filtered.length;
+  if (!filtered.length) {
+    container.innerHTML = '<div class="list-empty">Belum ada exchange. Tambah baru!</div>';
+    return;
+  }
+  container.innerHTML = filtered.map(ex => `
+    <div class="proj-item ${_exManageEditId === ex.id ? 'active' : ''}"
+         onclick="_showExManageForm(${ex.id})">
+      <div class="proj-item-info">
+        <div class="proj-item-name">${esc(ex.exchange_name||'—')}</div>
+        <div class="proj-item-badges">
+          ${ex.rank != null ? `<span class="proj-item-status st-c">#${ex.rank}</span>` : ''}
+          <span class="live-dot on">● ${(ex.type||'cex').toUpperCase()}</span>
+          ${ex.country ? `<span class="proj-item-status st-d">${esc(ex.country)}</span>` : ''}
+        </div>
+      </div>
+      <button onclick="event.stopPropagation();_deleteExManage(${ex.id},'${esc(ex.exchange_name||'')}')"
+              style="flex-shrink:0;padding:4px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.25);
+                     background:rgba(239,68,68,0.08);color:var(--red);font-family:var(--mono);font-size:0.52rem;
+                     cursor:pointer">🗑</button>
+    </div>`).join('');
+}
+
+function _showExManageForm(id) {
+  _exManageEditId = id;
+  _renderExManageList();
+  const ex = id ? (_exManageList.find(e => e.id === id) || {}) : {};
+  const isEdit = !!id;
+  const exType = (ex.type || 'cex').toLowerCase();
+
+  document.getElementById('exm-edit-panel').innerHTML = `
+    <div class="form-header">
+      <div class="form-title">${isEdit ? `✏️ ${esc(ex.exchange_name||'—')}` : '➕ Exchange Baru'}</div>
+      <div class="form-actions">
+        ${isEdit ? `<button class="btn-delete" onclick="_deleteExManage(${ex.id},'${esc(ex.exchange_name||'')}')">🗑 Hapus</button>` : ''}
+        <button class="btn-save" onclick="_saveExManage(${id||'null'})">💾 Simpan</button>
+      </div>
+    </div>
+    <div style="padding:1.25rem;display:flex;flex-direction:column;gap:1rem;">
+      <div class="fg" style="grid-template-columns:90px 1fr 1fr;">
+        <div class="field">
+          <label>Rank</label>
+          <input id="exm-rank" type="number" min="1" placeholder="1" value="${esc(ex.rank != null ? ex.rank : '')}">
+        </div>
+        <div class="field">
+          <label>Nama Exchange <span class="req">*</span></label>
+          <input id="exm-name" type="text" placeholder="Binance" value="${esc(ex.exchange_name||'')}">
+        </div>
+        <div class="field">
+          <label>Year Founded</label>
+          <input id="exm-year" type="text" placeholder="2017" value="${esc(ex.year_founded||'')}">
+        </div>
+      </div>
+      <div class="fg">
+        <div class="field">
+          <label>Logo URL</label>
+          <input id="exm-logo" type="url" placeholder="https://..." value="${esc(ex.logo_url||'')}">
+        </div>
+        <div class="field">
+          <label>Country / Jurisdiction</label>
+          <input id="exm-country" type="text" placeholder="Cayman Islands" value="${esc(ex.country||'')}">
+        </div>
+        <div class="field">
+          <label>Key Features</label>
+          <input id="exm-keyfeatures" type="text" placeholder="Highest liquidity, full features" value="${esc(ex.key_features||'')}">
+        </div>
+        <div class="field">
+          <label>Best For</label>
+          <input id="exm-bestfor" type="text" placeholder="All levels" value="${esc(ex.best_for||'')}">
+        </div>
+      </div>
+      <div class="field">
+        <label>Exchange Type</label>
+        <div style="display:flex;gap:6px;">
+          ${['cex','dex','hybrid'].map(t => {
+            const c = _exTypeColor(t);
+            const active = exType === t;
+            return `<button type="button" id="exm-type-btn-${t}" onclick="selectExmType('${t}')"
+              style="flex:1;padding:0.5rem;border-radius:6px;border:1px solid ${active?c.border:'var(--border2)'};
+                     background:${active?c.bg:'var(--s2)'};color:${active?c.color:'var(--text3)'};
+                     font-family:var(--mono);font-size:0.62rem;font-weight:700;cursor:pointer;transition:all 0.15s">
+              ${t.toUpperCase()}</button>`;
+          }).join('')}
+        </div>
+        <input type="hidden" id="exm-type" value="${exType}">
+      </div>
+    </div>`;
+}
+
+function selectExmType(type) {
+  document.getElementById('exm-type').value = type;
+  ['cex','dex','hybrid'].forEach(t => {
+    const btn = document.getElementById(`exm-type-btn-${t}`);
+    if (!btn) return;
+    const c = _exTypeColor(t);
+    const active = t === type;
+    btn.style.background  = active ? c.bg     : 'var(--s2)';
+    btn.style.borderColor = active ? c.border : 'var(--border2)';
+    btn.style.color       = active ? c.color  : 'var(--text3)';
+  });
+}
+
+async function _saveExManage(id) {
+  const name = document.getElementById('exm-name')?.value?.trim();
+  if (!name) { showToast('Nama exchange wajib diisi!', 'error'); return; }
+  const payload = {
+    exchange_name: name,
+    rank:          document.getElementById('exm-rank')?.value?.trim() ? parseInt(document.getElementById('exm-rank').value,10) : null,
+    logo_url:      document.getElementById('exm-logo')?.value?.trim()        || null,
+    country:       document.getElementById('exm-country')?.value?.trim()     || null,
+    key_features:  document.getElementById('exm-keyfeatures')?.value?.trim() || null,
+    best_for:      document.getElementById('exm-bestfor')?.value?.trim()     || null,
+    type:          document.getElementById('exm-type')?.value?.trim()        || 'cex',
+    year_founded:  document.getElementById('exm-year')?.value?.trim()        || null,
+  };
+  try {
+    const res = await fetch(
+      id ? `/api/admin-airdrop?type=exchanges&id=${id}` : '/api/admin-airdrop?type=exchanges',
+      { method: id ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
+    );
+    if (!res.ok) { const err = await res.json().catch(()=>{}); throw new Error(err?.error||`HTTP ${res.status}`); }
+    const result = await res.json();
+    showToast(id ? '✓ Exchange diupdate!' : '✓ Exchange ditambahkan!', 'success');
+    await _loadManageExchanges();
+    _renderExManageList();
+    const newId = id || (Array.isArray(result) ? result[0]?.id : result?.id);
+    if (newId) { _exManageEditId = newId; _showExManageForm(newId); }
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+async function _deleteExManage(id, name) {
+  if (!confirm(`Hapus exchange "${name}"?`)) return;
+  try {
+    const res = await fetch(`/api/admin-airdrop?type=exchanges&id=${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Gagal hapus');
+    showToast(`✓ "${name}" dihapus`, 'success');
+    _exManageEditId = null;
+    await _loadManageExchanges();
+    _renderManageExchangesPanel();
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
 
   window.onload = function() {
     google.accounts.id.initialize({ client_id: YOUR_CLIENT_ID, callback: handleCredentialResponse });
