@@ -1274,70 +1274,69 @@
   }
 
   async function saveForm() {
-    const name = document.getElementById('f-name')?.value?.trim();
-    if (!name) { showToast('Nama proyek wajib diisi!', 'error'); return; }
-    const payload = {
-      name,
-      status:              document.getElementById('f-status')?.value                || null,
-      confirmation_status: document.getElementById('f-confirmation-status')?.value  || 'potential',
-      published:           document.getElementById('f-published')?.checked           || false,
-      link:                document.getElementById('f-link')?.value?.trim()          || null,
-      tags:                document.getElementById('f-tags')?.value?.trim()          || null,
-      RaisedID:            document.getElementById('f-raisedid')?.value?.trim()      || null,
-      RaisedEN:            document.getElementById('f-raiseden')?.value?.trim()      || null,
-      tasksID:             document.getElementById('f-tasksid')?.value?.trim()       || null,
-      tasksEN:             document.getElementById('f-tasksen')?.value?.trim()       || null,
-      descriptionID:       document.getElementById('f-descid')?.value?.trim()        || null,
-      descriptionEN:       document.getElementById('f-descen')?.value?.trim()        || null,
-      ticker:              document.getElementById('f-ticker')?.value?.trim()        || null,
-      total_supply:        document.getElementById('f-supply')?.value?.trim()        || null,
-      network:             document.getElementById('f-network')?.value?.trim()       || null,
-      tge_date:            document.getElementById('f-tge')?.value?.trim()           || null,
-      logo_url:            pendingLogoUrl || null,
-      // Sosial media — ID cocok dengan elemen di renderForm
-      twitter:             document.getElementById('f-twitter')?.value?.trim()       || null,
-      telegram:            document.getElementById('f-telegram')?.value?.trim()      || null,
-      discord:             document.getElementById('f-discord')?.value?.trim()       || null,
-      instagram:           document.getElementById('f-instagram')?.value?.trim()     || null,
-      facebook:            document.getElementById('f-facebook')?.value?.trim()      || null,
-      linkedin:            document.getElementById('f-linkedin')?.value?.trim()      || null,
-      github:              document.getElementById('f-github')?.value?.trim()        || null,
-      youtube:             document.getElementById('f-youtube')?.value?.trim()       || null,
-      faqID:               document.getElementById('f-faqid')?.value?.trim()         || null,
-      faqEN:               document.getElementById('f-faqen')?.value?.trim()         || null,
-      testnet_links:       getTestnetLinks(),
-      _roadmap:            getRoadmapItems(),
-    };
+  const name = document.getElementById('f-name')?.value?.trim();
+  if (!name) { showToast('Nama proyek wajib diisi!', 'error'); return; }
+  const payload = {
+    name,
+    status:              document.getElementById('f-status')?.value                || null,
+    confirmation_status: document.getElementById('f-confirmation-status')?.value  || 'potential',
+    published:           document.getElementById('f-published')?.checked           || false,
+    link:                document.getElementById('f-link')?.value?.trim()          || null,
+    tags:                document.getElementById('f-tags')?.value?.trim()          || null,
+    RaisedID:            document.getElementById('f-raisedid')?.value?.trim()      || null,
+    RaisedEN:            document.getElementById('f-raiseden')?.value?.trim()      || null,
+    tasksID:             document.getElementById('f-tasksid')?.value?.trim()       || null,
+    tasksEN:             document.getElementById('f-tasksen')?.value?.trim()       || null,
+    descriptionID:       document.getElementById('f-descid')?.value?.trim()        || null,
+    descriptionEN:       document.getElementById('f-descen')?.value?.trim()        || null,
+    ticker:              document.getElementById('f-ticker')?.value?.trim()        || null,
+    total_supply:        document.getElementById('f-supply')?.value?.trim()        || null,
+    network:             document.getElementById('f-network')?.value?.trim()       || null,
+    tge_date:            document.getElementById('f-tge')?.value?.trim()           || null,
+    logo_url:            pendingLogoUrl || null,
+    twitter:             document.getElementById('f-twitter')?.value?.trim()       || null,
+    telegram:            document.getElementById('f-telegram')?.value?.trim()      || null,
+    discord:             document.getElementById('f-discord')?.value?.trim()       || null,
+    instagram:           document.getElementById('f-instagram')?.value?.trim()     || null,
+    facebook:            document.getElementById('f-facebook')?.value?.trim()      || null,
+    linkedin:            document.getElementById('f-linkedin')?.value?.trim()      || null,
+    github:              document.getElementById('f-github')?.value?.trim()        || null,
+    youtube:             document.getElementById('f-youtube')?.value?.trim()       || null,
+    faqID:               document.getElementById('f-faqid')?.value?.trim()         || null,
+    faqEN:               document.getElementById('f-faqen')?.value?.trim()         || null,
+    testnet_links:       getTestnetLinks(),
+    _roadmap:            getRoadmapItems(),
+  };
+  ['btn-save','btn-save-bottom'].forEach(id => {
+    const el = document.getElementById(id);
+    if (el) { el.disabled = true; el.innerHTML = '<span class="spinner"></span> Menyimpan...'; }
+  });
+  try {
+    const isNew = !editingId;
+    const controller = new AbortController();
+    setTimeout(() => controller.abort(), 9000);
+    const res = await fetch(
+      editingId ? `/api/admin-airdrop?id=${editingId}` : '/api/admin-airdrop',
+      { method: editingId ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload), signal: controller.signal }
+    );
+    const result = await res.json();
+    if (!res.ok) throw new Error(result.error || `HTTP ${res.status}`);
+    showToast(editingId ? '✓ Berhasil diupdate!' : '✓ Proyek ditambahkan!', 'success');
+    await loadProjects();
+    if (isNew && Array.isArray(result) && result[0]) { editingId = result[0].id; loadEdit(editingId); }
+  } catch(e) {
+    if (e.name === 'AbortError') {
+      showToast('⚠️ Timeout — coba simpan lagi', 'error');
+    } else {
+      showToast('Error: ' + e.message, 'error');
+    }
     ['btn-save','btn-save-bottom'].forEach(id => {
       const el = document.getElementById(id);
-      if (el) { el.disabled = true; el.innerHTML = '<span class="spinner"></span> Menyimpan...'; }
+      if (el) { el.disabled = false; el.innerHTML = editingId ? '💾 Simpan' : '➕ Tambah'; }
     });
-    try {
-      const isNew = !editingId;
-      } catch(e) {
-      showToast('Error: ' + e.message, 'error');
-      ['btn-save','btn-save-bottom'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) { el.disabled = false; el.innerHTML = editingId ? '💾 Simpan' : '➕ Tambah'; }
-      });
-    }
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || `HTTP ${res.status}`);
-      showToast(editingId ? '✓ Berhasil diupdate!' : '✓ Proyek ditambahkan!', 'success');
-      await loadProjects();
-      if (isNew && Array.isArray(result) && result[0]) { editingId = result[0].id; loadEdit(editingId); }
-    } catch(e) {
-      if (e.name === 'AbortError') {
-        showToast('⚠️ Timeout — coba simpan lagi', 'error');
-      } else {
-        showToast('Error: ' + e.message, 'error');
-      }
-      ['btn-save','btn-save-bottom'].forEach(id => {
-        const el = document.getElementById(id);
-        if (el) { el.disabled = false; el.innerHTML = editingId ? '💾 Simpan' : '➕ Tambah'; }
-      });
-    }
-
+  }
+}
+  
   async function deleteProject(id) {
     const p = projects.find(x => x.id == id);
     if (!confirm(`Hapus "${p?.name || id}"?\nTindakan ini tidak bisa dibatalkan.`)) return;
