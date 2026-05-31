@@ -2113,6 +2113,12 @@ function _renderManageExchangesPanel() {
             style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:6px;
                    padding:7px 10px;color:var(--text);font-family:var(--mono);font-size:0.7rem;outline:none;">
         </div>
+       <div style="display:flex;gap:4px;padding:8px 12px;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+          <button class="ftab active" id="exm-ftab-all"    onclick="setExmFilter('all',this)">Semua</button>
+          <button class="ftab"        id="exm-ftab-cex"    onclick="setExmFilter('cex',this)">🏦 CEX</button>
+          <button class="ftab"        id="exm-ftab-dex"    onclick="setExmFilter('dex',this)">🔄 DEX</button>
+          <button class="ftab"        id="exm-ftab-hybrid" onclick="setExmFilter('hybrid',this)">⚡ Hybrid</button>
+        </div>
         <div id="exm-list" class="ex-list-scroll"></div>
       </div>
       <div class="panel" id="exm-edit-panel">
@@ -2128,12 +2134,23 @@ function _renderManageExchangesPanel() {
   _renderExManageList();
 }
 
+  let _exmCurrentFilter = 'all';
+
+  function setExmFilter(mode, btn) {
+  _exmCurrentFilter = mode;
+  ['exm-ftab-all','exm-ftab-cex','exm-ftab-dex','exm-ftab-hybrid'].forEach(id => {
+    document.getElementById(id)?.classList.remove('active');
+  });
+  btn.classList.add('active');
+  _renderExManageList();
+}
 function _renderExManageList() {
   const container = document.getElementById('exm-list');
   if (!container) return;
   const q = (document.getElementById('exm-search')?.value || '').toLowerCase();
   const filtered = [..._exManageList]
     .filter(e => !q || (e.exchange_name||'').toLowerCase().includes(q))
+    .filter(e => _exmCurrentFilter === 'all' || (e.type||'cex').toLowerCase() === _exmCurrentFilter)
     .sort((a,b) => (a.rank||9999)-(b.rank||9999));
   document.getElementById('exm-count').textContent = filtered.length;
   if (!filtered.length) {
@@ -2147,7 +2164,7 @@ function _renderExManageList() {
         <div class="proj-item-name">${esc(ex.exchange_name||'—')}</div>
         <div class="proj-item-badges">
           ${ex.rank != null ? `<span class="proj-item-status st-c">#${ex.rank}</span>` : ''}
-          <span class="live-dot on">● ${(ex.type||'cex').toUpperCase()}</span>
+          <span class="proj-item-status ${(ex.type||'cex')==='cex'?'st-a':(ex.type==='dex'?'st-p':'st-w')}">${(ex.type||'cex').toUpperCase()}</span>
           ${ex.country ? `<span class="proj-item-status st-d">${esc(ex.country)}</span>` : ''}
         </div>
       </div>
@@ -2157,6 +2174,7 @@ function _renderExManageList() {
                      cursor:pointer">🗑</button>
     </div>`).join('');
 }
+
 
 function _showExManageForm(id) {
   _exManageEditId = id;
