@@ -31,6 +31,85 @@ module.exports = async function handler(req, res) {
   }
 
   // ─────────────────────────────────────────────
+  // EXCHANGES HANDLER (tabel exchanges — data basic)
+  // ─────────────────────────────────────────────
+  if (type === 'exchanges') {
+    if (req.method === 'GET') {
+      try {
+        const r = await fetch(`${BASE}/exchanges?select=*&order=rank.asc.nullslast`, { headers: H });
+        const data = await r.json();
+        if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
+        return res.status(200).json(Array.isArray(data) ? data : []);
+      } catch(e) { return res.status(500).json({ error: e.message }); }
+    }
+
+    if (req.method === 'POST') {
+      if (!req.body?.exchange_name)
+        return res.status(400).json({ error: 'Field "exchange_name" wajib diisi' });
+      try {
+        const payload = {
+          exchange_name: req.body.exchange_name,
+          rank:          req.body.rank ? parseInt(req.body.rank, 10) : null,
+          logo_url:      req.body.logo_url     || null,
+          country:       req.body.country      || null,
+          key_features:  req.body.key_features || null,
+          best_for:      req.body.best_for     || null,
+          type:          req.body.type         || 'cex',
+          year_founded:  req.body.year_founded || null,
+        };
+        const r = await fetch(`${BASE}/exchanges`, {
+          method: 'POST', headers: H, body: JSON.stringify(payload),
+        });
+        const data = await r.json();
+        if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
+        return res.status(201).json(data);
+      } catch(e) { return res.status(500).json({ error: e.message }); }
+    }
+
+    if (req.method === 'PATCH') {
+      if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
+      try {
+        const payload = {};
+        const b = req.body;
+        if ('exchange_name' in b) payload.exchange_name = b.exchange_name || null;
+        if ('rank'          in b) payload.rank          = b.rank ? parseInt(b.rank, 10) : null;
+        if ('logo_url'      in b) payload.logo_url      = b.logo_url      || null;
+        if ('country'       in b) payload.country       = b.country       || null;
+        if ('key_features'  in b) payload.key_features  = b.key_features  || null;
+        if ('best_for'      in b) payload.best_for      = b.best_for      || null;
+        if ('type'          in b) payload.type          = b.type          || 'cex';
+        if ('year_founded'  in b) payload.year_founded  = b.year_founded  || null;
+        const r = await fetch(`${BASE}/exchanges?id=eq.${encodeURIComponent(id)}`, {
+          method: 'PATCH', headers: H, body: JSON.stringify(payload),
+        });
+        const text = await r.text();
+        let result = null;
+        if (text) { try { result = JSON.parse(text); } catch(e) {} }
+        if (!r.ok) return res.status(r.status).json({ error: serializeError(result || text) });
+        return res.status(200).json({ success: true, updated: result });
+      } catch(e) { return res.status(500).json({ error: e.message }); }
+    }
+
+    if (req.method === 'DELETE') {
+      if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
+      try {
+        const r = await fetch(`${BASE}/exchanges?id=eq.${encodeURIComponent(id)}`, {
+          method: 'DELETE', headers: H,
+        });
+        if (!r.ok) {
+          const err = await r.json().catch(() => ({}));
+          return res.status(r.status).json({ error: serializeError(err) });
+        }
+        return res.status(200).json({ success: true });
+      } catch(e) { return res.status(500).json({ error: e.message }); }
+    }
+
+    res.setHeader('Allow', ['GET','POST','PATCH','DELETE']);
+    return res.status(405).json({ error: `Method ${req.method} tidak diizinkan untuk exchanges` });
+  }
+  
+
+  // ─────────────────────────────────────────────
   // EXCHANGE DETAILS HANDLER
   // ─────────────────────────────────────────────
   if (type === 'exchange-details') {
