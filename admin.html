@@ -1322,6 +1322,10 @@
     const result = await res.json();
     if (!res.ok) throw new Error(result.error || `HTTP ${res.status}`);
     showToast(editingId ? '✓ Berhasil diupdate!' : '✓ Proyek ditambahkan!', 'success');
+    ['btn-save','btn-save-bottom'].forEach(btnId => {
+      const el = document.getElementById(btnId);
+      if (el) { el.disabled = false; el.innerHTML = editingId ? '💾 Simpan' : '➕ Tambah'; }
+    });
     await loadProjects();
     if (isNew && Array.isArray(result) && result[0]) { editingId = result[0].id; loadEdit(editingId); }
   } catch(e) {
