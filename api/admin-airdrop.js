@@ -474,7 +474,7 @@ if (req.method === 'PATCH') {
         method: 'PATCH', headers: H,
         body: JSON.stringify(buildAirdropsPayload(req.body)),
       }),
-      fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`, {
+      fetch(`${BASE}/proyek?airdrop_id=eq.${parseInt(id, 10)}`, {
         method: 'PATCH', headers: H,
         body: JSON.stringify(buildProyekPayload(req.body)),
       }),
