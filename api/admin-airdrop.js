@@ -483,26 +483,19 @@ if (!r2.ok) {
       const checkData = await rCheck.json();
       const intId = checkData?.[0]?.id;
 
-      if (intId !== undefined) {
-        const controller = new AbortController();
-        const timeout = setTimeout(() => controller.abort(), 8000);
-        try {
-          await fetch(`${BASE}/proyek?airdrop_id=eq.${intId}`, {
-            method: 'PATCH',
-            headers: H,
-            body: JSON.stringify(buildProyekPayload(req.body)),
-            signal: controller.signal,
-          });
-        } catch(e) {
-          console.warn('Sync proyek PATCH timeout/error:', e.message);
-        } finally {
-          clearTimeout(timeout);
-        }
+     if (intId !== undefined) {
+  // Fire and forget — jangan await
+  fetch(`${BASE}/proyek?airdrop_id=eq.${intId}`, {
+    method: 'PATCH',
+    headers: H,
+    body: JSON.stringify(buildProyekPayload(req.body)),
+  }).catch(e => console.warn('Sync proyek PATCH error:', e.message));
 
-        if (req.body._roadmap !== undefined && intId !== undefined) {
-          await saveRoadmap(BASE, H, intId, req.body._roadmap || []);
-        }
-      }
+  if (req.body._roadmap !== undefined) {
+    saveRoadmap(BASE, H, intId, req.body._roadmap || [])
+      .catch(e => console.warn('saveRoadmap error:', e.message));
+  }
+}
 
       const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...buildAirdropsPayload(req.body) }]);
       return res.status(200).json(updated);
