@@ -465,44 +465,36 @@ if (!r2.ok) {
     }
   }
 
-  if (req.method === 'PATCH') {
-    if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
+if (req.method === 'PATCH') {
+  if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
-    try {
-      const r1 = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, {
+  try {
+    const [r1, rProyek] = await Promise.all([
+      fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, {
         method: 'PATCH', headers: H,
         body: JSON.stringify(buildAirdropsPayload(req.body)),
-      });
+      }),
+      fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`, {
+        method: 'PATCH', headers: H,
+        body: JSON.stringify(buildProyekPayload(req.body)),
+      }),
+    ]);
 
-      let result = null;
-      const text = await r1.text();
-      if (text) { try { result = JSON.parse(text); } catch(e) { result = null; } }
-      if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result || text) });
+    const text = await r1.text();
+    let result = null;
+    if (text) { try { result = JSON.parse(text); } catch(e) {} }
+    if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result || text) });
 
-      const rCheck = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}&select=id`, { headers: H });
-      const checkData = await rCheck.json();
-      const intId = checkData?.[0]?.id;
+    if (req.body._roadmap !== undefined) {
+      await saveRoadmap(BASE, H, id, req.body._roadmap || []);
+    }
 
-     if (intId !== undefined) {
-  // Fire and forget — jangan await
-  fetch(`${BASE}/proyek?airdrop_id=eq.${intId}`, {
-    method: 'PATCH',
-    headers: H,
-    body: JSON.stringify(buildProyekPayload(req.body)),
-  }).catch(e => console.warn('Sync proyek PATCH error:', e.message));
-
-  if (req.body._roadmap !== undefined) {
-    saveRoadmap(BASE, H, intId, req.body._roadmap || [])
-      .catch(e => console.warn('saveRoadmap error:', e.message));
+    const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...buildAirdropsPayload(req.body) }]);
+    return res.status(200).json(updated);
+  } catch (e) {
+    return res.status(500).json({ error: e.message });
   }
 }
-
-      const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...buildAirdropsPayload(req.body) }]);
-      return res.status(200).json(updated);
-    } catch (e) {
-      return res.status(500).json({ error: e.message });
-    }
-  }
 
   if (req.method === 'DELETE') {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
