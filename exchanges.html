@@ -442,18 +442,25 @@
         .social-link svg { width:16px; height:16px; flex-shrink:0; }
 
         /* FOUNDER CARDS */
+        .founder-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(90px, 1fr));
+            gap: 8px;
+        }
         .founder-card {
             display: flex;
             flex-direction: column;
             align-items: center;
+            justify-content: flex-start;
             gap: 8px;
             text-align: center;
-            padding: 14px 12px;
+            padding: 16px 10px;
             border-radius: 12px;
             border: 1px solid var(--border2);
             background: var(--green3);
-            min-width: 90px;
             transition: all 0.2s;
+            height: 100%;
+            min-height: 150px;
         }
         .founder-card:hover { border-color:var(--border); background:var(--green2); }
         .founder-avatar {
@@ -1082,7 +1089,7 @@ function renderDetailView(ex) {
         foundersHtml = `
         <div class="sidebar-card">
             <div class="sidebar-section-label">CEO / Founder</div>
-            <div style="display:flex;gap:10px;flex-wrap:wrap;justify-content:flex-start">
+            <div class="founder-grid">
                 ${founders.map(f => `
                 <div class="founder-card">
                     ${f.photo
