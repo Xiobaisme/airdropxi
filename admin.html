@@ -1314,23 +1314,29 @@
     });
     try {
       const isNew = !editingId;
-      const res = await fetch(
-        editingId ? `/api/admin-airdrop?id=${editingId}` : '/api/admin-airdrop',
-        { method: editingId ? 'PATCH' : 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(payload) }
-      );
-      const result = await res.json();
-      if (!res.ok) throw new Error(result.error || `HTTP ${res.status}`);
-      showToast(editingId ? '✓ Berhasil diupdate!' : '✓ Proyek ditambahkan!', 'success');
-      await loadProjects();
-      if (isNew && Array.isArray(result) && result[0]) { editingId = result[0].id; loadEdit(editingId); }
-    } catch(e) {
+      } catch(e) {
       showToast('Error: ' + e.message, 'error');
       ['btn-save','btn-save-bottom'].forEach(id => {
         const el = document.getElementById(id);
         if (el) { el.disabled = false; el.innerHTML = editingId ? '💾 Simpan' : '➕ Tambah'; }
       });
     }
-  }
+      const result = await res.json();
+      if (!res.ok) throw new Error(result.error || `HTTP ${res.status}`);
+      showToast(editingId ? '✓ Berhasil diupdate!' : '✓ Proyek ditambahkan!', 'success');
+      await loadProjects();
+      if (isNew && Array.isArray(result) && result[0]) { editingId = result[0].id; loadEdit(editingId); }
+    } catch(e) {
+      if (e.name === 'AbortError') {
+        showToast('⚠️ Timeout — coba simpan lagi', 'error');
+      } else {
+        showToast('Error: ' + e.message, 'error');
+      }
+      ['btn-save','btn-save-bottom'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) { el.disabled = false; el.innerHTML = editingId ? '💾 Simpan' : '➕ Tambah'; }
+      });
+    }
 
   async function deleteProject(id) {
     const p = projects.find(x => x.id == id);
