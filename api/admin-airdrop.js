@@ -421,13 +421,18 @@ module.exports = async function handler(req, res) {
       if (!newId) throw new Error('Gagal dapat ID setelah insert ke airdrops');
 
       const r2 = await fetch(`${BASE}/proyek`, {
-        method: 'POST', headers: H,
-        body: JSON.stringify(buildProyekPayload(req.body, newId)),
-      });
-      if (!r2.ok) {
-        const err2 = await r2.json().catch(() => ({}));
-        console.error('Sync proyek gagal:', JSON.stringify(err2));
-      }
+  method: 'POST', headers: H,
+  body: JSON.stringify(buildProyekPayload(req.body, newId)),
+});
+if (!r2.ok) {
+  const err2 = await r2.json().catch(() => ({}));
+  console.error('Sync proyek gagal:', JSON.stringify(err2));
+  // Rollback airdrops entry
+  await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(newId)}`, {
+    method: 'DELETE', headers: H,
+  });
+  return res.status(500).json({ error: 'Gagal insert ke proyek: ' + serializeError(err2) });
+}
 
       if (req.body._roadmap && Array.isArray(req.body._roadmap) && req.body._roadmap.length > 0) {
         await saveRoadmap(BASE, H, newId, req.body._roadmap);
