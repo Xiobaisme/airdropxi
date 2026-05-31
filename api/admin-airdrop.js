@@ -361,9 +361,6 @@ module.exports = async function handler(req, res) {
     if (airdropsId !== undefined) payload.airdrop_id = airdropsId;
     return payload;
   }
-    if (airdropsId !== undefined) payload.airdrop_id = airdropsId;
-    return payload;
-  }
 
   if (req.method === 'GET') {
     try {
