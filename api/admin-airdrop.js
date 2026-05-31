@@ -478,14 +478,17 @@ if (req.method === 'PATCH') {
   if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
   try {
+    const airdropsPayload = buildAirdropsPayload(req.body);
+    const proyekPayload   = buildProyekPayload(req.body);
+
     const [r1, rProyek] = await Promise.all([
       fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, {
         method: 'PATCH', headers: H,
-        body: JSON.stringify(buildAirdropsPayload(req.body)),
+        body: JSON.stringify(airdropsPayload),
       }),
-      fetch(`${BASE}/proyek?airdrop_id=eq.${parseInt(id, 10)}`, {
+      fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`, {
         method: 'PATCH', headers: H,
-        body: JSON.stringify(buildProyekPayload(req.body)),
+        body: JSON.stringify(proyekPayload),
       }),
     ]);
 
@@ -494,11 +497,17 @@ if (req.method === 'PATCH') {
     if (text) { try { result = JSON.parse(text); } catch(e) {} }
     if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result || text) });
 
+    const proyekText = await rProyek.text();
+    if (!rProyek.ok) {
+      console.error('PATCH proyek gagal:', proyekText);
+      return res.status(500).json({ error: 'PATCH proyek gagal: ' + proyekText });
+    }
+
     if (req.body._roadmap !== undefined) {
       await saveRoadmap(BASE, H, id, req.body._roadmap || []);
     }
 
-    const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...buildAirdropsPayload(req.body) }]);
+    const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...airdropsPayload }]);
     return res.status(200).json(updated);
   } catch (e) {
     return res.status(500).json({ error: e.message });
