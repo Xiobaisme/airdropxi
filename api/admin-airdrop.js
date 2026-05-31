@@ -369,10 +369,19 @@ module.exports = async function handler(req, res) {
   if (req.method === 'GET') {
     try {
       if (!id) {
-        const r = await fetch(`${BASE}/airdrops?select=*&order=created_at.desc`, { headers: H });
-        const data = await r.json();
-        if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
-        return res.status(200).json(Array.isArray(data) ? data : []);
+        const [rA, rP] = await Promise.all([
+          fetch(`${BASE}/airdrops?select=*&order=created_at.desc`, { headers: H }),
+          fetch(`${BASE}/proyek?select=*`, { headers: H }),
+        ]);
+        const airdrops = await rA.json();
+        const proyeks  = await rP.json();
+        if (!rA.ok) return res.status(rA.status).json({ error: serializeError(airdrops) });
+
+        const merged = airdrops.map(a => {
+          const p = Array.isArray(proyeks) ? proyeks.find(x => x.airdrop_id === a.id) || {} : {};
+          return { ...p, ...a, id: a.id };
+        });
+        return res.status(200).json(merged);
       }
 
       const [r1, r2] = await Promise.all([
