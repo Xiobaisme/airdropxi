@@ -803,26 +803,27 @@ function applyLang() {
     document.documentElement.lang = lang;
 }
 
+// Hanya update ?lang= query param — TIDAK ubah pathname supaya ga 404 di Vercel
+function updateURLLang() {
+    const url = new URL(window.location);
+    url.searchParams.set('lang', lang);
+    history.replaceState({}, '', url);
+}
+
 function toggleLang() {
     lang = lang === 'id' ? 'en' : 'id';
     localStorage.setItem('xi-lang', lang);
     applyLang();
-    // Update URL to reflect language
-    const url = new URL(window.location);
-    const pathParts = url.pathname.split('/').filter(Boolean);
-    // Remove existing lang prefix if present
-    if (pathParts[0] === 'en' || pathParts[0] === 'id') pathParts.shift();
-    url.pathname = '/' + lang + '/' + pathParts.join('/');
-    // Try pushState — if server doesn't support it, just update state silently
-    try { history.replaceState({lang}, '', url); } catch(e) {}
+    updateURLLang();
     if (currentDetailExchange) { detailLang = lang; syncDetailLangUI(); renderAboutSection(currentDetailExchange); }
 }
 
-// Read lang from URL on load
-(function detectLangFromURL() {
-    const parts = window.location.pathname.split('/').filter(Boolean);
-    if (parts[0] === 'en' || parts[0] === 'id') {
-        lang = parts[0];
+// Baca lang dari ?lang= query param, fallback ke localStorage
+(function detectLang() {
+    const params = new URLSearchParams(window.location.search);
+    const urlLang = params.get('lang');
+    if (urlLang === 'en' || urlLang === 'id') {
+        lang = urlLang;
         localStorage.setItem('xi-lang', lang);
     }
     detailLang = lang;
@@ -839,12 +840,7 @@ function setDetailLang(l) {
     localStorage.setItem('xi-lang', lang);
     applyLang();
     syncDetailLangUI();
-    // Update URL lang prefix
-    const url = new URL(window.location);
-    const pathParts = url.pathname.split('/').filter(Boolean);
-    if (pathParts[0] === 'en' || pathParts[0] === 'id') pathParts.shift();
-    url.pathname = '/' + lang + '/' + pathParts.join('/');
-    try { history.replaceState({lang}, '', url); } catch(e) {}
+    updateURLLang();
     if (currentDetailExchange) renderAboutSection(currentDetailExchange);
 }
 
@@ -1047,11 +1043,8 @@ function openDetail(slug) {
     const ex = allData.find(d => slugify(d.exchange_name) === slug);
     if (!ex) return;
     const url = new URL(window.location);
-    // Update URL with lang prefix
-    const pathParts = url.pathname.split('/').filter(Boolean);
-    if (pathParts[0] === 'en' || pathParts[0] === 'id') pathParts.shift();
-    url.pathname = '/' + lang + '/' + (pathParts.join('/') || 'exchanges.html');
     url.searchParams.set('exchange', slug);
+    url.searchParams.set('lang', lang);
     history.pushState({exchange:slug}, '', url);
     renderDetailView(ex);
 }
@@ -1194,12 +1187,9 @@ function closeDetail() {
     currentDetailExchange = null;
     document.getElementById('detail-view').classList.remove('active');
     document.getElementById('list-view').classList.remove('hidden-view');
-    // Restore URL
     const url = new URL(window.location);
-    const pathParts = url.pathname.split('/').filter(Boolean);
-    if (pathParts[0] === 'en' || pathParts[0] === 'id') pathParts.shift();
-    url.pathname = '/' + lang + '/' + (pathParts.join('/') || 'exchanges.html');
     url.searchParams.delete('exchange');
+    url.searchParams.set('lang', lang);
     history.pushState({}, '', url);
     window.scrollTo({top:0, behavior:'smooth'});
 }
