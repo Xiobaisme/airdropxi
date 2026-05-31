@@ -348,20 +348,19 @@ module.exports = async function handler(req, res) {
       network:             p.network             || null,
       tge_date:            p.tge_date            || null,
       logo_url:            p.logo_url            || null,
-      // Sosial media — disimpan di proyek
       twitter:             p.twitter             || null,
       discord:             p.discord             || null,
       telegram:            p.telegram            || null,
       linkedin:            p.linkedin            || null,
       youtube:             p.youtube             || null,
       instagram:           p.instagram           || null,
-      facebook:            p.facebook            || null,
-      github:              p.github              || null,
-      // FAQ
       faqID:               p.faqID               || null,
       faqEN:               p.faqEN               || null,
       testnet_links:       p.testnet_links       || null,
     };
+    if (airdropsId !== undefined) payload.airdrop_id = airdropsId;
+    return payload;
+  }
     if (airdropsId !== undefined) payload.airdrop_id = airdropsId;
     return payload;
   }
