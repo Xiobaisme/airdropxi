@@ -567,6 +567,14 @@
         }
         @media (min-width: 768px) { .footer-grid { grid-template-columns: 1.2fr 1fr 1fr; gap: 2rem; } }
         main { flex: 1; position: relative; z-index: 1; }
+        
+    /* STICKY TABLE HEADER */
+    thead th {
+             position: sticky;
+             top: 57px; /* tinggi nav ~57px */
+              z-index: 10;
+             }
+        
     </style>
 </head>
 <body>
