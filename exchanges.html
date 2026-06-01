@@ -257,7 +257,12 @@
             background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:5px;
         }
         @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-        .table-wrap { overflow-x:auto; -webkit-overflow-scrolling:touch; }
+       .table-wrap {
+       overflow-x: auto;
+       overflow-y: auto;
+       max-height: calc(100vh - 120px);
+      -webkit-overflow-scrolling: touch;
+      }
 
         /* ===================== DETAIL VIEW ===================== */
         #detail-view { display:none; animation:detailIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
@@ -568,9 +573,10 @@
         @media (min-width: 768px) { .footer-grid { grid-template-columns: 1.2fr 1fr 1fr; gap: 2rem; } }
         main { flex: 1; position: relative; z-index: 1; }
         
-   thead th {
+   /* STICKY TABLE HEADER */
+thead th {
     position: sticky;
-    top: 76px;
+    top: 0;
     z-index: 10;
     background: var(--bg2);
 }
