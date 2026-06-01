@@ -694,7 +694,8 @@
                 </table>
             </div>
 
-            <div class="flex items-center justify-between px-4 py-2 border-t" style="border-color:var(--border2)">
+               <div id="paginationWrap"></div>
+                 <div class="flex items-center justify-between px-4 py-2 border-t" style="border-color:var(--border2)">
                 <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2)" id="footerCount">—</p>
                 <a href="https://coinmarketcap.com" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2)">Source: CoinMarketCap</a>
             </div>
@@ -921,6 +922,12 @@ async function loadData() {
 function getRankClass(r) { return r===1?'gold':r===2?'silver':r===3?'bronze':''; }
 function slugify(name) { return (name||'').toLowerCase().replace(/[^a-z0-9]+/g,'-').replace(/^-|-$/g,''); }
 
+// ============================================================
+// PAGINATION STATE
+// ============================================================
+let currentPage = 1;
+let rowsPerPage = 30;
+
 function renderTable() {
     const tbody = document.getElementById('tbody');
     let filtered = allData.filter(d => d.type === currentType);
@@ -932,42 +939,123 @@ function renderTable() {
             d.best_for?.toLowerCase().includes(q)
         );
     }
-    const total = allData.filter(d=>d.type===currentType).length;
+    const total = allData.filter(d => d.type === currentType).length;
     document.getElementById('tabCount').textContent = filtered.length !== total ? `${filtered.length}/${total}` : `${total}`;
+
     if (!filtered.length) {
         document.getElementById('table').classList.add('hidden');
         document.getElementById('emptyState').classList.remove('hidden');
         document.getElementById('footerCount').textContent = '0 results';
+        renderPagination(0, 0);
         return;
     }
+
     document.getElementById('emptyState').classList.add('hidden');
     document.getElementById('table').classList.remove('hidden');
-    tbody.innerHTML = filtered.map((item, idx) => {
+
+    // Pagination
+    const totalFiltered = filtered.length;
+    const totalPages = Math.ceil(totalFiltered / rowsPerPage);
+    if (currentPage > totalPages) currentPage = 1;
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = Math.min(start + rowsPerPage, totalFiltered);
+    const pageData = filtered.slice(start, end);
+
+    tbody.innerHTML = pageData.map((item, idx) => {
         const rc = getRankClass(item.rank);
         const slug = slugify(item.exchange_name);
         const logoHtml = item.logo_url
             ? `<img src="${item.logo_url}" class="logo-img" alt="${item.exchange_name}" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"><div class="logo-placeholder" style="display:none">${item.exchange_name?.[0]||'?'}</div>`
             : `<div class="logo-placeholder">${item.exchange_name?.[0]||'?'}</div>`;
-        return `<tr onclick="openDetail('${slug}')" style="animation-delay:${idx*30}ms" title="View ${item.exchange_name}">
+        return `<tr onclick="openDetail('${slug}')" style="animation-delay:${idx*20}ms" title="View ${item.exchange_name}">
             <td><div class="rank-badge ${rc}">${item.rank||'—'}</div></td>
             <td><div class="flex items-center gap-2.5">
                 ${logoHtml}
                 <div>
-                    <span class="font-semibold" style="font-size:13px;color:var(--text)">${item.exchange_name}</span>
-                    ${item.year_founded?`<div style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2);margin-top:1px">Est. ${item.year_founded}</div>`:''}
+                    <span class="font-semibold" style="font-size:15px;color:var(--text)">${item.exchange_name}</span>
+                    ${item.year_founded?`<div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2);margin-top:1px">Est. ${item.year_founded}</div>`:''}
                 </div>
             </div></td>
-            <td class="hidden md:table-cell" style="color:var(--text2);font-size:12px">${item.country||'—'}</td>
-            <td class="hidden lg:table-cell" style="color:var(--text2);font-size:12px">${item.key_features||'—'}</td>
-            <td><span class="tag">${item.best_for||'—'}</span></td>
+            <td class="hidden md:table-cell" style="color:var(--text2);font-size:14px">${item.country||'—'}</td>
+            <td class="hidden lg:table-cell" style="color:var(--text2);font-size:14px">${item.key_features||'—'}</td>
+            <td><span class="tag" style="font-size:11px;padding:3px 10px">${item.best_for||'—'}</span></td>
         </tr>`;
     }).join('');
-    document.getElementById('footerCount').textContent = `Showing ${filtered.length} of ${total} exchanges`;
+
+    document.getElementById('footerCount').textContent = `Showing ${start + 1}–${end} of ${totalFiltered} exchanges`;
+    renderPagination(totalPages, totalFiltered);
 }
 
-function filterTable() { searchQuery = document.getElementById('searchInput').value; renderTable(); }
+function renderPagination(totalPages, totalFiltered) {
+    const wrap = document.getElementById('paginationWrap');
+    if (!wrap) return;
+    if (totalPages <= 1 && totalFiltered <= rowsPerPage) {
+        wrap.innerHTML = '';
+        return;
+    }
+
+    const start = (currentPage - 1) * rowsPerPage;
+    const end = Math.min(start + rowsPerPage, totalFiltered);
+
+    // Build page buttons (max 5 visible)
+    let pages = [];
+    if (totalPages <= 7) {
+        for (let i = 1; i <= totalPages; i++) pages.push(i);
+    } else {
+        pages = [1];
+        if (currentPage > 3) pages.push('...');
+        for (let i = Math.max(2, currentPage - 1); i <= Math.min(totalPages - 1, currentPage + 1); i++) pages.push(i);
+        if (currentPage < totalPages - 2) pages.push('...');
+        pages.push(totalPages);
+    }
+
+    wrap.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:10px 14px;border-top:1px solid var(--border2)">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)">${start+1}–${end} of ${totalFiltered}</span>
+            <div style="display:flex;align-items:center;gap:6px">
+                <button onclick="goPage(${currentPage-1})" ${currentPage===1?'disabled':''} style="width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--green3);color:var(--text2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;opacity:${currentPage===1?'0.35':'1'}">‹</button>
+                ${pages.map(p => p === '...'
+                    ? `<span style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);padding:0 2px">…</span>`
+                    : `<button onclick="goPage(${p})" style="width:30px;height:30px;border-radius:7px;border:1px solid ${p===currentPage?'var(--green)':'var(--border2)'};background:${p===currentPage?'var(--green2)':'var(--green3)'};color:${p===currentPage?'var(--green)':'var(--text2)'};cursor:pointer;font-size:12px;font-family:'JetBrains Mono',monospace;font-weight:${p===currentPage?700:400}">${p}</button>`
+                ).join('')}
+                <button onclick="goPage(${currentPage+1})" ${currentPage===totalPages?'disabled':''} style="width:30px;height:30px;border-radius:7px;border:1px solid var(--border);background:var(--green3);color:var(--text2);cursor:pointer;font-size:14px;display:flex;align-items:center;justify-content:center;opacity:${currentPage===totalPages?'0.35':'1'}">›</button>
+            </div>
+            <div style="display:flex;align-items:center;gap:6px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)">Rows</span>
+                ${[10,30,50].map(n => `
+                    <button onclick="setRowsPerPage(${n})" style="padding:4px 10px;border-radius:6px;border:1px solid ${rowsPerPage===n?'var(--green)':'var(--border2)'};background:${rowsPerPage===n?'var(--green2)':'var(--green3)'};color:${rowsPerPage===n?'var(--green)':'var(--text2)'};cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:${rowsPerPage===n?700:400}">${n}</button>
+                `).join('')}
+            </div>
+        </div>
+    `;
+}
+
+function goPage(p) {
+    const filtered = allData.filter(d => d.type === currentType);
+    const total = Math.ceil(filtered.length / rowsPerPage);
+    if (p < 1 || p > total) return;
+    currentPage = p;
+    renderTable();
+    document.getElementById('list-view').scrollIntoView({behavior:'smooth', block:'start'});
+}
+
+function setRowsPerPage(n) {
+    rowsPerPage = n;
+    currentPage = 1;
+    renderTable();
+}
+
+function filterTable() {
+    currentPage = 1;
+    searchQuery = document.getElementById('searchInput').value;
+    renderTable();
+}
+
 function setActiveTab(type) {
-    currentType = type; searchQuery = ''; document.getElementById('searchInput').value = '';
+    currentPage = 1;
+    currentType = type;
+    searchQuery = '';
+    document.getElementById('searchInput').value = '';
     document.getElementById('cexTab').className = (type==='cex')?'tab-active px-4 py-1.5 rounded-full text-xs font-bold':'tab-inactive px-4 py-1.5 rounded-full text-xs font-bold';
     document.getElementById('dexTab').className = (type==='dex')?'tab-active px-4 py-1.5 rounded-full text-xs font-bold':'tab-inactive px-4 py-1.5 rounded-full text-xs font-bold';
     if (allData.length) renderTable();
