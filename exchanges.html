@@ -257,12 +257,12 @@
             background-size:200% 100%; animation:shimmer 1.5s infinite; border-radius:5px;
         }
         @keyframes shimmer { 0%{background-position:200% 0} 100%{background-position:-200% 0} }
-       .table-wrap {
-       overflow-x: auto;
-       overflow-y: auto;
-       max-height: calc(100vh - 120px);
-      -webkit-overflow-scrolling: touch;
-      }
+        .table-wrap {
+            overflow-x: auto;
+            overflow-y: auto;
+            max-height: calc(100vh - 120px);
+            -webkit-overflow-scrolling: touch;
+        }
 
         /* ===================== DETAIL VIEW ===================== */
         #detail-view { display:none; animation:detailIn 0.4s cubic-bezier(0.16,1,0.3,1) both; }
@@ -407,6 +407,7 @@
         .detail-section:nth-child(2) { animation-delay: 0.10s; }
         .detail-section:nth-child(3) { animation-delay: 0.15s; }
         .detail-section:nth-child(4) { animation-delay: 0.20s; }
+        .detail-section:nth-child(5) { animation-delay: 0.25s; }
         .detail-section-title {
             font-family: 'JetBrains Mono', monospace;
             font-size: 9px;
@@ -517,6 +518,19 @@
         }
         .lang-pill.active { background: var(--green2); color: var(--green); border: 1px solid var(--border); }
 
+        /* MARKETS TABLE */
+        .markets-tbody tr { animation: none; }
+        .markets-tbody tr:hover { background: var(--green2); transform: translateX(2px); }
+        .markets-tbody td { padding: 7px 10px; border-bottom: 1px solid var(--border2); vertical-align: middle; }
+        .markets-tbody tr:hover td { border-color: transparent; }
+        .trust-green { color: #22c55e; }
+        .trust-yellow { color: #f59e0b; }
+        .trust-red { color: #ef4444; }
+        .live-dot {
+            width: 6px; height: 6px; border-radius: 50%; background: #22c55e;
+            animation: pulse 2s infinite; display: inline-block; margin-right: 5px;
+        }
+
         /* FOOTER */
         footer {
             position: relative; z-index: 10; margin-top: 3rem;
@@ -572,15 +586,14 @@
         }
         @media (min-width: 768px) { .footer-grid { grid-template-columns: 1.2fr 1fr 1fr; gap: 2rem; } }
         main { flex: 1; position: relative; z-index: 1; }
-        
-   /* STICKY TABLE HEADER */
-thead th {
-    position: sticky;
-    top: 0;
-    z-index: 10;
-    background: var(--bg2);
-}
-        
+
+        /* STICKY TABLE HEADER */
+        thead th {
+            position: sticky;
+            top: 0;
+            z-index: 10;
+            background: var(--bg2);
+        }
     </style>
 </head>
 <body>
@@ -700,8 +713,8 @@ thead th {
                 </table>
             </div>
 
-               <div id="paginationWrap"></div>
-                 <div class="flex items-center justify-between px-4 py-2 border-t" style="border-color:var(--border2)">
+            <div id="paginationWrap"></div>
+            <div class="flex items-center justify-between px-4 py-2 border-t" style="border-color:var(--border2)">
                 <p style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2)" id="footerCount">—</p>
                 <a href="https://coinmarketcap.com" target="_blank" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2)">Source: CoinMarketCap</a>
             </div>
@@ -807,8 +820,7 @@ function openMobileMenu() { document.getElementById('mobileMenu').classList.add(
 function closeMobileMenu() { document.getElementById('mobileMenu').classList.remove('open'); }
 
 // ============================================================
-// LANG — now with URL-based routing
-// e.g. /en/exchanges.html?exchange=binance or /id/exchanges.html?exchange=binance
+// LANG
 // ============================================================
 let lang = localStorage.getItem('xi-lang') || 'id';
 let detailLang = lang;
@@ -817,14 +829,11 @@ function applyLang() {
     document.getElementById('langBtn').textContent = lang === 'id' ? 'EN' : 'ID';
     document.documentElement.lang = lang;
 }
-
-// Hanya update ?lang= query param — TIDAK ubah pathname supaya ga 404 di Vercel
 function updateURLLang() {
     const url = new URL(window.location);
     url.searchParams.set('lang', lang);
     history.replaceState({}, '', url);
 }
-
 function toggleLang() {
     lang = lang === 'id' ? 'en' : 'id';
     localStorage.setItem('xi-lang', lang);
@@ -832,8 +841,6 @@ function toggleLang() {
     updateURLLang();
     if (currentDetailExchange) { detailLang = lang; syncDetailLangUI(); renderAboutSection(currentDetailExchange); }
 }
-
-// Baca lang dari ?lang= query param, fallback ke localStorage
 (function detectLang() {
     const params = new URLSearchParams(window.location.search);
     const urlLang = params.get('lang');
@@ -844,12 +851,10 @@ function toggleLang() {
     detailLang = lang;
     applyLang();
 })();
-
 function syncDetailLangUI() {
     document.getElementById('detailLangEN').classList.toggle('active', detailLang === 'en');
     document.getElementById('detailLangID').classList.toggle('active', detailLang === 'id');
 }
-
 function setDetailLang(l) {
     detailLang = l; lang = l;
     localStorage.setItem('xi-lang', lang);
@@ -959,7 +964,6 @@ function renderTable() {
     document.getElementById('emptyState').classList.add('hidden');
     document.getElementById('table').classList.remove('hidden');
 
-    // Pagination
     const totalFiltered = filtered.length;
     const totalPages = Math.ceil(totalFiltered / rowsPerPage);
     if (currentPage > totalPages) currentPage = 1;
@@ -995,15 +999,9 @@ function renderTable() {
 function renderPagination(totalPages, totalFiltered) {
     const wrap = document.getElementById('paginationWrap');
     if (!wrap) return;
-    if (totalPages <= 1 && totalFiltered <= rowsPerPage) {
-        wrap.innerHTML = '';
-        return;
-    }
-
+    if (totalPages <= 1 && totalFiltered <= rowsPerPage) { wrap.innerHTML = ''; return; }
     const start = (currentPage - 1) * rowsPerPage;
     const end = Math.min(start + rowsPerPage, totalFiltered);
-
-    // Build page buttons (max 5 visible)
     let pages = [];
     if (totalPages <= 7) {
         for (let i = 1; i <= totalPages; i++) pages.push(i);
@@ -1014,7 +1012,6 @@ function renderPagination(totalPages, totalFiltered) {
         if (currentPage < totalPages - 2) pages.push('...');
         pages.push(totalPages);
     }
-
     wrap.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:10px;padding:10px 14px;border-top:1px solid var(--border2)">
             <span style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)">${start+1}–${end} of ${totalFiltered}</span>
@@ -1032,8 +1029,7 @@ function renderPagination(totalPages, totalFiltered) {
                     <button onclick="setRowsPerPage(${n})" style="padding:4px 10px;border-radius:6px;border:1px solid ${rowsPerPage===n?'var(--green)':'var(--border2)'};background:${rowsPerPage===n?'var(--green2)':'var(--green3)'};color:${rowsPerPage===n?'var(--green)':'var(--text2)'};cursor:pointer;font-size:11px;font-family:'JetBrains Mono',monospace;font-weight:${rowsPerPage===n?700:400}">${n}</button>
                 `).join('')}
             </div>
-        </div>
-    `;
+        </div>`;
 }
 
 function goPage(p) {
@@ -1044,23 +1040,10 @@ function goPage(p) {
     renderTable();
     document.getElementById('list-view').scrollIntoView({behavior:'smooth', block:'start'});
 }
-
-function setRowsPerPage(n) {
-    rowsPerPage = n;
-    currentPage = 1;
-    renderTable();
-}
-
-function filterTable() {
-    currentPage = 1;
-    searchQuery = document.getElementById('searchInput').value;
-    renderTable();
-}
-
+function setRowsPerPage(n) { rowsPerPage = n; currentPage = 1; renderTable(); }
+function filterTable() { currentPage = 1; searchQuery = document.getElementById('searchInput').value; renderTable(); }
 function setActiveTab(type) {
-    currentPage = 1;
-    currentType = type;
-    searchQuery = '';
+    currentPage = 1; currentType = type; searchQuery = '';
     document.getElementById('searchInput').value = '';
     document.getElementById('cexTab').className = (type==='cex')?'tab-active px-4 py-1.5 rounded-full text-xs font-bold':'tab-inactive px-4 py-1.5 rounded-full text-xs font-bold';
     document.getElementById('dexTab').className = (type==='dex')?'tab-active px-4 py-1.5 rounded-full text-xs font-bold':'tab-inactive px-4 py-1.5 rounded-full text-xs font-bold';
@@ -1139,6 +1122,206 @@ const SVG = {
 };
 
 // ============================================================
+// MARKETS — COINGECKO REAL-TIME
+// ============================================================
+const CG_EXCHANGE_MAP = {
+    'binance':      { cgId: 'binance',           cmcUrl: 'https://coinmarketcap.com/exchanges/binance/' },
+    'okx':          { cgId: 'okex',              cmcUrl: 'https://coinmarketcap.com/exchanges/okx/' },
+    'bybit':        { cgId: 'bybit_spot',        cmcUrl: 'https://coinmarketcap.com/exchanges/bybit/' },
+    'kucoin':       { cgId: 'kucoin',            cmcUrl: 'https://coinmarketcap.com/exchanges/kucoin/' },
+    'gate.io':      { cgId: 'gate',              cmcUrl: 'https://coinmarketcap.com/exchanges/gate-io/' },
+    'gate':         { cgId: 'gate',              cmcUrl: 'https://coinmarketcap.com/exchanges/gate-io/' },
+    'bitget':       { cgId: 'bitget',            cmcUrl: 'https://coinmarketcap.com/exchanges/bitget/' },
+    'mexc':         { cgId: 'mxc',               cmcUrl: 'https://coinmarketcap.com/exchanges/mexc/' },
+    'htx':          { cgId: 'huobi',             cmcUrl: 'https://coinmarketcap.com/exchanges/htx/' },
+    'huobi':        { cgId: 'huobi',             cmcUrl: 'https://coinmarketcap.com/exchanges/htx/' },
+    'kraken':       { cgId: 'kraken',            cmcUrl: 'https://coinmarketcap.com/exchanges/kraken/' },
+    'coinbase':     { cgId: 'gdax',              cmcUrl: 'https://coinmarketcap.com/exchanges/coinbase-exchange/' },
+    'bitfinex':     { cgId: 'bitfinex',          cmcUrl: 'https://coinmarketcap.com/exchanges/bitfinex/' },
+    'phemex':       { cgId: 'phemex',            cmcUrl: 'https://coinmarketcap.com/exchanges/phemex/' },
+    'lbank':        { cgId: 'lbank',             cmcUrl: 'https://coinmarketcap.com/exchanges/lbank/' },
+    'bingx':        { cgId: 'bingx',             cmcUrl: 'https://coinmarketcap.com/exchanges/bingx/' },
+    'uniswap':      { cgId: 'uniswap_v3',        cmcUrl: 'https://coinmarketcap.com/exchanges/uniswap-v3/' },
+    'pancakeswap':  { cgId: 'pancakeswap_new',   cmcUrl: 'https://coinmarketcap.com/exchanges/pancakeswap-v2/' },
+    'curve':        { cgId: 'curve',             cmcUrl: 'https://coinmarketcap.com/exchanges/curve-finance/' },
+    'dydx':         { cgId: 'dydx',              cmcUrl: 'https://coinmarketcap.com/exchanges/dydx/' },
+    'gmx':          { cgId: 'gmx',               cmcUrl: 'https://coinmarketcap.com/exchanges/gmx/' },
+    '1inch':        { cgId: '1inch',             cmcUrl: 'https://coinmarketcap.com/exchanges/1inch-network/' },
+    'jupiter':      { cgId: 'jupiter_ag',        cmcUrl: 'https://coinmarketcap.com/exchanges/jupiter/' },
+    'raydium':      { cgId: 'raydium',           cmcUrl: 'https://coinmarketcap.com/exchanges/raydium/' },
+    'orca':         { cgId: 'orca_whirlpools',   cmcUrl: 'https://coinmarketcap.com/exchanges/orca/' },
+    'sushiswap':    { cgId: 'sushiswap',         cmcUrl: 'https://coinmarketcap.com/exchanges/sushiswap/' },
+    'balancer':     { cgId: 'balancer_v2',       cmcUrl: 'https://coinmarketcap.com/exchanges/balancer-v2/' },
+    'bitmart':      { cgId: 'bitmart',           cmcUrl: 'https://coinmarketcap.com/exchanges/bitmart/' },
+    'poloniex':     { cgId: 'poloniex',          cmcUrl: 'https://coinmarketcap.com/exchanges/poloniex/' },
+    'bitstamp':     { cgId: 'bitstamp',          cmcUrl: 'https://coinmarketcap.com/exchanges/bitstamp/' },
+    'gemini':       { cgId: 'gemini',            cmcUrl: 'https://coinmarketcap.com/exchanges/gemini/' },
+};
+
+function getExchangeMapping(exchangeName) {
+    if (!exchangeName) return null;
+    const key = exchangeName.toLowerCase().trim();
+    if (CG_EXCHANGE_MAP[key]) return CG_EXCHANGE_MAP[key];
+    for (const [k, v] of Object.entries(CG_EXCHANGE_MAP)) {
+        if (key.includes(k) || k.includes(key)) return v;
+    }
+    return null;
+}
+
+function fmtVol(v) {
+    if (!v || v === 0) return '—';
+    if (v >= 1e9) return '$' + (v / 1e9).toFixed(2) + 'B';
+    if (v >= 1e6) return '$' + (v / 1e6).toFixed(2) + 'M';
+    if (v >= 1e3) return '$' + (v / 1e3).toFixed(1) + 'K';
+    return '$' + v.toFixed(2);
+}
+function fmtMktPrice(p) {
+    if (!p || p === 0) return '—';
+    if (p >= 1000) return '$' + p.toLocaleString('en-US', {maximumFractionDigits: 2});
+    if (p >= 1) return '$' + p.toFixed(4);
+    if (p >= 0.0001) return '$' + p.toFixed(6);
+    return '$' + p.toExponential(4);
+}
+
+let marketsCache = {};
+
+async function loadMarketsSection(ex) {
+    const sectionEl = document.getElementById('markets-section');
+    if (!sectionEl) return;
+
+    const mapping = getExchangeMapping(ex.exchange_name);
+    if (!mapping) {
+        sectionEl.innerHTML = `
+            <div class="detail-section-title"><span>📊 Markets</span></div>
+            <div style="text-align:center;padding:28px 0">
+                <p style="color:var(--text2);font-size:13px">Market data not available for this exchange.</p>
+                ${ex.website ? `<a href="${ex.website}" target="_blank" rel="noopener" style="color:var(--green);font-size:12px;display:inline-block;margin-top:8px">Visit website ↗</a>` : ''}
+            </div>`;
+        return;
+    }
+
+    // 5-min cache
+    const cacheKey = mapping.cgId;
+    const now = Date.now();
+    if (marketsCache[cacheKey] && (now - marketsCache[cacheKey].ts) < 5 * 60 * 1000) {
+        renderMarketsTable(sectionEl, marketsCache[cacheKey].data, mapping, ex);
+        return;
+    }
+
+    // Skeleton loading
+    sectionEl.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">
+            <div class="detail-section-title" style="margin-bottom:0;flex:1">📊 Markets</div>
+        </div>
+        <div style="padding:4px 0">
+            ${[1,2,3,4,5,6].map((_, i) => `
+            <div style="display:grid;grid-template-columns:32px 140px 100px 110px 70px;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2);align-items:center;animation-delay:${i*60}ms" class="fade-in">
+                <div class="skeleton" style="width:22px;height:12px;border-radius:3px"></div>
+                <div class="skeleton" style="height:13px;border-radius:3px"></div>
+                <div class="skeleton" style="height:13px;border-radius:3px"></div>
+                <div class="skeleton" style="height:13px;border-radius:3px"></div>
+                <div class="skeleton" style="height:13px;border-radius:3px"></div>
+            </div>`).join('')}
+        </div>`;
+
+    try {
+        const res = await fetch(
+            `https://api.coingecko.com/api/v3/exchanges/${mapping.cgId}/tickers?page=1&order=volume_desc`,
+            { cache: 'no-store' }
+        );
+        if (!res.ok) throw new Error('CG ' + res.status);
+        const json = await res.json();
+        const tickers = (json.tickers || []).slice(0, 50);
+        marketsCache[cacheKey] = { ts: now, data: tickers };
+        renderMarketsTable(sectionEl, tickers, mapping, ex);
+    } catch (e) {
+        sectionEl.innerHTML = `
+            <div class="detail-section-title"><span>📊 Markets</span></div>
+            <div style="text-align:center;padding:28px 0">
+                <p style="color:var(--text2);font-size:13px;margin-bottom:10px">Failed to load market data</p>
+                <button onclick="loadMarketsSection(currentDetailExchange)" style="padding:6px 16px;border-radius:8px;border:1px solid var(--border);background:var(--green3);color:var(--green);font-size:12px;cursor:pointer;font-family:'JetBrains Mono',monospace">↺ Retry</button>
+            </div>`;
+    }
+}
+
+function renderMarketsTable(sectionEl, tickers, mapping, ex) {
+    if (!tickers.length) {
+        sectionEl.innerHTML = `
+            <div class="detail-section-title"><span>📊 Markets</span></div>
+            <p style="color:var(--text2);font-size:13px;text-align:center;padding:24px 0">No market data found.</p>`;
+        return;
+    }
+
+    const rows = tickers.map((t, i) => {
+        const pair = `${t.base}/${t.target}`;
+        const price = fmtMktPrice(t.last);
+        const vol = fmtVol(t.converted_volume?.usd || t.volume);
+        const trustScore = t.trust_score;
+        const trustColor = trustScore === 'green' ? '#22c55e' : trustScore === 'yellow' ? '#f59e0b' : trustScore === 'red' ? '#ef4444' : 'var(--text2)';
+        const trustLabel = trustScore ? (trustScore.charAt(0).toUpperCase() + trustScore.slice(1)) : '—';
+        const spreadPct = t.bid_ask_spread_percentage
+            ? (parseFloat(t.bid_ask_spread_percentage) < 1
+                ? parseFloat(t.bid_ask_spread_percentage).toFixed(3) + '%'
+                : parseFloat(t.bid_ask_spread_percentage).toFixed(2) + '%')
+            : '—';
+
+        // CMC link — goes to coin/markets page or exchange page
+        const coinSlug = t.coin_id ? t.coin_id.toLowerCase().replace(/\s+/g, '-') : null;
+        const cmcLink = coinSlug
+            ? `https://coinmarketcap.com/currencies/${coinSlug}/markets/`
+            : mapping.cmcUrl;
+
+        return `<tr class="markets-row" onclick="window.open('${cmcLink}','_blank','noopener')" title="View ${pair} on CoinMarketCap" style="cursor:pointer">
+            <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);padding:7px 8px;width:34px">${i + 1}</td>
+            <td style="padding:7px 8px">
+                <span style="font-weight:700;font-size:13px;color:var(--text);font-family:'JetBrains Mono',monospace">${t.base}</span><span style="color:var(--text2);font-size:12px;font-family:'JetBrains Mono',monospace">/${t.target}</span>
+            </td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--text);padding:7px 8px">${price}</td>
+            <td style="font-size:12px;color:var(--text2);padding:7px 8px">${vol}</td>
+            <td style="font-size:11px;color:var(--text2);padding:7px 8px" class="hidden md:table-cell">${spreadPct}</td>
+            <td style="padding:7px 8px" class="hidden sm:table-cell">
+                <span style="font-size:10px;font-weight:700;color:${trustColor};font-family:'JetBrains Mono',monospace;padding:2px 7px;border-radius:4px;background:${trustColor}1a;border:1px solid ${trustColor}40">${trustLabel}</span>
+            </td>
+            <td style="padding:7px 8px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--green);padding:3px 7px;border-radius:4px;border:1px solid var(--border);background:var(--green3);white-space:nowrap">CMC ↗</span>
+            </td>
+        </tr>`;
+    }).join('');
+
+    const updatedTime = new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+
+    sectionEl.innerHTML = `
+        <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
+            <div style="display:flex;align-items:center;gap:8px">
+                <span class="live-dot"></span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--green);text-transform:uppercase">📊 Markets</span>
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2)">· Top ${tickers.length} pairs</span>
+            </div>
+            <a href="${mapping.cmcUrl}" target="_blank" rel="noopener" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);text-decoration:none;border:1px solid var(--border);padding:4px 10px;border-radius:6px;background:var(--green3);white-space:nowrap;transition:all 0.2s" onmouseover="this.style.background='var(--green2)'" onmouseout="this.style.background='var(--green3)'">View all on CMC ↗</a>
+        </div>
+        <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border2)">
+            <table style="border-collapse:separate;border-spacing:0;width:100%;min-width:420px">
+                <thead>
+                    <tr>
+                        <th style="position:sticky;top:0;z-index:5;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--green);padding:8px 8px;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase;background:var(--green3);width:34px">#</th>
+                        <th style="position:sticky;top:0;z-index:5;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--green);padding:8px 8px;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase;background:var(--green3);min-width:110px">Pair</th>
+                        <th style="position:sticky;top:0;z-index:5;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--green);padding:8px 8px;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase;background:var(--green3);min-width:90px">Price</th>
+                        <th style="position:sticky;top:0;z-index:5;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--green);padding:8px 8px;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase;background:var(--green3);min-width:90px">Vol 24h</th>
+                        <th style="position:sticky;top:0;z-index:5;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--green);padding:8px 8px;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase;background:var(--green3)" class="hidden md:table-cell">Spread</th>
+                        <th style="position:sticky;top:0;z-index:5;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--green);padding:8px 8px;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase;background:var(--green3)" class="hidden sm:table-cell">Trust</th>
+                        <th style="position:sticky;top:0;z-index:5;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--green);padding:8px 8px;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase;background:var(--green3)"></th>
+                    </tr>
+                </thead>
+                <tbody class="markets-tbody">${rows}</tbody>
+            </table>
+        </div>
+        <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px;margin-top:6px">
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2)">Source: CoinGecko · Click pair → CoinMarketCap</span>
+            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2)">Updated ${updatedTime}</span>
+        </div>`;
+}
+
+// ============================================================
 // DETAIL VIEW
 // ============================================================
 function openDetail(slug) {
@@ -1157,7 +1340,7 @@ function renderDetailView(ex) {
     document.getElementById('list-view').classList.add('hidden-view');
     const dv = document.getElementById('detail-view');
     dv.classList.remove('active');
-    void dv.offsetWidth; // reflow to restart animation
+    void dv.offsetWidth;
     dv.classList.add('active');
     document.getElementById('breadcrumb-name').textContent = ex.exchange_name;
     syncDetailLangUI();
@@ -1249,11 +1432,21 @@ function renderDetailView(ex) {
                     <div class="detail-section-title">Regulatory &amp; Compliance</div>
                     <p class="about-plain">${ex.regulatory_info}</p>
                 </div>`:''}
+
+                <!-- MARKETS SECTION — real-time CoinGecko -->
+                <div class="detail-section" id="markets-section">
+                    <div class="detail-section-title"><span>📊 Markets</span></div>
+                    <div style="text-align:center;padding:20px 0">
+                        <div style="display:inline-flex;gap:6px;align-items:center">
+                            <div class="skeleton" style="width:16px;height:16px;border-radius:50%"></div>
+                            <div class="skeleton" style="width:120px;height:12px;border-radius:4px"></div>
+                        </div>
+                    </div>
+                </div>
             </div>
 
             <!-- SIDEBAR -->
             <div class="detail-sidebar">
-                <!-- META INFO -->
                 <div class="sidebar-card">
                     <div class="sidebar-section-label">Exchange Info</div>
                     <div class="sidebar-meta-row">
@@ -1277,12 +1470,14 @@ function renderDetailView(ex) {
                         <span class="sidebar-meta-value">${ex.headquarters}</span>
                     </div>`:''}
                 </div>
-
                 ${foundersHtml}
             </div>
         </div>
     `;
+
     renderAboutSection(ex);
+    // Load markets data after DOM is ready
+    loadMarketsSection(ex);
 }
 
 function closeDetail() {
@@ -1312,13 +1507,8 @@ function handleURLParam() {
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('exchange');
     if (!slug) return;
-    // Coba cari di semua type (CEX & DEX)
     const ex = allData.find(d => slugify(d.exchange_name) === slug);
-    if (ex) {
-        // Set tab sesuai type exchange yang dibuka
-        currentType = ex.type || 'cex';
-        renderDetailView(ex);
-    }
+    if (ex) { currentType = ex.type || 'cex'; renderDetailView(ex); }
 }
 
 // ============================================================
