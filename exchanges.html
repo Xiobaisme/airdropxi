@@ -1254,11 +1254,19 @@ async function silentRefreshMarkets(ex, mapping) {
     }
 }
 
+function getColorFromStr(str) {
+    const palette = ['#f97316','#3b82f6','#8b5cf6','#ec4899','#14b8a6','#f59e0b','#22c55e','#ef4444','#6366f1','#06b6d4'];
+    let hash = 0;
+    for (let i = 0; i < str.length; i++) hash = str.charCodeAt(i) + ((hash << 5) - hash);
+    return palette[Math.abs(hash) % palette.length];
+}
+
 function buildMarketRows(tickers, mapping) {
     return tickers.map((t, i) => {
         const coinSlug = t.coin_id ? t.coin_id.toLowerCase().replace(/\s+/g, '-') : null;
         const cmcLink  = coinSlug ? `https://coinmarketcap.com/currencies/${coinSlug}/markets/` : mapping.cmcUrl;
-        const imgUrl   = t.coin_id ? `https://assets.coingecko.com/coins/images/1/thumb/${t.coin_id}.png` : '';
+        // CoinGecko image URL uses numeric ID, not coin_id string — use CDN fallback chain instead
+        const imgUrl   = t.coin_id ? `https://lcw.nyc3.cdn.digitaloceanspaces.com/production/currencies/32/${t.base.toLowerCase()}.webp` : '';
         const price    = fmtMktPrice(t.last);
         const priceUsd = t.converted_last?.usd ? '$' + fmtMktPrice(t.converted_last.usd).replace('$','') : '';
         const vol      = fmtVol(t.converted_volume?.usd || t.volume);
@@ -1278,7 +1286,10 @@ function buildMarketRows(tickers, mapping) {
             <td style="padding:11px 12px;min-width:200px">
                 <div style="display:flex;align-items:center;gap:10px">
                     <div style="width:34px;height:34px;border-radius:50%;border:1px solid var(--border);background:var(--green3);flex-shrink:0;overflow:hidden;display:flex;align-items:center;justify-content:center">
-                        ${imgUrl ? `<img src="${imgUrl}" style="width:30px;height:30px;border-radius:50%;object-fit:cover" onerror="this.parentElement.innerHTML='<span style=\\'font-size:12px;font-weight:800;color:var(--green)\\'>${t.base[0]}</span>'" loading="lazy">` : `<span style="font-size:12px;font-weight:800;color:var(--green)">${t.base[0]}</span>`}
+                        <img src="https://lcw.nyc3.cdn.digitaloceanspaces.com/production/currencies/32/${t.base.toLowerCase()}.webp"
+                             style="width:30px;height:30px;border-radius:50%;object-fit:cover"
+                             onerror="this.src='https://cryptoicons.org/api/icon/${t.base.toLowerCase()}/32';this.onerror=function(){this.style.display='none';this.parentElement.innerHTML='<span style=\\'width:34px;height:34px;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:800;color:#fff;background:'+getColorFromStr('${t.base}')+';border-radius:50%;\\'>${t.base.slice(0,2)}</span>';}"
+                             loading="lazy">
                     </div>
                     <div>
                         <div style="font-weight:800;font-size:15px;color:var(--text);line-height:1.2">
