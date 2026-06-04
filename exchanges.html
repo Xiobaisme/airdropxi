@@ -1183,9 +1183,113 @@ function fmtMktPrice(p) {
     return '$' + p.toExponential(4);
 }
 
+// ============================================================
+// MARKETS AUTO-REFRESH (30s interval + countdown + flash)
+// ============================================================
 let marketsCache = {};
+let marketsRefreshTimer = null;   // setInterval handle
+let marketsCountdownTimer = null; // setInterval for countdown
+const MARKETS_REFRESH_SEC = 30;
+
+function clearMarketsTimers() {
+    if (marketsRefreshTimer) { clearInterval(marketsRefreshTimer); marketsRefreshTimer = null; }
+    if (marketsCountdownTimer) { clearInterval(marketsCountdownTimer); marketsCountdownTimer = null; }
+}
+
+function startMarketsCountdown(ex, mapping) {
+    clearMarketsTimers();
+    let remaining = MARKETS_REFRESH_SEC;
+
+    // Start countdown display
+    marketsCountdownTimer = setInterval(() => {
+        remaining--;
+        const cdEl = document.getElementById('mkt-countdown');
+        if (cdEl) {
+            cdEl.textContent = `↺ ${remaining}s`;
+            // Turn green when about to refresh
+            cdEl.style.color = remaining <= 5 ? 'var(--green)' : 'var(--text2)';
+        }
+        if (remaining <= 0) remaining = MARKETS_REFRESH_SEC;
+    }, 1000);
+
+    // Auto-refresh fetch
+    marketsRefreshTimer = setInterval(async () => {
+        remaining = MARKETS_REFRESH_SEC;
+        // Force bypass cache
+        marketsCache[mapping.cgId] = null;
+        await silentRefreshMarkets(ex, mapping);
+    }, MARKETS_REFRESH_SEC * 1000);
+}
+
+async function silentRefreshMarkets(ex, mapping) {
+    try {
+        const res = await fetch(
+            `https://api.coingecko.com/api/v3/exchanges/${mapping.cgId}/tickers?page=1&order=volume_desc`,
+            { cache: 'no-store' }
+        );
+        if (!res.ok) throw new Error('CG ' + res.status);
+        const json = await res.json();
+        const tickers = (json.tickers || []).slice(0, 50);
+        marketsCache[mapping.cgId] = { ts: Date.now(), data: tickers };
+
+        // Update only tbody + footer — no full re-render (no flicker)
+        const tbody = document.getElementById('markets-tbody');
+        const updatedEl = document.getElementById('mkt-updated');
+        const cdEl = document.getElementById('mkt-countdown');
+
+        if (!tbody) return;
+
+        // Flash animation on update
+        tbody.style.transition = 'opacity 0.2s';
+        tbody.style.opacity = '0.3';
+        setTimeout(() => {
+            tbody.innerHTML = buildMarketRows(tickers, mapping);
+            tbody.style.opacity = '1';
+            if (updatedEl) updatedEl.textContent = 'Updated ' + new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
+            if (cdEl) cdEl.textContent = `↺ ${MARKETS_REFRESH_SEC}s`;
+        }, 200);
+    } catch(e) {
+        const cdEl = document.getElementById('mkt-countdown');
+        if (cdEl) cdEl.textContent = '↺ err';
+    }
+}
+
+function buildMarketRows(tickers, mapping) {
+    return tickers.map((t, i) => {
+        const price = fmtMktPrice(t.last);
+        const vol = fmtVol(t.converted_volume?.usd || t.volume);
+        const trustScore = t.trust_score;
+        const trustColor = trustScore === 'green' ? '#22c55e' : trustScore === 'yellow' ? '#f59e0b' : trustScore === 'red' ? '#ef4444' : 'var(--text2)';
+        const trustLabel = trustScore ? (trustScore.charAt(0).toUpperCase() + trustScore.slice(1)) : '—';
+        const spreadPct = t.bid_ask_spread_percentage
+            ? (parseFloat(t.bid_ask_spread_percentage) < 1
+                ? parseFloat(t.bid_ask_spread_percentage).toFixed(3) + '%'
+                : parseFloat(t.bid_ask_spread_percentage).toFixed(2) + '%')
+            : '—';
+        const coinSlug = t.coin_id ? t.coin_id.toLowerCase().replace(/\s+/g, '-') : null;
+        const cmcLink = coinSlug
+            ? `https://coinmarketcap.com/currencies/${coinSlug}/markets/`
+            : mapping.cmcUrl;
+        return `<tr class="markets-row" onclick="window.open('${cmcLink}','_blank','noopener')" title="View ${t.base}/${t.target} on CoinMarketCap" style="cursor:pointer">
+            <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);padding:7px 8px;width:34px">${i + 1}</td>
+            <td style="padding:7px 8px">
+                <span style="font-weight:700;font-size:13px;color:var(--text);font-family:'JetBrains Mono',monospace">${t.base}</span><span style="color:var(--text2);font-size:12px;font-family:'JetBrains Mono',monospace">/${t.target}</span>
+            </td>
+            <td style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--text);padding:7px 8px">${price}</td>
+            <td style="font-size:12px;color:var(--text2);padding:7px 8px">${vol}</td>
+            <td style="font-size:11px;color:var(--text2);padding:7px 8px" class="hidden md:table-cell">${spreadPct}</td>
+            <td style="padding:7px 8px" class="hidden sm:table-cell">
+                <span style="font-size:10px;font-weight:700;color:${trustColor};font-family:'JetBrains Mono',monospace;padding:2px 7px;border-radius:4px;background:${trustColor}1a;border:1px solid ${trustColor}40">${trustLabel}</span>
+            </td>
+            <td style="padding:7px 8px">
+                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--green);padding:3px 7px;border-radius:4px;border:1px solid var(--border);background:var(--green3);white-space:nowrap">CMC ↗</span>
+            </td>
+        </tr>`;
+    }).join('');
+}
 
 async function loadMarketsSection(ex) {
+    clearMarketsTimers();
     const sectionEl = document.getElementById('markets-section');
     if (!sectionEl) return;
 
@@ -1200,14 +1304,6 @@ async function loadMarketsSection(ex) {
         return;
     }
 
-    // 5-min cache
-    const cacheKey = mapping.cgId;
-    const now = Date.now();
-    if (marketsCache[cacheKey] && (now - marketsCache[cacheKey].ts) < 5 * 60 * 1000) {
-        renderMarketsTable(sectionEl, marketsCache[cacheKey].data, mapping, ex);
-        return;
-    }
-
     // Skeleton loading
     sectionEl.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:16px">
@@ -1215,7 +1311,7 @@ async function loadMarketsSection(ex) {
         </div>
         <div style="padding:4px 0">
             ${[1,2,3,4,5,6].map((_, i) => `
-            <div style="display:grid;grid-template-columns:32px 140px 100px 110px 70px;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2);align-items:center;animation-delay:${i*60}ms" class="fade-in">
+            <div style="display:grid;grid-template-columns:32px 140px 100px 110px 70px;gap:10px;padding:9px 0;border-bottom:1px solid var(--border2);align-items:center" class="fade-in" style="animation-delay:${i*50}ms">
                 <div class="skeleton" style="width:22px;height:12px;border-radius:3px"></div>
                 <div class="skeleton" style="height:13px;border-radius:3px"></div>
                 <div class="skeleton" style="height:13px;border-radius:3px"></div>
@@ -1232,8 +1328,10 @@ async function loadMarketsSection(ex) {
         if (!res.ok) throw new Error('CG ' + res.status);
         const json = await res.json();
         const tickers = (json.tickers || []).slice(0, 50);
-        marketsCache[cacheKey] = { ts: now, data: tickers };
+        marketsCache[mapping.cgId] = { ts: Date.now(), data: tickers };
         renderMarketsTable(sectionEl, tickers, mapping, ex);
+        // Start auto-refresh after first load
+        startMarketsCountdown(ex, mapping);
     } catch (e) {
         sectionEl.innerHTML = `
             <div class="detail-section-title"><span>📊 Markets</span></div>
@@ -1252,43 +1350,7 @@ function renderMarketsTable(sectionEl, tickers, mapping, ex) {
         return;
     }
 
-    const rows = tickers.map((t, i) => {
-        const pair = `${t.base}/${t.target}`;
-        const price = fmtMktPrice(t.last);
-        const vol = fmtVol(t.converted_volume?.usd || t.volume);
-        const trustScore = t.trust_score;
-        const trustColor = trustScore === 'green' ? '#22c55e' : trustScore === 'yellow' ? '#f59e0b' : trustScore === 'red' ? '#ef4444' : 'var(--text2)';
-        const trustLabel = trustScore ? (trustScore.charAt(0).toUpperCase() + trustScore.slice(1)) : '—';
-        const spreadPct = t.bid_ask_spread_percentage
-            ? (parseFloat(t.bid_ask_spread_percentage) < 1
-                ? parseFloat(t.bid_ask_spread_percentage).toFixed(3) + '%'
-                : parseFloat(t.bid_ask_spread_percentage).toFixed(2) + '%')
-            : '—';
-
-        // CMC link — goes to coin/markets page or exchange page
-        const coinSlug = t.coin_id ? t.coin_id.toLowerCase().replace(/\s+/g, '-') : null;
-        const cmcLink = coinSlug
-            ? `https://coinmarketcap.com/currencies/${coinSlug}/markets/`
-            : mapping.cmcUrl;
-
-        return `<tr class="markets-row" onclick="window.open('${cmcLink}','_blank','noopener')" title="View ${pair} on CoinMarketCap" style="cursor:pointer">
-            <td style="font-family:'JetBrains Mono',monospace;font-size:11px;color:var(--text2);padding:7px 8px;width:34px">${i + 1}</td>
-            <td style="padding:7px 8px">
-                <span style="font-weight:700;font-size:13px;color:var(--text);font-family:'JetBrains Mono',monospace">${t.base}</span><span style="color:var(--text2);font-size:12px;font-family:'JetBrains Mono',monospace">/${t.target}</span>
-            </td>
-            <td style="font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;color:var(--text);padding:7px 8px">${price}</td>
-            <td style="font-size:12px;color:var(--text2);padding:7px 8px">${vol}</td>
-            <td style="font-size:11px;color:var(--text2);padding:7px 8px" class="hidden md:table-cell">${spreadPct}</td>
-            <td style="padding:7px 8px" class="hidden sm:table-cell">
-                <span style="font-size:10px;font-weight:700;color:${trustColor};font-family:'JetBrains Mono',monospace;padding:2px 7px;border-radius:4px;background:${trustColor}1a;border:1px solid ${trustColor}40">${trustLabel}</span>
-            </td>
-            <td style="padding:7px 8px">
-                <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--green);padding:3px 7px;border-radius:4px;border:1px solid var(--border);background:var(--green3);white-space:nowrap">CMC ↗</span>
-            </td>
-        </tr>`;
-    }).join('');
-
-    const updatedTime = new Date().toLocaleTimeString('en-US', {hour:'2-digit',minute:'2-digit'});
+    const updatedTime = new Date().toLocaleTimeString('en-US', {hour:'2-digit', minute:'2-digit', second:'2-digit'});
 
     sectionEl.innerHTML = `
         <div style="display:flex;align-items:center;justify-content:space-between;flex-wrap:wrap;gap:8px;margin-bottom:14px">
@@ -1297,7 +1359,10 @@ function renderMarketsTable(sectionEl, tickers, mapping, ex) {
                 <span style="font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.14em;color:var(--green);text-transform:uppercase">📊 Markets</span>
                 <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2)">· Top ${tickers.length} pairs</span>
             </div>
-            <a href="${mapping.cmcUrl}" target="_blank" rel="noopener" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);text-decoration:none;border:1px solid var(--border);padding:4px 10px;border-radius:6px;background:var(--green3);white-space:nowrap;transition:all 0.2s" onmouseover="this.style.background='var(--green2)'" onmouseout="this.style.background='var(--green3)'">View all on CMC ↗</a>
+            <div style="display:flex;align-items:center;gap:8px">
+                <span id="mkt-countdown" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2);padding:3px 8px;border-radius:5px;border:1px solid var(--border2);background:var(--green3)">↺ ${MARKETS_REFRESH_SEC}s</span>
+                <a href="${mapping.cmcUrl}" target="_blank" rel="noopener" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--green);text-decoration:none;border:1px solid var(--border);padding:4px 10px;border-radius:6px;background:var(--green3);white-space:nowrap;transition:all 0.2s" onmouseover="this.style.background='var(--green2)'" onmouseout="this.style.background='var(--green3)'">View all on CMC ↗</a>
+            </div>
         </div>
         <div style="overflow-x:auto;border-radius:10px;border:1px solid var(--border2)">
             <table style="border-collapse:separate;border-spacing:0;width:100%;min-width:420px">
@@ -1312,12 +1377,12 @@ function renderMarketsTable(sectionEl, tickers, mapping, ex) {
                         <th style="position:sticky;top:0;z-index:5;font-family:'JetBrains Mono',monospace;font-size:9px;letter-spacing:.12em;color:var(--green);padding:8px 8px;border-bottom:1px solid var(--border);text-align:left;text-transform:uppercase;background:var(--green3)"></th>
                     </tr>
                 </thead>
-                <tbody class="markets-tbody">${rows}</tbody>
+                <tbody class="markets-tbody" id="markets-tbody">${buildMarketRows(tickers, mapping)}</tbody>
             </table>
         </div>
         <div style="display:flex;align-items:center;justify-content:space-between;padding:8px 4px;margin-top:6px">
             <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2)">Source: CoinGecko · Click pair → CoinMarketCap</span>
-            <span style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2)">Updated ${updatedTime}</span>
+            <span id="mkt-updated" style="font-family:'JetBrains Mono',monospace;font-size:9px;color:var(--text2)">Updated ${updatedTime}</span>
         </div>`;
 }
 
@@ -1481,6 +1546,7 @@ function renderDetailView(ex) {
 }
 
 function closeDetail() {
+    clearMarketsTimers();
     currentDetailExchange = null;
     document.getElementById('detail-view').classList.remove('active');
     document.getElementById('list-view').classList.remove('hidden-view');
@@ -1492,6 +1558,7 @@ function closeDetail() {
 }
 
 window.addEventListener('popstate', () => {
+    clearMarketsTimers();
     const params = new URLSearchParams(window.location.search);
     const slug = params.get('exchange');
     if (slug && allData.length) {
