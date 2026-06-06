@@ -172,6 +172,11 @@
         #list-view.hidden-view { display:none; }
         @keyframes detailIn { from{opacity:0;transform:translateY(20px) scale(0.99)} to{opacity:1;transform:translateY(0) scale(1)} }
 
+        #detail-view {
+        max-width: 1100px;
+        margin: 0 auto;
+        }
+
         .detail-hero { background:linear-gradient(135deg,var(--green3) 0%,rgba(0,0,0,0.4) 100%); border:1px solid var(--border); border-radius:20px; padding:28px 32px; display:flex; align-items:flex-start; gap:22px; flex-wrap:wrap; margin-bottom:24px; position:relative; overflow:hidden; }
         .detail-hero::before { content:''; position:absolute; top:-60px; right:-60px; width:200px; height:200px; background:radial-gradient(ellipse,rgba(34,197,94,0.12) 0%,transparent 70%); pointer-events:none; }
         .detail-logo { width:80px; height:80px; border-radius:18px; border:2px solid var(--border); object-fit:cover; background:var(--bg2); flex-shrink:0; }
@@ -179,7 +184,7 @@
         .detail-hero-name { font-size:clamp(24px,4vw,36px); font-weight:900; color:var(--text); line-height:1.1; letter-spacing:-0.02em; }
         .detail-hero-desc { font-size:15px; color:var(--text2); line-height:1.7; max-width:640px; margin-top:8px; }
 
-        .detail-layout { display:grid; grid-template-columns:1fr 280px; gap:16px; align-items:start; }
+        .detail-layout { display:grid; grid-template-columns:1fr 240px; gap:16px; align-items:start; }
         @media (max-width:900px) { .detail-layout { grid-template-columns:1fr; } .detail-sidebar { order:-1; } }
         .detail-sidebar { display:flex; flex-direction:column; gap:12px; }
         .sidebar-card { background:var(--card); border:1px solid var(--border); border-radius:14px; backdrop-filter:blur(20px); padding:16px; animation:sideIn 0.5s cubic-bezier(0.16,1,0.3,1) both; }
@@ -1034,6 +1039,21 @@ async function silentRefreshMarkets(ex, mapping) {
     }
 }
 
+function fmtSymbol(str) {
+    if (!str) return '?';
+    if (str.startsWith('0x') && str.length > 12) {
+        return str.slice(0, 6) + '…' + str.slice(-3);
+    }
+    return str;
+}
+function fmtAddr(str) {
+    if (!str) return '?';
+    if (str.startsWith('0x') && str.length > 12) {
+        return str.slice(0, 6) + '…' + str.slice(-4);
+    }
+    return str;
+}
+
 function buildMarketRows(tickers, mapping) {
     return tickers.map((t,i)=>{
         const price   = fmtMktPrice(t.last);
@@ -1059,8 +1079,8 @@ function buildMarketRows(tickers, mapping) {
                              loading="lazy">
                     </div>
                     <div>
-                        <div style="font-weight:800;font-size:15px;color:var(--text)">${t.base}<span style="color:var(--text2);font-weight:500;font-size:12px"> ${t.target}</span></div>
-                        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)">${t.base}/${t.target}</div>
+                        <div style="font-weight:800;font-size:15px;color:var(--text)">${fmtSymbol(t.base)}<span style="color:var(--text2);font-weight:500;font-size:12px"> / ${fmtSymbol(t.target)}</span></div>
+                        <div style="font-family:'JetBrains Mono',monospace;font-size:10px;color:var(--text2)">${fmtAddr(t.base)}/${fmtAddr(t.target)}</div>
                     </div>
                 </div>
             </td>
