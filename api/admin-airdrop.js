@@ -357,6 +357,7 @@ module.exports = async function handler(req, res) {
       faqID:               p.faqID               || null,
       faqEN:               p.faqEN               || null,
       testnet_links:       p.testnet_links       || null,
+      tasks_images:        p.tasks_images        || null,
     };
     if (airdropsId !== undefined) payload.airdrop_id = airdropsId;
     return payload;
