@@ -1055,21 +1055,22 @@
         </div>
 
         <div class="form-sec">
-          <div class="sec-lbl">Tugas / Guide Steps<span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400"> — Format: "1. Judul | Deskripsi" per baris</span></div>
-          <div class="fg c1">
-            <div class="field"><label>Tugas (ID)</label><textarea id="f-tasksid" class="tall" placeholder="1. Daftar di website | Kunjungi https://... dan klik Sign Up">${esc(d.tasksID||'')}</textarea></div>
-            <div class="field"><label>Tasks (EN)</label><textarea id="f-tasksen" class="tall" placeholder="1. Register | Visit https://... and click Sign Up">${esc(d.tasksEN||'')}</textarea></div>
-            <div class="field s2">
-              <label>Task Images <span class="hint">— 1 slot per task, urutan sesuai task di atas</span></label>
-              <div id="task-images-builder" style="display:flex;flex-direction:column;gap:8px;margin-top:4px;"></div>
-              <button type="button" onclick="addTaskImageSlot()"
-                style="width:100%;margin-top:8px;padding:0.55rem;background:var(--adim);border:1px dashed var(--aborder);
-                       border-radius:6px;color:var(--accent);font-family:var(--mono);font-size:0.63rem;cursor:pointer;transition:all 0.2s"
-                onmouseover="this.style.background='rgba(0,229,160,0.14)'" onmouseout="this.style.background='var(--adim)'">
-                ＋ Tambah Slot Gambar
-              </button>
+         <div class="sec-lbl">Tugas / Guide Steps<span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400"> — Format: "1. Judul | Deskripsi" per baris</span></div>
+         <div class="fg">
+          <div class="field"><label>Tugas (ID)</label><textarea id="f-tasksid" class="tall" placeholder="1. Daftar di website | Kunjungi https://... dan klik Sign Up" oninput="syncTaskSlots()">${esc(d.tasksID||'')}</textarea></div>
+          <div class="field"><label>Tasks (EN)</label><textarea id="f-tasksen" class="tall" placeholder="1. Register | Visit https://... and click Sign Up" oninput="syncTaskSlots()">${esc(d.tasksEN||'')}</textarea></div>
+          </div>
+           <div style="margin-top:12px">
+           <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Task Images — upload per task</div>
+            <div id="task-images-builder" style="display:flex;flex-direction:column;gap:8px;"></div>
+               <button type="button" onclick="addTaskImageSlot()"
+                 style="width:100%;margin-top:8px;padding:0.55rem;background:var(--adim);border:1px dashed var(--aborder);
+                border-radius:6px;color:var(--accent);font-family:var(--mono);font-size:0.63rem;cursor:pointer;transition:all 0.2s"
+               onmouseover="this.style.background='rgba(0,229,160,0.14)'" onmouseout="this.style.background='var(--adim)'">
+              ＋ Tambah Slot Gambar
+             </button>
              </div>
-            </div>
+           </div>
           </div>
           
         <div class="form-sec">
@@ -2324,39 +2325,59 @@ async function _deleteExManage(id, name) {
 
   // ── TASK IMAGES BUILDER ───────────────────────────────
   function initTaskImagesBuilder(rawData) {
-    const builder = document.getElementById('task-images-builder');
-    if (!builder) return;
-    builder.innerHTML = '';
-    let items = [];
-    try {
-      if (Array.isArray(rawData)) items = rawData;
-      else if (typeof rawData === 'string' && rawData.trim()) items = JSON.parse(rawData);
-    } catch(e) { items = []; }
+  const builder = document.getElementById('task-images-builder');
+  if (!builder) return;
+  builder.innerHTML = '';
+  let items = [];
+  try {
+    if (Array.isArray(rawData)) items = rawData;
+    else if (typeof rawData === 'string' && rawData.trim()) items = JSON.parse(rawData);
+  } catch(e) { items = []; }
 
-    // hitung jumlah task dari textarea ID atau EN
-    const tasksIDRaw = document.getElementById('f-tasksid')?.value || '';
-    const tasksENRaw = document.getElementById('f-tasksen')?.value || '';
-    const countID = tasksIDRaw.split('\n').map(l=>l.trim()).filter(l=>l && !/^(Q:|A:|💡)/i.test(l)).length;
-    const countEN = tasksENRaw.split('\n').map(l=>l.trim()).filter(l=>l && !/^(Q:|A:|💡)/i.test(l)).length;
-    const taskCount = Math.max(countID, countEN, items.length, 1);
+  const tasksIDRaw = document.getElementById('f-tasksid')?.value || '';
+  const tasksENRaw = document.getElementById('f-tasksen')?.value || '';
+  const parseLines = raw => raw.split('\n').map(l=>l.trim()).filter(l=>l && !/^(Q:|A:|💡)/i.test(l));
+  const linesID = parseLines(tasksIDRaw);
+  const linesEN = parseLines(tasksENRaw);
+  const countID = linesID.length;
+  const countEN = linesEN.length;
+  const taskCount = Math.max(countID, countEN, items.length, 1);
 
-    // pad items sampai sesuai jumlah task
-    // parse judul task dari textarea ID (prioritas) atau EN
-const taskTitles = [];
-const srcRaw = countID >= countEN ? tasksIDRaw : tasksENRaw;
-srcRaw.split('\n').map(l => l.trim()).filter(l => l && !/^(Q:|A:|💡)/i.test(l)).forEach(line => {
-  const clean = line.replace(/^(\d+[\.\)]\s*)/, '');
-  taskTitles.push(clean.split(' | ')[0] || clean);
-});
+  const taskTitles = [];
+  const srcLines = countID >= countEN ? linesID : linesEN;
+  srcLines.forEach(line => {
+    const clean = line.replace(/^(\d+[\.\)]\s*)/, '');
+    taskTitles.push(clean.split(' | ')[0] || clean);
+  });
 
-while (items.length < taskCount) items.push({ url: '', caption: '' });
-items.forEach((item, i) => {
-  item._title = taskTitles[i] || '';
-  addTaskImageSlot(item, i);
-});
+  while (items.length < taskCount) items.push({ url: '', caption: '' });
+  items.forEach((item, i) => {
+    item._title = taskTitles[i] || '';
+    addTaskImageSlot(item, i);
+  });
+}
 
-    items.forEach((item, i) => addTaskImageSlot(item, i));
+function syncTaskSlots() {
+  const tasksIDRaw = document.getElementById('f-tasksid')?.value || '';
+  const tasksENRaw = document.getElementById('f-tasksen')?.value || '';
+  const parseLines = raw => raw.split('\n').map(l=>l.trim()).filter(l=>l && !/^(Q:|A:|💡)/i.test(l));
+  const linesID = parseLines(tasksIDRaw);
+  const linesEN = parseLines(tasksENRaw);
+  const taskCount = Math.max(linesID.length, linesEN.length);
+  const builder = document.getElementById('task-images-builder');
+  if (!builder) return;
+  const currentSlots = builder.querySelectorAll('.timg-slot').length;
+  for (let i = currentSlots; i < taskCount; i++) {
+    addTaskImageSlot({ url: '', caption: '' }, i);
   }
+  builder.querySelectorAll('.timg-slot').forEach((slot, i) => {
+    const titleID = (linesID[i]||'').replace(/^(\d+[\.\)]\s*)/, '').split(' | ')[0];
+    const titleEN = (linesEN[i]||'').replace(/^(\d+[\.\)]\s*)/, '').split(' | ')[0];
+    const label = slot.querySelector('.timg-task-label');
+    if (label) label.textContent = `TASK ${i+1}${titleID ? ' — ' + titleID : ''}${titleEN ? ' / ' + titleEN : ''}`;
+  });
+}
+
 
   function taskImageSlotHTML(idx, item) {
     item = item || { url: '', caption: '' };
@@ -2392,9 +2413,9 @@ items.forEach((item, i) => {
         </div>
         <!-- Info -->
         <div style="flex:1;display:flex;flex-direction:column;gap:7px;min-width:0;">
-          <div style="font-family:var(--mono);font-size:0.52rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">
-          Task ${idx + 1}${item._title ? ' — ' + item._title : ''}
-          </div>
+          <div class="timg-task-label" style="font-family:var(--mono);font-size:0.52rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">
+           TASK ${idx + 1}${item._title ? ' — ' + item._title : ''}
+           </div>
           <input type="hidden" class="timg-url" value="${esc(item.url || '')}">
           <input type="text" class="timg-caption" placeholder="Keterangan gambar (opsional)"
                  value="${esc(item.caption || '')}"
