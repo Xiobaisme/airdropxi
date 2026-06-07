@@ -1018,13 +1018,14 @@ function render(p, roadmapData) {
     else if (typeof rawImgs === 'string' && rawImgs.trim()) taskImages = JSON.parse(rawImgs);
   } catch(e) { taskImages = []; }
 
-  const tasksHTML = taskItems.length ? '<div class="section-block reveal"><div class="section-head"><div class="section-icon">🎯</div><div class="section-head-text"><div class="section-title-txt">' + esc(t.mission) + '</div><div class="section-subtitle-txt">' + esc(t.missionSub2) + '</div></div><span class="section-count">' + taskItems.length + ' ' + esc(t.missionSub) + '</span></div><div class="section-body"><div class="mission-grid">' +
+  const tasksHTML = taskItems.length ? '<div class="section-block reveal">...' +
     taskItems.map((task, idx) => {
       const img = taskImages[idx];
       const hasImg = img && img.url && img.url.trim() !== '';
-      const toggleBtn = hasImg ? '<button class="task-img-toggle" onclick="toggleTaskImg(' + idx + ',event)"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><rect x="3" y="3" width="18" height="18" rx="3"/><circle cx="8.5" cy="8.5" r="1.5"/><polyline points="21 15 16 10 5 21"/></svg><span id="toggle-txt-' + idx + '">Lihat contoh</span></button>' : '';
-      const imgBlock = hasImg ? '<div class="task-image-preview" id="task-img-' + idx + '" style="display:none"><img src="' + esc(img.url) + '" alt="' + esc(img.caption || 'Contoh task') + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' + (img.caption ? '<div class="task-img-caption">📷 ' + esc(img.caption) + '</div>' : '') + '</div>' : '';
-      return '<div class="mission-card"><div class="mission-card-top"><div class="mission-num">' + (idx+1) + '</div><div class="mission-content"><div class="mission-title">' + esc(task.title) + '</div>' + (task.desc ? '<div class="mission-desc">' + esc(task.desc) + '</div>' : '') + '</div>' + toggleBtn + '</div>' + imgBlock + '</div>';
+      const imgBlock = hasImg
+        ? '<div class="task-image-preview"><img src="' + esc(img.url) + '" alt="' + esc(img.caption || 'Contoh task ' + (idx+1)) + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' + (img.caption ? '<div class="task-img-caption">📷 ' + esc(img.caption) + '</div>' : '') + '</div>'
+        : '';
+      return '<div class="mission-card"><div class="mission-card-top"><div class="mission-num">' + (idx+1) + '</div><div class="mission-content"><div class="mission-title">' + esc(task.title) + '</div>' + (task.desc ? '<div class="mission-desc">' + esc(task.desc) + '</div>' : '') + '</div></div>' + imgBlock + '</div>';
     }).join('') +
     tipItems.map(tip => '<div class="mission-tip"><span class="tip-icon">💡</span><span>' + esc(tip) + '</span></div>').join('') +
   '</div></div></div>' : '';
