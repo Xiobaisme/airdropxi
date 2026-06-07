@@ -2332,7 +2332,17 @@ async function _deleteExManage(id, name) {
       if (Array.isArray(rawData)) items = rawData;
       else if (typeof rawData === 'string' && rawData.trim()) items = JSON.parse(rawData);
     } catch(e) { items = []; }
-    if (!items.length) items = [{ url: '', caption: '' }];
+
+    // hitung jumlah task dari textarea ID atau EN
+    const tasksIDRaw = document.getElementById('f-tasksid')?.value || '';
+    const tasksENRaw = document.getElementById('f-tasksen')?.value || '';
+    const countID = tasksIDRaw.split('\n').map(l=>l.trim()).filter(l=>l && !/^(Q:|A:|💡)/i.test(l)).length;
+    const countEN = tasksENRaw.split('\n').map(l=>l.trim()).filter(l=>l && !/^(Q:|A:|💡)/i.test(l)).length;
+    const taskCount = Math.max(countID, countEN, items.length, 1);
+
+    // pad items sampai sesuai jumlah task
+    while (items.length < taskCount) items.push({ url: '', caption: '' });
+
     items.forEach((item, i) => addTaskImageSlot(item, i));
   }
 
