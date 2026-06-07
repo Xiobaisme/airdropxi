@@ -1059,9 +1059,17 @@
           <div class="fg c1">
             <div class="field"><label>Tugas (ID)</label><textarea id="f-tasksid" class="tall" placeholder="1. Daftar di website | Kunjungi https://... dan klik Sign Up">${esc(d.tasksID||'')}</textarea></div>
             <div class="field"><label>Tasks (EN)</label><textarea id="f-tasksen" class="tall" placeholder="1. Register | Visit https://... and click Sign Up">${esc(d.tasksEN||'')}</textarea></div>
+            <div class="field s2">
+              <label>Task Images <span class="hint">— JSON array, index sesuai urutan task</span></label>
+              <textarea id="f-tasks-images" class="tall" placeholder='[{"url":"https://...","caption":"Contoh task 1"},{"url":"","caption":""}]'>${esc(d.tasks_images ? (typeof d.tasks_images === 'string' ? d.tasks_images : JSON.stringify(d.tasks_images, null, 2)) : '')}</textarea>
+              <div style="font-family:var(--mono);font-size:0.54rem;color:var(--text3);margin-top:4px;line-height:1.6">
+                💡 Format: <code style="background:var(--s3);padding:1px 5px;border-radius:3px">[{"url":"https://i.imgur.com/xxx.png","caption":"Keterangan"},{"url":"","caption":""}]</code><br>
+                Task tanpa gambar: isi <code style="background:var(--s3);padding:1px 5px;border-radius:3px">"url":""</code> &nbsp;|&nbsp; Index array = urutan task
+              </div>
+            </div>
           </div>
         </div>
-
+        
         <div class="form-sec">
           <div class="sec-lbl">Testnet / Link Penting<span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400"> — Maks 5 link</span></div>
           <div class="testnet-builder" id="testnet-builder">
@@ -1304,8 +1312,13 @@
     youtube:             document.getElementById('f-youtube')?.value?.trim()       || null,
     faqID:               document.getElementById('f-faqid')?.value?.trim()         || null,
     faqEN:               document.getElementById('f-faqen')?.value?.trim()         || null,
-    testnet_links:       getTestnetLinks(),
+   testnet_links:       getTestnetLinks(),
     _roadmap:            getRoadmapItems(),
+    tasks_images:        (() => {
+      const raw = document.getElementById('f-tasks-images')?.value?.trim();
+      if (!raw) return null;
+      try { return JSON.parse(raw); } catch(e) { return null; }
+    })(),
   };
   ['btn-save','btn-save-bottom'].forEach(id => {
     const el = document.getElementById(id);
