@@ -2341,7 +2341,19 @@ async function _deleteExManage(id, name) {
     const taskCount = Math.max(countID, countEN, items.length, 1);
 
     // pad items sampai sesuai jumlah task
-    while (items.length < taskCount) items.push({ url: '', caption: '' });
+    // parse judul task dari textarea ID (prioritas) atau EN
+const taskTitles = [];
+const srcRaw = countID >= countEN ? tasksIDRaw : tasksENRaw;
+srcRaw.split('\n').map(l => l.trim()).filter(l => l && !/^(Q:|A:|💡)/i.test(l)).forEach(line => {
+  const clean = line.replace(/^(\d+[\.\)]\s*)/, '');
+  taskTitles.push(clean.split(' | ')[0] || clean);
+});
+
+while (items.length < taskCount) items.push({ url: '', caption: '' });
+items.forEach((item, i) => {
+  item._title = taskTitles[i] || '';
+  addTaskImageSlot(item, i);
+});
 
     items.forEach((item, i) => addTaskImageSlot(item, i));
   }
@@ -2381,7 +2393,7 @@ async function _deleteExManage(id, name) {
         <!-- Info -->
         <div style="flex:1;display:flex;flex-direction:column;gap:7px;min-width:0;">
           <div style="font-family:var(--mono);font-size:0.52rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">
-            Task ${idx + 1}
+          Task ${idx + 1}${item._title ? ' — ' + item._title : ''}
           </div>
           <input type="hidden" class="timg-url" value="${esc(item.url || '')}">
           <input type="text" class="timg-caption" placeholder="Keterangan gambar (opsional)"
