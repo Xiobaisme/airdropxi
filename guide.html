@@ -1006,7 +1006,7 @@ function render(p, roadmapData) {
     } else if (!/^(Q:|A:)/i.test(line)) {
       const cleanNum = line.replace(/^(\d+[\.\)]\s*)/, '');
       const parts = cleanNum.split(' | ');
-      taskItems.push({ title: parts[0] || cleanNum, desc: parts[1] || null });
+     taskItems.push({ title: parts[0] || cleanNum, desc: parts[1] || null, img: parts[2] ? parts[2].trim() : null });
     }
   });
 
@@ -1020,11 +1020,14 @@ function render(p, roadmapData) {
 
   const tasksHTML = taskItems.length ? '<div class="section-block reveal">...' +
     taskItems.map((task, idx) => {
-      const img = taskImages[idx];
-      const hasImg = img && img.url && img.url.trim() !== '';
+      const imgUrl = task.img || (taskImages[idx]?.url || '');
+      const imgCaption = task.img ? '' : (taskImages[idx]?.caption || '');
+      const hasImg = !!(imgUrl && imgUrl.trim());
       const imgBlock = hasImg
-        ? '<div class="task-image-preview"><img src="' + esc(img.url) + '" alt="' + esc(img.caption || 'Contoh task ' + (idx+1)) + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' + (img.caption ? '<div class="task-img-caption">📷 ' + esc(img.caption) + '</div>' : '') + '</div>'
-        : '';
+  ? '<div class="task-image-preview"><img src="' + esc(imgUrl) + '" alt="Contoh task ' + (idx+1) + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' +
+    (imgCaption ? '<div class="task-img-caption">📷 ' + esc(imgCaption) + '</div>' : '') +
+    '</div>'
+  : '';
       return '<div class="mission-card"><div class="mission-card-top"><div class="mission-num">' + (idx+1) + '</div><div class="mission-content"><div class="mission-title">' + esc(task.title) + '</div>' + (task.desc ? '<div class="mission-desc">' + esc(task.desc) + '</div>' : '') + '</div></div>' + imgBlock + '</div>';
     }).join('') +
     tipItems.map(tip => '<div class="mission-tip"><span class="tip-icon">💡</span><span>' + esc(tip) + '</span></div>').join('') +
