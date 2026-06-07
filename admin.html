@@ -1055,21 +1055,26 @@
         </div>
 
         <div class="form-sec">
-         <div class="sec-lbl">Tugas / Guide Steps<span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400"> — Format: "1. Judul | Deskripsi" per baris</span></div>
-         <div class="fg">
-        <div class="field"><label>Tugas (ID)</label><textarea id="f-tasksid" class="tall" placeholder="1. Daftar di website | Kunjungi https://... dan klik Sign Up">${esc(d.tasksID||'')}</textarea></div>
-       <div class="field"><label>Tasks (EN)</label><textarea id="f-tasksen" class="tall" placeholder="1. Register | Visit https://... and click Sign Up">${esc(d.tasksEN||'')}</textarea></div>
-       </div>
-       <div style="margin-top:12px">
-       <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text3);letter-spacing:0.1em;text-transform:uppercase;margin-bottom:8px">Task Images — Upload Gambar per Task</div>
-       <div id="task-images-builder" style="display:flex;flex-direction:column;gap:6px;"></div>
-       <button type="button" onclick="addTaskImageSlot()"
-      style="width:100%;margin-top:8px;padding:0.55rem;background:var(--adim);border:1px dashed var(--aborder);
-      border-radius:6px;color:var(--accent);font-family:var(--mono);font-size:0.63rem;cursor:pointer;transition:all 0.2s"
-      onmouseover="this.style.background='rgba(0,229,160,0.14)'" onmouseout="this.style.background='var(--adim)'">
-      ＋ Tambah Slot Gambar
-        </button>
-      </div>
+  <div class="sec-lbl">Tugas / Guide Steps<span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400"> — Format: "1. Judul | Deskripsi" per baris</span></div>
+  <!-- Header kolom -->
+  <div style="display:grid;grid-template-columns:24px 1fr 1fr 180px 28px;gap:10px;padding:0 12px;margin-bottom:6px;">
+    <div></div>
+    <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">Tugas (ID)</div>
+    <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">Tasks (EN)</div>
+    <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">Gambar</div>
+    <div></div>
+  </div>
+  <!-- Hidden textarea untuk simpan data (tidak tampil) -->
+  <textarea id="f-tasksid" style="display:none">${esc(d.tasksID||'')}</textarea>
+  <textarea id="f-tasksen" style="display:none">${esc(d.tasksEN||'')}</textarea>
+  <!-- Builder rows -->
+  <div id="task-images-builder" style="display:flex;flex-direction:column;gap:6px;"></div>
+  <button type="button" onclick="addTaskRow()"
+    style="width:100%;margin-top:8px;padding:0.55rem;background:var(--adim);border:1px dashed var(--aborder);
+    border-radius:6px;color:var(--accent);font-family:var(--mono);font-size:0.63rem;cursor:pointer;transition:all 0.2s"
+    onmouseover="this.style.background='rgba(0,229,160,0.14)'" onmouseout="this.style.background='var(--adim)'">
+    ＋ Tambah Tugas
+  </button>
    </div>
           
         <div class="form-sec">
@@ -2323,49 +2328,71 @@ async function _deleteExManage(id, name) {
   };
 
   // ── TASK IMAGES BUILDER ───────────────────────────────
-  function initTaskImagesBuilder(rawData) {
+ function initTaskImagesBuilder(rawData) {
   const builder = document.getElementById('task-images-builder');
   if (!builder) return;
   builder.innerHTML = '';
-  let items = [];
+
+  let savedImages = [];
   try {
-    if (Array.isArray(rawData)) items = rawData;
-    else if (typeof rawData === 'string' && rawData.trim()) items = JSON.parse(rawData);
-  } catch(e) { items = []; }
-  items.forEach((item, i) => addTaskImageSlot(item, i));
+    if (Array.isArray(rawData)) savedImages = rawData;
+    else if (typeof rawData === 'string' && rawData.trim()) savedImages = JSON.parse(rawData);
+  } catch(e) { savedImages = []; }
+
+  const linesID = parseTaskLines(document.getElementById('f-tasksid')?.value || '');
+  const linesEN = parseTaskLines(document.getElementById('f-tasksen')?.value || '');
+  const count = Math.max(linesID.length, linesEN.length, 0);
+
+  for (let i = 0; i < count; i++) {
+    const textID = (linesID[i] || '').replace(/^(\d+[\.\)]\s*)/, '');
+    const textEN = (linesEN[i] || '').replace(/^(\d+[\.\)]\s*)/, '');
+    addTaskRow({ textID, textEN, url: savedImages[i]?.url || '', caption: savedImages[i]?.caption || '' });
+  }
+}
+
+function parseTaskLines(raw) {
+  return raw.split('\n').map(l => l.trim()).filter(l => l);
 }
 
 
- function taskImageSlotHTML(idx, item) {
-  item = item || { url: '', caption: '' };
+function taskRowHTML(idx, item) {
+  item = item || {};
   const hasImg = !!(item.url && item.url.trim());
   const slotId = `timg-slot-${idx}-${Date.now()}`;
-
-  const tasksIDRaw = document.getElementById('f-tasksid')?.value || '';
-  const tasksENRaw = document.getElementById('f-tasksen')?.value || '';
-  const parseLines = raw => raw.split('\n').map(l => l.trim()).filter(l => l);
-  const linesID = parseLines(tasksIDRaw);
-  const linesEN = parseLines(tasksENRaw);
-  const labelID = (linesID[idx] || '').replace(/^(\d+[\.\)]\s*)/, '').split(' | ')[0] || '';
-  const labelEN = (linesEN[idx] || '').replace(/^(\d+[\.\)]\s*)/, '').split(' | ')[0] || '';
 
   return `
     <div class="timg-slot" id="${slotId}"
          style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;
-                padding:10px 12px;display:grid;grid-template-columns:1fr 1fr 160px 28px;gap:10px;align-items:start;">
-      <!-- Kolom Tugas ID -->
-      <div style="display:flex;flex-direction:column;gap:4px;">
-        <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">Task ${idx+1} — ID</div>
-        <div style="font-family:var(--mono);font-size:0.68rem;color:var(--text2);line-height:1.4;min-height:32px;">${esc(labelID) || '<span style="color:var(--text3);font-style:italic">—</span>'}</div>
+                padding:10px 12px;display:grid;
+                grid-template-columns:24px 1fr 1fr 180px 28px;
+                gap:10px;align-items:start;">
+
+      <!-- Nomor -->
+      <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);
+                  font-weight:700;text-align:center;padding-top:8px;">
+        <span class="trow-num">${idx + 1}</span>
       </div>
-      <!-- Kolom Tasks EN -->
+
+      <!-- Input Tugas ID -->
+      <textarea class="trow-id" placeholder="Teks tugas bahasa Indonesia..."
+             style="width:100%;background:var(--s3);border:1px solid var(--border);border-radius:6px;
+                    color:var(--text);font-family:var(--mono);font-size:0.72rem;
+                    padding:0.5rem 0.65rem;outline:none;resize:vertical;min-height:60px;line-height:1.5;
+                    transition:border-color 0.2s;"
+             onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+      >${esc(item.textID || '')}</textarea>
+
+      <!-- Input Tasks EN -->
+      <textarea class="trow-en" placeholder="Task text in English..."
+             style="width:100%;background:var(--s3);border:1px solid var(--border);border-radius:6px;
+                    color:var(--text);font-family:var(--mono);font-size:0.72rem;
+                    padding:0.5rem 0.65rem;outline:none;resize:vertical;min-height:60px;line-height:1.5;
+                    transition:border-color 0.2s;"
+             onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'"
+      >${esc(item.textEN || '')}</textarea>
+
+      <!-- Upload Gambar -->
       <div style="display:flex;flex-direction:column;gap:4px;">
-        <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">Task ${idx+1} — EN</div>
-        <div style="font-family:var(--mono);font-size:0.68rem;color:var(--text2);line-height:1.4;min-height:32px;">${esc(labelEN) || '<span style="color:var(--text3);font-style:italic">—</span>'}</div>
-      </div>
-      <!-- Kolom Upload Gambar -->
-      <div style="display:flex;flex-direction:column;gap:5px;">
-        <div style="font-family:var(--mono);font-size:0.5rem;color:var(--text3);letter-spacing:0.08em;text-transform:uppercase;">Gambar</div>
         <div style="display:flex;gap:6px;align-items:center;">
           <div class="timg-preview" id="prev-${slotId}"
                style="width:48px;height:36px;border-radius:4px;border:1px dashed var(--border2);
@@ -2381,9 +2408,8 @@ async function _deleteExManage(id, name) {
                    onchange="handleTaskImageUpload(event,'${slotId}')">
             <button type="button" onclick="document.getElementById('timg-file-${slotId}').click()"
                     style="font-family:var(--mono);font-size:0.48rem;padding:3px 7px;border-radius:4px;
-                           border:1px solid var(--aborder);background:var(--adim);color:var(--accent);cursor:pointer;white-space:nowrap;">
-              ⬆ Upload
-            </button>
+                           border:1px solid var(--aborder);background:var(--adim);color:var(--accent);
+                           cursor:pointer;white-space:nowrap;">⬆ Upload</button>
             ${hasImg ? `<button type="button" onclick="clearTaskImageSlot('${slotId}')"
                     style="font-family:var(--mono);font-size:0.48rem;padding:3px 7px;border-radius:4px;
                            border:1px solid rgba(239,68,68,0.3);background:rgba(239,68,68,0.08);
@@ -2399,35 +2425,32 @@ async function _deleteExManage(id, name) {
                onfocus="this.style.borderColor='var(--accent)'" onblur="this.style.borderColor='var(--border)'">
         <div class="timg-status-${slotId}" style="font-family:var(--mono);font-size:0.5rem;display:none;"></div>
       </div>
-      <!-- Tombol hapus slot -->
+
+      <!-- Tombol hapus -->
       <button type="button" onclick="removeTaskImageSlot('${slotId}')"
               style="padding:3px 6px;border-radius:4px;border:1px solid rgba(239,68,68,0.2);
                      background:rgba(239,68,68,0.06);color:var(--red);font-family:var(--mono);
-                     font-size:0.5rem;cursor:pointer;margin-top:16px;">✕</button>
+                     font-size:0.5rem;cursor:pointer;margin-top:8px;">✕</button>
     </div>`;
 }
-  function addTaskImageSlot(item, idx) {
-    const builder = document.getElementById('task-images-builder');
-    if (!builder) return;
-    const currentCount = builder.querySelectorAll('.timg-slot').length;
-    if (currentCount >= 20) { showToast('Maksimal 20 slot gambar', 'error'); return; }
-    const i = idx !== undefined ? idx : currentCount;
-    builder.insertAdjacentHTML('beforeend', taskImageSlotHTML(i, item || { url: '', caption: '' }));
-    refreshTaskImageNums();
-  }
+  
+  function addTaskRow(item) {
+  const builder = document.getElementById('task-images-builder');
+  if (!builder) return;
+  const idx = builder.querySelectorAll('.timg-slot').length;
+  builder.insertAdjacentHTML('beforeend', taskRowHTML(idx, item || {}));
+  refreshTaskImageNums();
+}
 
   function removeTaskImageSlot(slotId) {
     document.getElementById(slotId)?.remove();
     refreshTaskImageNums();
   }
 
-  function refreshTaskImageNums() {
+ function refreshTaskImageNums() {
   document.getElementById('task-images-builder')?.querySelectorAll('.timg-slot').forEach((slot, idx) => {
-    slot.querySelectorAll('div[style*="text-transform:uppercase"]').forEach((label, col) => {
-      if (col === 0) label.textContent = `Task ${idx+1} — ID`;
-      if (col === 1) label.textContent = `Task ${idx+1} — EN`;
-      if (col === 2) label.textContent = `Gambar`;
-    });
+    const num = slot.querySelector('.trow-num');
+    if (num) num.textContent = idx + 1;
   });
 }
 
@@ -2485,16 +2508,30 @@ async function _deleteExManage(id, name) {
   }
 
   function getTaskImages() {
-    const builder = document.getElementById('task-images-builder');
-    if (!builder) return null;
-    const items = [];
-    builder.querySelectorAll('.timg-slot').forEach(slot => {
-      const url     = slot.querySelector('.timg-url')?.value?.trim()     || '';
-      const caption = slot.querySelector('.timg-caption')?.value?.trim() || '';
-      items.push({ url, caption });
-    });
-    return items.some(i => i.url) ? JSON.stringify(items) : null;
-  }
+  const builder = document.getElementById('task-images-builder');
+  if (!builder) return null;
+
+  const linesID = [], linesEN = [], items = [];
+  let rowIdx = 1;
+  builder.querySelectorAll('.timg-slot').forEach(slot => {
+    const textID  = slot.querySelector('.trow-id')?.value?.trim()      || '';
+    const textEN  = slot.querySelector('.trow-en')?.value?.trim()      || '';
+    const url     = slot.querySelector('.timg-url')?.value?.trim()     || '';
+    const caption = slot.querySelector('.timg-caption')?.value?.trim() || '';
+    if (textID) linesID.push(`${rowIdx}. ${textID}`);
+    if (textEN) linesEN.push(`${rowIdx}. ${textEN}`);
+    items.push({ url, caption });
+    rowIdx++;
+  });
+
+  // Sync ke hidden textarea supaya saveForm() bisa baca tasksID & tasksEN
+  const tidEl = document.getElementById('f-tasksid');
+  const tenEl = document.getElementById('f-tasksen');
+  if (tidEl) tidEl.value = linesID.join('\n');
+  if (tenEl) tenEl.value = linesEN.join('\n');
+
+  return items.some(i => i.url) ? JSON.stringify(items) : null;
+}
   
 </script>
 
