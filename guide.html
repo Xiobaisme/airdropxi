@@ -1033,10 +1033,14 @@ taskLines.forEach(line => {
       '</div>'
     : '';
 
-  const text = task.desc ? task.title + '. ' + task.desc : task.title;
+  // Semua baris dalam task digabung jadi paragraf, baru gambar di bawah
+  const lines = task.title.split('\n').map(l => l.trim()).filter(Boolean);
+  const textBlock = lines.map(line => 
+    '<p>' + line + '</p>'
+  ).join('') + (task.desc ? '<p>' + task.desc + '</p>' : '');
 
-  return '<div style="margin-bottom:16px">' +
-    '<div class="desc-text"><p>' + text + '</p></div>' +
+  return '<div style="margin-bottom:20px">' +
+    '<div class="desc-text">' + textBlock + '</div>' +
     imgBlock +
     '</div>';
 }).join('');
