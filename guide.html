@@ -581,8 +581,10 @@
 }
 .task-image-preview img {
   width: 100%; display: block;
-  max-height: 320px; object-fit: contain;
+  height: auto; max-height: none;
+  object-fit: unset;
   background: var(--surface3);
+  border-radius: 8px;
 }
 .task-img-caption {
   font-family: var(--mono); font-size: 10px; color: var(--text3);
