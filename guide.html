@@ -1028,19 +1028,15 @@ taskLines.forEach(line => {
 
   const imgBlock = hasImg
     ? '<div class="task-image-preview" style="margin-top:12px">' +
-      '<img src="' + esc(imgUrl) + '" alt="Task ' + (idx+1) + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' +
+      '<img src="' + esc(imgUrl) + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' +
       (imgCaption ? '<div class="task-img-caption">📷 ' + esc(imgCaption) + '</div>' : '') +
       '</div>'
     : '';
 
-  // Semua baris dalam task digabung jadi paragraf, baru gambar di bawah
-  const lines = task.title.split('\n').map(l => l.trim()).filter(Boolean);
-  const textBlock = lines.map(line => 
-    '<p>' + line + '</p>'
-  ).join('') + (task.desc ? '<p>' + task.desc + '</p>' : '');
+  const text = task.desc ? task.title + '<br>' + task.desc : task.title;
 
-  return '<div style="margin-bottom:20px">' +
-    '<div class="desc-text">' + textBlock + '</div>' +
+  return '<div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)">' +
+    '<div class="desc-text"><p>' + text + '</p></div>' +
     imgBlock +
     '</div>';
 }).join('');
