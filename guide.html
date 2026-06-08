@@ -1062,9 +1062,9 @@ const proseBlocks = taskItems.map((task, idx) => {
   const text = task.desc ? task.title + '<br>' + task.desc : task.title;
 
   return '<div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)">' +
-    imgBlock +
-    '<div class="desc-text"><p>' + text + '</p></div>' +
-    '</div>';
+  '<div class="desc-text"><p>' + text + '</p></div>' +
+  imgBlock +
+  '</div>';
 }).join('');
 
 const tasksHTML = taskItems.length
