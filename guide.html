@@ -1019,8 +1019,8 @@ function render(p, roadmapData) {
 const firstImg = allImages[0] || '';
 
 const proseText = taskItems.map((task, idx) => {
-  return task.desc ? task.title + '. ' + task.desc : task.title + '.';
-}).join(' ');
+  return task.desc ? task.title + '. ' + task.desc : task.title;
+}).join('</p><p>');
 
 const imgBlockFull = firstImg
   ? '<div class="task-image-preview" style="margin-top:20px"><img src="' + esc(firstImg) + '" alt="Task preview" loading="lazy" onerror="this.parentElement.style.display=\'none\'"></div>'
@@ -1037,7 +1037,7 @@ const tasksHTML = taskItems.length
     '<span class="section-count">' + taskItems.length + ' ' + esc(t.missionSub) + '</span>' +
     '</div>' +
     '<div class="section-body">' +
-    '<div class="desc-text"><p>' + esc(proseText) + '</p></div>' +
+    '<div class="desc-text"><p>' + proseText + '</p></div>' +
     imgBlockFull +
     tipItems.map(tip => '<div class="mission-tip" style="margin-top:16px"><span class="tip-icon">💡</span><span>' + esc(tip) + '</span></div>').join('') +
     '</div>' +
