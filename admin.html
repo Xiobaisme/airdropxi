@@ -2334,10 +2334,10 @@ function initTaskRowsBuilder(data) {
   try {
     const rawID = data.tasksID || '';
     const rawEN = data.tasksEN || '';
-   tasksID = rawID.split('\n\n')
-  .map(l => l.trim()).filter(Boolean);
-  tasksEN = rawEN.split('\n\n')
-  .map(l => l.trim()).filter(Boolean);
+   const sepID = rawID.includes('\n\n') ? '\n\n' : '\n';
+const sepEN = rawEN.includes('\n\n') ? '\n\n' : '\n';
+tasksID = rawID.split(sepID).map(l => l.trim()).filter(Boolean);
+tasksEN = rawEN.split(sepEN).map(l => l.trim()).filter(Boolean);
     const rawImgs = data.tasks_images;
     if (Array.isArray(rawImgs)) images = rawImgs;
     else if (typeof rawImgs === 'string' && rawImgs.trim()) images = JSON.parse(rawImgs);
