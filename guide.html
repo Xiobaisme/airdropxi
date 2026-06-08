@@ -998,16 +998,20 @@ function render(p, roadmapData) {
 
   /* MISSION */
   const taskLines = tasksRaw.split('\n').map(l => l.trim()).filter(Boolean);
-  const taskItems = [], tipItems = [];
-  taskLines.forEach(line => {
-    if (/^💡/i.test(line)) {
-      tipItems.push(line.replace(/^💡\s*/, ''));
-    } else if (!/^(Q:|A:)/i.test(line)) {
-      const cleanNum = line.replace(/^(\d+[\.\)]\s*)/, '');
-      const parts = cleanNum.split(' | ');
-     taskItems.push({ title: parts[0] || cleanNum, desc: parts[1] || null, img: parts[2] ? parts[2].trim() : null });
-    }
-  });
+const taskItems = [], tipItems = [];
+taskLines.forEach(line => {
+  if (/^💡/i.test(line)) {
+    tipItems.push(line.replace(/^💡\s*/, ''));
+  } else if (!/^(Q:|A:)/i.test(line)) {
+    const cleanNum = line.replace(/^(\d+[\.\)]\s*)/, '');
+    const parts = cleanNum.split(' | ');
+    // Kalau taskImages ada, selalu 1 baris = 1 task (jangan gabung)
+    taskItems.push({ title: parts[0] || cleanNum, desc: parts[1] || null, img: parts[2] ? parts[2].trim() : null });
+  }
+});
+
+// Merge baris yang harusnya 1 task (tidak ada gambar di index itu)
+// Sekarang 1 baris di DB = 1 task, jadi tidak perlu merge
 
 // Parse tasks_images
   let taskImages = [];
@@ -1017,21 +1021,25 @@ function render(p, roadmapData) {
     else if (typeof rawImgs === 'string' && rawImgs.trim()) taskImages = JSON.parse(rawImgs);
   } catch(e) { taskImages = []; }
 
- const allTexts = taskItems.map(task =>
-  task.desc ? task.title + '. ' + task.desc : task.title
-).join('</p><p>');
-
-const allImgBlocks = taskItems.map((task, idx) => {
+ const proseBlocks = taskItems.map((task, idx) => {
   const imgUrl = task.img || (taskImages[idx]?.url || '');
   const imgCaption = taskImages[idx]?.caption || '';
-  if (!(imgUrl && imgUrl.trim())) return '';
-  return '<div class="task-image-preview" style="margin-top:16px">' +
-    '<img src="' + esc(imgUrl) + '" alt="Task ' + (idx+1) + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' +
-    (imgCaption ? '<div class="task-img-caption">📷 ' + esc(imgCaption) + '</div>' : '') +
+  const hasImg = !!(imgUrl && imgUrl.trim());
+
+  const imgBlock = hasImg
+    ? '<div class="task-image-preview" style="margin-top:12px">' +
+      '<img src="' + esc(imgUrl) + '" alt="Task ' + (idx+1) + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' +
+      (imgCaption ? '<div class="task-img-caption">📷 ' + esc(imgCaption) + '</div>' : '') +
+      '</div>'
+    : '';
+
+  const text = task.desc ? task.title + '. ' + task.desc : task.title;
+
+  return '<div style="margin-bottom:16px">' +
+    '<div class="desc-text"><p>' + text + '</p></div>' +
+    imgBlock +
     '</div>';
 }).join('');
-
-const proseBlocks = '<div class="desc-text"><p>' + allTexts + '</p></div>' + allImgBlocks;
 
 const tasksHTML = taskItems.length
   ? '<div class="section-block reveal">' +
