@@ -523,8 +523,10 @@
     </div>
   </div>
 
-  <div class="toast" id="toast"></div>
+<div class="toast" id="toast"></div>
 </div>
+
+<div id="admin-guide-root" style="position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:0 1.25rem 4rem;"></div>
 
 <script>
   const GH_OWNER      = 'Xiobaisme';
@@ -1389,6 +1391,7 @@
       if (res.ok && result.success) {
         document.getElementById('login-section').style.display = 'none';
         document.getElementById('admin-content').classList.remove('hidden');
+        renderAdminGuide();
         if (!localStorage.getItem('gh_token_airdropxi'))
           setTimeout(() => showToast('💡 Setup GitHub Token untuk enable upload gambar!', 'success'), 800);
       } else {
@@ -2522,6 +2525,73 @@ function getTaskRows() {
     tasksEN:      enLines.length ? enLines.join('\n') : null,
     tasks_images: images.some(i => i.url) ? JSON.stringify(images) : null,
   };
+}
+
+  // ── ADMIN GUIDE ───────────────────────────────────────
+function guideSection(icon, title, body) {
+  return `<div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;overflow:hidden;">
+    <div style="display:flex;align-items:center;gap:8px;padding:0.75rem 1rem;border-bottom:1px solid var(--border);background:linear-gradient(90deg,rgba(0,229,160,0.03),transparent);">
+      <span style="font-size:1rem">${icon}</span>
+      <span style="font-size:0.82rem;font-weight:700">${title}</span>
+    </div>
+    <div style="padding:1rem;font-size:0.78rem;color:var(--text2);line-height:1.7;display:flex;flex-direction:column;gap:8px">${body}</div>
+  </div>`;
+}
+
+function switchGuideTab(lang) {
+  const idC = document.getElementById('guide-content-id');
+  const enC = document.getElementById('guide-content-en');
+  const idT = document.getElementById('guide-tab-id');
+  const enT = document.getElementById('guide-tab-en');
+  if (!idC) return;
+  const on  = 'rgba(0,229,160,0.06)', off = 'transparent';
+  if (lang === 'id') {
+    idC.style.display = 'flex'; enC.style.display = 'none';
+    idT.style.cssText += ';border-bottom-color:var(--accent);background:'+on+';color:var(--accent)';
+    enT.style.cssText += ';border-bottom-color:transparent;background:'+off+';color:var(--text3)';
+  } else {
+    enC.style.display = 'flex'; idC.style.display = 'none';
+    enT.style.cssText += ';border-bottom-color:var(--accent);background:'+on+';color:var(--accent)';
+    idT.style.cssText += ';border-bottom-color:transparent;background:'+off+';color:var(--text3)';
+  }
+}
+
+function renderAdminGuide() {
+  const root = document.getElementById('admin-guide-root');
+  if (!root) return;
+  const ID = [
+    ['🔑','Login & Akses','<p>Login pakai Google yang sudah diwhitelist. Kalau "Akses Ditolak" — email belum didaftarkan, hubungi owner.</p><p>Setelah login, setup <strong style="color:var(--accent)">GitHub Token</strong> via tombol sidebar. Wajib untuk upload gambar.</p>'],
+    ['➕','Tambah Airdrop Baru','<ol style="padding-left:1.2rem;display:flex;flex-direction:column;gap:5px"><li>Isi <strong>Nama Proyek</strong> + <strong>Status Airdrop</strong> — wajib.</li><li>Pilih <strong>Confirmation Status</strong>: Potential / Confirmed / Ended / TBA.</li><li>Isi deskripsi, funding, tokenomics, sosmed.</li><li>Upload logo via <strong>⬆ Upload Gambar</strong>.</li><li>Tambah task di <strong>Tugas / Guide Steps</strong>.</li><li>Toggle ke <strong style="color:var(--accent)">Published</strong> kalau siap publik.</li><li>Klik <strong>➕ Tambah</strong>.</li></ol>'],
+    ['✏️','Edit Proyek','<p>Klik nama proyek di list kiri → ubah field → klik <strong style="color:var(--accent)">💾 Simpan</strong>. Toggle Published/Draft bisa diubah kapan saja.</p>'],
+    ['🗂️','Status & Confirmation','<ul style="padding-left:1.2rem;display:flex;flex-direction:column;gap:5px"><li><strong style="color:var(--accent)">Status Airdrop</strong>: fase aktif (Active, Testnet, Season 1, dst).</li><li><strong style="color:var(--cyan)">Confirmed</strong>: resmi dikonfirmasi tim proyek.</li><li><strong style="color:var(--purple)">Potential</strong>: kemungkinan ada, belum pasti.</li><li><strong style="color:var(--text3)">Ended</strong>: sudah selesai.</li></ul>'],
+    ['📋','Task / Guide Steps','<p>Tiap task: field <strong>Tugas (ID)</strong>, <strong>Tasks (EN)</strong>, dan <strong>Gambar</strong>. Upload gambar per task untuk panduan visual. Caption opsional. Maks 20 task.</p>'],
+    ['🏦','Manage Exchanges','<p>🏦 <strong style="color:var(--cyan)">Manage Exchanges</strong> → tambah/edit/hapus daftar exchange.<br>🔄 <strong style="color:var(--accent)">Update Exchange Details</strong> → isi About, CEO+foto, native token, sosmed.</p>'],
+    ['📘','Share Facebook','<ol style="padding-left:1.2rem;display:flex;flex-direction:column;gap:5px"><li>Klik tombol <strong style="color:#5b9cf6">📘 FB</strong> di list proyek.</li><li>Klik <strong>📋 Copy Caption</strong>.</li><li>Klik <strong>📘 Buka Facebook</strong> → paste.</li></ol>'],
+    ['⚠️','Hal Penting','<ul style="padding-left:1.2rem;display:flex;flex-direction:column;gap:5px"><li>Proyek <strong style="color:var(--warn)">Draft</strong> tidak tampil publik.</li><li>Hapus proyek <strong>tidak bisa dibatalkan</strong>.</li><li>GitHub Token disimpan di browser lokal — jaga keamanan device.</li><li>Upload maks <strong>2MB</strong>, format PNG/JPG/WEBP/SVG/GIF.</li><li>Maks 5 testnet link, 20 task, 20 fase roadmap per proyek.</li></ul>'],
+  ];
+  const EN = [
+    ['🔑','Login & Access','<p>Login with a whitelisted Google account. "Access Denied" = email not registered, contact the owner.</p><p>After login, set up your <strong style="color:var(--accent)">GitHub Token</strong> via the sidebar. Required for image uploads.</p>'],
+    ['➕','Add New Airdrop','<ol style="padding-left:1.2rem;display:flex;flex-direction:column;gap:5px"><li>Fill <strong>Project Name</strong> + <strong>Airdrop Status</strong> — required.</li><li>Select <strong>Confirmation Status</strong>: Potential / Confirmed / Ended / TBA.</li><li>Fill description, funding, tokenomics, social media.</li><li>Upload logo via <strong>⬆ Upload Gambar</strong>.</li><li>Add tasks under <strong>Tugas / Guide Steps</strong>.</li><li>Toggle to <strong style="color:var(--accent)">Published</strong> when ready.</li><li>Click <strong>➕ Tambah</strong>.</li></ol>'],
+    ['✏️','Edit a Project','<p>Click a project in the left list → update fields → click <strong style="color:var(--accent)">💾 Simpan</strong>. Published/Draft toggle can be changed anytime.</p>'],
+    ['🗂️','Status & Confirmation','<ul style="padding-left:1.2rem;display:flex;flex-direction:column;gap:5px"><li><strong style="color:var(--accent)">Airdrop Status</strong>: active phase (Active, Testnet, Season 1, etc).</li><li><strong style="color:var(--cyan)">Confirmed</strong>: officially confirmed by the project team.</li><li><strong style="color:var(--purple)">Potential</strong>: possible but not yet official.</li><li><strong style="color:var(--text3)">Ended</strong>: concluded.</li></ul>'],
+    ['📋','Task / Guide Steps','<p>Each task has: <strong>Tugas (ID)</strong>, <strong>Tasks (EN)</strong>, and <strong>Image</strong>. Upload an image per task for visual guidance. Caption optional. Max 20 tasks.</p>'],
+    ['🏦','Manage Exchanges','<p>🏦 <strong style="color:var(--cyan)">Manage Exchanges</strong> → add/edit/delete exchanges.<br>🔄 <strong style="color:var(--accent)">Update Exchange Details</strong> → fill About, CEO+photo, native token, social media.</p>'],
+    ['📘','Share to Facebook','<ol style="padding-left:1.2rem;display:flex;flex-direction:column;gap:5px"><li>Click <strong style="color:#5b9cf6">📘 FB</strong> on a project.</li><li>Click <strong>📋 Copy Caption</strong>.</li><li>Click <strong>📘 Buka Facebook</strong> → paste.</li></ol>'],
+    ['⚠️','Important Notes','<ul style="padding-left:1.2rem;display:flex;flex-direction:column;gap:5px"><li><strong style="color:var(--warn)">Draft</strong> projects are not visible publicly.</li><li>Deleting a project <strong>cannot be undone</strong>.</li><li>GitHub Token is stored locally — keep your device secure.</li><li>Max upload <strong>2MB</strong>, formats PNG/JPG/WEBP/SVG/GIF.</li><li>Max 5 testnet links, 20 tasks, 20 roadmap phases per project.</li></ul>'],
+  ];
+  root.innerHTML = `
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;">
+      <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);background:linear-gradient(105deg,rgba(0,229,160,0.04),transparent)">
+        <div style="font-family:var(--mono);font-size:0.58rem;color:var(--text3);letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.4rem">📘 Panduan Admin · Admin Guide</div>
+        <div style="font-size:0.95rem;font-weight:700">Cara Pakai Admin Panel</div>
+      </div>
+      <div style="display:flex;border-bottom:1px solid var(--border)">
+        <button id="guide-tab-id" onclick="switchGuideTab('id')" style="flex:1;padding:0.65rem;font-family:var(--mono);font-size:0.62rem;font-weight:700;cursor:pointer;border:none;border-bottom:2px solid var(--accent);background:rgba(0,229,160,0.06);color:var(--accent);transition:all 0.2s">🇮🇩 Bahasa Indonesia</button>
+        <button id="guide-tab-en" onclick="switchGuideTab('en')" style="flex:1;padding:0.65rem;font-family:var(--mono);font-size:0.62rem;font-weight:700;cursor:pointer;border:none;border-bottom:2px solid transparent;background:transparent;color:var(--text3);transition:all 0.2s">🇺🇸 English</button>
+      </div>
+      <div id="guide-content-id" style="padding:1.5rem;display:flex;flex-direction:column;gap:1rem">${ID.map(([i,t,b])=>guideSection(i,t,b)).join('')}</div>
+      <div id="guide-content-en" style="padding:1.5rem;display:none;flex-direction:column;gap:1rem">${EN.map(([i,t,b])=>guideSection(i,t,b)).join('')}</div>
+    </div>`;
 }
   
 </script>
