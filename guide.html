@@ -1014,21 +1014,21 @@ function render(p, roadmapData) {
     else if (typeof rawImgs === 'string' && rawImgs.trim()) taskImages = JSON.parse(rawImgs);
   } catch(e) { taskImages = []; }
 
- const proseBlocks = taskItems.map((task, idx) => {
+ const allTexts = taskItems.map(task =>
+  task.desc ? task.title + '. ' + task.desc : task.title
+).join('</p><p>');
+
+const allImgBlocks = taskItems.map((task, idx) => {
   const imgUrl = task.img || (taskImages[idx]?.url || '');
   const imgCaption = taskImages[idx]?.caption || '';
-  const hasImg = !!(imgUrl && imgUrl.trim());
-
-  const imgBlock = hasImg
-    ? '<div class="task-image-preview" style="margin-top:12px">' +
-      '<img src="' + esc(imgUrl) + '" alt="Task ' + (idx+1) + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' +
-      (imgCaption ? '<div class="task-img-caption">📷 ' + esc(imgCaption) + '</div>' : '') +
-      '</div>'
-    : '';
-
-  const text = task.desc ? task.title + '. ' + task.desc : task.title;
-  return '<div style="margin-bottom:20px"><div class="desc-text"><p>' + text + '</p></div>' + imgBlock + '</div>';
+  if (!(imgUrl && imgUrl.trim())) return '';
+  return '<div class="task-image-preview" style="margin-top:16px">' +
+    '<img src="' + esc(imgUrl) + '" alt="Task ' + (idx+1) + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' +
+    (imgCaption ? '<div class="task-img-caption">📷 ' + esc(imgCaption) + '</div>' : '') +
+    '</div>';
 }).join('');
+
+const proseBlocks = '<div class="desc-text"><p>' + allTexts + '</p></div>' + allImgBlocks;
 
 const tasksHTML = taskItems.length
   ? '<div class="section-block reveal">' +
