@@ -1023,7 +1023,7 @@ function render(p, roadmapData) {
   const descHTML = desc ? '<div class="section-block reveal"><div class="section-head"><div class="section-icon">📋</div><div class="section-head-text"><div class="section-title-txt">' + esc(t.about) + '</div><div class="section-subtitle-txt">' + esc(t.aboutSub) + '</div></div></div><div class="section-body"><div class="desc-text">' + desc.split('\n\n').map(para => '<p>' + esc(para.trim()).replace(/\n/g,'<br>') + '</p>').join('') + '</div></div></div>' : '';
 
   /* MISSION */
-  const taskLines = tasksRaw.split('\n').map(l => l.trim()).filter(Boolean);
+  const taskLines = tasksRaw.split('\n\n').map(l => l.trim()).filter(Boolean);
 const taskItems = [], tipItems = [];
 taskLines.forEach(line => {
   if (/^💡/i.test(line)) {
