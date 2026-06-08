@@ -356,13 +356,7 @@
   }
   .mission-card:hover { border-color: var(--border3); background: var(--mission-hover-bg); transform: translateX(4px); }
   .mission-card:hover::before { opacity: 1; }
-  .mission-num {
-    width: 28px; height: 28px; border-radius: 50%;
-    background: var(--section-icon-bg); border: 1px solid var(--section-icon-border);
-    display: flex; align-items: center; justify-content: center;
-    font-family: var(--mono); font-size: 10px; font-weight: 700; color: var(--g-readable);
-    flex-shrink: 0; margin-top: 1px;
-  }
+  .mission-num { display: none; }
   .mission-content { flex: 1; }
   .mission-title { font-weight: 700; color: var(--text); margin-bottom: 4px; font-family: var(--sans); font-size: 14px; }
   .mission-desc { font-size: 12.5px; color: var(--text2); line-height: 1.65; }
@@ -1028,7 +1022,7 @@ function render(p, roadmapData) {
           (imgCaption ? '<div class="task-img-caption">📷 ' + esc(imgCaption) + '</div>' : '') +
           '</div>'
         : '';
-      return '<div class="mission-card"><div class="mission-card-top"><div class="mission-num">' + (idx+1) + '</div><div class="mission-content"><div class="mission-title">' + esc(task.title) + '</div>' + (task.desc ? '<div class="mission-desc">' + esc(task.desc) + '</div>' : '') + '</div></div>' + imgBlock + '</div>';
+        return '<div class="mission-card"><div class="mission-content" style="width:100%"><div class="mission-title">' + esc(task.title) + '</div>' + (task.desc ? '<div class="mission-desc">' + esc(task.desc) + '</div>' : '') + '</div>' + imgBlock + '</div>';
     }).join('') +
     tipItems.map(tip => '<div class="mission-tip"><span class="tip-icon">💡</span><span>' + esc(tip) + '</span></div>').join('') +
   '</div></div></div>' : '';
