@@ -1053,18 +1053,25 @@ const proseBlocks = taskItems.map((task, idx) => {
   const hasImg = !!(imgUrl && imgUrl.trim());
 
   const imgBlock = hasImg
-    ? '<div class="task-image-preview" style="margin-bottom:12px">' +
+    ? '<div class="task-image-preview" style="margin-top:14px">' +
       '<img src="' + esc(imgUrl) + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' +
       (imgCaption ? '<div class="task-img-caption">📷 ' + esc(imgCaption) + '</div>' : '') +
       '</div>'
     : '';
 
-  const text = task.desc ? task.title + '<br>' + task.desc : task.title;
+  const paragraphs = (task.desc
+    ? task.title + '\n' + task.desc
+    : task.title
+  ).split('\n').map(l => l.trim()).filter(Boolean);
+
+  const textBlock = '<div class="desc-text">' +
+    paragraphs.map(p => '<p>' + esc(p) + '</p>').join('') +
+    '</div>';
 
   return '<div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)">' +
-  '<div class="desc-text"><p>' + text + '</p></div>' +
-  imgBlock +
-  '</div>';
+    textBlock +
+    imgBlock +
+    '</div>';
 }).join('');
 
 const tasksHTML = taskItems.length
