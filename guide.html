@@ -580,9 +580,12 @@
   to   { opacity: 1; transform: translateY(0); }
 }
 .task-image-preview img {
-  width: 100%; display: block;
-  height: auto; max-height: none;
-  object-fit: unset;
+  display: block;
+  max-width: 100%;
+  height: auto;
+  max-height: 600px;
+  object-fit: contain;
+  margin: 0 auto;
   background: var(--surface3);
   border-radius: 8px;
 }
