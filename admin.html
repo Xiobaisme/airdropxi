@@ -2521,8 +2521,8 @@ function getTaskRows() {
     images.push({ url: imgUrl, caption });
   });
   return {
-    tasksID:      idLines.length ? idLines.join('\n') : null,
-    tasksEN:      enLines.length ? enLines.join('\n') : null,
+   tasksID: idLines.length ? idLines.join('\n\n') : null,
+   tasksEN: enLines.length ? enLines.join('\n\n') : null,
     tasks_images: images.some(i => i.url) ? JSON.stringify(images) : null,
   };
 }
