@@ -1047,13 +1047,13 @@ taskLines.forEach(line => {
     else if (typeof rawImgs === 'string' && rawImgs.trim()) taskImages = JSON.parse(rawImgs);
   } catch(e) { taskImages = []; }
 
- const proseBlocks = taskItems.map((task, idx) => {
+const proseBlocks = taskItems.map((task, idx) => {
   const imgUrl = task.img || (taskImages[idx]?.url || '');
   const imgCaption = taskImages[idx]?.caption || '';
   const hasImg = !!(imgUrl && imgUrl.trim());
 
   const imgBlock = hasImg
-    ? '<div class="task-image-preview" style="margin-top:12px">' +
+    ? '<div class="task-image-preview" style="margin-bottom:12px">' +
       '<img src="' + esc(imgUrl) + '" loading="lazy" onerror="this.parentElement.style.display=\'none\'">' +
       (imgCaption ? '<div class="task-img-caption">📷 ' + esc(imgCaption) + '</div>' : '') +
       '</div>'
@@ -1062,8 +1062,8 @@ taskLines.forEach(line => {
   const text = task.desc ? task.title + '<br>' + task.desc : task.title;
 
   return '<div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)">' +
-    '<div class="desc-text"><p>' + text + '</p></div>' +
     imgBlock +
+    '<div class="desc-text"><p>' + text + '</p></div>' +
     '</div>';
 }).join('');
 
