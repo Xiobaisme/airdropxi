@@ -415,7 +415,7 @@
     .ex-list-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
     .ex-edit-scroll { max-height: calc(100vh - 160px); overflow-y: auto; }
     .ex-edit-scroll::-webkit-scrollbar { width: 3px; }
-    .ex-edit-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+    .task-id-input, .task-en-input { overflow: hidden !important; resize: none !important; }
   </style>
 </head>
 <body>
@@ -2352,6 +2352,12 @@ tasksEN = rawEN.split(sepEN).map(l => l.trim()).filter(Boolean);
       caption: images[i]?.caption || ''
     });
   }
+setTimeout(() => {
+    document.querySelectorAll('.task-id-input, .task-en-input').forEach(el => {
+      el.style.height = 'auto';
+      el.style.height = el.scrollHeight + 'px';
+    });
+  }, 30);
 }
 
 function addTaskRow(item) {
@@ -2389,9 +2395,9 @@ function addTaskRow(item) {
                     style="width:100%;background:var(--s3);border:1px solid var(--border);
                            border-radius:6px;color:var(--text);font-family:var(--mono);
                            font-size:0.72rem;padding:0.5rem 0.65rem;outline:none;
-                           transition:border-color 0.2s;resize:vertical;min-height:70px;line-height:1.5;"
+                           transition:border-color 0.2s;line-height:1.5;"
                     onfocus="this.style.borderColor='var(--accent)'"
-                    onblur="this.style.borderColor='var(--border)'">${esc(item.idText)}</textarea>
+                    onblur="this.style.borderColor='var(--border)'" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${esc(item.idText)}</textarea>
         </div>
 
         <!-- Tasks EN -->
@@ -2402,9 +2408,9 @@ function addTaskRow(item) {
                     style="width:100%;background:var(--s3);border:1px solid var(--border);
                            border-radius:6px;color:var(--text);font-family:var(--mono);
                            font-size:0.72rem;padding:0.5rem 0.65rem;outline:none;
-                           transition:border-color 0.2s;resize:vertical;min-height:70px;line-height:1.5;"
+                           transition:border-color 0.2s;line-height:1.5;"
                     onfocus="this.style.borderColor='var(--accent)'"
-                    onblur="this.style.borderColor='var(--border)'">${esc(item.enText)}</textarea>
+                    onblur="this.style.borderColor='var(--border)'" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${esc(item.enText)}</textarea>
         </div>
 
         <!-- Gambar -->
