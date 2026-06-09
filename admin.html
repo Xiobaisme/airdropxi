@@ -2412,7 +2412,7 @@ function addTaskRow(item) {
           <label style="font-family:var(--mono);font-size:0.56rem;color:var(--text2);
                         text-transform:uppercase;letter-spacing:0.06em;">Gambar Tugas</label>
           <div style="display:flex;flex-direction:column;gap:5px;">
-            <div class="trow-img-preview" id="prev-${rowId}"
+           <div class="trow-img-preview" id="prev-${rowId}"
                  style="width:100%;height:80px;border-radius:6px;border:1px dashed var(--border2);
                         background:var(--s3);display:flex;align-items:center;justify-content:center;
                         font-size:20px;overflow:hidden;cursor:pointer;"
@@ -2431,6 +2431,14 @@ function addTaskRow(item) {
                              border-radius:4px;border:1px solid var(--aborder);
                              background:var(--adim);color:var(--accent);cursor:pointer;">
                 ⬆ Upload
+              </button>
+              <button type="button"
+                      onclick="openTaskImgEditor('${rowId}')"
+                      style="flex:1;font-family:var(--mono);font-size:0.5rem;padding:4px;
+                             border-radius:4px;border:1px solid rgba(0,200,240,0.3);
+                             background:rgba(0,200,240,0.08);color:var(--cyan);cursor:pointer;"
+                      id="btn-edit-${rowId}">
+                ✏️ Edit
               </button>
               <button type="button"
                       onclick="clearTaskRowImage('${rowId}')"
@@ -2477,6 +2485,8 @@ function clearTaskRowImage(rowId) {
   row.querySelector('.trow-img-url').value = '';
   const preview = row.querySelector('.trow-img-preview');
   if (preview) preview.innerHTML = '🖼️';
+  const editBtn = document.getElementById(`btn-edit-${rowId}`);
+  if (editBtn) editBtn.style.opacity = '0.4';
 }
 
 async function handleTaskRowImageUpload(e, rowId) {
@@ -2518,11 +2528,352 @@ function getTaskRows() {
     if (enText) enLines.push(enText);
     images.push({ url: imgUrl, caption });
   });
-  return {
+ return {
    tasksID: idLines.length ? idLines.join('\n\n') : null,
    tasksEN: enLines.length ? enLines.join('\n\n') : null,
     tasks_images: images.some(i => i.url) ? JSON.stringify(images) : null,
   };
+}
+
+// ── TASK IMAGE EDITOR ────────────────────────────────────
+let _imgEditorRowId   = null;
+let _imgEditorBaseImg = null;
+let _imgEditorAnnotations = [];
+let _imgEditorCropRect    = null;
+let _imgEditorDrawing     = false;
+let _imgEditorStartX = 0, _imgEditorStartY = 0;
+let _imgEditorTool   = 'arrow';
+let _imgEditorColor  = '#22c55e';
+let _imgEditorLineW  = 2;
+
+function openTaskImgEditor(rowId) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+  const imgUrl = row.querySelector('.trow-img-url')?.value?.trim();
+  _imgEditorRowId = rowId;
+  _imgEditorAnnotations = [];
+  _imgEditorCropRect    = null;
+
+  document.getElementById('task-img-editor-modal')?.remove();
+
+  const modal = document.createElement('div');
+  modal.id = 'task-img-editor-modal';
+  modal.style.cssText = `position:fixed;inset:0;z-index:4000;background:rgba(0,0,0,0.82);
+    backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:1rem`;
+
+  modal.innerHTML = `
+    <div style="background:var(--s1);border:1px solid var(--border);border-radius:14px;
+                width:min(780px,98vw);max-height:96vh;display:flex;flex-direction:column;overflow:hidden;">
+      
+      <!-- Header -->
+      <div style="display:flex;align-items:center;gap:10px;padding:0.75rem 1.1rem;
+                  border-bottom:1px solid var(--border);flex-shrink:0;
+                  background:linear-gradient(90deg,rgba(0,229,160,0.04),transparent)">
+        <span style="font-family:var(--mono);font-size:0.65rem;color:var(--accent);font-weight:700;flex:1">
+          ✏️ Edit Gambar Task
+        </span>
+        <button onclick="document.getElementById('task-img-editor-modal').remove()"
+                style="padding:4px 10px;border-radius:5px;border:1px solid var(--border);
+                       background:transparent;color:var(--text2);font-family:var(--mono);
+                       font-size:0.6rem;cursor:pointer">✕ Tutup</button>
+      </div>
+
+      <!-- Toolbar -->
+      <div style="display:flex;gap:5px;padding:8px 12px;border-bottom:1px solid var(--border);
+                  flex-wrap:wrap;align-items:center;flex-shrink:0;background:var(--s2)">
+        <button id="ietool-arrow" onclick="_ieTool('arrow')"
+          style="padding:5px 10px;border-radius:5px;border:1px solid var(--aborder);
+                 background:var(--adim);color:var(--accent);font-family:var(--mono);
+                 font-size:0.6rem;cursor:pointer;font-weight:700">➡ Arrow</button>
+        <button id="ietool-rect" onclick="_ieTool('rect')"
+          style="padding:5px 10px;border-radius:5px;border:1px solid var(--border2);
+                 background:var(--s3);color:var(--text2);font-family:var(--mono);
+                 font-size:0.6rem;cursor:pointer">□ Kotak</button>
+        <button id="ietool-crop" onclick="_ieTool('crop')"
+          style="padding:5px 10px;border-radius:5px;border:1px solid var(--border2);
+                 background:var(--s3);color:var(--text2);font-family:var(--mono);
+                 font-size:0.6rem;cursor:pointer">✂ Crop</button>
+        <div style="width:1px;height:20px;background:var(--border);margin:0 2px"></div>
+        <!-- Colors -->
+        ${[['#22c55e','Hijau'],['#ef4444','Merah'],['#3b82f6','Biru'],['#f59e0b','Kuning'],['#ffffff','Putih']].map(([c,n])=>`
+          <div onclick="_ieColor('${c}',this)" data-c="${c}" title="${n}"
+               style="width:20px;height:20px;border-radius:50%;background:${c};cursor:pointer;
+                      border:2px solid ${c==='#22c55e'?'#fff':'transparent'};flex-shrink:0;
+                      transition:border-color 0.15s"></div>`).join('')}
+        <div style="width:1px;height:20px;background:var(--border);margin:0 2px"></div>
+        <!-- Line width -->
+        <span style="font-family:var(--mono);font-size:0.55rem;color:var(--text3)">Tebal:</span>
+        <input type="range" id="ie-linesize" min="1" max="8" value="2" step="1"
+               style="width:60px" oninput="_imgEditorLineW=+this.value;document.getElementById('ie-sizeval').textContent=this.value">
+        <span id="ie-sizeval" style="font-family:var(--mono);font-size:0.55rem;color:var(--text2);min-width:12px">2</span>
+        <div style="flex:1"></div>
+        <button onclick="_ieUndo()"
+          style="padding:5px 10px;border-radius:5px;border:1px solid var(--border);
+                 background:transparent;color:var(--text2);font-family:var(--mono);font-size:0.6rem;cursor:pointer">↩ Undo</button>
+        <button onclick="_ieClear()"
+          style="padding:5px 10px;border-radius:5px;border:1px solid rgba(239,68,68,0.25);
+                 background:rgba(239,68,68,0.08);color:var(--red);font-family:var(--mono);font-size:0.6rem;cursor:pointer">🗑 Clear</button>
+      </div>
+
+      <!-- Canvas area -->
+      <div style="flex:1;overflow:auto;display:flex;align-items:flex-start;justify-content:center;
+                  padding:12px;background:var(--bg)">
+        <div style="position:relative;display:inline-block" id="ie-canvas-wrap">
+          <canvas id="ie-base-canvas"></canvas>
+          <canvas id="ie-draw-canvas" style="position:absolute;top:0;left:0;cursor:crosshair"></canvas>
+        </div>
+      </div>
+
+      <!-- Bottom bar -->
+      <div style="display:flex;gap:8px;padding:10px 12px;border-top:1px solid var(--border);
+                  align-items:center;flex-shrink:0;background:var(--s2)">
+        <div id="ie-crop-hint" style="font-family:var(--mono);font-size:0.58rem;color:var(--text3);flex:1;display:none">
+          Drag area crop → klik Apply Crop
+        </div>
+        <button id="ie-apply-crop" onclick="_ieApplyCrop()"
+          style="display:none;padding:6px 14px;border-radius:6px;border:1px solid var(--aborder);
+                 background:var(--adim);color:var(--accent);font-family:var(--mono);
+                 font-size:0.62rem;cursor:pointer;font-weight:700">✔ Apply Crop</button>
+        <div style="flex:1"></div>
+       <button onclick="_ieSaveResult()" class="ie-save-btn"
+          style="padding:7px 18px;border-radius:6px;border:1px solid var(--aborder);
+                 background:var(--adim);color:var(--accent);font-family:var(--mono);
+                 font-size:0.65rem;cursor:pointer;font-weight:700">
+          💾 Simpan & Upload
+        </button>
+      </div>
+    </div>`;
+
+  modal.addEventListener('click', e => { if (e.target === modal) modal.remove(); });
+  document.body.appendChild(modal);
+
+  if (imgUrl) {
+    _ieLoadImageFromUrl(imgUrl);
+  } else {
+    const fileInput = document.getElementById(`trow-file-${rowId}`);
+    const hint = document.createElement('div');
+    hint.style.cssText = 'font-family:var(--mono);font-size:0.65rem;color:var(--text3);padding:2rem;text-align:center';
+    hint.textContent = 'Upload gambar dulu sebelum edit.';
+    document.getElementById('ie-canvas-wrap')?.appendChild(hint);
+  }
+  _ieTool('arrow');
+}
+
+function _ieLoadImageFromUrl(url) {
+  const img = new Image();
+  img.crossOrigin = 'anonymous';
+  img.onload = () => { _imgEditorBaseImg = img; _ieInitCanvas(img); };
+  img.onerror = () => {
+    const wrap = document.getElementById('ie-canvas-wrap');
+    if (wrap) wrap.innerHTML = `<div style="font-family:var(--mono);font-size:0.65rem;color:var(--red);padding:2rem">
+      Gagal load gambar. Coba upload ulang terlebih dahulu.</div>`;
+  };
+  img.src = url;
+}
+
+function _ieInitCanvas(img) {
+  const maxW = Math.min(720, window.innerWidth - 60);
+  const maxH = Math.min(480, window.innerHeight - 260);
+  const scale = Math.min(maxW / img.width, maxH / img.height, 1);
+  const W = Math.round(img.width * scale);
+  const H = Math.round(img.height * scale);
+
+  const base = document.getElementById('ie-base-canvas');
+  const draw = document.getElementById('ie-draw-canvas');
+  if (!base || !draw) return;
+  base.width  = W; base.height = H;
+  draw.width  = W; draw.height = H;
+  base.style.width  = W + 'px'; base.style.height = H + 'px';
+  draw.style.width  = W + 'px'; draw.style.height = H + 'px';
+  base.getContext('2d').drawImage(img, 0, 0, W, H);
+  _ieBindEvents(draw);
+  _ieRedraw();
+}
+
+function _ieBindEvents(canvas) {
+  canvas.onmousedown = e => {
+    _imgEditorDrawing = true;
+    const p = _iePos(e, canvas);
+    _imgEditorStartX = p.x; _imgEditorStartY = p.y;
+  };
+  canvas.onmousemove = e => {
+    if (!_imgEditorDrawing) return;
+    const p = _iePos(e, canvas);
+    if (_imgEditorTool === 'crop') _imgEditorCropRect = { x: _imgEditorStartX, y: _imgEditorStartY, w: p.x - _imgEditorStartX, h: p.y - _imgEditorStartY };
+    _ieRedraw(true, p.x, p.y);
+  };
+  canvas.onmouseup = e => {
+    if (!_imgEditorDrawing) return;
+    _imgEditorDrawing = false;
+    const p = _iePos(e, canvas);
+    if (_imgEditorTool === 'arrow' || _imgEditorTool === 'rect') {
+      _imgEditorAnnotations.push({ type: _imgEditorTool, x1: _imgEditorStartX, y1: _imgEditorStartY, x2: p.x, y2: p.y, color: _imgEditorColor, lw: _imgEditorLineW });
+    }
+    if (_imgEditorTool === 'crop') _imgEditorCropRect = { x: _imgEditorStartX, y: _imgEditorStartY, w: p.x - _imgEditorStartX, h: p.y - _imgEditorStartY };
+    _ieRedraw(false, 0, 0);
+  };
+  canvas.onmouseleave = () => { if (_imgEditorDrawing) { _imgEditorDrawing = false; _ieRedraw(); } };
+
+  // Touch support
+  canvas.ontouchstart = e => { e.preventDefault(); const t = e.touches[0]; canvas.onmousedown({ clientX: t.clientX, clientY: t.clientY }); };
+  canvas.ontouchmove  = e => { e.preventDefault(); const t = e.touches[0]; canvas.onmousemove({ clientX: t.clientX, clientY: t.clientY }); };
+  canvas.ontouchend   = e => { e.preventDefault(); const t = e.changedTouches[0]; canvas.onmouseup({ clientX: t.clientX, clientY: t.clientY }); };
+}
+
+function _iePos(e, canvas) {
+  const r = canvas.getBoundingClientRect();
+  return { x: (e.clientX - r.left) * (canvas.width / r.width), y: (e.clientY - r.top) * (canvas.height / r.height) };
+}
+
+function _ieRedraw(preview, px, py) {
+  const draw = document.getElementById('ie-draw-canvas');
+  if (!draw) return;
+  const ctx = draw.getContext('2d');
+  ctx.clearRect(0, 0, draw.width, draw.height);
+  _imgEditorAnnotations.forEach(a => _ieDrawShape(ctx, a));
+  if (preview && _imgEditorDrawing) {
+    if (_imgEditorTool === 'arrow') _ieDrawArrow(ctx, _imgEditorStartX, _imgEditorStartY, px, py, _imgEditorColor, _imgEditorLineW, 0.7);
+    if (_imgEditorTool === 'rect')  _ieDrawRect(ctx, _imgEditorStartX, _imgEditorStartY, px, py, _imgEditorColor, _imgEditorLineW, 0.7);
+  }
+  if (_imgEditorCropRect && _imgEditorTool === 'crop') {
+    const r = _ieNormRect(_imgEditorCropRect);
+    ctx.save();
+    ctx.fillStyle = 'rgba(0,0,0,0.5)';
+    ctx.fillRect(0, 0, draw.width, draw.height);
+    ctx.clearRect(r.x, r.y, r.w, r.h);
+    ctx.strokeStyle = '#22c55e'; ctx.lineWidth = 1.5; ctx.setLineDash([4,3]);
+    ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.setLineDash([]); ctx.restore();
+  }
+}
+
+function _ieDrawShape(ctx, a) {
+  if (a.type === 'arrow') _ieDrawArrow(ctx, a.x1, a.y1, a.x2, a.y2, a.color, a.lw, 1);
+  if (a.type === 'rect')  _ieDrawRect(ctx, a.x1, a.y1, a.x2, a.y2, a.color, a.lw, 1);
+}
+
+function _ieDrawArrow(ctx, x1, y1, x2, y2, clr, lw, alpha) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.strokeStyle = clr; ctx.fillStyle = clr; ctx.lineWidth = lw;
+  ctx.beginPath(); ctx.moveTo(x1, y1); ctx.lineTo(x2, y2); ctx.stroke();
+  const angle = Math.atan2(y2 - y1, x2 - x1);
+  const hLen  = Math.max(10, lw * 5);
+  ctx.beginPath();
+  ctx.moveTo(x2, y2);
+  ctx.lineTo(x2 - hLen * Math.cos(angle - Math.PI/6), y2 - hLen * Math.sin(angle - Math.PI/6));
+  ctx.lineTo(x2 - hLen * Math.cos(angle + Math.PI/6), y2 - hLen * Math.sin(angle + Math.PI/6));
+  ctx.closePath(); ctx.fill(); ctx.restore();
+}
+
+function _ieDrawRect(ctx, x1, y1, x2, y2, clr, lw, alpha) {
+  ctx.save(); ctx.globalAlpha = alpha;
+  ctx.strokeStyle = clr; ctx.lineWidth = lw;
+  ctx.strokeRect(x1, y1, x2 - x1, y2 - y1); ctx.restore();
+}
+
+function _ieNormRect(r) {
+  return { x: r.w < 0 ? r.x + r.w : r.x, y: r.h < 0 ? r.y + r.h : r.y, w: Math.abs(r.w), h: Math.abs(r.h) };
+}
+
+function _ieTool(t) {
+  _imgEditorTool = t;
+  ['arrow','rect','crop'].forEach(name => {
+    const btn = document.getElementById(`ietool-${name}`);
+    if (!btn) return;
+    if (name === t) {
+      btn.style.borderColor = 'var(--aborder)'; btn.style.background = 'var(--adim)'; btn.style.color = 'var(--accent)';
+    } else {
+      btn.style.borderColor = 'var(--border2)'; btn.style.background = 'var(--s3)'; btn.style.color = 'var(--text2)';
+    }
+  });
+  const cropHint = document.getElementById('ie-crop-hint');
+  const cropBtn  = document.getElementById('ie-apply-crop');
+  if (cropHint) cropHint.style.display = t === 'crop' ? 'block' : 'none';
+  if (cropBtn)  cropBtn.style.display  = t === 'crop' ? 'inline-block' : 'none';
+  if (t !== 'crop') { _imgEditorCropRect = null; _ieRedraw(); }
+}
+
+function _ieColor(c, el) {
+  _imgEditorColor = c;
+  document.querySelectorAll('#task-img-editor-modal [data-c]').forEach(d => d.style.borderColor = 'transparent');
+  el.style.borderColor = '#fff';
+}
+
+function _ieUndo() {
+  if (_imgEditorAnnotations.length) { _imgEditorAnnotations.pop(); _ieRedraw(); }
+  else if (_imgEditorCropRect) { _imgEditorCropRect = null; _ieRedraw(); }
+}
+
+function _ieClear() {
+  _imgEditorAnnotations = []; _imgEditorCropRect = null; _ieRedraw();
+}
+
+function _ieApplyCrop() {
+  if (!_imgEditorCropRect) return;
+  const r = _ieNormRect(_imgEditorCropRect);
+  if (r.w < 5 || r.h < 5) return;
+  const base = document.getElementById('ie-base-canvas');
+  const draw = document.getElementById('ie-draw-canvas');
+  if (!base || !draw) return;
+
+  // Merge base + annotations onto temp canvas, then crop
+  const tmp = document.createElement('canvas');
+  tmp.width = r.w; tmp.height = r.h;
+  const tCtx = tmp.getContext('2d');
+  tCtx.drawImage(base, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h);
+  // Also bake current annotations
+  const annTmp = document.createElement('canvas');
+  annTmp.width = base.width; annTmp.height = base.height;
+  const aCtx = annTmp.getContext('2d');
+  _imgEditorAnnotations.forEach(a => _ieDrawShape(aCtx, a));
+  tCtx.drawImage(annTmp, r.x, r.y, r.w, r.h, 0, 0, r.w, r.h);
+
+  base.width = r.w; base.height = r.h;
+  draw.width = r.w; draw.height = r.h;
+  base.style.width = r.w + 'px'; base.style.height = r.h + 'px';
+  draw.style.width = r.w + 'px'; draw.style.height = r.h + 'px';
+  base.getContext('2d').drawImage(tmp, 0, 0);
+  _imgEditorAnnotations = _imgEditorAnnotations
+    .map(a => ({ ...a, x1: a.x1 - r.x, y1: a.y1 - r.y, x2: a.x2 - r.x, y2: a.y2 - r.y }))
+    .filter(a => Math.max(a.x1,a.x2) > 0 && Math.min(a.x1,a.x2) < r.w && Math.max(a.y1,a.y2) > 0 && Math.min(a.y1,a.y2) < r.h);
+  _imgEditorCropRect = null;
+  _ieRedraw();
+  _ieTool('arrow');
+}
+
+async function _ieSaveResult() {
+  const base = document.getElementById('ie-base-canvas');
+  const draw = document.getElementById('ie-draw-canvas');
+  if (!base) { showToast('Tidak ada gambar untuk disimpan.', 'error'); return; }
+
+  const out = document.createElement('canvas');
+  out.width = base.width; out.height = base.height;
+  const octx = out.getContext('2d');
+  octx.drawImage(base, 0, 0);
+  octx.drawImage(draw, 0, 0);
+
+  const saveBtn = document.querySelector('#task-img-editor-modal .ie-save-btn');
+  if (saveBtn) { saveBtn.disabled = true; saveBtn.innerHTML = '<span class="spinner"></span> Uploading...'; }
+
+  try {
+    const blob = await new Promise(res => out.toBlob(res, 'image/png'));
+    const file = new File([blob], 'task-edited.png', { type: 'image/png' });
+    const projectName = document.getElementById('f-name')?.value?.trim() || 'task';
+    const rawUrl = await uploadImageToGitHub(file, `task-${projectName}-edited`);
+
+    // Update preview & hidden input di task row
+    const row = document.getElementById(_imgEditorRowId);
+    if (row) {
+      const preview  = row.querySelector('.trow-img-preview');
+      const urlInput = row.querySelector('.trow-img-url');
+      if (preview) preview.innerHTML = `<img src="${rawUrl}" style="width:100%;height:100%;object-fit:cover;border-radius:5px" onerror="this.parentElement.innerHTML='🖼️'">`;
+      if (urlInput) urlInput.value = rawUrl;
+    }
+    showToast('✓ Gambar tersimpan & diupload!', 'success');
+    document.getElementById('task-img-editor-modal')?.remove();
+  } catch(err) {
+    showToast('Upload gagal: ' + err.message, 'error');
+    if (saveBtn) { saveBtn.disabled = false; saveBtn.innerHTML = '💾 Simpan & Upload'; }
+  }
 }
 
   // ── ADMIN GUIDE ───────────────────────────────────────
