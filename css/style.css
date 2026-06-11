@@ -63,7 +63,7 @@ body {
   min-height: 100vh;
   cursor: default;
   transition: background 0.4s, color 0.4s;
-  padding-top: 68px; /* tinggi nav (60px) + ticker price (36px) + news (32px) */
+  padding-top: 128px;
 }
 
 /* ==========================================
@@ -95,7 +95,9 @@ body::after {
   display: flex; align-items:center;
   backdrop-filter: blur(20px);
   max-width: 100vw;
+  position: fixed; top: 0; left: 0; right: 0; z-index: 102;
 }
+
 [data-theme="light"] .pticker-wrap { background: rgba(255,255,255,0.75); }
 .pticker-inner {
   display: inline-flex;
@@ -126,6 +128,7 @@ body::after {
   display: flex; align-items:stretch;
   backdrop-filter: blur(20px);
   max-width: 100vw;
+  position: fixed; top: 36px; left: 0; right: 0; z-index: 101;
 }
 [data-theme="light"] .nticker-wrap { background: rgba(255,255,255,0.8); }
 .nticker-label {
@@ -193,7 +196,7 @@ nav {
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(30px);
   background: rgba(8,15,12,0.75);
-  position: fixed; top:0; left:0; right:0; z-index:100;
+  position: fixed; top: 68px; left:0; right:0; z-index:100;
   transition: background 0.4s;
 }
 [data-theme="light"] nav { background: rgba(240,247,244,0.88); }
