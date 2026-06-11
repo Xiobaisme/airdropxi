@@ -189,13 +189,9 @@ body::after {
    6. NAVBAR
    ========================================== */
 nav {
-  display: flex; align-items:center; justify-content:space-between;
-  padding: 0 40px; height:60px;
-  border-bottom: 1px solid var(--border);
-  backdrop-filter: blur(30px);
-  background: rgba(8,15,12,0.75);
-  position: fixed; top: 68px; left:0; right:0; z-index:100;
-  transition: background 0.4s;
+  top: 68px !important;
+  background: red !important; /* biar keliatan */
+  z-index: 9999 !important;
 }
 [data-theme="light"] nav { background: rgba(240,247,244,0.88); }
 
