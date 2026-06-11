@@ -1006,6 +1006,11 @@ footer {
     height: auto;
     min-height: 36px;
     white-space: normal;
+    position: fixed; /* ← tambah ini */
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 102;
   }
   .pticker-inner {
     animation: none !important;
