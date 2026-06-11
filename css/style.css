@@ -63,6 +63,7 @@ body {
   min-height: 100vh;
   cursor: default;
   transition: background 0.4s, color 0.4s;
+  padding-top: 68px; /* tinggi nav (60px) + ticker price (36px) + news (32px) */
 }
 
 /* ==========================================
@@ -192,7 +193,7 @@ nav {
   border-bottom: 1px solid var(--border);
   backdrop-filter: blur(30px);
   background: rgba(8,15,12,0.75);
-  position: sticky; top:0; z-index:100;
+  position: fixed; top:0; left:0; right:0; z-index:100;
   transition: background 0.4s;
 }
 [data-theme="light"] nav { background: rgba(240,247,244,0.88); }
