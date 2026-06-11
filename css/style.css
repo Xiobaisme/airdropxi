@@ -1004,11 +1004,24 @@ footer {
     height: auto;
     min-height: 36px;
     white-space: normal;
-    position: fixed; /* ← tambah ini */
+    position: fixed;
     top: 0;
     left: 0;
     right: 0;
     z-index: 102;
+  }
+  .nticker-wrap {
+    position: fixed;
+    top: 36px;
+    left: 0;
+    right: 0;
+    z-index: 101;
+  }
+  nav {
+    top: 68px;
+  }
+  body {
+    padding-top: 128px;
   }
   .pticker-inner {
     animation: none !important;
