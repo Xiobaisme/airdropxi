@@ -910,7 +910,7 @@ footer {
     max-width: 100vw !important;
   }
   .pticker-inner { animation: scrollX 60s linear infinite !important; }
-  .nticker-inner { animation: scrollX 60s linear infinite !important; }
+  .nticker-inner { animation: scrollX 70s linear infinite !important; }
 
   /* Text overflow fixes */
   .section-title, .section-sub, .acard-name, .acard-status,
