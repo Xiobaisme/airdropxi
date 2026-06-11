@@ -996,19 +996,31 @@ footer {
 }
 
 /* ==========================================
-   PRICE TICKER — DESKTOP STATIC GRID
+   PRICE TICKER — DESKTOP FIXED + SCROLL
    ========================================== */
 @media (min-width: 768px) {
   .pticker-wrap {
-  overflow: hidden;
-  height: 36px;
-  white-space: normal;
-  position: fixed;
-  top: 0;
-  left: 0;
-  right: 0;
-  z-index: 102;
-}
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 102;
+    overflow: hidden;
+    height: 36px;
+    white-space: nowrap;
+  }
+
+  .pticker-inner {
+    display: inline-flex !important;
+    flex-wrap: nowrap !important;
+    animation: scrollX 220s linear infinite !important;
+    white-space: nowrap !important;
+    width: auto !important;
+    justify-content: flex-start !important;
+    padding: 0 !important;
+    gap: 0 !important;
+  }
+
   .nticker-wrap {
     position: fixed;
     top: 36px;
@@ -1016,21 +1028,12 @@ footer {
     right: 0;
     z-index: 101;
   }
+
   nav {
     top: 68px;
   }
+
   body {
     padding-top: 128px;
-  }
-  .pticker-inner {
-    animation: none !important;
-    transform: none !important;
-    display: flex !important;
-    flex-wrap: wrap !important;
-    justify-content: center !important;
-    gap: 4px !important;
-    padding: 4px 12px !important;
-    white-space: normal !important;
-    width: 100% !important;
   }
 }
