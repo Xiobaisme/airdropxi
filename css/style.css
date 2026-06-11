@@ -1000,16 +1000,15 @@ footer {
    ========================================== */
 @media (min-width: 768px) {
   .pticker-wrap {
-    overflow: visible;
-    height: auto;
-    min-height: 36px;
-    white-space: normal;
-    position: fixed;
-    top: 0;
-    left: 0;
-    right: 0;
-    z-index: 102;
-  }
+  overflow: hidden;
+  height: 36px;
+  white-space: normal;
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  z-index: 102;
+}
   .nticker-wrap {
     position: fixed;
     top: 36px;
