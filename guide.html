@@ -620,6 +620,17 @@
 .img-lightbox-close:hover { background: rgba(255,255,255,.2); }
 .task-image-preview img { cursor: zoom-in; transition: opacity .2s; }
 .task-image-preview img:hover { opacity: .85; }
+
+ .task-start-btn {
+  display: inline-flex; align-items: center; gap: 7px;
+  padding: 10px 20px;
+  background: linear-gradient(135deg, var(--g), var(--c)); color: #000;
+  font-weight: 700; font-size: 11px; font-family: var(--mono);
+  border-radius: 10px; text-decoration: none;
+  letter-spacing: .06em; text-transform: uppercase;
+  transition: opacity .2s, transform .15s, box-shadow .2s;
+}
+.task-start-btn:hover { opacity: .88; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,232,122,.28); }
  
 </style>
 </head>
@@ -974,6 +985,15 @@ function render(p, roadmapData) {
   const tasksRaw = isID ? (p.tasksID || p.tasksEN || '') : (p.tasksEN || p.tasksID || '');
   const faqRaw   = isID ? (p.faqID || p.faqEN || '') : (p.faqEN || p.faqID || '');
 
+ // Parse testnet_links untuk tombol per task
+let links = [];
+if (p.testnet_links) {
+  try {
+    const parsed = typeof p.testnet_links === 'string' ? JSON.parse(p.testnet_links) : p.testnet_links;
+    if (Array.isArray(parsed)) links = parsed;
+  } catch(e) {}
+}
+
   const tags = (p.tags || '').split(',').map(tg => tg.trim()).filter(Boolean);
   const confirmClass = getConfirmClass(p.confirmation_status);
   const confirmLabel = getConfirmLabel(p.confirmation_status);
@@ -1047,7 +1067,7 @@ taskLines.forEach(line => {
     else if (typeof rawImgs === 'string' && rawImgs.trim()) taskImages = JSON.parse(rawImgs);
   } catch(e) { taskImages = []; }
 
-const proseBlocks = taskItems.map((task, idx) => {
+  const proseBlocks = taskItems.map((task, idx) => {
   const imgUrl = task.img || (taskImages[idx]?.url || '');
   const imgCaption = taskImages[idx]?.caption || '';
   const hasImg = !!(imgUrl && imgUrl.trim());
@@ -1068,9 +1088,22 @@ const proseBlocks = taskItems.map((task, idx) => {
     paragraphs.map(p => '<p>' + esc(p) + '</p>').join('') +
     '</div>';
 
+  // Ambil link dari testnet_links sesuai index task
+  const taskLink = links[idx] ? links[idx].url : null;
+  const taskLabel = links[idx] ? (links[idx].label || 'Start') : null;
+
+  const startBtn = taskLink
+    ? '<div style="margin-top:14px">' +
+      '<a href="' + esc(taskLink) + '" target="_blank" rel="noopener noreferrer" class="task-start-btn">' +
+      '<svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><polygon points="5 3 19 12 5 21 5 3"/></svg>' +
+      esc(taskLabel) +
+      '</a></div>'
+    : '';
+
   return '<div style="margin-bottom:24px;padding-bottom:24px;border-bottom:1px solid var(--border)">' +
     textBlock +
     imgBlock +
+    startBtn +
     '</div>';
 }).join('');
 
@@ -1130,26 +1163,8 @@ function renderCTA(p, t) {
   const ctaWrap = document.getElementById('cta-wrap');
   const ctaBtns = document.getElementById('cta-buttons');
   ctaWrap.style.display = 'flex';
-  let links = [];
-  if (p.testnet_links) {
-    try {
-      const parsed = typeof p.testnet_links === 'string' ? JSON.parse(p.testnet_links) : p.testnet_links;
-      if (Array.isArray(parsed) && parsed.length > 0) links = parsed;
-    } catch(e) {}
-  }
-  if (links.length > 0) {
-    ctaBtns.innerHTML = '<div class="btn-dropdown-wrap" id="dropdown-wrap"><button class="btn-dropdown-toggle" onclick="toggleDropdown()">⚡ ' + esc(t.cta) + '<span class="btn-arrow-ico">▲</span></button><div class="btn-dropdown-menu">' + links.map((l, i) => '<a href="' + esc(l.url) + '" target="_blank" rel="noopener noreferrer" class="dropdown-item"><div class="dropdown-item-icon">⚡</div><div><div class="dropdown-item-label">' + esc(l.label || 'Link ' + (i+1)) + '</div><div class="dropdown-item-url">' + esc(l.url) + '</div></div></a>').join('') + '</div></div>';
-  } else if (p.link) {
-    ctaBtns.innerHTML = '<a href="' + esc(p.link) + '" target="_blank" rel="noopener noreferrer" class="btn-main">⚡ ' + esc(t.cta) + '</a>';
-  } else {
-    ctaBtns.innerHTML = '<button class="btn-main" style="opacity:.35;cursor:not-allowed" disabled>⚡ ' + esc(t.ctaNA) + '</button>';
-  }
-  document.addEventListener('click', function(e) {
-    const wrap = document.getElementById('dropdown-wrap');
-    if (wrap && !wrap.contains(e.target)) wrap.classList.remove('open');
-  });
+  ctaBtns.innerHTML = '';
 }
-
 function toggleDropdown() {
   const wrap = document.getElementById('dropdown-wrap');
   if (wrap) wrap.classList.toggle('open');
