@@ -53,7 +53,7 @@ html { scroll-behavior:smooth; }
 
 html, body {
   max-width: 100%;
-  overflow-x: hidden;
+  overflow-x: clip;
 }
 
 body {
@@ -977,8 +977,8 @@ footer {
   .btn-primary, .btn-ghost { width: 100%; justify-content: center; }
   .hero-stats { gap: 12px; }
 
-  body, html { overflow-x: hidden; width: 100%; }
-  .container, section, .hero, footer { overflow-x: hidden; }
+  body, html { overflow-x: clip; width: 100%; }
+  .container, section, .hero, footer { overflow-x: clip; }
 
   .acard { padding: 16px; }
   .acard-top { flex-wrap: wrap; gap: 10px; }
@@ -992,6 +992,7 @@ footer {
   .prog-meta { flex-wrap: wrap; gap: 4px; }
   .tasks-body { max-height: 100px; overflow-y: auto; }
 }
+
 /* ==========================================
    PRICE TICKER — DESKTOP STATIC GRID
    ========================================== */
