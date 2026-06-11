@@ -1007,6 +1007,8 @@ footer {
     z-index: 102;
     overflow: hidden;
     height: 36px;
+    white-space: nowrap;
+    justify-content: center;
   }
 
   .pticker-inner {
