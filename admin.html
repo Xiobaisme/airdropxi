@@ -416,6 +416,17 @@
     .ex-edit-scroll { max-height: calc(100vh - 160px); overflow-y: auto; }
     .ex-edit-scroll::-webkit-scrollbar { width: 3px; }
     .task-id-input, .task-en-input { overflow: hidden !important; resize: none !important; }
+
+    .task-row.dragging { opacity: 0.4; border-color: var(--accent) !important; }
+    .task-row.drag-over { border-top: 2px solid var(--accent) !important; }
+    .drag-handle {
+    cursor: grab; color: var(--text3); font-size: 1rem; padding: 4px 6px;
+    border-radius: 4px; transition: color 0.15s; user-select: none; flex-shrink: 0;
+    }
+   .drag-handle:hover { color: var(--accent); }
+   .drag-handle:active { cursor: grabbing; }
+
+    
   </style>
 </head>
 <body>
@@ -1315,7 +1326,6 @@
     youtube:             document.getElementById('f-youtube')?.value?.trim()       || null,
     faqID:               document.getElementById('f-faqid')?.value?.trim()         || null,
     faqEN:               document.getElementById('f-faqen')?.value?.trim()         || null,
-   testnet_links:       getTestnetLinks(),
     _roadmap:            getRoadmapItems(),
   };
   ['btn-save','btn-save-bottom'].forEach(id => {
@@ -2329,30 +2339,36 @@ function initTaskRowsBuilder(data) {
   if (!builder) return;
   builder.innerHTML = '';
 
-  // Parse existing tasks
-  let tasksID = [], tasksEN = [], images = [];
+  let tasksID = [], tasksEN = [], images = [], taskLinks = [];
   try {
     const rawID = data.tasksID || '';
     const rawEN = data.tasksEN || '';
-   const sepID = rawID.includes('\n\n') ? '\n\n' : '\n';
-const sepEN = rawEN.includes('\n\n') ? '\n\n' : '\n';
-tasksID = rawID.split(sepID).map(l => l.trim()).filter(Boolean);
-tasksEN = rawEN.split(sepEN).map(l => l.trim()).filter(Boolean);
+    const sepID = rawID.includes('\n\n') ? '\n\n' : '\n';
+    const sepEN = rawEN.includes('\n\n') ? '\n\n' : '\n';
+    tasksID = rawID.split(sepID).map(l => l.trim()).filter(Boolean);
+    tasksEN = rawEN.split(sepEN).map(l => l.trim()).filter(Boolean);
     const rawImgs = data.tasks_images;
     if (Array.isArray(rawImgs)) images = rawImgs;
     else if (typeof rawImgs === 'string' && rawImgs.trim()) images = JSON.parse(rawImgs);
-  } catch(e) { images = []; }
+    // Parse testnet_links untuk link per task
+    if (data.testnet_links) {
+      const parsed = typeof data.testnet_links === 'string' ? JSON.parse(data.testnet_links) : data.testnet_links;
+      if (Array.isArray(parsed)) taskLinks = parsed;
+    }
+  } catch(e) { images = []; taskLinks = []; }
 
   const maxRows = Math.max(tasksID.length, tasksEN.length, 1);
   for (let i = 0; i < maxRows; i++) {
     addTaskRow({
-      idText:  tasksID[i] || '',
-      enText:  tasksEN[i] || '',
-      imgUrl:  images[i]?.url || '',
-      caption: images[i]?.caption || ''
+      idText:    tasksID[i]        || '',
+      enText:    tasksEN[i]        || '',
+      imgUrl:    images[i]?.url    || '',
+      caption:   images[i]?.caption || '',
+      link:      taskLinks[i]?.url  || '',
+      linkLabel: taskLinks[i]?.label || '',
     });
   }
-setTimeout(() => {
+  setTimeout(() => {
     document.querySelectorAll('.task-id-input, .task-en-input').forEach(el => {
       el.style.height = 'auto';
       el.style.height = el.scrollHeight + 'px';
@@ -2365,27 +2381,28 @@ function addTaskRow(item) {
   if (!builder) return;
   const idx = builder.querySelectorAll('.task-row').length;
   if (idx >= 20) { showToast('Maksimal 20 task', 'error'); return; }
-  item = item || { idText: '', enText: '', imgUrl: '', caption: '' };
+  item = item || { idText: '', enText: '', imgUrl: '', caption: '', link: '' };
   const rowId = `trow-${Date.now()}-${idx}`;
   const hasImg = !!(item.imgUrl);
 
   builder.insertAdjacentHTML('beforeend', `
-    <div class="task-row" id="${rowId}"
+    <div class="task-row" id="${rowId}" draggable="true"
          style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;
                 padding:12px;display:flex;flex-direction:column;gap:8px;position:relative;">
       
       <!-- Header row -->
-      <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:2px;">
+      <div style="display:flex;align-items:center;gap:8px;margin-bottom:2px;">
+        <span class="drag-handle" title="Drag to reorder">⠿⠿</span>
         <span style="font-family:var(--mono);font-size:0.55rem;color:var(--text3);
-                     letter-spacing:0.1em;text-transform:uppercase;">Task ${idx + 1}</span>
+                     letter-spacing:0.1em;text-transform:uppercase;flex:1;">Task ${idx + 1}</span>
         <button type="button" onclick="removeTaskRow('${rowId}')"
                 style="padding:2px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.25);
                        background:rgba(239,68,68,0.08);color:var(--red);font-family:var(--mono);
                        font-size:0.5rem;cursor:pointer;">✕ Hapus</button>
       </div>
 
-      <!-- 3 kolom: ID | EN | Gambar -->
-      <div style="display:grid;grid-template-columns:1fr 1fr 180px;gap:8px;align-items:start;">
+      <!-- 4 kolom: ID | EN | Link | Gambar -->
+      <div style="display:grid;grid-template-columns:1fr 1fr 180px 180px;gap:8px;align-items:start;">
         
         <!-- Tugas ID -->
         <div class="field" style="gap:4px;">
@@ -2395,9 +2412,10 @@ function addTaskRow(item) {
                     style="width:100%;background:var(--s3);border:1px solid var(--border);
                            border-radius:6px;color:var(--text);font-family:var(--mono);
                            font-size:0.72rem;padding:0.5rem 0.65rem;outline:none;
-                           transition:border-color 0.2s;line-height:1.5;"
+                           transition:border-color 0.2s;line-height:1.5;overflow:hidden;resize:none;"
                     onfocus="this.style.borderColor='var(--accent)'"
-                    onblur="this.style.borderColor='var(--border)'" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${esc(item.idText)}</textarea>
+                    onblur="this.style.borderColor='var(--border)'"
+                    oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${esc(item.idText)}</textarea>
         </div>
 
         <!-- Tasks EN -->
@@ -2408,9 +2426,38 @@ function addTaskRow(item) {
                     style="width:100%;background:var(--s3);border:1px solid var(--border);
                            border-radius:6px;color:var(--text);font-family:var(--mono);
                            font-size:0.72rem;padding:0.5rem 0.65rem;outline:none;
-                           transition:border-color 0.2s;line-height:1.5;"
+                           transition:border-color 0.2s;line-height:1.5;overflow:hidden;resize:none;"
                     onfocus="this.style.borderColor='var(--accent)'"
-                    onblur="this.style.borderColor='var(--border)'" oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${esc(item.enText)}</textarea>
+                    onblur="this.style.borderColor='var(--border)'"
+                    oninput="this.style.height='auto';this.style.height=this.scrollHeight+'px'">${esc(item.enText)}</textarea>
+        </div>
+
+        <!-- Link Task -->
+        <div class="field" style="gap:4px;">
+          <label style="font-family:var(--mono);font-size:0.56rem;color:var(--text2);
+                        text-transform:uppercase;letter-spacing:0.06em;">Link Task</label>
+          <div style="display:flex;flex-direction:column;gap:4px;">
+            <input type="url" class="trow-link-url" placeholder="https://..."
+                   value="${esc(item.link||'')}"
+                   style="width:100%;background:var(--s3);border:1px solid var(--border);
+                          border-radius:6px;color:var(--text);font-family:var(--mono);
+                          font-size:0.68rem;padding:0.45rem 0.65rem;outline:none;
+                          transition:border-color 0.2s;"
+                   onfocus="this.style.borderColor='var(--accent)'"
+                   onblur="this.style.borderColor='var(--border)'">
+            <input type="text" class="trow-link-label" placeholder="Label (e.g. Quest Platform)"
+                   value="${esc(item.linkLabel||'')}"
+                   style="width:100%;background:var(--s3);border:1px solid var(--border);
+                          border-radius:6px;color:var(--text);font-family:var(--mono);
+                          font-size:0.68rem;padding:0.45rem 0.65rem;outline:none;
+                          transition:border-color 0.2s;"
+                   onfocus="this.style.borderColor='var(--accent)'"
+                   onblur="this.style.borderColor='var(--border)'">
+            <div style="font-family:var(--mono);font-size:0.48rem;color:var(--text3);
+                        padding:2px 0;line-height:1.4;">
+              ⚡ Tombol Start di guide page
+            </div>
+          </div>
         </div>
 
         <!-- Gambar -->
@@ -2418,7 +2465,7 @@ function addTaskRow(item) {
           <label style="font-family:var(--mono);font-size:0.56rem;color:var(--text2);
                         text-transform:uppercase;letter-spacing:0.06em;">Gambar Tugas</label>
           <div style="display:flex;flex-direction:column;gap:5px;">
-           <div class="trow-img-preview" id="prev-${rowId}"
+            <div class="trow-img-preview" id="prev-${rowId}"
                  style="width:100%;height:80px;border-radius:6px;border:1px dashed var(--border2);
                         background:var(--s3);display:flex;align-items:center;justify-content:center;
                         font-size:20px;overflow:hidden;cursor:pointer;"
@@ -2469,6 +2516,7 @@ function addTaskRow(item) {
       </div>
     </div>`);
 
+  initTaskRowDrag(rowId);
   refreshTaskRowNums();
 }
 
@@ -2484,6 +2532,48 @@ function refreshTaskRowNums() {
       if (label) label.textContent = `Task ${idx + 1}`;
     });
 }
+
+  function initTaskRowDrag(rowId) {
+  const row = document.getElementById(rowId);
+  if (!row) return;
+
+  row.addEventListener('dragstart', e => {
+    e.dataTransfer.effectAllowed = 'move';
+    e.dataTransfer.setData('text/plain', rowId);
+    setTimeout(() => row.classList.add('dragging'), 0);
+  });
+  row.addEventListener('dragend', () => {
+    row.classList.remove('dragging');
+    document.querySelectorAll('.task-row').forEach(r => r.classList.remove('drag-over'));
+    refreshTaskRowNums();
+  });
+  row.addEventListener('dragover', e => {
+    e.preventDefault();
+    e.dataTransfer.dropEffect = 'move';
+    document.querySelectorAll('.task-row').forEach(r => r.classList.remove('drag-over'));
+    row.classList.add('drag-over');
+  });
+  row.addEventListener('drop', e => {
+    e.preventDefault();
+    const dragId = e.dataTransfer.getData('text/plain');
+    if (dragId === rowId) return;
+    const dragEl = document.getElementById(dragId);
+    const builder = document.getElementById('task-rows-builder');
+    if (!dragEl || !builder) return;
+    // Insert dragged before drop target
+    builder.insertBefore(dragEl, row);
+    row.classList.remove('drag-over');
+    refreshTaskRowNums();
+  });
+
+  // Handle drag juga kalau drag dari handle
+  const handle = row.querySelector('.drag-handle');
+  if (handle) {
+    handle.addEventListener('mousedown', () => { row.draggable = true; });
+    handle.addEventListener('mouseup',   () => { row.draggable = false; });
+  }
+}
+  
 
 function clearTaskRowImage(rowId) {
   const row = document.getElementById(rowId);
@@ -2523,21 +2613,25 @@ async function handleTaskRowImageUpload(e, rowId) {
 
 function getTaskRows() {
   const builder = document.getElementById('task-rows-builder');
-  if (!builder) return { tasksID: null, tasksEN: null, tasks_images: null };
-  const idLines = [], enLines = [], images = [];
-  builder.querySelectorAll('.task-row').forEach((row, idx) => {
-    const idText  = row.querySelector('.task-id-input')?.value?.trim() || '';
-    const enText  = row.querySelector('.task-en-input')?.value?.trim() || '';
-    const imgUrl  = row.querySelector('.trow-img-url')?.value?.trim()  || '';
-    const caption = row.querySelector('.trow-img-caption')?.value?.trim() || '';
+  if (!builder) return { tasksID: null, tasksEN: null, tasks_images: null, testnet_links: null };
+  const idLines = [], enLines = [], images = [], links = [];
+  builder.querySelectorAll('.task-row').forEach((row) => {
+    const idText    = row.querySelector('.task-id-input')?.value?.trim()   || '';
+    const enText    = row.querySelector('.task-en-input')?.value?.trim()   || '';
+    const imgUrl    = row.querySelector('.trow-img-url')?.value?.trim()    || '';
+    const caption   = row.querySelector('.trow-img-caption')?.value?.trim() || '';
+    const linkUrl   = row.querySelector('.trow-link-url')?.value?.trim()   || '';
+    const linkLabel = row.querySelector('.trow-link-label')?.value?.trim() || '';
     if (idText) idLines.push(idText);
     if (enText) enLines.push(enText);
     images.push({ url: imgUrl, caption });
+    links.push({ label: linkLabel || linkUrl || '', url: linkUrl });
   });
- return {
-   tasksID: idLines.length ? idLines.join('\n\n') : null,
-   tasksEN: enLines.length ? enLines.join('\n\n') : null,
-    tasks_images: images.some(i => i.url) ? JSON.stringify(images) : null,
+  return {
+    tasksID:       idLines.length ? idLines.join('\n\n') : null,
+    tasksEN:       enLines.length ? enLines.join('\n\n') : null,
+    tasks_images:  images.some(i => i.url) ? JSON.stringify(images) : null,
+    testnet_links: links.some(l => l.url)  ? JSON.stringify(links)  : null,
   };
 }
 
