@@ -909,8 +909,8 @@ footer {
     overflow: hidden !important;
     max-width: 100vw !important;
   }
-  .pticker-inner { animation: scrollX 220s linear infinite !important; }
-  .nticker-inner { animation: scrollX 20s linear infinite !important; }
+  .pticker-inner { animation: scrollX 60s linear infinite !important; }
+  .nticker-inner { animation: scrollX 35s linear infinite !important; }
 
   /* Text overflow fixes */
   .section-title, .section-sub, .acard-name, .acard-status,
