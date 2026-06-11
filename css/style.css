@@ -1011,12 +1011,13 @@ footer {
     justify-content: center;
   }
 
-  .pticker-inner {
-    display: inline-flex !important;
+ .pticker-inner {
+    display: flex !important;
     flex-wrap: nowrap !important;
-    animation: scrollX 60s linear infinite !important;
+    animation: none !important;
     white-space: nowrap !important;
-    width: auto !important;
+    width: 100% !important;
+    justify-content: center !important;
   }
 
   .nticker-wrap {
