@@ -75,6 +75,7 @@
     min-height: 100vh;
     overflow-x: hidden;
     transition: background .35s, color .35s;
+    padding-top: 58px;
   }
 
   #bg-canvas { position: fixed; inset: 0; z-index: 0; pointer-events: none; }
@@ -95,8 +96,9 @@
     box-shadow: 0 0 10px rgba(0,232,122,.5);
   }
 
-  .guide-nav {
-    position: sticky; top: 0; z-index: 100;
+  
+   .guide-nav {
+    position: fixed; top: 0; left: 0; right: 0; z-index: 100; /* ← sticky diganti fixed, tambah left:0 right:0 */
     background: var(--nav-bg); backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px);
     border-bottom: 1px solid var(--border);
     padding: 0 32px; height: 58px;
@@ -526,6 +528,7 @@
   .btn-ghost-sm:hover { border-color: var(--g-readable); color: var(--g-readable); }
 
   @media (max-width: 640px) {
+     body { padding-top: 58px; }
     .hero-inner { grid-template-columns: 1fr; gap: 20px; padding: 36px 0 32px; }
     .project-name { font-size: 30px; letter-spacing: -1.2px; }
     .project-hero { padding: 0 20px; }
