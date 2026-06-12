@@ -854,21 +854,40 @@
     }
   }
 
-  let _dragSrcIdx = null;
-  function handleProjDragStart(idx) { _dragSrcIdx = idx; }
-  function handleProjDrop(targetIdx) {
-    if (_dragSrcIdx === null || _dragSrcIdx === targetIdx) return;
-    const filtered = getFilteredProjects();
-    const movedItem = filtered[_dragSrcIdx];
-    const targetItem = filtered[targetIdx];
-    const fromIdx = projects.findIndex(p => p.id === movedItem.id);
-    const toIdx   = projects.findIndex(p => p.id === targetItem.id);
-    const [removed] = projects.splice(fromIdx, 1);
-    projects.splice(toIdx, 0, removed);
-    _dragSrcIdx = null;
-    renderList();
-    saveReorder();
+ let _dragSrcIdx = null;
+
+function handleProjDragStart(idx) {
+  _dragSrcIdx = idx;
+}
+
+function handleProjDrop(targetIdx) {
+  if (_dragSrcIdx === null || _dragSrcIdx === targetIdx) return;
+  const filtered = getFilteredProjects();
+  const movedItem  = filtered[_dragSrcIdx];
+  const targetItem = filtered[targetIdx];
+  const fromIdx = projects.findIndex(p => p.id === movedItem.id);
+  const toIdx   = projects.findIndex(p => p.id === targetItem.id);
+  const [removed] = projects.splice(fromIdx, 1);
+  projects.splice(toIdx, 0, removed);
+  _dragSrcIdx = null;
+  renderList();
+  saveReorder();
+}
+
+async function saveReorder() {
+  const items = projects.map((p, idx) => ({ id: p.id, sort_order: idx }));
+  try {
+    const res = await fetch('/api/admin-airdrop?type=reorder', {
+      method: 'PATCH',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ items }),
+    });
+    if (!res.ok) throw new Error(`HTTP ${res.status}`);
+    projects.forEach((p, idx) => { p.sort_order = idx; });
+  } catch(e) {
+    showToast('Gagal simpan urutan: ' + e.message, 'error');
   }
+}
   
 
   // ── HELPERS ───────────────────────────────────────────
