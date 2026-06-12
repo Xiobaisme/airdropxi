@@ -50,7 +50,7 @@ module.exports = async function handler(req, res) {
     }
 
     // Cache 60 detik di CDN Vercel
-    res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=300');
+    res.setHeader('Cache-Control', 's-maxage=30, stale-while-revalidate=60');
     return res.status(200).json(Array.isArray(data) ? data : []);
   } catch (e) {
     return res.status(500).json({ error: e.message });
