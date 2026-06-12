@@ -481,6 +481,8 @@
         <button class="ftab active" onclick="setFilter('all',this)">Semua</button>
         <button class="ftab"        onclick="setFilter('live',this)">Live</button>
         <button class="ftab draft"  onclick="setFilter('draft',this)">Draft</button>
+        <button class="ftab"        onclick="setFilter('active',this)">Active</button>
+        <button class="ftab"        onclick="setFilter('waitlist',this)">Waitlist</button>
       </div>
 
       <div class="panel">
@@ -731,12 +733,13 @@
       const res = await fetch('/api/admin-airdrop');
       if (!res.ok) throw new Error('Gagal fetch');
       projects = await res.json();
+      projects.sort((a,b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999));
       updateStats(); renderList(); renderDrafts();
     } catch(e) {
       document.getElementById('proj-list').innerHTML = `<div class="list-empty" style="color:var(--red)">${e.message}</div>`;
     }
   }
-
+  
   function updateStats() {
     const total     = projects.length;
     const live      = projects.filter(p => p.published === true).length;
@@ -750,8 +753,10 @@
 
   function getFilteredProjects() {
     let list = projects;
-    if (filterMode === 'live')  list = list.filter(p => p.published === true);
-    if (filterMode === 'draft') list = list.filter(p => !p.published);
+    if (filterMode === 'live')     list = list.filter(p => p.published === true);
+    if (filterMode === 'draft')    list = list.filter(p => !p.published);
+    if (filterMode === 'active')   list = list.filter(p => (p.status||'').toLowerCase().includes('active'));
+    if (filterMode === 'waitlist') list = list.filter(p => (p.status||'').toLowerCase().includes('wait'));
     if (searchQ.trim()) {
       const q = searchQ.toLowerCase();
       list = list.filter(p =>
@@ -770,13 +775,18 @@
     document.getElementById('proj-count').textContent = filtered.length + '/' + projects.length;
     if (!projects.length) { list.innerHTML = '<div class="list-empty">Belum ada proyek.</div>'; return; }
     if (!filtered.length) { list.innerHTML = '<div class="list-empty">Tidak ada hasil.</div>'; return; }
-    list.innerHTML = filtered.map(p => {
+    list.innerHTML = filtered.map((p, idx) => {
       const isLive  = p.published === true;
       const confVal = (p.confirmation_status||'').toLowerCase();
       const confCls = confVal.includes('confirmed') ? 'confirmed' : confVal.includes('potential') ? 'potential' : confVal.includes('ended') ? 'ended' : '';
       const confLbl = confVal.includes('confirmed') ? '✓ Confirmed' : confVal.includes('potential') ? '◈ Potential' : confVal.includes('ended') ? '✕ Ended' : '';
       return `
-        <div class="proj-item ${editingId == p.id ? 'active' : ''}" onclick="loadEdit(${p.id})">
+        <div class="proj-item ${editingId == p.id ? 'active' : ''}" draggable="true"
+             ondragstart="handleProjDragStart(${idx})"
+             ondragover="event.preventDefault()"
+             ondrop="handleProjDrop(${idx})"
+             onclick="loadEdit(${p.id})">
+          <span class="drag-handle" style="margin-right:4px" onclick="event.stopPropagation()">⠿</span>
           <div class="proj-item-info">
             <div class="proj-item-name">${esc(p.name)}</div>
             <div class="proj-item-badges">
@@ -830,6 +840,36 @@
     btn.classList.add('active');
     renderList();
   }
+
+  async function saveReorder() {
+    const items = projects.map((p, idx) => ({ id: p.id, sort_order: idx }));
+    try {
+      await fetch('/api/admin-airdrop?type=reorder', {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ items }),
+      });
+    } catch(e) {
+      showToast('Gagal simpan urutan: ' + e.message, 'error');
+    }
+  }
+
+  let _dragSrcIdx = null;
+  function handleProjDragStart(idx) { _dragSrcIdx = idx; }
+  function handleProjDrop(targetIdx) {
+    if (_dragSrcIdx === null || _dragSrcIdx === targetIdx) return;
+    const filtered = getFilteredProjects();
+    const movedItem = filtered[_dragSrcIdx];
+    const targetItem = filtered[targetIdx];
+    const fromIdx = projects.findIndex(p => p.id === movedItem.id);
+    const toIdx   = projects.findIndex(p => p.id === targetItem.id);
+    const [removed] = projects.splice(fromIdx, 1);
+    projects.splice(toIdx, 0, removed);
+    _dragSrcIdx = null;
+    renderList();
+    saveReorder();
+  }
+  
 
   // ── HELPERS ───────────────────────────────────────────
   function getStCls(s) {
