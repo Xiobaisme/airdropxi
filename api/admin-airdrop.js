@@ -306,6 +306,33 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: `Method ${req.method} tidak diizinkan untuk exchange-details` });
   }
 
+  // ─────────────────────────────────────────────
+  // REORDER HANDLER — update sort_order tanpa overwrite field lain
+  // ─────────────────────────────────────────────
+  if (type === 'reorder') {
+    if (req.method !== 'PATCH') {
+      res.setHeader('Allow', ['PATCH']);
+      return res.status(405).json({ error: `Method ${req.method} tidak diizinkan untuk reorder` });
+    }
+    const items = req.body?.items;
+    if (!Array.isArray(items) || !items.length)
+      return res.status(400).json({ error: 'Body harus { items: [{id, sort_order}, ...] }' });
+
+    try {
+      await Promise.all(items.map(it =>
+        fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(it.id)}`, {
+          method: 'PATCH',
+          headers: { ...H, 'Prefer': 'return=minimal' },
+          body: JSON.stringify({ sort_order: it.sort_order }),
+        })
+      ));
+      return res.status(200).json({ success: true });
+    } catch(e) {
+      return res.status(500).json({ error: e.message });
+    }
+  }
+  
+
   // ============================================================
   // AIRDROP & PROYEK
   // ============================================================
