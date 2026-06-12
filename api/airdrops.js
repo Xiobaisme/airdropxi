@@ -32,7 +32,7 @@ module.exports = async function handler(req, res) {
       endpoint = `${BASE}/airdrops?id=eq.${encodeURIComponent(id)}&published=eq.true&limit=1`;
     } else {
       // List semua — hanya yang published
-      endpoint = `${BASE}/airdrops?select=*&published=eq.true&order=created_at.desc`;
+     endpoint = `${BASE}/airdrops?select=*&published=eq.true&order=sort_order.asc.nullslast,created_at.desc`;
     }
 
     const r = await fetch(endpoint, { headers: H });
