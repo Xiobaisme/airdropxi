@@ -733,7 +733,13 @@
       const res = await fetch('/api/admin-airdrop');
       if (!res.ok) throw new Error('Gagal fetch');
       projects = await res.json();
-      projects.sort((a,b) => (a.sort_order ?? 999999) - (b.sort_order ?? 999999));
+      projects.sort((a,b) => {
+      const as = a.sort_order, bs = b.sort_order;
+     if (as == null && bs == null) return b.id - a.id;
+     if (as == null) return -1;
+     if (bs == null) return 1;
+     return as - bs;
+  });
       updateStats(); renderList(); renderDrafts();
     } catch(e) {
       document.getElementById('proj-list').innerHTML = `<div class="list-empty" style="color:var(--red)">${e.message}</div>`;
@@ -2684,7 +2690,7 @@ function getTaskRows() {
     if (idText) idLines.push(idText);
     if (enText) enLines.push(enText);
     images.push({ url: imgUrl, caption });
-    links.push({ label: linkLabel || linkUrl || '', url: linkUrl });
+    links.push({ label: linkLabel || 'Start Activate', url: linkUrl });
   });
   return {
     tasksID:       idLines.length ? idLines.join('\n\n') : null,
