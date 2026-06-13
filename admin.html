@@ -426,6 +426,42 @@
    .drag-handle:hover { color: var(--accent); }
    .drag-handle:active { cursor: grabbing; }
 
+    /* ── PROJECT LINKS SIDEBAR ── */
+.proj-links-panel { background: var(--s1); border: 1px solid var(--border); border-radius: var(--r); overflow: hidden; }
+.proj-links-head {
+  display: flex; align-items: center; gap: 8px; padding: 0.75rem 1rem;
+  border-bottom: 1px solid var(--border);
+  background: linear-gradient(90deg, rgba(0,229,160,0.03), transparent);
+}
+.proj-link-item {
+  display: flex; align-items: center; gap: 10px;
+  padding: 0.6rem 1rem; border-bottom: 1px solid var(--border);
+  transition: background 0.15s;
+}
+.proj-link-item:last-child { border-bottom: none; }
+.proj-link-item:hover { background: var(--s2); }
+.proj-link-logo {
+  width: 30px; height: 30px; border-radius: 7px; border: 1px solid var(--border2);
+  background: var(--s3); display: flex; align-items: center; justify-content: center;
+  overflow: hidden; flex-shrink: 0; font-size: 0.9rem;
+}
+.proj-link-logo img { width: 100%; height: 100%; object-fit: cover; border-radius: 6px; }
+.proj-link-info { flex: 1; min-width: 0; }
+.proj-link-name { font-size: 0.76rem; font-weight: 600; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; margin-bottom: 3px; }
+.proj-link-badges { display: flex; gap: 4px; align-items: center; }
+.proj-link-btn {
+  display: inline-flex; align-items: center; gap: 3px;
+  padding: 0.15rem 0.5rem; border-radius: 3px; flex-shrink: 0;
+  background: rgba(0,229,160,0.08); border: 1px solid rgba(0,229,160,0.2);
+  color: var(--accent); font-family: var(--mono); font-size: 0.48rem;
+  cursor: pointer; text-decoration: none; transition: all 0.15s; white-space: nowrap;
+}
+.proj-link-btn:hover { background: rgba(0,229,160,0.18); }
+.proj-link-btn.no-link { background: var(--s3); border-color: var(--border); color: var(--text3); cursor: default; pointer-events: none; }
+.proj-links-scroll { max-height: 320px; overflow-y: auto; }
+.proj-links-scroll::-webkit-scrollbar { width: 3px; }
+.proj-links-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+    
     
   </style>
 </head>
@@ -469,6 +505,18 @@
         <div class="stat-card"><div class="stat-label">Live</div><div class="stat-value blue"  id="stat-live">0</div></div>
         <div class="stat-card"><div class="stat-label">Draft</div><div class="stat-value warn"  id="stat-draft">0</div></div>
         <div class="stat-card"><div class="stat-label">Confirmed</div><div class="stat-value cyan" id="stat-confirmed">0</div></div>
+      </div>
+
+      <!-- PROJECT LINKS PANEL -->
+<div class="proj-links-panel" id="proj-links-panel">
+  <div class="proj-links-head">
+    <span class="ph-dot" style="background:var(--cyan);box-shadow:0 0 6px var(--cyan)"></span>
+     <span class="ph-title" style="color:var(--cyan)">Project Links</span>
+      <span class="ph-count" style="color:var(--cyan)" id="proj-links-count">0</span>
+      </div>
+        <div class="proj-links-scroll" id="proj-links-list">
+          <div class="list-empty">Loading...</div>
+        </div>
       </div>
 
       <div class="search-wrap">
@@ -740,7 +788,7 @@
      if (bs == null) return 1;
      return as - bs;
   });
-      updateStats(); renderList(); renderDrafts();
+      updateStats(); renderList(); renderDrafts(); renderProjectLinks();
     } catch(e) {
       document.getElementById('proj-list').innerHTML = `<div class="list-empty" style="color:var(--red)">${e.message}</div>`;
     }
@@ -1103,6 +1151,7 @@ async function saveReorder() {
               <select id="f-status">${STATUS_OPTIONS.map(s=>`<option value="${s}" ${d.status===s?'selected':''}>${s}</option>`).join('')}</select>
             </div>
             <div class="field"><label>Link Official</label><input id="f-link" type="url" placeholder="https://..." value="${esc(d.link||'')}"></div>
+            <div class="field"><label>Website Official <span class="hint" style="color:var(--cyan)">🔒 Admin only</span></label><input id="f-website-url" type="url" placeholder="https://website-resmi.com" value="${esc(d.website_url||'')}"></div>
             <div class="field"><label>Tags <span class="hint">pisah koma</span></label><input id="f-tags" type="text" placeholder="DeFi, AI, Layer2" value="${esc(d.tags||'')}"></div>
           </div>
           <div style="margin-top:0.875rem">
@@ -1370,6 +1419,7 @@ async function saveReorder() {
     confirmation_status: document.getElementById('f-confirmation-status')?.value  || 'potential',
     published:           document.getElementById('f-published')?.checked           || false,
     link:                document.getElementById('f-link')?.value?.trim()          || null,
+    website_url:         document.getElementById('f-website-url')?.value?.trim()   || null,
     tags:                document.getElementById('f-tags')?.value?.trim()          || null,
     RaisedID:            document.getElementById('f-raisedid')?.value?.trim()      || null,
     RaisedEN:            document.getElementById('f-raiseden')?.value?.trim()      || null,
@@ -1447,6 +1497,53 @@ async function saveReorder() {
   function esc(s) {
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
+
+  // ── PROJECT LINKS PANEL ───────────────────────────────
+function renderProjectLinks() {
+  const list   = document.getElementById('proj-links-list');
+  const count  = document.getElementById('proj-links-count');
+  if (!list) return;
+
+  // Ambil semua project yang published, urut by sort_order
+  const published = projects.filter(p => p.published);
+  const all       = projects; // tampilkan semua termasuk draft
+
+  if (count) count.textContent = all.length;
+
+  if (!all.length) {
+    list.innerHTML = '<div class="list-empty">Belum ada proyek.</div>';
+    return;
+  }
+
+  list.innerHTML = all.map(p => {
+    const hasLink    = !!(p.website_url);
+    const confVal    = (p.confirmation_status || '').toLowerCase();
+    const confCls    = confVal.includes('confirmed') ? 'confirmed' : confVal.includes('potential') ? 'potential' : confVal.includes('ended') ? 'ended' : '';
+    const confLbl    = confVal.includes('confirmed') ? '✓ Conf' : confVal.includes('potential') ? '◈ Pot' : confVal.includes('ended') ? '✕ End' : '';
+    const isLive     = p.published === true;
+
+    return `
+      <div class="proj-link-item">
+        <div class="proj-link-logo">
+          ${p.logo_url
+            ? `<img src="${esc(p.logo_url)}" onerror="this.parentElement.innerHTML='🪂'">`
+            : '🪂'}
+        </div>
+        <div class="proj-link-info">
+          <div class="proj-link-name">${esc(p.name)}</div>
+          <div class="proj-link-badges">
+            <span class="proj-item-status ${getStCls(p.status)}">${esc(p.status || 'TBA')}</span>
+            <span class="live-dot ${isLive ? 'on' : 'off'}">${isLive ? '● LIVE' : '○ DRAFT'}</span>
+            ${confCls ? `<span class="conf-badge ${confCls}">${confLbl}</span>` : ''}
+          </div>
+        </div>
+        ${hasLink
+          ? `<a href="${esc(p.website_url)}" target="_blank" rel="noopener" class="proj-link-btn">🌐 Buka</a>`
+          : `<span class="proj-link-btn no-link">— No Link</span>`}
+      </div>`;
+  }).join('');
+}
+  
 
   loadProjects();
 </script>
