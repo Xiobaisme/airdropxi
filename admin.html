@@ -507,18 +507,6 @@
         <div class="stat-card"><div class="stat-label">Confirmed</div><div class="stat-value cyan" id="stat-confirmed">0</div></div>
       </div>
 
-      <!-- PROJECT LINKS PANEL -->
-<div class="proj-links-panel" id="proj-links-panel">
-  <div class="proj-links-head">
-    <span class="ph-dot" style="background:var(--cyan);box-shadow:0 0 6px var(--cyan)"></span>
-     <span class="ph-title" style="color:var(--cyan)">Project Links</span>
-      <span class="ph-count" style="color:var(--cyan)" id="proj-links-count">0</span>
-      </div>
-        <div class="proj-links-scroll" id="proj-links-list">
-          <div class="list-empty">Loading...</div>
-        </div>
-      </div>
-
       <div class="search-wrap">
         <span class="search-icon">🔍</span>
         <input type="text" id="search-input" placeholder="Cari proyek..." spellcheck="false" oninput="onSearch(this.value)">
@@ -585,6 +573,49 @@
   </div>
 
 <div class="toast" id="toast"></div>
+</div>
+
+<!-- ── PROJECT LINKS SECTION ── -->
+<div id="proj-links-section" style="position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:0 1.25rem 1.5rem;">
+  <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;">
+    
+    <!-- Header -->
+    <div style="padding:1rem 1.25rem;border-bottom:1px solid var(--border);
+                background:linear-gradient(105deg,rgba(0,200,240,0.04),transparent);
+                display:flex;align-items:center;gap:12px;flex-wrap:wrap;">
+      <span style="width:8px;height:8px;border-radius:50%;background:var(--cyan);
+                   box-shadow:0 0 8px var(--cyan);flex-shrink:0;display:inline-block"></span>
+      <div style="flex:1">
+        <div style="font-family:var(--mono);font-size:0.55rem;color:var(--text3);
+                    letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.2rem">
+          🔗 Project Links — Admin Only
+        </div>
+        <div style="font-size:0.92rem;font-weight:700">
+          Quick Access — Website Resmi Project
+        </div>
+      </div>
+      <span style="font-family:var(--mono);font-size:0.65rem;color:var(--cyan)" id="proj-links-count">0</span>
+    </div>
+
+    <!-- Filter tabs -->
+    <div style="display:flex;gap:4px;padding:10px 1.25rem;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+      <button class="ftab active" id="plf-all"      onclick="setPLFilter('all',this)">Semua</button>
+      <button class="ftab"        id="plf-active"   onclick="setPLFilter('active',this)">Active</button>
+      <button class="ftab"        id="plf-waitlist" onclick="setPLFilter('waitlist',this)">Waitlist</button>
+      <button class="ftab"        id="plf-ended"    onclick="setPLFilter('ended',this)">Ended</button>
+      <button class="ftab"        id="plf-confirmed" onclick="setPLFilter('confirmed',this)">Confirmed</button>
+      <button class="ftab"        id="plf-potential" onclick="setPLFilter('potential',this)">Potential</button>
+      <button class="ftab"        id="plf-nolink"   onclick="setPLFilter('nolink',this)" 
+              style="border-color:rgba(239,68,68,0.2);color:var(--red)">No Link</button>
+    </div>
+
+    <!-- Grid cards -->
+    <div id="proj-links-list" style="padding:1.25rem;
+         display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+      <div style="font-family:var(--mono);font-size:0.65rem;color:var(--text3);
+                  grid-column:1/-1;text-align:center;padding:2rem">Loading...</div>
+    </div>
+  </div>
 </div>
 
 <div id="admin-guide-root" style="position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:0 1.25rem 4rem;"></div>
@@ -1498,48 +1529,75 @@ async function saveReorder() {
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   }
 
-  // ── PROJECT LINKS PANEL ───────────────────────────────
+// ── PROJECT LINKS SECTION ─────────────────────────────
+let _plFilter = 'all';
+
+function setPLFilter(mode, btn) {
+  _plFilter = mode;
+  document.querySelectorAll('#proj-links-section .ftab').forEach(t => t.classList.remove('active'));
+  btn.classList.add('active');
+  renderProjectLinks();
+}
+
 function renderProjectLinks() {
-  const list   = document.getElementById('proj-links-list');
-  const count  = document.getElementById('proj-links-count');
+  const list  = document.getElementById('proj-links-list');
+  const count = document.getElementById('proj-links-count');
   if (!list) return;
 
-  // Ambil semua project yang published, urut by sort_order
-  const published = projects.filter(p => p.published);
-  const all       = projects; // tampilkan semua termasuk draft
+  let filtered = [...projects];
+  if (_plFilter === 'active')    filtered = filtered.filter(p => (p.status||'').toLowerCase().includes('active'));
+  if (_plFilter === 'waitlist')  filtered = filtered.filter(p => (p.status||'').toLowerCase().includes('wait'));
+  if (_plFilter === 'ended')     filtered = filtered.filter(p => (p.status||'').toLowerCase().includes('end') || (p.confirmation_status||'').toLowerCase().includes('ended'));
+  if (_plFilter === 'confirmed') filtered = filtered.filter(p => (p.confirmation_status||'').toLowerCase().includes('confirmed'));
+  if (_plFilter === 'potential') filtered = filtered.filter(p => (p.confirmation_status||'').toLowerCase().includes('potential'));
+  if (_plFilter === 'nolink')    filtered = filtered.filter(p => !p.website_url);
 
-  if (count) count.textContent = all.length;
+  if (count) count.textContent = `${filtered.length}/${projects.length}`;
 
-  if (!all.length) {
-    list.innerHTML = '<div class="list-empty">Belum ada proyek.</div>';
+  if (!filtered.length) {
+    list.innerHTML = `<div style="font-family:var(--mono);font-size:0.65rem;color:var(--text3);grid-column:1/-1;text-align:center;padding:2rem">Tidak ada proyek.</div>`;
     return;
   }
 
-  list.innerHTML = all.map(p => {
-    const hasLink    = !!(p.website_url);
-    const confVal    = (p.confirmation_status || '').toLowerCase();
-    const confCls    = confVal.includes('confirmed') ? 'confirmed' : confVal.includes('potential') ? 'potential' : confVal.includes('ended') ? 'ended' : '';
-    const confLbl    = confVal.includes('confirmed') ? '✓ Conf' : confVal.includes('potential') ? '◈ Pot' : confVal.includes('ended') ? '✕ End' : '';
-    const isLive     = p.published === true;
+  list.innerHTML = filtered.map(p => {
+    const hasLink = !!(p.website_url);
+    const isLive  = p.published === true;
+    const confVal = (p.confirmation_status||'').toLowerCase();
+    const confCls = confVal.includes('confirmed') ? 'confirmed' : confVal.includes('potential') ? 'potential' : confVal.includes('ended') ? 'ended' : '';
+    const confLbl = confVal.includes('confirmed') ? '✓ Conf' : confVal.includes('potential') ? '◈ Pot' : confVal.includes('ended') ? '✕ End' : '';
 
     return `
-      <div class="proj-link-item">
-        <div class="proj-link-logo">
-          ${p.logo_url
-            ? `<img src="${esc(p.logo_url)}" onerror="this.parentElement.innerHTML='🪂'">`
-            : '🪂'}
-        </div>
-        <div class="proj-link-info">
-          <div class="proj-link-name">${esc(p.name)}</div>
-          <div class="proj-link-badges">
-            <span class="proj-item-status ${getStCls(p.status)}">${esc(p.status || 'TBA')}</span>
-            <span class="live-dot ${isLive ? 'on' : 'off'}">${isLive ? '● LIVE' : '○ DRAFT'}</span>
-            ${confCls ? `<span class="conf-badge ${confCls}">${confLbl}</span>` : ''}
+      <div style="background:var(--s2);border:1px solid ${hasLink?'var(--border2)':'rgba(239,68,68,0.15)'};
+                  border-radius:10px;padding:14px;display:flex;flex-direction:column;gap:10px;
+                  transition:border-color 0.2s;cursor:pointer"
+           onclick="loadEdit(${p.id})"
+           onmouseover="this.style.borderColor='${hasLink?'var(--accent)':'rgba(239,68,68,0.4)'}'"
+           onmouseout="this.style.borderColor='${hasLink?'var(--border2)':'rgba(239,68,68,0.15)'}'">
+        <div style="display:flex;align-items:center;gap:10px;">
+          <div style="width:36px;height:36px;border-radius:8px;border:1px solid var(--border2);
+                      background:var(--s3);display:flex;align-items:center;justify-content:center;
+                      overflow:hidden;flex-shrink:0;font-size:1rem;">
+            ${p.logo_url ? `<img src="${esc(p.logo_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:7px" onerror="this.parentElement.innerHTML='🪂'">` : '🪂'}
+          </div>
+          <div style="flex:1;min-width:0;">
+            <div style="font-size:0.8rem;font-weight:700;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p.name)}</div>
+            <div style="display:flex;gap:4px;margin-top:3px;flex-wrap:wrap;align-items:center;">
+              <span class="proj-item-status ${getStCls(p.status)}">${esc(p.status||'TBA')}</span>
+              <span class="live-dot ${isLive?'on':'off'}">${isLive?'● LIVE':'○ DRAFT'}</span>
+              ${confCls ? `<span class="conf-badge ${confCls}">${confLbl}</span>` : ''}
+            </div>
           </div>
         </div>
         ${hasLink
-          ? `<a href="${esc(p.website_url)}" target="_blank" rel="noopener" class="proj-link-btn">🌐 Buka</a>`
-          : `<span class="proj-link-btn no-link">— No Link</span>`}
+          ? `<a href="${esc(p.website_url)}" target="_blank" rel="noopener" onclick="event.stopPropagation()"
+                style="display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;
+                       border-radius:6px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);
+                       color:var(--accent);font-family:var(--mono);font-size:0.6rem;text-decoration:none;font-weight:700">
+              🌐 Buka Website</a>`
+          : `<div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;
+                         border-radius:6px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);
+                         color:var(--red);font-family:var(--mono);font-size:0.6rem;font-weight:700;">
+               ✕ Belum ada link</div>`}
       </div>`;
   }).join('');
 }
