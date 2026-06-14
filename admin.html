@@ -461,6 +461,20 @@
 .proj-links-scroll { max-height: 320px; overflow-y: auto; }
 .proj-links-scroll::-webkit-scrollbar { width: 3px; }
 .proj-links-scroll::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
+
+/* ── LOGIN PARTICLE ANIMATION ── */
+#login-section {
+  position: fixed; inset: 0; z-index: 999;
+  display: flex; align-items: center; justify-content: center;
+  background: var(--bg); overflow: hidden;
+}
+.login-card {
+  animation: loginFadeIn 0.8s ease forwards;
+}
+@keyframes loginFadeIn {
+  from { opacity: 0; transform: translateY(20px) scale(0.97); }
+  to   { opacity: 1; transform: translateY(0)    scale(1); }
+}
     
     
   </style>
@@ -468,7 +482,8 @@
 <body>
 
 <div id="login-section">
-  <div class="login-card">
+  <canvas id="login-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
+  <div class="login-card" style="position:relative;z-index:1;">
     <div class="login-logo">AirdropXI</div>
     <div class="login-title">Admin Panel</div>
     <div class="login-sub">Login dengan Google untuk akses</div>
@@ -1604,6 +1619,125 @@ function renderProjectLinks() {
       </div>`;
   }).join('');
 }
+
+  // ── LOGIN PARTICLE CANVAS ─────────────────────────────
+(function initLoginParticles() {
+  const canvas = document.getElementById('login-canvas');
+  if (!canvas) return;
+  const ctx = canvas.getContext('2d');
+
+  const COLORS = ['#00e5a0','#00c8f0','#7c6dfa','#3b82f6'];
+  const PARTICLE_COUNT = 80;
+  let particles = [];
+  let W, H, animId;
+
+  function resize() {
+    W = canvas.width  = window.innerWidth;
+    H = canvas.height = window.innerHeight;
+  }
+
+  function randBetween(a, b) { return a + Math.random() * (b - a); }
+
+  function createParticle() {
+    return {
+      x:     randBetween(0, W),
+      y:     randBetween(0, H),
+      r:     randBetween(0.8, 2.5),
+      vx:    randBetween(-0.25, 0.25),
+      vy:    randBetween(-0.4, -0.1),
+      alpha: randBetween(0.2, 0.8),
+      color: COLORS[Math.floor(Math.random() * COLORS.length)],
+      pulse: randBetween(0, Math.PI * 2),
+    };
+  }
+
+  function init() {
+    resize();
+    particles = Array.from({ length: PARTICLE_COUNT }, createParticle);
+  }
+
+  function drawHexagon(x, y, size) {
+    ctx.beginPath();
+    for (let i = 0; i < 6; i++) {
+      const angle = (Math.PI / 3) * i - Math.PI / 6;
+      const px = x + size * Math.cos(angle);
+      const py = y + size * Math.sin(angle);
+      i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
+    }
+    ctx.closePath();
+  }
+
+  function draw() {
+    ctx.clearRect(0, 0, W, H);
+
+    // Draw connecting lines between nearby particles
+    for (let i = 0; i < particles.length; i++) {
+      for (let j = i + 1; j < particles.length; j++) {
+        const dx = particles[i].x - particles[j].x;
+        const dy = particles[i].y - particles[j].y;
+        const dist = Math.sqrt(dx * dx + dy * dy);
+        if (dist < 120) {
+          ctx.beginPath();
+          ctx.moveTo(particles[i].x, particles[i].y);
+          ctx.lineTo(particles[j].x, particles[j].y);
+          ctx.strokeStyle = `rgba(0,229,160,${0.06 * (1 - dist / 120)})`;
+          ctx.lineWidth = 0.5;
+          ctx.stroke();
+        }
+      }
+    }
+
+    // Draw particles
+    particles.forEach(p => {
+      p.pulse += 0.02;
+      const pulsedAlpha = p.alpha * (0.7 + 0.3 * Math.sin(p.pulse));
+      const pulsedR = p.r * (0.9 + 0.2 * Math.sin(p.pulse));
+
+      // Glow
+      const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, pulsedR * 4);
+      grd.addColorStop(0, p.color + Math.round(pulsedAlpha * 255).toString(16).padStart(2,'0'));
+      grd.addColorStop(1, 'transparent');
+      ctx.beginPath();
+      ctx.arc(p.x, p.y, pulsedR * 4, 0, Math.PI * 2);
+      ctx.fillStyle = grd;
+      ctx.fill();
+
+      // Core dot — some are hexagons
+      ctx.fillStyle = p.color + Math.round(pulsedAlpha * 255).toString(16).padStart(2,'0');
+      if (p.r > 1.8) {
+        drawHexagon(p.x, p.y, pulsedR * 1.5);
+        ctx.fill();
+      } else {
+        ctx.beginPath();
+        ctx.arc(p.x, p.y, pulsedR, 0, Math.PI * 2);
+        ctx.fill();
+      }
+
+      // Move
+      p.x += p.vx;
+      p.y += p.vy;
+
+      // Reset if out of screen
+      if (p.y < -10) { p.y = H + 5; p.x = randBetween(0, W); }
+      if (p.x < -10) p.x = W + 5;
+      if (p.x > W + 10) p.x = -5;
+    });
+
+    animId = requestAnimationFrame(draw);
+  }
+
+  function stopParticles() {
+    if (animId) cancelAnimationFrame(animId);
+  }
+
+  init();
+  draw();
+
+  window.addEventListener('resize', () => { resize(); });
+
+  // Stop animation setelah login berhasil
+  window._stopLoginParticles = stopParticles;
+})();
   
 
   loadProjects();
@@ -1623,6 +1757,7 @@ function renderProjectLinks() {
       const result = await res.json();
       if (res.ok && result.success) {
         document.getElementById('login-section').style.display = 'none';
+        if (window._stopLoginParticles) window._stopLoginParticles();
         document.getElementById('admin-content').classList.remove('hidden');
         renderAdminGuide();
         if (!localStorage.getItem('gh_token_airdropxi'))
