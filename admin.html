@@ -571,12 +571,17 @@
         🔄 Update Exchange Details
       </button>
     
-   <button class="btn-new" onclick="showManageExchanges()"
+  <button class="btn-new" onclick="showManageExchanges()"
      style="border-color:rgba(0,200,240,0.3);color:var(--cyan);background:rgba(0,200,240,0.06)">
      🏦 Manage Exchanges
   </button>
-</div>
 
+  <button class="btn-new" onclick="showChatPanel()"
+    style="border-color:rgba(124,109,250,0.3);color:var(--purple);background:rgba(124,109,250,0.06)">
+    💬 Chat Admin
+  </button>
+</div>
+    
     <div class="form-area" id="form-area">
       <div class="panel">
         <div class="empty-form">
@@ -3398,6 +3403,138 @@ function renderAdminGuide() {
       <div id="guide-content-en" style="padding:1.5rem;display:none;flex-direction:column;gap:1rem">${EN.map(([i,t,b])=>guideSection(i,t,b)).join('')}</div>
     </div>`;
 }
+
+// ── ADMIN CHAT ────────────────────────────────────────
+const CHAT_API = '/api/admin-airdrop?type=chat';
+
+let _chatPollInterval = null;
+let _chatLastId = 0;
+
+function showChatPanel() {
+  editingId = null; renderList();
+  if (_chatPollInterval) clearInterval(_chatPollInterval);
+
+  document.getElementById('form-area').innerHTML = `
+    <div class="panel" style="display:flex;flex-direction:column;height:600px;">
+      <div class="panel-head">
+        <span class="ph-dot" style="background:var(--purple);box-shadow:0 0 6px var(--purple)"></span>
+        <span class="ph-title">💬 Admin Chat</span>
+        <span id="chat-status" style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">● live</span>
+      </div>
+
+      <!-- Nama sender -->
+      <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
+        <span style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">Nama:</span>
+        <input id="chat-sender" type="text" value="${localStorage.getItem('chat_sender')||''}"
+          placeholder="e.g. Admin1"
+          oninput="localStorage.setItem('chat_sender',this.value)"
+          style="background:var(--s2);border:1px solid var(--border2);border-radius:5px;
+                 color:var(--text);font-family:var(--mono);font-size:0.68rem;
+                 padding:4px 8px;outline:none;width:140px;">
+      </div>
+
+      <!-- Messages -->
+      <div id="chat-messages"
+           style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth;">
+        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);text-align:center">
+          ⏳ Loading...
+        </div>
+      </div>
+
+      <!-- Input -->
+      <div style="padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;">
+        <textarea id="chat-input" placeholder="Ketik pesan..."
+          rows="2"
+          onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}"
+          style="flex:1;background:var(--s2);border:1px solid var(--border2);border-radius:6px;
+                 color:var(--text);font-family:var(--mono);font-size:0.72rem;
+                 padding:0.5rem 0.7rem;outline:none;resize:none;line-height:1.4;
+                 transition:border-color 0.2s;"
+          onfocus="this.style.borderColor='var(--purple)'"
+          onblur="this.style.borderColor='var(--border2)'"></textarea>
+        <button onclick="sendChatMessage()"
+          style="padding:0.5rem 1rem;background:rgba(124,109,250,0.1);border:1px solid rgba(124,109,250,0.3);
+                 border-radius:6px;color:var(--purple);font-family:var(--mono);font-size:0.65rem;
+                 font-weight:700;cursor:pointer;white-space:nowrap;align-self:flex-end;transition:all 0.2s"
+          onmouseover="this.style.background='rgba(124,109,250,0.2)'"
+          onmouseout="this.style.background='rgba(124,109,250,0.1)'">
+          📤 Kirim
+        </button>
+      </div>
+    </div>`;
+
+  _chatLastId = 0;
+  fetchChatMessages(true);
+  _chatPollInterval = setInterval(() => fetchChatMessages(false), 4000);
+}
+
+async function fetchChatMessages(scrollToBottom) {
+  try {
+    const res = await fetch(CHAT_API);
+    if (!res.ok) throw new Error('Fetch failed');
+    const msgs = await res.json();
+    renderChatMessages(msgs, scrollToBottom);
+    if (msgs.length) _chatLastId = msgs[msgs.length - 1].id;
+    const statusEl = document.getElementById('chat-status');
+    if (statusEl) { statusEl.textContent = '● live'; statusEl.style.color = 'var(--accent)'; }
+  } catch(e) {
+    const statusEl = document.getElementById('chat-status');
+    if (statusEl) { statusEl.textContent = '✕ offline'; statusEl.style.color = 'var(--red)'; }
+  }
+}
+
+function renderChatMessages(msgs, scrollToBottom) {
+  const container = document.getElementById('chat-messages');
+  if (!container) return;
+  if (!msgs.length) {
+    container.innerHTML = `<div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);text-align:center;padding:2rem">
+      Belum ada pesan. Mulai chat!</div>`;
+    return;
+  }
+  const mySender = (document.getElementById('chat-sender')?.value || '').trim();
+  container.innerHTML = msgs.map(m => {
+    const isMe = mySender && m.sender === mySender;
+    const time = new Date(m.created_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+    return `
+      <div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px;">
+        <div style="font-family:var(--mono);font-size:0.48rem;color:var(--text3);
+                    padding:0 4px;">${esc(m.sender)} · ${time}</div>
+        <div style="max-width:75%;padding:8px 12px;border-radius:${isMe?'12px 12px 2px 12px':'12px 12px 12px 2px'};
+                    background:${isMe?'rgba(124,109,250,0.15)':'var(--s2)'};
+                    border:1px solid ${isMe?'rgba(124,109,250,0.3)':'var(--border2)'};
+                    color:${isMe?'#c4bbff':'var(--text)'};
+                    font-size:0.78rem;line-height:1.5;white-space:pre-wrap;word-break:break-word;">
+          ${esc(m.content)}
+        </div>
+      </div>`;
+  }).join('');
+  if (scrollToBottom) container.scrollTop = container.scrollHeight;
+}
+
+async function sendChatMessage() {
+  const input  = document.getElementById('chat-input');
+  const sender = (document.getElementById('chat-sender')?.value || '').trim();
+  const content = input?.value?.trim();
+  if (!content) { showToast('Pesan kosong!', 'error'); return; }
+  if (!sender)  { showToast('Isi nama dulu!', 'error'); document.getElementById('chat-sender')?.focus(); return; }
+
+  input.value = '';
+  input.style.height = 'auto';
+
+  try {
+   const res = await fetch(CHAT_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ sender, content }),
+    });
+    if (!res.ok) throw new Error('Send failed');
+    fetchChatMessages(true);
+  } catch(e) {
+    showToast('Gagal kirim: ' + e.message, 'error');
+    input.value = content;
+  }
+}
+
   
 </script>
 
