@@ -598,16 +598,18 @@
     </div>
 
     <!-- Filter tabs -->
-    <div style="display:flex;gap:4px;padding:10px 1.25rem;border-bottom:1px solid var(--border);flex-wrap:wrap;">
-      <button class="ftab active" id="plf-all"      onclick="setPLFilter('all',this)">Semua</button>
-      <button class="ftab"        id="plf-active"   onclick="setPLFilter('active',this)">Active</button>
-      <button class="ftab"        id="plf-waitlist" onclick="setPLFilter('waitlist',this)">Waitlist</button>
-      <button class="ftab"        id="plf-ended"    onclick="setPLFilter('ended',this)">Ended</button>
-      <button class="ftab"        id="plf-confirmed" onclick="setPLFilter('confirmed',this)">Confirmed</button>
-      <button class="ftab"        id="plf-potential" onclick="setPLFilter('potential',this)">Potential</button>
-      <button class="ftab"        id="plf-nolink"   onclick="setPLFilter('nolink',this)" 
-              style="border-color:rgba(239,68,68,0.2);color:var(--red)">No Link</button>
-    </div>
+<div style="display:flex;gap:4px;padding:10px 1.25rem;border-bottom:1px solid var(--border);flex-wrap:wrap;">
+  <button class="ftab active" id="plf-all"       onclick="setPLFilter('all',this)">Semua</button>
+  <button class="ftab"        id="plf-active"    onclick="setPLFilter('active',this)">Active</button>
+  <button class="ftab"        id="plf-waitlist"  onclick="setPLFilter('waitlist',this)">Waitlist</button>
+  <button class="ftab"        id="plf-ended"     onclick="setPLFilter('ended',this)">Ended</button>
+  <button class="ftab"        id="plf-confirmed" onclick="setPLFilter('confirmed',this)">Confirmed</button>
+  <button class="ftab"        id="plf-potential" onclick="setPLFilter('potential',this)">Potential</button>
+  <button class="ftab"        id="plf-haslink"   onclick="setPLFilter('haslink',this)"
+          style="border-color:rgba(0,229,160,0.2);color:var(--accent)">✓ Ada Link</button>
+  <button class="ftab"        id="plf-nolink"    onclick="setPLFilter('nolink',this)"
+          style="border-color:rgba(239,68,68,0.2);color:var(--red)">✕ No Link</button>
+</div>
 
     <!-- Grid cards -->
     <div id="proj-links-list" style="padding:1.25rem;
@@ -1551,6 +1553,7 @@ function renderProjectLinks() {
   if (_plFilter === 'confirmed') filtered = filtered.filter(p => (p.confirmation_status||'').toLowerCase().includes('confirmed'));
   if (_plFilter === 'potential') filtered = filtered.filter(p => (p.confirmation_status||'').toLowerCase().includes('potential'));
   if (_plFilter === 'nolink')    filtered = filtered.filter(p => !p.website_url);
+  if (_plFilter === 'haslink')   filtered = filtered.filter(p => !!p.website_url);
 
   if (count) count.textContent = `${filtered.length}/${projects.length}`;
 
