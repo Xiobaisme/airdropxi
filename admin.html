@@ -3415,49 +3415,77 @@ function showChatPanel() {
   if (_chatPollInterval) clearInterval(_chatPollInterval);
 
   document.getElementById('form-area').innerHTML = `
-    <div class="panel" style="display:flex;flex-direction:column;height:600px;">
-      <div class="panel-head">
-        <span class="ph-dot" style="background:var(--purple);box-shadow:0 0 6px var(--purple)"></span>
-        <span class="ph-title">💬 Admin Chat</span>
-        <span id="chat-status" style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">● live</span>
+    <div class="panel" style="display:flex;flex-direction:column;height:620px;overflow:hidden;">
+      
+      <!-- Header -->
+      <div style="display:flex;align-items:center;gap:10px;padding:0.85rem 1.1rem;
+                  border-bottom:1px solid var(--border);flex-shrink:0;
+                  background:linear-gradient(90deg,rgba(124,109,250,0.06),transparent);">
+        <span style="width:8px;height:8px;border-radius:50%;background:var(--purple);
+                     box-shadow:0 0 8px var(--purple);flex-shrink:0"></span>
+        <span style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);
+                     letter-spacing:0.1em;text-transform:uppercase;flex:1">💬 Admin Chat</span>
+        <span id="chat-status"
+              style="font-family:var(--mono);font-size:0.5rem;color:var(--accent);
+                     display:flex;align-items:center;gap:4px">
+          <span style="width:5px;height:5px;border-radius:50%;background:var(--accent);
+                       box-shadow:0 0 4px var(--accent);display:inline-block"></span>live
+        </span>
       </div>
 
       <!-- Nama sender -->
-      <div style="padding:8px 12px;border-bottom:1px solid var(--border);display:flex;align-items:center;gap:8px;">
-        <span style="font-family:var(--mono);font-size:0.58rem;color:var(--text3)">Nama:</span>
+      <div style="padding:8px 12px;border-bottom:1px solid var(--border);
+                  display:flex;align-items:center;gap:8px;background:var(--s2);flex-shrink:0;">
+        <span style="font-family:var(--mono);font-size:0.55rem;color:var(--text3)">👤 Nama:</span>
         <input id="chat-sender" type="text" value="${localStorage.getItem('chat_sender')||''}"
           placeholder="e.g. Admin1"
           oninput="localStorage.setItem('chat_sender',this.value)"
-          style="background:var(--s2);border:1px solid var(--border2);border-radius:5px;
-                 color:var(--text);font-family:var(--mono);font-size:0.68rem;
-                 padding:4px 8px;outline:none;width:140px;">
+          style="background:var(--s3);border:1px solid var(--border2);border-radius:5px;
+                 color:var(--accent);font-family:var(--mono);font-size:0.68rem;font-weight:700;
+                 padding:4px 10px;outline:none;width:130px;letter-spacing:0.04em;"
+          onfocus="this.style.borderColor='var(--purple)'"
+          onblur="this.style.borderColor='var(--border2)'">
+        <span style="font-family:var(--mono);font-size:0.5rem;color:var(--text3)">
+          — hanya terlihat oleh sesama admin
+        </span>
+        <button onclick="clearChatHistory()" title="Hapus semua pesan"
+          style="margin-left:auto;padding:3px 8px;border-radius:4px;
+                 border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.08);
+                 color:var(--red);font-family:var(--mono);font-size:0.5rem;cursor:pointer;">
+          🗑 Clear
+        </button>
       </div>
 
-      <!-- Messages -->
+      <!-- Messages area -->
       <div id="chat-messages"
-           style="flex:1;overflow-y:auto;padding:1rem;display:flex;flex-direction:column;gap:8px;scroll-behavior:smooth;">
-        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);text-align:center">
-          ⏳ Loading...
-        </div>
+           style="flex:1;overflow-y:auto;padding:1rem 1.1rem;
+                  display:flex;flex-direction:column;gap:10px;scroll-behavior:smooth;
+                  background:var(--bg);">
+        <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);
+                    text-align:center;padding:2rem">⏳ Loading...</div>
       </div>
 
-      <!-- Input -->
-      <div style="padding:10px 12px;border-top:1px solid var(--border);display:flex;gap:8px;">
-        <textarea id="chat-input" placeholder="Ketik pesan..."
+      <!-- Input area -->
+      <div style="padding:10px 12px;border-top:1px solid var(--border);
+                  display:flex;gap:8px;align-items:flex-end;
+                  background:var(--s1);flex-shrink:0;">
+        <textarea id="chat-input" placeholder="Ketik pesan... (Enter kirim, Shift+Enter baris baru)"
           rows="2"
           onkeydown="if(event.key==='Enter'&&!event.shiftKey){event.preventDefault();sendChatMessage()}"
-          style="flex:1;background:var(--s2);border:1px solid var(--border2);border-radius:6px;
+          style="flex:1;background:var(--s2);border:1px solid var(--border2);border-radius:8px;
                  color:var(--text);font-family:var(--mono);font-size:0.72rem;
-                 padding:0.5rem 0.7rem;outline:none;resize:none;line-height:1.4;
-                 transition:border-color 0.2s;"
+                 padding:0.6rem 0.8rem;outline:none;resize:none;line-height:1.5;
+                 transition:border-color 0.2s;min-height:44px;"
           onfocus="this.style.borderColor='var(--purple)'"
           onblur="this.style.borderColor='var(--border2)'"></textarea>
         <button onclick="sendChatMessage()"
-          style="padding:0.5rem 1rem;background:rgba(124,109,250,0.1);border:1px solid rgba(124,109,250,0.3);
-                 border-radius:6px;color:var(--purple);font-family:var(--mono);font-size:0.65rem;
-                 font-weight:700;cursor:pointer;white-space:nowrap;align-self:flex-end;transition:all 0.2s"
-          onmouseover="this.style.background='rgba(124,109,250,0.2)'"
-          onmouseout="this.style.background='rgba(124,109,250,0.1)'">
+          style="padding:0.55rem 1.1rem;
+                 background:linear-gradient(135deg,rgba(124,109,250,0.2),rgba(124,109,250,0.1));
+                 border:1px solid rgba(124,109,250,0.4);border-radius:8px;
+                 color:var(--purple);font-family:var(--mono);font-size:0.65rem;font-weight:700;
+                 cursor:pointer;white-space:nowrap;transition:all 0.2s;min-height:44px;"
+          onmouseover="this.style.background='rgba(124,109,250,0.3)';this.style.borderColor='rgba(124,109,250,0.6)'"
+          onmouseout="this.style.background='linear-gradient(135deg,rgba(124,109,250,0.2),rgba(124,109,250,0.1))';this.style.borderColor='rgba(124,109,250,0.4)'">
           📤 Kirim
         </button>
       </div>
@@ -3486,29 +3514,79 @@ async function fetchChatMessages(scrollToBottom) {
 function renderChatMessages(msgs, scrollToBottom) {
   const container = document.getElementById('chat-messages');
   if (!container) return;
+
   if (!msgs.length) {
-    container.innerHTML = `<div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);text-align:center;padding:2rem">
-      Belum ada pesan. Mulai chat!</div>`;
+    container.innerHTML = `
+      <div style="display:flex;flex-direction:column;align-items:center;gap:8px;
+                  padding:3rem 1rem;color:var(--text3);text-align:center;">
+        <div style="font-size:2rem">💬</div>
+        <div style="font-family:var(--mono);font-size:0.6rem">Belum ada pesan. Mulai chat!</div>
+      </div>`;
     return;
   }
+
   const mySender = (document.getElementById('chat-sender')?.value || '').trim();
-  container.innerHTML = msgs.map(m => {
-    const isMe = mySender && m.sender === mySender;
-    const time = new Date(m.created_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
-    return `
-      <div style="display:flex;flex-direction:column;align-items:${isMe?'flex-end':'flex-start'};gap:2px;">
-        <div style="font-family:var(--mono);font-size:0.48rem;color:var(--text3);
-                    padding:0 4px;">${esc(m.sender)} · ${time}</div>
-        <div style="max-width:75%;padding:8px 12px;border-radius:${isMe?'12px 12px 2px 12px':'12px 12px 12px 2px'};
-                    background:${isMe?'rgba(124,109,250,0.15)':'var(--s2)'};
-                    border:1px solid ${isMe?'rgba(124,109,250,0.3)':'var(--border2)'};
-                    color:${isMe?'#c4bbff':'var(--text)'};
-                    font-size:0.78rem;line-height:1.5;white-space:pre-wrap;word-break:break-word;">
-          ${esc(m.content)}
-        </div>
-      </div>`;
-  }).join('');
-  if (scrollToBottom) container.scrollTop = container.scrollHeight;
+
+  // Group by date
+  const grouped = {};
+  msgs.forEach(m => {
+    const d = new Date(m.created_at).toLocaleDateString('id-ID',{day:'2-digit',month:'short',year:'numeric'});
+    if (!grouped[d]) grouped[d] = [];
+    grouped[d].push(m);
+  });
+
+  container.innerHTML = Object.entries(grouped).map(([date, dayMsgs]) => `
+    <div style="display:flex;align-items:center;gap:8px;margin:4px 0;">
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+      <span style="font-family:var(--mono);font-size:0.48rem;color:var(--text3);
+                   padding:2px 8px;background:var(--s2);border:1px solid var(--border);
+                   border-radius:10px;white-space:nowrap">${date}</span>
+      <div style="flex:1;height:1px;background:var(--border)"></div>
+    </div>
+    ${dayMsgs.map(m => {
+      const isMe = mySender && m.sender === mySender;
+      const time = new Date(m.created_at).toLocaleTimeString('id-ID',{hour:'2-digit',minute:'2-digit'});
+      const initials = m.sender.slice(0,2).toUpperCase();
+      const colors = ['#7c6dfa','#00c8f0','#00e5a0','#f59e0b','#ef4444','#3b82f6'];
+      const colorIdx = m.sender.charCodeAt(0) % colors.length;
+      const avatarColor = colors[colorIdx];
+
+      return `
+        <div style="display:flex;align-items:flex-end;gap:8px;
+                    flex-direction:${isMe?'row-reverse':'row'};margin-bottom:2px;">
+          
+          <!-- Avatar -->
+          <div style="width:28px;height:28px;border-radius:50%;flex-shrink:0;
+                      background:${avatarColor}22;border:1px solid ${avatarColor}44;
+                      display:flex;align-items:center;justify-content:center;
+                      font-family:var(--mono);font-size:0.52rem;font-weight:700;
+                      color:${avatarColor}">
+            ${initials}
+          </div>
+
+          <!-- Bubble -->
+          <div style="max-width:70%;display:flex;flex-direction:column;
+                      align-items:${isMe?'flex-end':'flex-start'};gap:3px;">
+            <div style="font-family:var(--mono);font-size:0.46rem;color:var(--text3);
+                        padding:0 4px;">${isMe?'Kamu':''}${!isMe?m.sender:''} · ${time}</div>
+            <div style="padding:9px 13px;
+                        border-radius:${isMe?'14px 14px 2px 14px':'14px 14px 14px 2px'};
+                        background:${isMe?'rgba(124,109,250,0.18)':'var(--s2)'};
+                        border:1px solid ${isMe?'rgba(124,109,250,0.35)':'var(--border2)'};
+                        color:${isMe?'#d4cfff':'var(--text)'};
+                        font-size:0.78rem;line-height:1.55;
+                        white-space:pre-wrap;word-break:break-word;
+                        box-shadow:${isMe?'0 2px 8px rgba(124,109,250,0.1)':'none'}">
+              ${esc(m.content)}
+            </div>
+          </div>
+        </div>`;
+    }).join('')}
+  `).join('');
+
+  const prev = container.scrollTop;
+  const atBottom = container.scrollHeight - container.clientHeight - prev < 60;
+  if (scrollToBottom || atBottom) container.scrollTop = container.scrollHeight;
 }
 
 async function sendChatMessage() {
@@ -3532,6 +3610,20 @@ async function sendChatMessage() {
   } catch(e) {
     showToast('Gagal kirim: ' + e.message, 'error');
     input.value = content;
+  }
+}
+
+  async function clearChatHistory() {
+  if (!confirm('Hapus semua pesan chat? Tidak bisa dibatalkan.')) return;
+  try {
+    const msgs = await fetch(CHAT_API).then(r => r.json());
+    await Promise.all(msgs.map(m =>
+      fetch(`${CHAT_API}&id=${m.id}`, { method: 'DELETE' })
+    ));
+    fetchChatMessages(true);
+    showToast('✓ Chat dihapus', 'success');
+  } catch(e) {
+    showToast('Gagal hapus: ' + e.message, 'error');
   }
 }
 
