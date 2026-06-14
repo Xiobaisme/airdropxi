@@ -307,6 +307,35 @@ module.exports = async function handler(req, res) {
   }
 
   // ─────────────────────────────────────────────
+  // CHAT HANDLER
+  // ─────────────────────────────────────────────
+  if (type === 'chat') {
+    if (req.method === 'GET') {
+      const r = await fetch(`${BASE}/admin_messages?order=created_at.asc&limit=100`, { headers: H });
+      const data = await r.json();
+      return res.status(r.ok ? 200 : 500).json(data);
+    }
+    if (req.method === 'POST') {
+      const { sender, content } = req.body || {};
+      if (!sender || !content) return res.status(400).json({ error: 'sender & content wajib' });
+      const r = await fetch(`${BASE}/admin_messages`, {
+        method: 'POST', headers: H,
+        body: JSON.stringify({ sender, content }),
+      });
+      const data = await r.json();
+      return res.status(r.ok ? 201 : 500).json(data);
+    }
+    if (req.method === 'DELETE') {
+      const { id: msgId } = req.query;
+      if (!msgId) return res.status(400).json({ error: 'id wajib' });
+      const r = await fetch(`${BASE}/admin_messages?id=eq.${msgId}`, { method: 'DELETE', headers: H });
+      return res.status(r.ok ? 200 : 500).json({ success: r.ok });
+    }
+    res.setHeader('Allow', ['GET','POST','DELETE']);
+    return res.status(405).json({ error: 'Method not allowed untuk chat' });
+  }
+
+  // ─────────────────────────────────────────────
   // REORDER HANDLER — update sort_order tanpa overwrite field lain
   // ─────────────────────────────────────────────
   if (type === 'reorder') {
