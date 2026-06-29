@@ -442,7 +442,6 @@ function renderCards() {
     const firstTag = item.tags ? String(item.tags).split(',')[0].trim() : '';
 
     return `<tr onclick="window.location.href='${guideUrl}'">
-      <td class="tbl-num">${rowNum}</td>
       <td>
         <div class="tbl-name-wrap">
           ${logoHtml}
@@ -476,7 +475,6 @@ function renderCards() {
       <table class="airdrop-table">
         <thead>
           <tr>
-            <th class="tbl-num">#</th>
             <th>Project</th>
             <th>Category</th>
             <th>${t.raised}</th>
