@@ -475,6 +475,18 @@
   from { opacity: 0; transform: translateY(20px) scale(0.97); }
   to   { opacity: 1; transform: translateY(0)    scale(1); }
 }
+
+    /* ── BACKERS BUILDER ── */
+.backer-card {
+  background: var(--s3); border: 1px solid var(--border2); border-radius: 8px;
+  padding: 12px; display: flex; gap: 12px; align-items: center; position: relative;
+}
+.backer-avatar-prev {
+  width: 40px; height: 40px; border-radius: 50%; border: 1px dashed var(--border2);
+  background: var(--s2); display: flex; align-items: center; justify-content: center;
+  font-size: 16px; overflow: hidden; flex-shrink: 0; cursor: pointer;
+}
+.backer-avatar-prev img { width: 100%; height: 100%; object-fit: cover; border-radius: 50%; }
     
     
   </style>
@@ -1227,6 +1239,23 @@ async function saveReorder() {
         </div>
 
         <div class="form-sec">
+          <div class="sec-lbl">Funds &amp; Backers
+            <span style="color:var(--text3);font-size:0.55rem;text-transform:none;letter-spacing:0;font-weight:400">
+              — investor / VC yang mendanai project
+            </span>
+          </div>
+          <div id="backers-builder" style="display:flex;flex-direction:column;gap:8px;"></div>
+          <button type="button" onclick="addBackerCard()"
+            style="width:100%;margin-top:8px;padding:0.6rem;background:var(--adim);
+            border:1px dashed var(--aborder);border-radius:6px;color:var(--accent);
+            font-family:var(--mono);font-size:0.65rem;cursor:pointer;transition:all 0.2s"
+            onmouseover="this.style.background='rgba(0,229,160,0.14)'"
+            onmouseout="this.style.background='var(--adim)'">
+            ＋ Tambah Backer / Investor
+          </button>
+        </div>
+
+        <div class="form-sec">
           <div class="sec-lbl">Deskripsi Proyek</div>
           <div class="fg c1">
             <div class="field"><label>Deskripsi (ID)</label><textarea id="f-descid" class="tall" placeholder="Jelaskan proyek ini...">${esc(d.descriptionID||'')}</textarea></div>
@@ -1325,6 +1354,7 @@ async function saveReorder() {
       </div>`;
 
     initLogoUpload(d.logo_url || null);
+    initBackersBuilder(d.backers || null);
     initTaskRowsBuilder(d);
     if (!testnetLinks.length) {
       const builder = document.getElementById('testnet-builder');
@@ -1494,6 +1524,7 @@ async function saveReorder() {
     youtube:             document.getElementById('f-youtube')?.value?.trim()       || null,
     faqID:               document.getElementById('f-faqid')?.value?.trim()         || null,
     faqEN:               document.getElementById('f-faqen')?.value?.trim()         || null,
+    backers:             getBackers(),
     _roadmap:            getRoadmapItems(),
   };
   ['btn-save','btn-save-bottom'].forEach(id => {
@@ -3625,6 +3656,124 @@ async function sendChatMessage() {
   } catch(e) {
     showToast('Gagal hapus: ' + e.message, 'error');
   }
+}
+
+  // ── BACKERS BUILDER ──────────────────────────────────
+function initBackersBuilder(raw) {
+  const builder = document.getElementById('backers-builder');
+  if (!builder) return;
+  builder.innerHTML = '';
+  let backers = [];
+  try {
+    if (Array.isArray(raw)) backers = raw;
+    else if (typeof raw === 'string' && raw.trim()) backers = JSON.parse(raw);
+  } catch(e) { backers = []; }
+  if (!backers.length) return;
+  backers.forEach((b, i) => addBackerCard(b));
+}
+
+function addBackerCard(item) {
+  const builder = document.getElementById('backers-builder');
+  if (!builder) return;
+  if (builder.querySelectorAll('.backer-card').length >= 20) { showToast('Maksimal 20 backer', 'error'); return; }
+  item = item || { name: '', type: '', logo: '' };
+  const uid = `backer-${Date.now()}-${Math.random().toString(36).slice(2,6)}`;
+  const hasLogo = !!item.logo;
+
+  builder.insertAdjacentHTML('beforeend', `
+    <div class="backer-card" id="${uid}">
+      <!-- Avatar -->
+      <div class="backer-avatar-prev" id="bprev-${uid}"
+           onclick="document.getElementById('bfile-${uid}').click()" title="Upload logo">
+        ${hasLogo
+          ? `<img src="${esc(item.logo)}" onerror="this.parentElement.innerHTML='🏢'">`
+          : '🏢'}
+      </div>
+      <input type="file" id="bfile-${uid}" accept="image/*" style="display:none"
+             onchange="handleBackerLogoUpload(event,'${uid}')">
+      <input type="hidden" class="backer-logo-val" value="${esc(item.logo||'')}">
+
+      <!-- Fields -->
+      <div style="flex:1;display:grid;grid-template-columns:1fr 120px;gap:8px;min-width:0">
+        <div class="field" style="gap:4px">
+          <label style="font-family:var(--mono);font-size:0.56rem;color:var(--text2);
+                        text-transform:uppercase;letter-spacing:0.06em">Nama <span style="color:var(--red)">*</span></label>
+          <input type="text" class="backer-name-val" placeholder="e.g. Galaxy, Paradigm"
+                 value="${esc(item.name||'')}"
+                 style="width:100%;background:var(--s2);border:1px solid var(--border);border-radius:6px;
+                        color:var(--text);font-family:var(--mono);font-size:0.72rem;
+                        padding:0.45rem 0.65rem;outline:none;transition:border-color 0.2s"
+                 onfocus="this.style.borderColor='var(--accent)'"
+                 onblur="this.style.borderColor='var(--border)'">
+        </div>
+        <div class="field" style="gap:4px">
+          <label style="font-family:var(--mono);font-size:0.56rem;color:var(--text2);
+                        text-transform:uppercase;letter-spacing:0.06em">Tipe</label>
+          <select class="backer-type-val"
+                  style="width:100%;background:var(--s2);border:1px solid var(--border);border-radius:6px;
+                         color:var(--text);font-family:var(--mono);font-size:0.72rem;
+                         padding:0.45rem 0.65rem;outline:none;transition:border-color 0.2s"
+                  onfocus="this.style.borderColor='var(--accent)'"
+                  onblur="this.style.borderColor='var(--border)'">
+            <option value="VC"        ${item.type==='VC'?'selected':''}>VC</option>
+            <option value="Angel"     ${item.type==='Angel'?'selected':''}>Angel</option>
+            <option value="Strategic" ${item.type==='Strategic'?'selected':''}>Strategic</option>
+            <option value="Exchange"  ${item.type==='Exchange'?'selected':''}>Exchange</option>
+            <option value="Other"     ${item.type==='Other'?'selected':''}>Other</option>
+          </select>
+        </div>
+      </div>
+
+      <!-- Hapus -->
+      <button type="button" onclick="document.getElementById('${uid}').remove()"
+              style="position:absolute;top:8px;right:8px;padding:2px 7px;border-radius:4px;
+                     border:1px solid rgba(239,68,68,0.25);background:rgba(239,68,68,0.08);
+                     color:var(--red);font-family:var(--mono);font-size:0.5rem;cursor:pointer">✕</button>
+      
+      <!-- Upload status -->
+      <div class="backer-status-${uid}"
+           style="position:absolute;bottom:6px;right:36px;font-family:var(--mono);
+                  font-size:0.48rem;display:none"></div>
+    </div>`);
+}
+
+async function handleBackerLogoUpload(e, uid) {
+  const file = e.target.files?.[0];
+  if (!file) return;
+  const allowed = ['image/png','image/jpeg','image/jpg','image/webp','image/svg+xml','image/gif'];
+  if (!allowed.includes(file.type)) { showToast('Format tidak didukung.', 'error'); return; }
+  if (file.size > 2 * 1024 * 1024) { showToast('File terlalu besar. Maks 2MB.', 'error'); return; }
+
+  const card     = document.getElementById(uid);
+  const preview  = document.getElementById(`bprev-${uid}`);
+  const hidden   = card?.querySelector('.backer-logo-val');
+  const statusEl = card?.querySelector(`.backer-status-${uid}`);
+  const nameVal  = card?.querySelector('.backer-name-val')?.value?.trim() || 'backer';
+
+  if (statusEl) { statusEl.style.display = 'block'; statusEl.style.color = 'var(--blue)'; statusEl.textContent = '⏳...'; }
+  try {
+    const rawUrl = await uploadImageToGitHub(file, `backer-${nameVal}`);
+    if (preview) preview.innerHTML = `<img src="${rawUrl}" onerror="this.parentElement.innerHTML='🏢'">`;
+    if (hidden)  hidden.value = rawUrl;
+    if (statusEl) { statusEl.style.color = 'var(--accent)'; statusEl.textContent = '✓'; setTimeout(() => { statusEl.style.display = 'none'; }, 2000); }
+    showToast('✓ Logo backer diupload!', 'success');
+  } catch(err) {
+    if (statusEl) { statusEl.style.color = 'var(--red)'; statusEl.textContent = '✕'; }
+    showToast('Upload gagal: ' + err.message, 'error');
+  } finally { e.target.value = ''; }
+}
+
+function getBackers() {
+  const builder = document.getElementById('backers-builder');
+  if (!builder) return null;
+  const items = [];
+  builder.querySelectorAll('.backer-card').forEach(card => {
+    const name = card.querySelector('.backer-name-val')?.value?.trim() || '';
+    const type = card.querySelector('.backer-type-val')?.value?.trim() || 'VC';
+    const logo = card.querySelector('.backer-logo-val')?.value?.trim() || '';
+    if (name) items.push({ name, type, logo: logo || null });
+  });
+  return items.length ? JSON.stringify(items) : null;
 }
 
   
