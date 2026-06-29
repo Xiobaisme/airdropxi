@@ -647,6 +647,128 @@ nav.guide-nav {
   transition: opacity .2s, transform .15s, box-shadow .2s;
 }
 .task-start-btn:hover { opacity: .88; transform: translateY(-1px); box-shadow: 0 8px 24px rgba(0,232,122,.28); }
+
+ /* ── FUNDS & BACKERS ── */
+.backers-row {
+  display: flex; align-items: center; gap: 10px;
+  margin-top: 18px; flex-wrap: wrap;
+}
+.backers-label {
+  font-family: var(--mono); font-size: 10px; color: var(--text3);
+  letter-spacing: .12em; text-transform: uppercase; margin-right: 4px;
+  flex-shrink: 0;
+}
+.backers-avatars {
+  display: flex; align-items: center;
+}
+.backer-avatar {
+  width: 34px; height: 34px; border-radius: 50%;
+  border: 2px solid var(--bg);
+  background: var(--surface2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 13px; font-weight: 700; color: var(--text2);
+  cursor: pointer; transition: transform .18s, border-color .18s, box-shadow .18s;
+  overflow: hidden; flex-shrink: 0;
+  margin-left: -8px; position: relative;
+}
+.backer-avatar:first-child { margin-left: 0; }
+.backer-avatar:hover {
+  transform: translateY(-3px) scale(1.1);
+  border-color: var(--g-readable);
+  box-shadow: 0 6px 18px rgba(0,232,122,.25);
+  z-index: 10;
+}
+.backer-avatar img {
+  width: 100%; height: 100%; object-fit: cover; border-radius: 50%;
+}
+.backer-avatar-more {
+  background: var(--surface3); border: 2px solid var(--border2);
+  font-family: var(--mono); font-size: 10px; font-weight: 700;
+  color: var(--text2); letter-spacing: -.02em;
+}
+.backer-avatar-more:hover {
+  border-color: var(--g-readable); color: var(--g-readable);
+}
+
+/* ── BACKER POPUP ── */
+.backer-popup-overlay {
+  position: fixed; inset: 0; z-index: 9998;
+  background: rgba(0,0,0,.72); backdrop-filter: blur(6px);
+  display: flex; align-items: center; justify-content: center;
+  animation: fadeIn .18s ease;
+  padding: 20px;
+}
+.backer-popup {
+  background: var(--surface); border: 1px solid var(--border2);
+  border-radius: 20px; width: 100%; max-width: 380px;
+  box-shadow: 0 24px 80px rgba(0,0,0,.7), 0 0 0 1px rgba(0,232,122,.08);
+  animation: popupIn .22s cubic-bezier(.34,1.56,.64,1);
+  overflow: hidden; position: relative;
+}
+@keyframes popupIn {
+  from { opacity: 0; transform: scale(.88) translateY(12px); }
+  to   { opacity: 1; transform: scale(1) translateY(0); }
+}
+.backer-popup-header {
+  display: flex; align-items: center; gap: 14px;
+  padding: 22px 22px 18px;
+  background: linear-gradient(135deg, rgba(0,232,122,.06), rgba(0,200,240,.03));
+  border-bottom: 1px solid var(--border);
+  position: relative;
+}
+.backer-popup-avatar {
+  width: 52px; height: 52px; border-radius: 14px;
+  background: var(--surface2); border: 1px solid var(--border2);
+  display: flex; align-items: center; justify-content: center;
+  font-size: 22px; overflow: hidden; flex-shrink: 0;
+}
+.backer-popup-avatar img { width: 100%; height: 100%; object-fit: cover; border-radius: 13px; }
+.backer-popup-name { font-family: var(--sans); font-size: 17px; font-weight: 800; color: var(--text); letter-spacing: -.4px; }
+.backer-popup-type {
+  font-family: var(--mono); font-size: 9px; font-weight: 700;
+  letter-spacing: .1em; text-transform: uppercase; margin-top: 4px;
+  padding: 3px 10px; border-radius: 20px; display: inline-block;
+  background: rgba(0,232,122,.1); color: var(--g-readable);
+  border: 1px solid rgba(0,232,122,.22);
+}
+.backer-popup-close {
+  position: absolute; top: 14px; right: 14px;
+  width: 30px; height: 30px; border-radius: 50%;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; font-size: 13px; color: var(--text2);
+  transition: all .18s;
+}
+.backer-popup-close:hover { background: rgba(255,45,85,.12); color: #ff2d55; border-color: rgba(255,45,85,.3); }
+.backer-popup-body { padding: 18px 22px 22px; }
+.backer-popup-desc {
+  font-size: 13px; color: var(--text2); line-height: 1.7;
+  font-family: var(--sans); margin-bottom: 16px;
+}
+.backer-popup-meta { display: flex; flex-direction: column; gap: 8px; margin-bottom: 18px; }
+.backer-meta-row {
+  display: flex; align-items: center; gap: 10px;
+  font-family: var(--mono); font-size: 11px; color: var(--text2);
+}
+.backer-meta-icon {
+  width: 26px; height: 26px; border-radius: 7px;
+  background: var(--surface2); border: 1px solid var(--border);
+  display: flex; align-items: center; justify-content: center; font-size: 11px;
+  flex-shrink: 0;
+}
+.backer-meta-label { color: var(--text3); margin-right: 4px; }
+.backer-meta-val { color: var(--text); }
+.backer-popup-link {
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  width: 100%; padding: 11px 20px;
+  background: rgba(0,232,122,.08); border: 1px solid rgba(0,232,122,.22);
+  border-radius: 11px; color: var(--g-readable);
+  font-family: var(--mono); font-size: 11px; font-weight: 700;
+  text-decoration: none; letter-spacing: .06em; text-transform: uppercase;
+  transition: all .18s;
+}
+.backer-popup-link:hover { background: rgba(0,232,122,.15); border-color: rgba(0,232,122,.4); transform: translateY(-1px); }
+ 
  
 </style>
 </head>
@@ -1038,6 +1160,7 @@ if (p.testnet_links) {
     (confirmClass !== 'tba' ? '<span class="badge logo-confirm-badge ' + confirmClass + '">' + confirmLabel + '</span>' : '') +
     '</div>' +
     (socials.length ? '<div class="social-row">' + socials.join('') + '</div>' : '') +
+    buildBackersRow(p) +
     '</div></div></div>';
   heroEl.style.display = 'block';
 
@@ -1229,6 +1352,136 @@ function initLightbox() {
     img.addEventListener('click', () => openLightbox(img.src));
   });
 }
+
+ /* ── BACKERS ── */
+function buildBackersRow(p) {
+  let backers = [];
+  try {
+    const raw = p.backers;
+    if (Array.isArray(raw)) backers = raw;
+    else if (typeof raw === 'string' && raw.trim()) backers = JSON.parse(raw);
+  } catch(e) { backers = []; }
+
+  if (!backers.length) return '';
+
+  const MAX_VISIBLE = 5;
+  const visible = backers.slice(0, MAX_VISIBLE);
+  const extra = backers.length - MAX_VISIBLE;
+
+  const avatars = visible.map((b, i) => {
+    const initials = (b.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const imgTag = b.logo
+      ? `<img src="${esc(b.logo)}" alt="${esc(b.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">${initials}`
+      : initials;
+    return `<div class="backer-avatar" onclick="openBackerPopup(${i}, event)" title="${esc(b.name)}">${imgTag}</div>`;
+  }).join('');
+
+  const moreBtn = extra > 0
+    ? `<div class="backer-avatar backer-avatar-more" onclick="openBackerPopup(${MAX_VISIBLE}, event)">+${extra}</div>`
+    : '';
+
+  return `<div class="backers-row">
+    <span class="backers-label">Funds &amp; Backers:</span>
+    <div class="backers-avatars">${avatars}${moreBtn}</div>
+  </div>`;
+}
+
+function openBackerPopup(startIdx, e) {
+  e.stopPropagation();
+  const p = window._projectData;
+  let backers = [];
+  try {
+    const raw = p.backers;
+    if (Array.isArray(raw)) backers = raw;
+    else if (typeof raw === 'string' && raw.trim()) backers = JSON.parse(raw);
+  } catch(e2) { backers = []; }
+
+  if (!backers.length) return;
+
+  // Kalau klik "+N", tampilkan semua; otherwise tampilkan yg diklik
+  const isMore = startIdx >= 5;
+  const listToShow = isMore ? backers : [backers[startIdx]];
+  const isSingle = listToShow.length === 1;
+
+  function buildCard(b) {
+    const initials = (b.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    const imgHtml = b.logo
+      ? `<img src="${esc(b.logo)}" alt="${esc(b.name)}" onerror="this.style.display='none'">`
+      : initials;
+    const typeLabel = b.type || 'Investor';
+    const meta = [];
+    if (b.portfolio) meta.push(`<div class="backer-meta-row"><div class="backer-meta-icon">💼</div><span class="backer-meta-label">Portfolio:</span><span class="backer-meta-val">${esc(b.portfolio)}</span></div>`);
+    if (b.stage)     meta.push(`<div class="backer-meta-row"><div class="backer-meta-icon">📊</div><span class="backer-meta-label">Stage:</span><span class="backer-meta-val">${esc(b.stage)}</span></div>`);
+    if (b.amount)    meta.push(`<div class="backer-meta-row"><div class="backer-meta-icon">💰</div><span class="backer-meta-label">Amount:</span><span class="backer-meta-val">${esc(b.amount)}</span></div>`);
+    const linkBtn = b.website
+      ? `<a href="${esc(b.website)}" target="_blank" rel="noopener" class="backer-popup-link">
+          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+          Visit Website
+        </a>`
+      : '';
+    return `
+      <div class="backer-popup-header">
+        <div class="backer-popup-avatar">${imgHtml}</div>
+        <div>
+          <div class="backer-popup-name">${esc(b.name)}</div>
+          <span class="backer-popup-type">${esc(typeLabel)}</span>
+        </div>
+        <div class="backer-popup-close" onclick="closeBackerPopup()">✕</div>
+      </div>
+      <div class="backer-popup-body">
+        ${b.description ? `<div class="backer-popup-desc">${esc(b.description)}</div>` : ''}
+        ${meta.length ? `<div class="backer-popup-meta">${meta.join('')}</div>` : ''}
+        ${linkBtn}
+      </div>`;
+  }
+
+  // Kalau show all (isMore), tampilin list grid
+  let innerHtml;
+  if (!isSingle) {
+    const cards = listToShow.map((b, i) => {
+      const initials = (b.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+      const imgHtml = b.logo
+        ? `<img src="${esc(b.logo)}" alt="${esc(b.name)}" onerror="this.style.display='none'">`
+        : initials;
+      return `<div class="backer-list-item" onclick="closeBackerPopup();openBackerPopup(${i},event)" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);transition:border-color .18s" onmouseover="this.style.borderColor='var(--g-readable)'" onmouseout="this.style.borderColor='var(--border)'">
+        <div class="backer-popup-avatar" style="width:38px;height:38px;border-radius:10px;font-size:14px">${imgHtml}</div>
+        <div>
+          <div style="font-weight:700;font-size:13px;color:var(--text);font-family:var(--sans)">${esc(b.name)}</div>
+          <div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">${esc(b.type || 'Investor')}</div>
+        </div>
+      </div>`;
+    }).join('');
+
+    innerHtml = `
+      <div class="backer-popup-header" style="align-items:center;justify-content:space-between">
+        <div>
+          <div class="backer-popup-name">All Backers</div>
+          <span class="backer-popup-type">${backers.length} investors</span>
+        </div>
+        <div class="backer-popup-close" onclick="closeBackerPopup()">✕</div>
+      </div>
+      <div class="backer-popup-body">
+        <div style="display:flex;flex-direction:column;gap:8px">${cards}</div>
+      </div>`;
+  } else {
+    innerHtml = buildCard(listToShow[0]);
+  }
+
+  const overlay = document.createElement('div');
+  overlay.className = 'backer-popup-overlay';
+  overlay.id = 'backer-popup-overlay';
+  overlay.innerHTML = `<div class="backer-popup">${innerHtml}</div>`;
+  overlay.addEventListener('click', e2 => { if (e2.target === overlay) closeBackerPopup(); });
+  document.body.appendChild(overlay);
+  document.addEventListener('keydown', _backerKeyHandler);
+}
+
+function closeBackerPopup() {
+  document.getElementById('backer-popup-overlay')?.remove();
+  document.removeEventListener('keydown', _backerKeyHandler);
+}
+function _backerKeyHandler(e) { if (e.key === 'Escape') closeBackerPopup(); }
+ 
 
 loadProject();
 </script>
