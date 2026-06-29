@@ -382,6 +382,7 @@ module.exports = async function handler(req, res) {
       tasksEN:             p.tasksEN             || null,
       logo_url:            p.logo_url            || null,
       testnet_links:       p.testnet_links       || null,
+      backers:             p.backers             || null,
     };
   }
 
@@ -416,6 +417,7 @@ module.exports = async function handler(req, res) {
       faqEN:               p.faqEN               || null,
       testnet_links:       p.testnet_links       || null,
       tasks_images:        p.tasks_images        || null,
+      backers:             p.backers             || null,
     };
     if (airdropsId !== undefined) payload.airdrop_id = airdropsId;
     return payload;
