@@ -1163,6 +1163,10 @@ if (p.testnet_links) {
     buildBackersRow(p) +
     '</div></div></div>';
   heroEl.style.display = 'block';
+ // Bind tombol + backers setelah hero dirender
+  setTimeout(() => {
+    document.getElementById('backers-plus-btn')?.addEventListener('click', openBackerPopup);
+  }, 0);
 
   /* INFO CHIPS */
   const infoItems = [];
@@ -1363,6 +1367,9 @@ function buildBackersRow(p) {
   } catch(e) { backers = []; }
   if (!backers.length) return '';
 
+  // Simpan ke window supaya bisa diakses dari onclick
+  window._backers = backers;
+
   const MAX_VISIBLE = 4;
   const first = backers[0];
   const rest  = backers.slice(1, MAX_VISIBLE);
@@ -1382,9 +1389,9 @@ function buildBackersRow(p) {
     ? `<div class="backer-avatar backer-avatar-more">+${extra}</div>`
     : '';
 
-  // Tombol + hanya muncul kalau backers > 1
-  const plusBtn = backers.length > 1 ? `
-    <div onclick="openBackerPopup(event)"
+  const plusBtn = `
+    <div id="backers-plus-btn"
+         onclick="openBackerPopup()"
          style="display:inline-flex;align-items:center;justify-content:center;
                 width:22px;height:22px;border-radius:50%;
                 background:var(--surface3);border:1px solid var(--border2);
@@ -1395,7 +1402,7 @@ function buildBackersRow(p) {
       <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2.5">
         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
-    </div>` : '';
+    </div>`;
 
   return `<div class="backers-row">
     <span class="backers-label">Funds &amp; Backers:</span>
@@ -1411,6 +1418,59 @@ function buildBackersRow(p) {
     </div>
   </div>`;
 }
+
+function openBackerPopup() {
+  const backers = window._backers || [];
+  if (!backers.length) return;
+
+  document.getElementById('backer-popup-overlay')?.remove();
+
+  const items = backers.map(b => {
+    const initials = (b.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
+    return `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;
+                        border-radius:10px;background:var(--surface2);border:1px solid var(--border)">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--surface3);
+                  border:1px solid var(--border2);display:flex;align-items:center;
+                  justify-content:center;font-size:11px;font-weight:700;color:var(--text2);
+                  overflow:hidden;flex-shrink:0;">
+        ${b.logo
+          ? `<img src="${esc(b.logo)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display='none'">`
+          : initials}
+      </div>
+      <span style="font-family:var(--sans);font-size:13px;font-weight:700;color:var(--text)">${esc(b.name)}</span>
+    </div>`;
+  }).join('');
+
+  const overlay = document.createElement('div');
+  overlay.className = 'backer-popup-overlay';
+  overlay.id = 'backer-popup-overlay';
+  overlay.innerHTML = `
+    <div class="backer-popup">
+      <div class="backer-popup-header" style="justify-content:space-between">
+        <div>
+          <div class="backer-popup-name">Funds &amp; Backers</div>
+          <span class="backer-popup-type">${backers.length} investor${backers.length > 1 ? 's' : ''}</span>
+        </div>
+        <div class="backer-popup-close" id="backer-close-btn">✕</div>
+      </div>
+      <div class="backer-popup-body">
+        <div style="display:flex;flex-direction:column;gap:8px">${items}</div>
+      </div>
+    </div>`;
+
+  document.body.appendChild(overlay);
+
+  // Bind events setelah element ada di DOM
+  document.getElementById('backer-close-btn').addEventListener('click', closeBackerPopup);
+  overlay.addEventListener('click', e => { if (e.target === overlay) closeBackerPopup(); });
+  document.addEventListener('keydown', _backerKeyHandler);
+}
+
+function closeBackerPopup() {
+  document.getElementById('backer-popup-overlay')?.remove();
+  document.removeEventListener('keydown', _backerKeyHandler);
+}
+function _backerKeyHandler(e) { if (e.key === 'Escape') closeBackerPopup(); }
  
 
 loadProject();
