@@ -2,7 +2,8 @@
 // A. CORE CONFIG & INIT
 // ==========================================
 
-let allData = [], currentLang = 'id', activeFilter = 'all', visibleCount = 9;
+let allData = [], currentLang = 'id', activeFilter = 'all', currentPage = 1;
+const PAGE_SIZE = 10;
 
 // Restore bahasa dari URL path dulu, fallback ke localStorage
 (function () {
@@ -28,7 +29,7 @@ async function init() {
     setLang(currentLang); // render cards + terjemahan sekaligus
 
     document.getElementById('loading-state').style.display = 'none';
-    document.getElementById('airdrop-container').style.display = 'grid';
+    document.getElementById('airdrop-container').style.display = 'block';
 
   } catch (e) {
     document.getElementById('loading-state').style.display = 'none';
@@ -326,17 +327,12 @@ function setFilter(el, f) {
   document.querySelectorAll('.fbtn').forEach(b => b.classList.remove('active'));
   el.classList.add('active');
   activeFilter = f;
-  visibleCount = 9;
+  currentPage = 1;
   renderCards();
 }
 
 function filterCards() {
-  visibleCount = 9;
-  renderCards();
-}
-
-function showMore() {
-  visibleCount += 9;
+  currentPage = 1;
   renderCards();
 }
 
@@ -420,127 +416,118 @@ function renderCards() {
   });
 
   if (!filtered.length) {
-    cont.innerHTML = `<div style="grid-column:1/-1;text-align:center;padding:60px;border:1px dashed var(--border);border-radius:var(--radius);color:var(--text2);font-family:'JetBrains Mono',monospace">${t.empty}</div>`;
+    cont.innerHTML = `<div style="text-align:center;padding:60px;border:1px dashed var(--border);border-radius:14px;color:var(--text2);font-family:'JetBrains Mono',monospace">${t.empty}</div>`;
     return;
   }
 
-  const first = allData[0];
-  if (first) {
-    const fcLatest = document.getElementById('fc-latest');
-    const fcRaised = document.getElementById('fc-raised');
-    if (fcLatest) fcLatest.textContent = first.name || '—';
-    if (fcRaised) fcRaised.textContent = first.RaisedEN || first.RaisedID || 'N/A';
-  }
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  if (currentPage > totalPages) currentPage = 1;
+  const start   = (currentPage - 1) * PAGE_SIZE;
+  const pageData = filtered.slice(start, start + PAGE_SIZE);
 
-  const visible   = filtered.slice(0, visibleCount);
-  const remaining = filtered.length - visibleCount;
-
-  // Guide URL pakai lang prefix: /guide/en/3 atau /guide/id/3
-  cont.innerHTML = visible.map((item, i) => {
+  const rows = pageData.map((item, i) => {
+    const rowNum = start + i + 1;
     const raised = currentLang === 'id'
       ? (item.RaisedID || item.RaisedEN || t.unknown)
       : (item.RaisedEN || item.RaisedID || t.unknown);
 
-    const tasks = currentLang === 'id'
-      ? (item.tasksID || item.tasksEN || t.unknown)
-      : (item.tasksEN || item.tasksID || t.unknown);
-
-    const taskPreview = tasks
-      .split('\n')
-      .map(l => l.trim())
-      .filter(l => l && !/^(tip:|💡|Q:|A:)/i.test(l))
-      .slice(0, 2)
-      .map(l => l.replace(/^(\d+[\.\)]\s*)/, '').split(' | ')[0])
-      .join(' · ');
-
     const stCls   = getStatusClass(item.status);
     const stLabel = getStatusLabel(item.status);
-
-    let tagsHTML = '';
-    if (item.tags) {
-      tagsHTML = String(item.tags)
-        .split(',')
-        .map(x => `<span class="atag">${esc(x.trim())}</span>`)
-        .join('');
-    }
-
-    if (item._prog === undefined) {
-      item._prog = 20 + ((item.idx || item.id || i) * 37) % 75;
-    }
-    const prog = item._prog;
-
-    // Guide URL dengan lang prefix
     const guideUrl = `/guide/${currentLang}/${encodeURIComponent(item.id)}`;
 
     const logoHtml = item.logo_url
-      ? `<img src="${esc(item.logo_url)}" alt="${esc(item.name)}"
-              style="width:38px;height:38px;border-radius:9px;object-fit:cover;border:1px solid var(--border);background:var(--surface2)"
-              onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`
-        + `<div style="display:none;width:38px;height:38px;border-radius:9px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.18);align-items:center;justify-content:center;font-size:1.1rem">${getIcon(item.tags)}</div>`
-      : `<div style="width:38px;height:38px;border-radius:9px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.18);display:flex;align-items:center;justify-content:center;font-size:1.1rem">${getIcon(item.tags)}</div>`;
+      ? `<img src="${esc(item.logo_url)}" class="tbl-logo" alt="${esc(item.name)}" onerror="this.src='';this.style.display='none'">`
+      : `<div style="width:28px;height:28px;border-radius:7px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.18);display:flex;align-items:center;justify-content:center;font-size:14px;flex-shrink:0">${getIcon(item.tags)}</div>`;
 
-    return `
-      <div class="acard reveal"
-           data-name="${esc(item.name)}"
-           data-status="${esc(item.status)}"
-           style="animation-delay:${i * .05}s;cursor:pointer"
-           onclick="window.location.href='${guideUrl}'">
+    const firstTag = item.tags ? String(item.tags).split(',')[0].trim() : '';
 
-        <div class="acard-top">
-          <div style="flex:1;min-width:0">
-            <div class="acard-name">${esc(item.name) || 'Unknown'}</div>
-            <div class="acard-tags" style="margin-top:7px">${tagsHTML}</div>
-          </div>
-          <div style="display:flex;flex-direction:column;align-items:flex-end;gap:7px;flex-shrink:0">
-            ${logoHtml}
-            <span class="acard-status ${stCls}">${stLabel}</span>
-          </div>
-        </div>
-
-        <div class="acard-raised">
-          <div class="raised-ico">$</div>
+    return `<tr onclick="window.location.href='${guideUrl}'">
+      <td class="tbl-num">${rowNum}</td>
+      <td>
+        <div class="tbl-name-wrap">
+          ${logoHtml}
           <div>
-            <div class="raised-lbl">${t.raised}</div>
-            <div class="raised-val">${esc(raised)}</div>
+            <div class="tbl-name">${esc(item.name) || 'Unknown'}</div>
+            ${item.ticker ? `<div class="tbl-ticker">${esc(item.ticker)}</div>` : ''}
           </div>
         </div>
-
-        <div class="prog-wrap">
-          <div class="prog-meta"><span>${t.tasks}</span><span>${prog}%</span></div>
-          <div class="prog-bar"><div class="prog-fill" style="width:${prog}%"></div></div>
-        </div>
-
-        <div class="acard-tasks">
-          <div class="tasks-lbl">TASKS</div>
-          <div class="tasks-body">${esc(taskPreview || tasks.substring(0, 120))}</div>
-        </div>
-
-        <a href="${guideUrl}"
-           class="acard-btn"
-           onclick="event.stopPropagation()">⚡ ${t.cta}</a>
-      </div>`;
+      </td>
+      <td>${firstTag ? `<span class="tbl-tag">${esc(firstTag)}</span>` : '—'}</td>
+      <td class="tbl-raised">${esc(raised)}</td>
+      <td><span class="acard-status ${stCls}" style="font-size:10px;padding:3px 8px">${stLabel}</span></td>
+      <td style="text-align:right">
+        <a href="${guideUrl}" onclick="event.stopPropagation()" style="font-family:'JetBrains Mono',monospace;font-size:10px;color:#00e5a0;text-decoration:none;border:1px solid rgba(0,229,160,0.25);padding:4px 10px;border-radius:6px;white-space:nowrap">⚡ ${t.cta}</a>
+      </td>
+    </tr>`;
   }).join('');
 
-  if (remaining > 0) {
-    cont.innerHTML += `
-      <div style="grid-column:1/-1;text-align:center;margin-top:8px;padding-bottom:4px">
-        <button
-          onclick="showMore()"
-          style="background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.3);color:#00e5a0;font-family:'JetBrains Mono',monospace;font-size:12px;font-weight:600;padding:12px 32px;border-radius:10px;cursor:pointer;letter-spacing:.5px;transition:all .2s"
-          onmouseover="this.style.background='rgba(0,229,160,0.15)';this.style.borderColor='rgba(0,229,160,0.6)'"
-          onmouseout="this.style.background='rgba(0,229,160,0.08)';this.style.borderColor='rgba(0,229,160,0.3)'">
-          ⬇ ${t.showMore} (${remaining})
-        </button>
-      </div>`;
+  // Pagination buttons
+  const maxBtns = 5;
+  let pagBtns = '';
+  let startP = Math.max(1, currentPage - 2);
+  let endP   = Math.min(totalPages, startP + maxBtns - 1);
+  if (endP - startP < maxBtns - 1) startP = Math.max(1, endP - maxBtns + 1);
+  for (let p = startP; p <= endP; p++) {
+    pagBtns += `<button class="pag-btn${p===currentPage?' active':''}" onclick="goPage(${p})">${p}</button>`;
   }
 
-  document.querySelectorAll('.acard.reveal').forEach(el => observer.observe(el));
+  cont.innerHTML = `
+    <div class="airdrop-table-wrap">
+      <table class="airdrop-table">
+        <thead>
+          <tr>
+            <th class="tbl-num">#</th>
+            <th>Project</th>
+            <th>Category</th>
+            <th>${t.raised}</th>
+            <th>Status</th>
+            <th></th>
+          </tr>
+        </thead>
+        <tbody>${rows}</tbody>
+      </table>
+    </div>
+    <div class="airdrop-pagination">
+      <span class="pag-info">${start+1}–${Math.min(start+PAGE_SIZE, filtered.length)} of ${filtered.length} projects</span>
+      <div class="pag-btns">
+        <button class="pag-btn" onclick="goPage(currentPage-1)" ${currentPage===1?'disabled':''}>← Prev</button>
+        ${pagBtns}
+        <button class="pag-btn" onclick="goPage(currentPage+1)" ${currentPage===totalPages?'disabled':''}>Next →</button>
+      </div>
+    </div>`;
+
   bindHoverEffects();
 }
 
+function goPage(p) {
+  const q = (document.getElementById('search-input')?.value || '').toLowerCase().trim();
+  const filtered = allData.filter(item => {
+    if (q) {
+      const name   = (item.name   || '').toLowerCase();
+      const tags   = (item.tags   || '').toLowerCase();
+      const ticker = (item.ticker || '').toLowerCase();
+      if (!name.includes(q) && !tags.includes(q) && !ticker.includes(q)) return false;
+    }
+    if (activeFilter !== 'all') {
+      const s = (item.status || '').toLowerCase().trim();
+      if (activeFilter === 'active'   && !isActive(s))            return false;
+      if (activeFilter === 'waitlist' && !s.includes('waitlist')) return false;
+      if (activeFilter === 'listing'  && !isListed(s))            return false;
+    }
+    return true;
+  });
+  const totalPages = Math.ceil(filtered.length / PAGE_SIZE);
+  if (p < 1 || p > totalPages) return;
+  currentPage = p;
+  renderCards();
+  document.getElementById('airdrops')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
 // ==========================================
-// F. DASHBOARD STATS
+// F. DASHBOARD CHART
 // ==========================================
+let _radarChart = null;
+
 function updateDash() {
   let active = 0, listing = 0, waitlist = 0;
   allData.forEach(item => {
@@ -550,32 +537,132 @@ function updateDash() {
     else                             active++;
   });
 
-  animateNum('dash-total',    allData.length);
-  animateNum('dash-active',   active);
-  animateNum('dash-listing',  listing);
-  animateNum('dash-waitlist', waitlist);
-  animateNum('hs-total',      allData.length);
-  animateNum('hs-active',     active);
+  // update legend values
+  const elA = document.getElementById('legend-active-val');
+  const elW = document.getElementById('legend-waitlist-val');
+  const elL = document.getElementById('legend-listing-val');
+  if (elA) elA.textContent = active;
+  if (elW) elW.textContent = waitlist;
+  if (elL) elL.textContent = listing;
 
+  // hero stats
+  animateNum('hs-total',  allData.length);
+  animateNum('hs-active', active);
   setElText('fc-raised', `${allData.length} Projects`);
   if (allData[0]) setElText('fc-latest', allData[0].name || '—');
+
+  // build time-series: snapshot setiap N detik → simpan ke history
+  if (!window._chartHistory) {
+    window._chartHistory = [];
+  }
+  const now = new Date();
+  const label = now.getHours().toString().padStart(2,'0') + ':' + now.getMinutes().toString().padStart(2,'0') + ':' + now.getSeconds().toString().padStart(2,'0');
+  window._chartHistory.push({ label, active, waitlist, listing });
+  if (window._chartHistory.length > 20) window._chartHistory.shift();
+
+  const hist = window._chartHistory;
+  const labels   = hist.map(h => h.label);
+  const dActive  = hist.map(h => h.active);
+  const dWait    = hist.map(h => h.waitlist);
+  const dListing = hist.map(h => h.listing);
+
+  const canvas = document.getElementById('radar-chart');
+  if (!canvas) return;
+
+  if (!_radarChart) {
+    // load Chart.js dulu
+    if (!window.Chart) {
+      const s = document.createElement('script');
+      s.src = 'https://cdnjs.cloudflare.com/ajax/libs/Chart.js/4.4.1/chart.umd.js';
+      s.onload = () => buildChart(canvas, labels, dActive, dWait, dListing);
+      document.head.appendChild(s);
+    } else {
+      buildChart(canvas, labels, dActive, dWait, dListing);
+    }
+  } else {
+    _radarChart.data.labels = labels;
+    _radarChart.data.datasets[0].data = dActive;
+    _radarChart.data.datasets[1].data = dWait;
+    _radarChart.data.datasets[2].data = dListing;
+    _radarChart.update('none');
+    const el = document.getElementById('chart-refresh-label');
+    if (el) el.textContent = '⟳ ' + label;
+  }
 }
 
-function animateNum(id, target) {
-  const el = document.getElementById(id);
-  if (!el) return;
-  let current = 0;
-  const step = Math.max(1, Math.ceil(target / 30));
-  const timer = setInterval(() => {
-    current = Math.min(current + step, target);
-    el.textContent = current;
-    if (current >= target) clearInterval(timer);
-  }, 40);
-}
-
-function setElText(id, val) {
-  const el = document.getElementById(id);
-  if (el && val !== undefined) el.textContent = val;
+function buildChart(canvas, labels, dActive, dWait, dListing) {
+  _radarChart = new Chart(canvas, {
+    type: 'line',
+    data: {
+      labels,
+      datasets: [
+        {
+          label: 'Active',
+          data: dActive,
+          borderColor: '#00e5a0',
+          backgroundColor: 'rgba(0,229,160,0.08)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#00e5a0',
+          tension: 0.4,
+          fill: true,
+        },
+        {
+          label: 'Waitlist',
+          data: dWait,
+          borderColor: '#f0b429',
+          backgroundColor: 'rgba(240,180,41,0.06)',
+          borderWidth: 2,
+          borderDash: [5, 4],
+          pointRadius: 3,
+          pointBackgroundColor: '#f0b429',
+          tension: 0.4,
+          fill: false,
+        },
+        {
+          label: 'Listed',
+          data: dListing,
+          borderColor: '#7c6dfa',
+          backgroundColor: 'rgba(124,109,250,0.07)',
+          borderWidth: 2,
+          pointRadius: 3,
+          pointBackgroundColor: '#7c6dfa',
+          tension: 0.4,
+          fill: false,
+        },
+      ],
+    },
+    options: {
+      responsive: true,
+      maintainAspectRatio: false,
+      interaction: { mode: 'index', intersect: false },
+      plugins: {
+        legend: { display: false },
+        tooltip: {
+          backgroundColor: '#0c1822',
+          borderColor: 'rgba(0,229,160,0.3)',
+          borderWidth: 1,
+          titleColor: '#00e5a0',
+          bodyColor: '#8899aa',
+          titleFont: { family: 'JetBrains Mono', size: 11 },
+          bodyFont:  { family: 'JetBrains Mono', size: 11 },
+        },
+      },
+      scales: {
+        x: {
+          ticks: { color: '#4a6070', font: { family: 'JetBrains Mono', size: 10 }, maxRotation: 0 },
+          grid:  { color: 'rgba(255,255,255,0.04)' },
+          border: { color: 'rgba(0,229,160,0.1)' },
+        },
+        y: {
+          ticks: { color: '#4a6070', font: { family: 'JetBrains Mono', size: 10 }, stepSize: 1, precision: 0 },
+          grid:  { color: 'rgba(255,255,255,0.04)' },
+          border: { color: 'rgba(0,229,160,0.1)' },
+          beginAtZero: true,
+        },
+      },
+    },
+  });
 }
 
 // ==========================================
@@ -784,4 +871,6 @@ if (window.location.pathname.includes('unlocks.html')) {
 // ==========================================
 // INIT
 // ==========================================
+// INIT
 init();
+setInterval(() => { if (allData.length) updateDash(); }, 30000);
