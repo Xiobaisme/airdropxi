@@ -1363,75 +1363,45 @@ function buildBackersRow(p) {
   } catch(e) { backers = []; }
   if (!backers.length) return '';
 
-  const MAX_VISIBLE = 5;
-  const visible = backers.slice(0, MAX_VISIBLE);
+  const MAX_VISIBLE = 4;
+  const first = backers[0];
+  const rest  = backers.slice(1, MAX_VISIBLE);
   const extra = backers.length - MAX_VISIBLE;
 
-  const avatars = visible.map((b, i) => {
+  // Avatar helper — logo atau initials, tidak keduanya
+  function avatarHTML(b, clickable = true) {
     const initials = (b.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-    const imgTag = b.logo
-      ? `<img src="${esc(b.logo)}" alt="${esc(b.name)}" onerror="this.style.display='none'">${initials}`
-      : initials;
-    return `<div class="backer-avatar" onclick="openBackerPopup(event)" title="${esc(b.name)}">${imgTag}</div>`;
-  }).join('');
+    const inner = b.logo
+      ? `<img src="${esc(b.logo)}" alt="${esc(b.name)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'">`+
+        `<span style="display:none;width:100%;height:100%;align-items:center;justify-content:center;font-size:11px;font-weight:700">${initials}</span>`
+      : `<span style="font-size:11px;font-weight:700">${initials}</span>`;
+    const click = clickable ? `onclick="openBackerPopup(event)"` : '';
+    return `<div class="backer-avatar" ${click} title="${esc(b.name)}">${inner}</div>`;
+  }
 
+  // Backer pertama: avatar + nama
+  const firstHTML = `
+    <div style="display:flex;align-items:center;gap:7px;cursor:pointer" onclick="openBackerPopup(event)">
+      ${avatarHTML(first, false)}
+      <span style="font-family:var(--sans);font-size:12px;font-weight:700;color:var(--text2)">${esc(first.name)}</span>
+    </div>`;
+
+  // Sisa avatars (index 1-3)
+  const restHTML = rest.map(b => avatarHTML(b)).join('');
+
+  // +N button
   const moreBtn = extra > 0
     ? `<div class="backer-avatar backer-avatar-more" onclick="openBackerPopup(event)">+${extra}</div>`
     : '';
 
   return `<div class="backers-row">
     <span class="backers-label">Funds &amp; Backers:</span>
-    <div class="backers-avatars">${avatars}${moreBtn}</div>
+    <div class="backers-avatars" style="gap:4px">
+      ${firstHTML}
+      <div style="display:flex;align-items:center">${restHTML}${moreBtn}</div>
+    </div>
   </div>`;
 }
-
-function openBackerPopup(e) {
-  e.stopPropagation();
-  const p = window._projectData;
-  let backers = [];
-  try {
-    const raw = p.backers;
-    if (Array.isArray(raw)) backers = raw;
-    else if (typeof raw === 'string' && raw.trim()) backers = JSON.parse(raw);
-  } catch(e2) { backers = []; }
-  if (!backers.length) return;
-
-  const items = backers.map(b =>
-    `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--surface2);border:1px solid var(--border)">
-      <div style="width:32px;height:32px;border-radius:50%;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text2);overflow:hidden;flex-shrink:0">
-        ${b.logo ? `<img src="${esc(b.logo)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display='none'">` : ''}
-        ${(b.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
-      </div>
-      <span style="font-family:var(--sans);font-size:13px;font-weight:700;color:var(--text)">${esc(b.name)}</span>
-    </div>`
-  ).join('');
-
-  const overlay = document.createElement('div');
-  overlay.className = 'backer-popup-overlay';
-  overlay.id = 'backer-popup-overlay';
-  overlay.innerHTML = `
-    <div class="backer-popup">
-      <div class="backer-popup-header" style="justify-content:space-between">
-        <div>
-          <div class="backer-popup-name">Funds &amp; Backers</div>
-          <span class="backer-popup-type">${backers.length} investors</span>
-        </div>
-        <div class="backer-popup-close" onclick="closeBackerPopup()">✕</div>
-      </div>
-      <div class="backer-popup-body">
-        <div style="display:flex;flex-direction:column;gap:8px">${items}</div>
-      </div>
-    </div>`;
-  overlay.addEventListener('click', e2 => { if (e2.target === overlay) closeBackerPopup(); });
-  document.body.appendChild(overlay);
-  document.addEventListener('keydown', _backerKeyHandler);
-}
-
-function closeBackerPopup() {
-  document.getElementById('backer-popup-overlay')?.remove();
-  document.removeEventListener('keydown', _backerKeyHandler);
-}
-function _backerKeyHandler(e) { if (e.key === 'Escape') closeBackerPopup(); }
  
 
 loadProject();
