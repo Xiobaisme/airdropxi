@@ -108,6 +108,16 @@
 .pag-btn:hover    { background: rgba(0,229,160,0.14); }
 .pag-btn:disabled { opacity: .35; cursor: not-allowed; }
 .pag-btn.active   { background: rgba(0,229,160,0.18); border-color: rgba(0,229,160,0.5); font-weight: 700; }
+
+  @media (max-width: 600px) {
+  .airdrop-table thead th:nth-child(2),
+  .airdrop-table tbody td:nth-child(2),
+  .airdrop-table thead th:nth-child(5),
+  .airdrop-table tbody td:nth-child(5) { display: none; }
+  .airdrop-table { font-size: 11px; }
+  .airdrop-table td { padding: 10px 8px; }
+  .acard-status { white-space: nowrap; font-size: 9px !important; padding: 2px 5px !important; }
+}
   
 </style>
 </head>
