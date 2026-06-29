@@ -523,6 +523,23 @@ function goPage(p) {
   document.getElementById('airdrops')?.scrollIntoView({ behavior: 'smooth', block: 'start' });
 }
 
+function animateNum(id, target) {
+  const el = document.getElementById(id);
+  if (!el) return;
+  let current = 0;
+  const step = Math.max(1, Math.ceil(target / 30));
+  const timer = setInterval(() => {
+    current = Math.min(current + step, target);
+    el.textContent = current;
+    if (current >= target) clearInterval(timer);
+  }, 40);
+}
+
+function setElText(id, val) {
+  const el = document.getElementById(id);
+  if (el && val !== undefined) el.textContent = val;
+}
+
 // ==========================================
 // F. DASHBOARD CHART
 // ==========================================
