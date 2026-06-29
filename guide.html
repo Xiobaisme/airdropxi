@@ -1378,39 +1378,35 @@ function buildBackersRow(p) {
   }
 
   const restHTML = rest.map(b => avatarHTML(b)).join('');
-
   const moreBtn = extra > 0
     ? `<div class="backer-avatar backer-avatar-more">+${extra}</div>`
     : '';
 
-  // Tombol + kecil
-  const plusBtn = `
+  // Tombol + hanya muncul kalau backers > 1
+  const plusBtn = backers.length > 1 ? `
     <div onclick="openBackerPopup(event)"
          style="display:inline-flex;align-items:center;justify-content:center;
                 width:22px;height:22px;border-radius:50%;
                 background:var(--surface3);border:1px solid var(--border2);
-                cursor:pointer;flex-shrink:0;transition:all .18s;margin-left:6px"
+                cursor:pointer;flex-shrink:0;transition:all .18s;margin-left:4px"
          title="Lihat semua backers"
          onmouseover="this.style.borderColor='var(--g-readable)';this.style.background='rgba(0,232,122,.1)'"
          onmouseout="this.style.borderColor='var(--border2)';this.style.background='var(--surface3)'">
-      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--text3)" stroke-width="2.5">
+      <svg width="10" height="10" viewBox="0 0 24 24" fill="none" stroke="var(--text2)" stroke-width="2.5">
         <line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/>
       </svg>
-    </div>`;
+    </div>` : '';
 
   return `<div class="backers-row">
     <span class="backers-label">Funds &amp; Backers:</span>
     <div style="display:flex;align-items:center;gap:6px;flex-wrap:wrap">
-      <!-- Avatar pertama + nama -->
       <div style="display:flex;align-items:center;gap:7px">
         ${avatarHTML(first)}
         <span style="font-family:var(--sans);font-size:12px;font-weight:700;color:var(--text2)">${esc(first.name)}</span>
       </div>
-      <!-- Sisa avatars overlap -->
       <div style="display:flex;align-items:center">
         ${restHTML}${moreBtn}
       </div>
-      <!-- Tombol + -->
       ${plusBtn}
     </div>
   </div>`;
