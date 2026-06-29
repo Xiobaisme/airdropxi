@@ -1353,7 +1353,7 @@ function initLightbox() {
   });
 }
 
- /* ── BACKERS ── */
+/* ── BACKERS ── */
 function buildBackersRow(p) {
   let backers = [];
   try {
@@ -1361,7 +1361,6 @@ function buildBackersRow(p) {
     if (Array.isArray(raw)) backers = raw;
     else if (typeof raw === 'string' && raw.trim()) backers = JSON.parse(raw);
   } catch(e) { backers = []; }
-
   if (!backers.length) return '';
 
   const MAX_VISIBLE = 5;
@@ -1371,13 +1370,13 @@ function buildBackersRow(p) {
   const avatars = visible.map((b, i) => {
     const initials = (b.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
     const imgTag = b.logo
-      ? `<img src="${esc(b.logo)}" alt="${esc(b.name)}" onerror="this.style.display='none';this.nextElementSibling.style.display='block'">${initials}`
+      ? `<img src="${esc(b.logo)}" alt="${esc(b.name)}" onerror="this.style.display='none'">${initials}`
       : initials;
-    return `<div class="backer-avatar" onclick="openBackerPopup(${i}, event)" title="${esc(b.name)}">${imgTag}</div>`;
+    return `<div class="backer-avatar" onclick="openBackerPopup(event)" title="${esc(b.name)}">${imgTag}</div>`;
   }).join('');
 
   const moreBtn = extra > 0
-    ? `<div class="backer-avatar backer-avatar-more" onclick="openBackerPopup(${MAX_VISIBLE}, event)">+${extra}</div>`
+    ? `<div class="backer-avatar backer-avatar-more" onclick="openBackerPopup(event)">+${extra}</div>`
     : '';
 
   return `<div class="backers-row">
@@ -1386,7 +1385,7 @@ function buildBackersRow(p) {
   </div>`;
 }
 
-function openBackerPopup(startIdx, e) {
+function openBackerPopup(e) {
   e.stopPropagation();
   const p = window._projectData;
   let backers = [];
@@ -1395,82 +1394,34 @@ function openBackerPopup(startIdx, e) {
     if (Array.isArray(raw)) backers = raw;
     else if (typeof raw === 'string' && raw.trim()) backers = JSON.parse(raw);
   } catch(e2) { backers = []; }
-
   if (!backers.length) return;
 
-  // Kalau klik "+N", tampilkan semua; otherwise tampilkan yg diklik
-  const isMore = startIdx >= 5;
-  const listToShow = isMore ? backers : [backers[startIdx]];
-  const isSingle = listToShow.length === 1;
-
-  function buildCard(b) {
-    const initials = (b.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-    const imgHtml = b.logo
-      ? `<img src="${esc(b.logo)}" alt="${esc(b.name)}" onerror="this.style.display='none'">`
-      : initials;
-    const typeLabel = b.type || 'Investor';
-    const meta = [];
-    if (b.portfolio) meta.push(`<div class="backer-meta-row"><div class="backer-meta-icon">💼</div><span class="backer-meta-label">Portfolio:</span><span class="backer-meta-val">${esc(b.portfolio)}</span></div>`);
-    if (b.stage)     meta.push(`<div class="backer-meta-row"><div class="backer-meta-icon">📊</div><span class="backer-meta-label">Stage:</span><span class="backer-meta-val">${esc(b.stage)}</span></div>`);
-    if (b.amount)    meta.push(`<div class="backer-meta-row"><div class="backer-meta-icon">💰</div><span class="backer-meta-label">Amount:</span><span class="backer-meta-val">${esc(b.amount)}</span></div>`);
-    const linkBtn = b.website
-      ? `<a href="${esc(b.website)}" target="_blank" rel="noopener" class="backer-popup-link">
-          <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><circle cx="12" cy="12" r="10"/><path d="M2 12h20M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
-          Visit Website
-        </a>`
-      : '';
-    return `
-      <div class="backer-popup-header">
-        <div class="backer-popup-avatar">${imgHtml}</div>
-        <div>
-          <div class="backer-popup-name">${esc(b.name)}</div>
-          <span class="backer-popup-type">${esc(typeLabel)}</span>
-        </div>
-        <div class="backer-popup-close" onclick="closeBackerPopup()">✕</div>
+  const items = backers.map(b =>
+    `<div style="display:flex;align-items:center;gap:10px;padding:10px 14px;border-radius:10px;background:var(--surface2);border:1px solid var(--border)">
+      <div style="width:32px;height:32px;border-radius:50%;background:var(--surface3);border:1px solid var(--border2);display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700;color:var(--text2);overflow:hidden;flex-shrink:0">
+        ${b.logo ? `<img src="${esc(b.logo)}" style="width:100%;height:100%;object-fit:cover;border-radius:50%" onerror="this.style.display='none'">` : ''}
+        ${(b.name||'?').split(' ').map(w=>w[0]).join('').slice(0,2).toUpperCase()}
       </div>
-      <div class="backer-popup-body">
-        ${b.description ? `<div class="backer-popup-desc">${esc(b.description)}</div>` : ''}
-        ${meta.length ? `<div class="backer-popup-meta">${meta.join('')}</div>` : ''}
-        ${linkBtn}
-      </div>`;
-  }
+      <span style="font-family:var(--sans);font-size:13px;font-weight:700;color:var(--text)">${esc(b.name)}</span>
+    </div>`
+  ).join('');
 
-  // Kalau show all (isMore), tampilin list grid
-  let innerHtml;
-  if (!isSingle) {
-    const cards = listToShow.map((b, i) => {
-      const initials = (b.name || '?').split(' ').map(w => w[0]).join('').slice(0,2).toUpperCase();
-      const imgHtml = b.logo
-        ? `<img src="${esc(b.logo)}" alt="${esc(b.name)}" onerror="this.style.display='none'">`
-        : initials;
-      return `<div class="backer-list-item" onclick="closeBackerPopup();openBackerPopup(${i},event)" style="display:flex;align-items:center;gap:12px;padding:12px 14px;border-radius:12px;cursor:pointer;border:1px solid var(--border);background:var(--surface2);transition:border-color .18s" onmouseover="this.style.borderColor='var(--g-readable)'" onmouseout="this.style.borderColor='var(--border)'">
-        <div class="backer-popup-avatar" style="width:38px;height:38px;border-radius:10px;font-size:14px">${imgHtml}</div>
+  const overlay = document.createElement('div');
+  overlay.className = 'backer-popup-overlay';
+  overlay.id = 'backer-popup-overlay';
+  overlay.innerHTML = `
+    <div class="backer-popup">
+      <div class="backer-popup-header" style="justify-content:space-between">
         <div>
-          <div style="font-weight:700;font-size:13px;color:var(--text);font-family:var(--sans)">${esc(b.name)}</div>
-          <div style="font-family:var(--mono);font-size:9px;color:var(--text3);text-transform:uppercase;letter-spacing:.08em;margin-top:2px">${esc(b.type || 'Investor')}</div>
-        </div>
-      </div>`;
-    }).join('');
-
-    innerHtml = `
-      <div class="backer-popup-header" style="align-items:center;justify-content:space-between">
-        <div>
-          <div class="backer-popup-name">All Backers</div>
+          <div class="backer-popup-name">Funds &amp; Backers</div>
           <span class="backer-popup-type">${backers.length} investors</span>
         </div>
         <div class="backer-popup-close" onclick="closeBackerPopup()">✕</div>
       </div>
       <div class="backer-popup-body">
-        <div style="display:flex;flex-direction:column;gap:8px">${cards}</div>
-      </div>`;
-  } else {
-    innerHtml = buildCard(listToShow[0]);
-  }
-
-  const overlay = document.createElement('div');
-  overlay.className = 'backer-popup-overlay';
-  overlay.id = 'backer-popup-overlay';
-  overlay.innerHTML = `<div class="backer-popup">${innerHtml}</div>`;
+        <div style="display:flex;flex-direction:column;gap:8px">${items}</div>
+      </div>
+    </div>`;
   overlay.addEventListener('click', e2 => { if (e2.target === overlay) closeBackerPopup(); });
   document.body.appendChild(overlay);
   document.addEventListener('keydown', _backerKeyHandler);
