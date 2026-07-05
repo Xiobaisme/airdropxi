@@ -375,10 +375,27 @@ module.exports = async function handler(req, res) {
         return res.status(200).json({ success: true });
       } catch(e) { return res.status(500).json({ error: e.message }); }
     }
+    
+     if (req.method === 'PATCH') {
+      if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
+      const { title, content } = req.body || {};
+      if (!content) return res.status(400).json({ error: 'Field "content" wajib diisi' });
+      try {
+        const r = await fetch(`${BASE}/admin_notes?id=eq.${encodeURIComponent(id)}`, {
+          method: 'PATCH', headers: H,
+          body: JSON.stringify({ title: title || null, content }),
+        });
+        const data = await r.json();
+        if (!r.ok) return res.status(r.status).json({ error: serializeError(data) });
+        return res.status(200).json(data);
+      } catch(e) { return res.status(500).json({ error: e.message }); }
+    }
 
-    res.setHeader('Allow', ['GET','POST','DELETE']);
+    res.setHeader('Allow', ['GET','POST','PATCH','DELETE']);
     return res.status(405).json({ error: `Method ${req.method} tidak diizinkan untuk notes` });
   }
+  
+
 
   // ─────────────────────────────────────────────
   // REORDER HANDLER — update sort_order tanpa overwrite field lain
