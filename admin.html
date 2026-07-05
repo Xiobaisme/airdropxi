@@ -592,8 +592,13 @@
     style="border-color:rgba(124,109,250,0.3);color:var(--purple);background:rgba(124,109,250,0.06)">
     💬 Chat Admin
   </button>
+
+  <button class="btn-new" onclick="showNotesPanel()"
+    style="border-color:rgba(245,158,11,0.3);color:var(--warn);background:rgba(245,158,11,0.06)">
+    📝 Catatan Admin
+  </button>
 </div>
-    
+
     <div class="form-area" id="form-area">
       <div class="panel">
         <div class="empty-form">
@@ -3775,7 +3780,171 @@ function getBackers() {
   });
   return items.length ? JSON.stringify(items) : null;
 }
+const NOTES_API = '/api/admin-airdrop?type=notes';
+let _calcOpen = false;
 
+function showNotesPanel() {
+  editingId = null; renderList();
+  if (_chatPollInterval) { clearInterval(_chatPollInterval); _chatPollInterval = null; }
+
+  document.getElementById('form-area').innerHTML = `
+    <div style="display:grid;grid-template-columns:1fr ${_calcOpen ? '220px' : '0px'};gap:${_calcOpen ? '1rem' : '0'};align-items:start;transition:all 0.2s;">
+      
+      <!-- CATATAN PANEL -->
+      <div class="panel" style="display:flex;flex-direction:column;height:620px;overflow:hidden;">
+        <div style="display:flex;align-items:center;gap:10px;padding:0.85rem 1.1rem;
+                    border-bottom:1px solid var(--border);flex-shrink:0;
+                    background:linear-gradient(90deg,rgba(245,158,11,0.06),transparent);">
+          <span style="width:8px;height:8px;border-radius:50%;background:var(--warn);
+                       box-shadow:0 0 8px var(--warn);flex-shrink:0"></span>
+          <span style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);
+                       letter-spacing:0.1em;text-transform:uppercase;flex:1">📝 Catatan Admin</span>
+          <span id="notes-count" style="font-family:var(--mono);font-size:0.6rem;color:var(--warn)">0</span>
+          <button onclick="toggleCalc()"
+            style="padding:3px 9px;border-radius:5px;border:1px solid rgba(0,200,240,0.3);
+                   background:${_calcOpen ? 'rgba(0,200,240,0.18)' : 'rgba(0,200,240,0.06)'};
+                   color:var(--cyan);font-family:var(--mono);font-size:0.55rem;font-weight:700;cursor:pointer;">
+            🧮 ${_calcOpen ? 'Tutup' : 'Kalkulator'}
+          </button>
+        </div>
+
+        <div style="padding:10px 12px;border-bottom:1px solid var(--border);
+                    display:flex;gap:8px;background:var(--s2);flex-shrink:0;">
+          <input id="note-title" type="text" placeholder="Judul catatan..."
+            style="width:180px;background:var(--s3);border:1px solid var(--border2);border-radius:6px;
+                   color:var(--text);font-family:var(--mono);font-size:0.7rem;
+                   padding:0.5rem 0.7rem;outline:none;">
+          <textarea id="note-content" placeholder="Isi catatan..." rows="1"
+            style="flex:1;background:var(--s3);border:1px solid var(--border2);border-radius:6px;
+                   color:var(--text);font-family:var(--mono);font-size:0.7rem;
+                   padding:0.5rem 0.7rem;outline:none;resize:none;min-height:38px;"></textarea>
+          <button onclick="addNote()"
+            style="padding:0.5rem 1rem;background:rgba(245,158,11,0.12);border:1px solid rgba(245,158,11,0.35);
+                   border-radius:6px;color:var(--warn);font-family:var(--mono);font-size:0.65rem;
+                   font-weight:700;cursor:pointer;white-space:nowrap;">＋ Tambah</button>
+        </div>
+
+        <div id="notes-list" style="flex:1;overflow-y:auto;padding:1rem 1.1rem;
+                    display:flex;flex-direction:column;gap:10px;background:var(--bg);">
+          <div style="font-family:var(--mono);font-size:0.6rem;color:var(--text3);text-align:center;padding:2rem">⏳ Loading...</div>
+        </div>
+      </div>
+
+      <!-- KALKULATOR (collapsible) -->
+      ${_calcOpen ? `
+      <div class="panel" style="overflow:hidden;">
+        <div class="panel-head">
+          <span class="ph-dot" style="background:var(--cyan);box-shadow:0 0 6px var(--cyan)"></span>
+          <span class="ph-title">Kalkulator</span>
+        </div>
+        <div style="padding:0.9rem;">
+          <input id="calc-display" type="text" readonly value="0"
+            style="width:100%;background:var(--s2);border:1px solid var(--border2);border-radius:8px;
+                   color:var(--accent);font-family:var(--mono);font-size:1.15rem;font-weight:700;
+                   text-align:right;padding:0.65rem 0.7rem;outline:none;margin-bottom:8px;">
+          <div style="display:grid;grid-template-columns:repeat(4,1fr);gap:5px;">
+            ${['C','←','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','='].map(k => `
+              <button onclick="calcPress('${k==='←'?'back':k}')"
+                style="padding:0.65rem 0;border-radius:6px;border:1px solid var(--border2);
+                       background:${'/*-+='.includes(k)?'rgba(0,229,160,0.1)':'var(--s2)'};
+                       color:${'/*-+='.includes(k)?'var(--accent)':'var(--text)'};
+                       font-family:var(--mono);font-size:0.75rem;font-weight:700;cursor:pointer;
+                       ${k==='0'?'grid-column:span 2':''}">${k}</button>`).join('')}
+          </div>
+        </div>
+      </div>` : ''}
+    </div>`;
+
+  fetchNotes();
+}
+
+function toggleCalc() {
+  _calcOpen = !_calcOpen;
+  showNotesPanel();
+}
+
+async function fetchNotes() {
+  try {
+    const res = await fetch(NOTES_API);
+    if (!res.ok) throw new Error('Fetch failed');
+    const notes = await res.json();
+    renderNotes(notes);
+  } catch(e) {
+    const list = document.getElementById('notes-list');
+    if (list) list.innerHTML = `<div style="font-family:var(--mono);font-size:0.65rem;color:var(--red);text-align:center;padding:2rem">${e.message}</div>`;
+  }
+}
+
+function renderNotes(notes) {
+  const list = document.getElementById('notes-list');
+  const count = document.getElementById('notes-count');
+  if (!list) return;
+  if (count) count.textContent = notes.length;
+  if (!notes.length) {
+    list.innerHTML = `<div style="text-align:center;color:var(--text3);padding:3rem 1rem;font-family:var(--mono);font-size:0.6rem">Belum ada catatan.</div>`;
+    return;
+  }
+  list.innerHTML = notes.slice().reverse().map(n => `
+    <div style="background:var(--s2);border:1px solid var(--border2);border-radius:8px;padding:12px;position:relative;">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px;">
+        <div style="font-size:0.8rem;font-weight:700;color:var(--warn)">${esc(n.title||'Tanpa Judul')}</div>
+        <button onclick="deleteNote(${n.id})"
+          style="flex-shrink:0;padding:2px 8px;border-radius:4px;border:1px solid rgba(239,68,68,0.25);
+                 background:rgba(239,68,68,0.08);color:var(--red);font-family:var(--mono);font-size:0.5rem;cursor:pointer;">✕</button>
+      </div>
+      <div style="font-size:0.75rem;color:var(--text2);line-height:1.6;white-space:pre-wrap;margin-top:4px;">${esc(n.content||'')}</div>
+      <div style="font-family:var(--mono);font-size:0.48rem;color:var(--text3);margin-top:8px;">
+        ${new Date(n.created_at).toLocaleString('id-ID')}
+      </div>
+    </div>`).join('');
+}
+
+async function addNote() {
+  const title   = document.getElementById('note-title')?.value?.trim() || '';
+  const content = document.getElementById('note-content')?.value?.trim() || '';
+  if (!content) { showToast('Isi catatan kosong!', 'error'); return; }
+  try {
+    const res = await fetch(NOTES_API, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ title, content }),
+    });
+    if (!res.ok) throw new Error('Gagal simpan');
+    document.getElementById('note-title').value = '';
+    document.getElementById('note-content').value = '';
+    fetchNotes();
+    showToast('✓ Catatan ditambahkan', 'success');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+async function deleteNote(id) {
+  if (!confirm('Hapus catatan ini?')) return;
+  try {
+    const res = await fetch(`${NOTES_API}&id=${id}`, { method: 'DELETE' });
+    if (!res.ok) throw new Error('Gagal hapus');
+    fetchNotes();
+    showToast('✓ Catatan dihapus', 'success');
+  } catch(e) { showToast('Error: ' + e.message, 'error'); }
+}
+
+let _calcExpr = '';
+function calcPress(key) {
+  const disp = document.getElementById('calc-display');
+  if (!disp) return;
+  if (key === 'C') { _calcExpr = ''; disp.value = '0'; return; }
+  if (key === 'back') { _calcExpr = _calcExpr.slice(0, -1); disp.value = _calcExpr || '0'; return; }
+  if (key === '=') {
+    try {
+      if (!/^[0-9+\-*/.%\s]+$/.test(_calcExpr)) throw new Error();
+      const result = Function(`"use strict"; return (${_calcExpr})`)();
+      disp.value = String(result);
+      _calcExpr = String(result);
+    } catch(e) { disp.value = 'Error'; _calcExpr = ''; }
+    return;
+  }
+  _calcExpr += key;
+  disp.value = _calcExpr;
+}
   
 </script>
 
