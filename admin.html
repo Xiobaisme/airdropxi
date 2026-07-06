@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>🪂 AirdropXI — Admin NFT Vibe</title>
+    <title>🪂 AIRDROP-</title>
     <link rel="icon" type="image/png" href="logo.png" />
     <link rel="preconnect" href="https://fonts.googleapis.com" />
     <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
@@ -666,6 +666,7 @@
             display: flex;
             gap: 8px;
             margin-top: 2px;
+            flex-wrap: wrap;
         }
         .proj-card .actions .link-btn {
             flex: 1;
@@ -720,6 +721,16 @@
             border-color: rgba(0, 240, 255, 0.35);
             transform: translateY(-1px);
             box-shadow: 0 0 30px rgba(0, 240, 255, 0.05);
+        }
+        .proj-card .actions .delete-btn {
+            border-color: rgba(255, 45, 138, 0.2);
+            background: rgba(255, 45, 138, 0.06);
+            color: var(--glow-pink);
+        }
+        .proj-card .actions .delete-btn:hover {
+            background: rgba(255, 45, 138, 0.16);
+            border-color: rgba(255, 45, 138, 0.35);
+            box-shadow: 0 0 30px rgba(255, 45, 138, 0.05);
         }
 
         /* ─── MODAL ─── */
@@ -1225,6 +1236,11 @@
                     <button class="modal-close" onclick="closeEditModal()">✕</button>
                 </div>
                 <div class="modal-body">
+                    <!-- FIELD NAMA (baru) -->
+                    <div class="field">
+                        <label>Nama Proyek <span style="color:var(--glow-pink)">*</span></label>
+                        <input id="e-name" type="text" placeholder="Nama proyek" />
+                    </div>
                     <div class="field">
                         <label>Status Airdrop</label>
                         <select id="e-status"></select>
@@ -1486,6 +1502,7 @@
                             : `<span class="link-btn nolink">✕ Belum ada link</span>`
                         }
                         <button class="edit-btn" onclick="openEditModal(${p.id})">✏️ Edit</button>
+                        <button class="edit-btn delete-btn" onclick="deleteProject(${p.id})">🗑️ Hapus</button>
                     </div>
                 </div>
             `;
@@ -1504,6 +1521,8 @@
             ).join('');
 
             document.getElementById('edit-modal-title').textContent = `✏️ Edit: ${p.name || '—'}`;
+            // Isi field nama
+            document.getElementById('e-name').value = p.name || '';
             document.getElementById('e-tags').value = p.tags || '';
             document.getElementById('e-raisedid').value = p.RaisedID || '';
             document.getElementById('e-raisedn').value = p.RaisedEN || '';
@@ -1521,10 +1540,15 @@
 
         async function saveEdit() {
             if (!_editingId) return;
-            const p = projects.find(x => x.id === _editingId);
+
+            const name = document.getElementById('e-name')?.value?.trim() || null;
+            if (!name) {
+                showToast('Nama proyek wajib diisi!', 'error');
+                return;
+            }
 
             const payload = {
-                name: p ? p.name : undefined,
+                name,
                 status: document.getElementById('e-status')?.value || null,
                 tags: document.getElementById('e-tags')?.value?.trim() || null,
                 RaisedID: document.getElementById('e-raisedid')?.value?.trim() || null,
@@ -1565,7 +1589,6 @@
 
         // ─── TAMBAH PROYEK ─────────────────────────────────────
         function openAddModal() {
-            // Reset form
             document.getElementById('a-name').value = '';
             document.getElementById('a-status').value = 'Active';
             document.getElementById('a-tags').value = '';
@@ -1625,6 +1648,22 @@
                     btn.disabled = false;
                     btn.innerHTML = '🚀 Tambah';
                 }
+            }
+        }
+
+        // ─── HAPUS PROYEK ─────────────────────────────────────
+        async function deleteProject(id) {
+            if (!confirm('Yakin ingin menghapus proyek ini? Tindakan ini tidak dapat dibatalkan.')) return;
+            try {
+                const res = await fetch(`/api/admin-airdrop?id=${id}`, { method: 'DELETE' });
+                if (!res.ok) {
+                    const err = await res.json().catch(() => ({}));
+                    throw new Error(err.error || `HTTP ${res.status}`);
+                }
+                showToast('✅ Proyek berhasil dihapus', 'success');
+                loadProjects();
+            } catch (e) {
+                showToast('Error: ' + e.message, 'error');
             }
         }
 
