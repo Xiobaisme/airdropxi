@@ -1,712 +1,1590 @@
 <!DOCTYPE html>
 <html lang="id">
 <head>
-  <meta charset="UTF-8"/>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Admin Panel — AirdropXI</title>
-  <link rel="icon" type="image/png" href="logo.png">
-  <link rel="preconnect" href="https://fonts.googleapis.com">
-  <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap" rel="stylesheet">
-  <script src="https://accounts.google.com/gsi/client" async defer></script>
-  <style>
-    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-    .hidden { display: none !important; }
-    :root {
-      --bg:      #07090b;
-      --s1:      #0d1117;
-      --s2:      #111820;
-      --s3:      #161e28;
-      --border:  #1c2733;
-      --border2: #243040;
-      --accent:  #00e5a0;
-      --adim:    rgba(0,229,160,0.08);
-      --aborder: rgba(0,229,160,0.2);
-      --blue:    #3b82f6;
-      --cyan:    #00c8f0;
-      --purple:  #7c6dfa;
-      --warn:    #f59e0b;
-      --red:     #ef4444;
-      --text:    #dce8f0;
-      --text2:   #8aa0b4;
-      --text3:   #4a6070;
-      --mono:    'JetBrains Mono', monospace;
-      --sans:    'Plus Jakarta Sans', sans-serif;
-      --r:       14px;
-    }
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>🪂 AirdropXI — Admin NFT Vibe</title>
+    <link rel="icon" type="image/png" href="logo.png" />
+    <link rel="preconnect" href="https://fonts.googleapis.com" />
+    <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;600;700;800;900&family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+    <script src="https://accounts.google.com/gsi/client" async defer></script>
+    <style>
+        /* ─── RESET & ROOT ─── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+        .hidden {
+            display: none !important;
+        }
 
-    body { background: var(--bg); color: var(--text); font-family: var(--sans); min-height: 100vh; font-size: 16px; }
-    body::before {
-      content: ''; position: fixed; inset: 0; z-index: 0;
-      background-image:
-        linear-gradient(rgba(0,229,160,0.02) 1px, transparent 1px),
-        linear-gradient(90deg, rgba(0,229,160,0.02) 1px, transparent 1px);
-      background-size: 52px 52px; pointer-events: none;
-    }
+        :root {
+            --bg: #05080c;
+            --s1: rgba(13, 18, 28, 0.85);
+            --s2: rgba(20, 28, 42, 0.75);
+            --s3: rgba(30, 42, 60, 0.6);
+            --border: rgba(255, 255, 255, 0.08);
+            --border2: rgba(255, 255, 255, 0.12);
+            --glow-cyan: #00f0ff;
+            --glow-pink: #ff2d8a;
+            --glow-purple: #a855f7;
+            --glow-orange: #f97316;
+            --glow-green: #22d3a7;
+            --text: #eef2f8;
+            --text2: #94a3b8;
+            --text3: #475569;
+            --mono: 'Orbitron', monospace;
+            --sans: 'Inter', sans-serif;
+            --r: 16px;
+            --shadow: 0 8px 32px rgba(0, 0, 0, 0.6);
+        }
 
-    #login-section {
-      position: fixed; inset: 0; z-index: 999;
-      display: flex; align-items: center; justify-content: center; background: var(--bg);
-      overflow: hidden;
-    }
-    .login-card {
-      background: var(--s1); border: 1px solid var(--border);
-      border-radius: 20px; padding: 3rem 2.4rem; text-align: center; max-width: 420px; width: 90%;
-      animation: loginFadeIn 0.8s ease forwards; position: relative; z-index: 1;
-    }
-    @keyframes loginFadeIn {
-      from { opacity: 0; transform: translateY(20px) scale(0.97); }
-      to   { opacity: 1; transform: translateY(0)    scale(1); }
-    }
-    .login-logo { font-family: var(--mono); font-size: 1.7rem; color: var(--accent); font-weight: 800; margin-bottom: 0.6rem; }
-    .login-title { font-size: 1.3rem; font-weight: 800; margin-bottom: 0.5rem; }
-    .login-sub { font-size: 0.9rem; color: var(--text2); margin-bottom: 1.8rem; }
+        body {
+            background: var(--bg);
+            color: var(--text);
+            font-family: var(--sans);
+            min-height: 100vh;
+            font-size: 15px;
+            overflow-x: hidden;
+        }
 
-    nav {
-      position: sticky; top: 0; z-index: 100;
-      background: rgba(7,9,11,0.92); backdrop-filter: blur(20px);
-      border-bottom: 1px solid var(--border);
-      height: 62px; padding: 0 1.75rem;
-      display: flex; align-items: center; justify-content: space-between;
-    }
-    .nav-left { display: flex; align-items: center; gap: 12px; }
-    .nav-logo { font-family: var(--mono); font-size: 1.05rem; font-weight: 800; color: var(--accent); text-decoration: none; }
-    .nav-badge {
-      font-family: var(--mono); font-size: 0.68rem; font-weight: 800; padding: 0.28rem 0.7rem;
-      background: rgba(239,68,68,0.12); border: 1px solid rgba(239,68,68,0.3);
-      border-radius: 6px; color: var(--red); letter-spacing: 0.08em;
-    }
-    .nav-btn {
-      font-family: var(--mono); font-size: 0.75rem; font-weight: 800; padding: 0.5rem 1rem;
-      border-radius: 8px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
-      border: 1px solid rgba(0,200,240,0.35); background: rgba(0,200,240,0.08); color: var(--cyan);
-    }
-    .nav-btn:hover { background: rgba(0,200,240,0.18); transform: translateY(-1px); }
+        /* ─── ANIMATED BG ORBS ─── */
+        .bg-orbs {
+            position: fixed;
+            inset: 0;
+            z-index: 0;
+            pointer-events: none;
+            overflow: hidden;
+        }
+        .bg-orbs span {
+            position: absolute;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.25;
+            animation: orbFloat 18s ease-in-out infinite alternate;
+        }
+        .bg-orbs span:nth-child(1) {
+            width: 500px;
+            height: 500px;
+            background: var(--glow-cyan);
+            top: -10%;
+            left: -10%;
+            animation-duration: 22s;
+        }
+        .bg-orbs span:nth-child(2) {
+            width: 400px;
+            height: 400px;
+            background: var(--glow-pink);
+            bottom: -10%;
+            right: -10%;
+            animation-duration: 26s;
+            animation-delay: -4s;
+        }
+        .bg-orbs span:nth-child(3) {
+            width: 350px;
+            height: 350px;
+            background: var(--glow-purple);
+            top: 40%;
+            left: 60%;
+            animation-duration: 20s;
+            animation-delay: -8s;
+        }
+        .bg-orbs span:nth-child(4) {
+            width: 300px;
+            height: 300px;
+            background: var(--glow-orange);
+            top: 70%;
+            left: 10%;
+            animation-duration: 24s;
+            animation-delay: -12s;
+        }
+        @keyframes orbFloat {
+            0% {
+                transform: translate(0, 0) scale(1);
+            }
+            33% {
+                transform: translate(80px, -60px) scale(1.1);
+            }
+            66% {
+                transform: translate(-40px, 80px) scale(0.9);
+            }
+            100% {
+                transform: translate(60px, 40px) scale(1.05);
+            }
+        }
 
-    /* filter tabs (reused inside Project Links section) */
-    .ftab {
-      font-family: var(--mono); font-size: 0.68rem; font-weight: 700; padding: 0.4rem 0.9rem; border-radius: 8px;
-      cursor: pointer; border: 1.5px solid var(--border); background: transparent; color: var(--text3);
-      transition: all 0.15s; letter-spacing: 0.04em; text-transform: uppercase;
-    }
-    .ftab:hover { border-color: var(--border2); color: var(--text2); transform: translateY(-1px); }
-    .ftab.active { background: var(--adim); border-color: var(--aborder); color: var(--accent); box-shadow: 0 0 0 1px var(--aborder) inset; }
+        /* ─── SCROLLBAR ─── */
+        ::-webkit-scrollbar {
+            width: 6px;
+            height: 6px;
+        }
+        ::-webkit-scrollbar-track {
+            background: var(--bg);
+        }
+        ::-webkit-scrollbar-thumb {
+            background: var(--glow-cyan);
+            border-radius: 999px;
+            box-shadow: 0 0 20px var(--glow-cyan);
+        }
 
-    /* status / live / confirm badges (used inside project link cards) — bold "doge" pill style */
-    .proj-item-status {
-      font-family: var(--mono); font-size: 0.68rem; font-weight: 800; padding: 0.3rem 0.7rem; border-radius: 999px;
-      white-space: nowrap; flex-shrink: 0; text-transform: uppercase; letter-spacing: 0.05em; border-width: 1.5px;
-    }
-    .st-a { background: rgba(0,229,160,0.14);  color: var(--accent); border: 1.5px solid rgba(0,229,160,0.35); }
-    .st-w { background: rgba(245,158,11,0.14); color: var(--warn);   border: 1.5px solid rgba(245,158,11,0.35); }
-    .st-s { background: rgba(59,130,246,0.14); color: var(--blue);   border: 1.5px solid rgba(59,130,246,0.35); }
-    .st-c { background: rgba(0,200,240,0.14);  color: var(--cyan);   border: 1.5px solid rgba(0,200,240,0.35); }
-    .st-p { background: rgba(124,109,250,0.14);color: var(--purple); border: 1.5px solid rgba(124,109,250,0.35); }
-    .st-d { background: var(--s3); color: var(--text3); border: 1.5px solid var(--border2); }
-    .live-dot {
-      font-family: var(--mono); font-size: 0.64rem; font-weight: 800; padding: 0.28rem 0.65rem; border-radius: 999px;
-      letter-spacing: 0.04em;
-    }
-    .live-dot.on  { background: rgba(0,229,160,0.16); color: var(--accent); border: 1.5px solid rgba(0,229,160,0.35); }
-    .live-dot.off { background: var(--s3); color: var(--text3); border: 1.5px solid var(--border2); }
-    .conf-badge {
-      font-family: var(--mono); font-size: 0.62rem; font-weight: 800; padding: 0.26rem 0.6rem; border-radius: 999px;
-      text-transform: uppercase; letter-spacing: 0.04em;
-    }
-    .conf-badge.confirmed { background: rgba(0,200,240,0.14);   color: var(--cyan);   border: 1.5px solid rgba(0,200,240,0.35); }
-    .conf-badge.potential { background: rgba(124,109,250,0.14); color: var(--purple); border: 1.5px solid rgba(124,109,250,0.35); }
-    .conf-badge.ended     { background: rgba(100,100,100,0.14); color: var(--text3);  border: 1.5px solid rgba(100,100,100,0.35); }
+        /* ─── LOGIN SECTION ─── */
+        #login-section {
+            position: fixed;
+            inset: 0;
+            z-index: 999;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: var(--bg);
+            overflow: hidden;
+        }
+        .login-card {
+            position: relative;
+            z-index: 2;
+            background: var(--s1);
+            backdrop-filter: blur(24px);
+            border: 1.5px solid rgba(0, 240, 255, 0.2);
+            border-radius: 28px;
+            padding: 3.2rem 2.8rem;
+            text-align: center;
+            max-width: 420px;
+            width: 90%;
+            box-shadow: 0 0 60px rgba(0, 240, 255, 0.08), var(--shadow);
+            animation: loginFade 0.9s ease forwards;
+        }
+        @keyframes loginFade {
+            from {
+                opacity: 0;
+                transform: translateY(30px) scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: translateY(0) scale(1);
+            }
+        }
+        .login-card::before {
+            content: '';
+            position: absolute;
+            inset: -2px;
+            border-radius: 30px;
+            padding: 2px;
+            background: linear-gradient(135deg, var(--glow-cyan), var(--glow-pink), var(--glow-purple));
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+        }
+        .login-logo {
+            font-family: var(--mono);
+            font-size: 2.2rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--glow-cyan), var(--glow-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            margin-bottom: 0.4rem;
+            letter-spacing: -0.02em;
+        }
+        .login-title {
+            font-size: 1.4rem;
+            font-weight: 800;
+            color: var(--text);
+            margin-bottom: 0.3rem;
+        }
+        .login-sub {
+            font-size: 0.9rem;
+            color: var(--text2);
+            margin-bottom: 2rem;
+        }
+        .login-divider {
+            width: 60px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--glow-cyan), var(--glow-pink));
+            border-radius: 999px;
+            margin: 0 auto 2rem;
+        }
 
-    .edit-btn {
-      display: inline-flex; align-items: center; justify-content: center; gap: 5px;
-      padding: 0.6rem; border-radius: 9px; border: 1.5px solid rgba(59,130,246,0.35);
-      background: rgba(59,130,246,0.1); color: var(--blue); font-family: var(--mono);
-      font-size: 0.72rem; font-weight: 800; cursor: pointer; transition: all 0.15s;
-    }
-    .edit-btn:hover { background: rgba(59,130,246,0.2); transform: translateY(-1px); }
+        /* ─── NAV ─── */
+        nav {
+            position: sticky;
+            top: 0;
+            z-index: 100;
+            background: rgba(5, 8, 12, 0.88);
+            backdrop-filter: blur(28px);
+            border-bottom: 1px solid var(--border);
+            height: 68px;
+            padding: 0 1.75rem;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+        .nav-left {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .nav-logo {
+            font-family: var(--mono);
+            font-size: 1.15rem;
+            font-weight: 900;
+            background: linear-gradient(135deg, var(--glow-cyan), var(--glow-pink));
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            text-decoration: none;
+            letter-spacing: -0.02em;
+        }
+        .nav-badge {
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 0.25rem 0.7rem;
+            background: rgba(255, 45, 138, 0.15);
+            border: 1.5px solid rgba(255, 45, 138, 0.3);
+            border-radius: 999px;
+            color: var(--glow-pink);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+        }
+        .nav-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+        .nav-btn {
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            font-weight: 700;
+            padding: 0.5rem 1.1rem;
+            border-radius: 999px;
+            cursor: pointer;
+            transition: all 0.2s;
+            border: 1.5px solid rgba(0, 240, 255, 0.3);
+            background: rgba(0, 240, 255, 0.06);
+            color: var(--glow-cyan);
+            letter-spacing: 0.04em;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+        .nav-btn:hover {
+            background: rgba(0, 240, 255, 0.16);
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.1);
+        }
+        .nav-btn.pink {
+            border-color: rgba(255, 45, 138, 0.3);
+            background: rgba(255, 45, 138, 0.06);
+            color: var(--glow-pink);
+        }
+        .nav-btn.pink:hover {
+            background: rgba(255, 45, 138, 0.16);
+            box-shadow: 0 0 30px rgba(255, 45, 138, 0.1);
+        }
 
-    .toast {
-      position: fixed; bottom: 20px; right: 20px; z-index: 2000;
-      background: var(--s1); border: 1px solid var(--border); border-radius: 10px;
-      padding: 0.85rem 1.4rem; font-size: 0.88rem; color: var(--text);
-      font-family: var(--mono); opacity: 0; transform: translateY(100px);
-      transition: all 0.3s; pointer-events: none; font-weight: 700;
-    }
-    .toast.show    { opacity: 1; transform: translateY(0); pointer-events: auto; }
-    .toast.success { border-color: rgba(0,229,160,0.35); background: rgba(0,229,160,0.1); color: var(--accent); }
-    .toast.error   { border-color: rgba(239,68,68,0.35);  background: rgba(239,68,68,0.1);  color: var(--red); }
+        /* ─── MAIN CONTENT ─── */
+        #admin-content {
+            position: relative;
+            z-index: 1;
+        }
 
-    /* modal (edit form) */
-    .modal {
-      position: fixed; inset: 0; z-index: 1500;
-      background: rgba(0,0,0,0.65); backdrop-filter: blur(5px);
-      display: flex; align-items: center; justify-content: center; padding: 1rem;
-    }
-    .modal-box {
-      background: var(--s1); border: 1px solid var(--border); border-radius: 16px;
-      max-width: 560px; width: 100%; max-height: 92vh; overflow-y: auto;
-      display: flex; flex-direction: column; gap: 0;
-    }
-    .modal-head {
-      display: flex; align-items: center; justify-content: space-between; gap: 10px;
-      padding: 1.2rem 1.5rem; border-bottom: 1px solid var(--border);
-      background: linear-gradient(105deg, rgba(59,130,246,0.06), transparent);
-    }
-    .modal-title { font-size: 1.05rem; font-weight: 800; }
-    .modal-body { padding: 1.3rem 1.5rem; display: flex; flex-direction: column; gap: 1.1rem; }
-    .modal-actions { display: flex; gap: 10px; justify-content: flex-end; padding: 1.2rem 1.5rem; border-top: 1px solid var(--border); }
-    .field { display: flex; flex-direction: column; gap: 6px; }
-    label { font-family: var(--mono); font-size: 0.68rem; color: var(--text2); letter-spacing: 0.06em; text-transform: uppercase; font-weight: 700; }
-    input, select, textarea {
-      width: 100%; background: var(--s2); border: 1.5px solid var(--border2); border-radius: 8px;
-      color: var(--text); font-family: var(--mono); font-size: 0.85rem;
-      padding: 0.7rem 0.85rem; outline: none; transition: border-color 0.2s; resize: vertical;
-    }
-    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
-    textarea { min-height: 90px; line-height: 1.55; }
-    .fg2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.9rem; }
-    @media (max-width: 500px) { .fg2 { grid-template-columns: 1fr; } }
-    .btn-save, .btn-cancel {
-      padding: 0.65rem 1.1rem; border-radius: 8px; border: 1.5px solid var(--border2);
-      background: var(--s2); color: var(--text); font-family: var(--mono); font-size: 0.72rem;
-      cursor: pointer; transition: all 0.15s; font-weight: 800;
-    }
-    .btn-save { background: var(--adim); border-color: var(--aborder); color: var(--accent); }
-    .btn-save:hover { background: rgba(0,229,160,0.18); }
-    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
-    .btn-cancel { background: transparent; border-color: var(--border); color: var(--text2); }
-    .btn-cancel:hover { border-color: var(--border2); color: var(--text); }
-    .spinner {
-      display: inline-block; width: 11px; height: 11px; border: 2px solid currentColor;
-      border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+        /* ─── PROJECT LINKS SECTION ─── */
+        #proj-links-section {
+            position: relative;
+            z-index: 1;
+            max-width: 1360px;
+            margin: 0 auto;
+            padding: 1.5rem 1.5rem 4rem;
+        }
 
-    /* calculator floating panel */
-    #calc-panel {
-      position: fixed; bottom: 20px; right: 20px; z-index: 1600;
-      width: 260px; background: var(--s1); border: 1px solid var(--border); border-radius: 14px;
-      overflow: hidden; box-shadow: 0 12px 34px rgba(0,0,0,0.45);
-    }
-    .calc-head {
-      display: flex; align-items: center; gap: 8px; padding: 0.75rem 0.9rem;
-      border-bottom: 1px solid var(--border); background: linear-gradient(90deg, rgba(0,200,240,0.08), transparent);
-      cursor: default;
-    }
-    .calc-head span.t { flex: 1; font-family: var(--mono); font-size: 0.66rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 800; }
-    .calc-close { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 0.85rem; padding: 3px 7px; }
-    .calc-close:hover { color: var(--text); }
-    .calc-body { padding: 0.9rem; }
-    #calc-display {
-      width: 100%; background: var(--s2); border: 1.5px solid var(--border2); border-radius: 9px;
-      color: var(--accent); font-family: var(--mono); font-size: 1.3rem; font-weight: 800;
-      text-align: right; padding: 0.6rem 0.75rem; outline: none; margin-bottom: 9px;
-    }
-    .calc-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 6px; }
-    .calc-key {
-      padding: 0.7rem 0; border-radius: 8px; border: 1.5px solid var(--border2);
-      background: var(--s2); color: var(--text); font-family: var(--mono); font-size: 0.85rem;
-      font-weight: 800; cursor: pointer;
-    }
-    .calc-key.op { background: rgba(0,229,160,0.12); color: var(--accent); }
-    .calc-key.zero { grid-column: span 2; }
+        .section-card {
+            background: var(--s1);
+            backdrop-filter: blur(12px);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            overflow: hidden;
+            box-shadow: var(--shadow);
+        }
 
-    /* status summary stat blocks */
-    .stat-block {
-      display: flex; flex-direction: column; gap: 4px; padding: 0.9rem 1rem;
-      border-radius: 12px; border: 1.5px solid var(--border2); background: var(--s2);
-    }
-    .stat-block .n { font-family: var(--mono); font-size: 1.7rem; font-weight: 800; line-height: 1; }
-    .stat-block .l { font-family: var(--mono); font-size: 0.64rem; font-weight: 700; text-transform: uppercase; letter-spacing: 0.08em; color: var(--text3); }
-  </style>
+        .section-header {
+            padding: 1.3rem 1.8rem;
+            border-bottom: 1px solid var(--border);
+            display: flex;
+            align-items: center;
+            gap: 16px;
+            flex-wrap: wrap;
+            background: linear-gradient(105deg, rgba(0, 240, 255, 0.04), transparent);
+        }
+        .section-header .icon-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: var(--glow-cyan);
+            box-shadow: 0 0 24px var(--glow-cyan);
+            flex-shrink: 0;
+            animation: pulseDot 2s ease-in-out infinite;
+        }
+        @keyframes pulseDot {
+            0%,
+            100% {
+                box-shadow: 0 0 24px var(--glow-cyan);
+                opacity: 1;
+            }
+            50% {
+                box-shadow: 0 0 48px var(--glow-cyan), 0 0 80px rgba(0, 240, 255, 0.2);
+                opacity: 0.8;
+            }
+        }
+        .section-header .title-group {
+            flex: 1;
+        }
+        .section-header .title-group .label {
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            color: var(--text3);
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            font-weight: 700;
+            margin-bottom: 0.2rem;
+        }
+        .section-header .title-group .main {
+            font-size: 1.25rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+        .section-header .count-badge {
+            font-family: var(--mono);
+            font-size: 0.8rem;
+            font-weight: 800;
+            color: var(--glow-cyan);
+            background: rgba(0, 240, 255, 0.08);
+            padding: 0.25rem 0.9rem;
+            border-radius: 999px;
+            border: 1px solid rgba(0, 240, 255, 0.15);
+        }
+
+        /* ─── STATUS SUMMARY ─── */
+        #status-summary {
+            padding: 1.1rem 1.8rem;
+            border-bottom: 1px solid var(--border);
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(110px, 1fr));
+            gap: 10px;
+            background: rgba(0, 0, 0, 0.2);
+        }
+        .stat-block {
+            display: flex;
+            flex-direction: column;
+            gap: 2px;
+            padding: 0.7rem 0.9rem;
+            border-radius: 10px;
+            border: 1px solid var(--border);
+            background: rgba(255, 255, 255, 0.02);
+            transition: border-color 0.2s, background 0.2s;
+        }
+        .stat-block:hover {
+            border-color: rgba(255, 255, 255, 0.15);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .stat-block .n {
+            font-family: var(--mono);
+            font-size: 1.5rem;
+            font-weight: 800;
+            line-height: 1.2;
+        }
+        .stat-block .l {
+            font-family: var(--mono);
+            font-size: 0.58rem;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: 0.08em;
+            color: var(--text3);
+        }
+
+        /* ─── FILTER TABS ─── */
+        .filter-bar {
+            display: flex;
+            gap: 6px;
+            padding: 0.8rem 1.8rem;
+            border-bottom: 1px solid var(--border);
+            flex-wrap: wrap;
+            background: rgba(0, 0, 0, 0.15);
+        }
+        .ftab {
+            font-family: var(--mono);
+            font-size: 0.62rem;
+            font-weight: 700;
+            padding: 0.35rem 0.9rem;
+            border-radius: 999px;
+            cursor: pointer;
+            border: 1.5px solid var(--border);
+            background: transparent;
+            color: var(--text3);
+            transition: all 0.2s;
+            letter-spacing: 0.04em;
+            text-transform: uppercase;
+        }
+        .ftab:hover {
+            border-color: var(--border2);
+            color: var(--text2);
+            transform: translateY(-1px);
+        }
+        .ftab.active {
+            background: rgba(0, 240, 255, 0.08);
+            border-color: rgba(0, 240, 255, 0.3);
+            color: var(--glow-cyan);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.04);
+        }
+        .ftab.haslink {
+            border-color: rgba(34, 211, 167, 0.25);
+            color: var(--glow-green);
+        }
+        .ftab.haslink.active {
+            background: rgba(34, 211, 167, 0.1);
+            border-color: rgba(34, 211, 167, 0.35);
+            color: var(--glow-green);
+        }
+        .ftab.nolink {
+            border-color: rgba(255, 45, 138, 0.2);
+            color: var(--glow-pink);
+        }
+        .ftab.nolink.active {
+            background: rgba(255, 45, 138, 0.08);
+            border-color: rgba(255, 45, 138, 0.3);
+            color: var(--glow-pink);
+        }
+
+        /* ─── PROJECT GRID ─── */
+        #proj-links-list {
+            padding: 1.5rem 1.8rem;
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(270px, 1fr));
+            gap: 16px;
+        }
+        .proj-card {
+            background: var(--s2);
+            backdrop-filter: blur(8px);
+            border: 1.5px solid var(--border);
+            border-radius: 14px;
+            padding: 18px;
+            display: flex;
+            flex-direction: column;
+            gap: 14px;
+            transition: all 0.25s;
+            position: relative;
+            overflow: hidden;
+        }
+        .proj-card::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            border-radius: 14px;
+            padding: 1.5px;
+            background: linear-gradient(135deg, transparent 40%, rgba(0, 240, 255, 0.05), transparent 70%);
+            -webkit-mask: linear-gradient(#fff 0 0) content-box, linear-gradient(#fff 0 0);
+            -webkit-mask-composite: xor;
+            mask-composite: exclude;
+            pointer-events: none;
+            opacity: 0;
+            transition: opacity 0.3s;
+        }
+        .proj-card:hover::before {
+            opacity: 1;
+        }
+        .proj-card:hover {
+            border-color: rgba(255, 255, 255, 0.12);
+            transform: translateY(-3px);
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.4);
+        }
+        .proj-card.nolink {
+            border-color: rgba(255, 45, 138, 0.15);
+        }
+        .proj-card.nolink:hover {
+            border-color: rgba(255, 45, 138, 0.25);
+        }
+
+        .proj-card .top {
+            display: flex;
+            align-items: center;
+            gap: 14px;
+        }
+        .proj-card .logo-wrap {
+            width: 48px;
+            height: 48px;
+            border-radius: 12px;
+            border: 1.5px solid var(--border);
+            background: var(--s3);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            overflow: hidden;
+            flex-shrink: 0;
+            font-size: 1.4rem;
+        }
+        .proj-card .logo-wrap img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            border-radius: 10px;
+        }
+        .proj-card .info {
+            flex: 1;
+            min-width: 0;
+        }
+        .proj-card .info .name {
+            font-size: 0.95rem;
+            font-weight: 800;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            color: var(--text);
+        }
+        .proj-card .info .tags {
+            display: flex;
+            gap: 5px;
+            flex-wrap: wrap;
+            margin-top: 5px;
+        }
+        .proj-card .info .tags .tag {
+            font-family: var(--mono);
+            font-size: 0.55rem;
+            font-weight: 700;
+            padding: 0.15rem 0.5rem;
+            border-radius: 999px;
+            background: rgba(255, 255, 255, 0.04);
+            border: 1px solid var(--border);
+            color: var(--text2);
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+        }
+
+        .proj-card .badges {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            align-items: center;
+        }
+        .badge-status {
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            font-weight: 800;
+            padding: 0.2rem 0.65rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            border-width: 1.5px;
+            border-style: solid;
+        }
+        .badge-status.st-a {
+            background: rgba(34, 211, 167, 0.12);
+            color: var(--glow-green);
+            border-color: rgba(34, 211, 167, 0.3);
+        }
+        .badge-status.st-w {
+            background: rgba(249, 115, 22, 0.12);
+            color: var(--glow-orange);
+            border-color: rgba(249, 115, 22, 0.3);
+        }
+        .badge-status.st-s {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--glow-cyan);
+            border-color: rgba(0, 240, 255, 0.25);
+        }
+        .badge-status.st-c {
+            background: rgba(168, 85, 247, 0.1);
+            color: var(--glow-purple);
+            border-color: rgba(168, 85, 247, 0.25);
+        }
+        .badge-status.st-p {
+            background: rgba(255, 45, 138, 0.1);
+            color: var(--glow-pink);
+            border-color: rgba(255, 45, 138, 0.25);
+        }
+        .badge-status.st-d {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text3);
+            border-color: var(--border);
+        }
+
+        .badge-live {
+            font-family: var(--mono);
+            font-size: 0.55rem;
+            font-weight: 800;
+            padding: 0.2rem 0.6rem;
+            border-radius: 999px;
+            letter-spacing: 0.04em;
+            border: 1.5px solid;
+        }
+        .badge-live.on {
+            background: rgba(34, 211, 167, 0.1);
+            color: var(--glow-green);
+            border-color: rgba(34, 211, 167, 0.25);
+        }
+        .badge-live.off {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text3);
+            border-color: var(--border);
+        }
+
+        .badge-conf {
+            font-family: var(--mono);
+            font-size: 0.52rem;
+            font-weight: 800;
+            padding: 0.2rem 0.55rem;
+            border-radius: 999px;
+            text-transform: uppercase;
+            letter-spacing: 0.04em;
+            border: 1.5px solid;
+        }
+        .badge-conf.confirmed {
+            background: rgba(0, 240, 255, 0.1);
+            color: var(--glow-cyan);
+            border-color: rgba(0, 240, 255, 0.25);
+        }
+        .badge-conf.potential {
+            background: rgba(168, 85, 247, 0.1);
+            color: var(--glow-purple);
+            border-color: rgba(168, 85, 247, 0.25);
+        }
+        .badge-conf.ended {
+            background: rgba(255, 255, 255, 0.03);
+            color: var(--text3);
+            border-color: var(--border);
+        }
+
+        .proj-card .actions {
+            display: flex;
+            gap: 8px;
+            margin-top: 2px;
+        }
+        .proj-card .actions .link-btn {
+            flex: 1;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 6px;
+            padding: 0.55rem;
+            border-radius: 10px;
+            border: 1.5px solid rgba(34, 211, 167, 0.2);
+            background: rgba(34, 211, 167, 0.06);
+            color: var(--glow-green);
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            font-weight: 700;
+            text-decoration: none;
+            transition: all 0.2s;
+        }
+        .proj-card .actions .link-btn:hover {
+            background: rgba(34, 211, 167, 0.12);
+            border-color: rgba(34, 211, 167, 0.35);
+            transform: translateY(-1px);
+        }
+        .proj-card .actions .link-btn.nolink {
+            border-color: rgba(255, 45, 138, 0.15);
+            background: rgba(255, 45, 138, 0.04);
+            color: var(--text3);
+            cursor: default;
+        }
+        .proj-card .actions .link-btn.nolink:hover {
+            transform: none;
+            background: rgba(255, 45, 138, 0.06);
+        }
+        .proj-card .actions .edit-btn {
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            gap: 5px;
+            padding: 0.55rem 0.9rem;
+            border-radius: 10px;
+            border: 1.5px solid rgba(0, 240, 255, 0.2);
+            background: rgba(0, 240, 255, 0.06);
+            color: var(--glow-cyan);
+            font-family: var(--mono);
+            font-size: 0.65rem;
+            font-weight: 700;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .proj-card .actions .edit-btn:hover {
+            background: rgba(0, 240, 255, 0.14);
+            border-color: rgba(0, 240, 255, 0.35);
+            transform: translateY(-1px);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.05);
+        }
+
+        /* ─── MODAL ─── */
+        .modal {
+            position: fixed;
+            inset: 0;
+            z-index: 1500;
+            background: rgba(0, 0, 0, 0.7);
+            backdrop-filter: blur(12px);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 1rem;
+            animation: modalFade 0.25s ease;
+        }
+        @keyframes modalFade {
+            from {
+                opacity: 0;
+                transform: scale(0.96);
+            }
+            to {
+                opacity: 1;
+                transform: scale(1);
+            }
+        }
+        .modal-box {
+            background: var(--s1);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 20px;
+            max-width: 580px;
+            width: 100%;
+            max-height: 92vh;
+            overflow-y: auto;
+            display: flex;
+            flex-direction: column;
+            box-shadow: 0 24px 80px rgba(0, 0, 0, 0.6);
+        }
+        .modal-box::-webkit-scrollbar {
+            width: 4px;
+        }
+        .modal-head {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 10px;
+            padding: 1.2rem 1.8rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(105deg, rgba(0, 240, 255, 0.04), transparent);
+        }
+        .modal-title {
+            font-size: 1.05rem;
+            font-weight: 800;
+            color: var(--text);
+        }
+        .modal-close {
+            background: none;
+            border: none;
+            color: var(--text3);
+            cursor: pointer;
+            font-size: 1.1rem;
+            padding: 4px 10px;
+            border-radius: 8px;
+            transition: all 0.15s;
+        }
+        .modal-close:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.04);
+        }
+
+        .modal-body {
+            padding: 1.5rem 1.8rem;
+            display: flex;
+            flex-direction: column;
+            gap: 1.1rem;
+        }
+        .field {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .field label {
+            font-family: var(--mono);
+            font-size: 0.62rem;
+            color: var(--text2);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            font-weight: 700;
+        }
+        .field label .hint {
+            text-transform: none;
+            color: var(--text3);
+            font-weight: 400;
+            font-size: 0.6rem;
+        }
+        .field input,
+        .field select,
+        .field textarea {
+            width: 100%;
+            background: var(--s2);
+            border: 1.5px solid var(--border2);
+            border-radius: 10px;
+            color: var(--text);
+            font-family: var(--sans);
+            font-size: 0.85rem;
+            padding: 0.7rem 0.9rem;
+            outline: none;
+            transition: border-color 0.25s, box-shadow 0.25s;
+            resize: vertical;
+        }
+        .field input:focus,
+        .field select:focus,
+        .field textarea:focus {
+            border-color: var(--glow-cyan);
+            box-shadow: 0 0 0 3px rgba(0, 240, 255, 0.08);
+        }
+        .field textarea {
+            min-height: 80px;
+            line-height: 1.55;
+            font-family: var(--sans);
+        }
+        .fg2 {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 0.9rem;
+        }
+        @media (max-width: 500px) {
+            .fg2 {
+                grid-template-columns: 1fr;
+            }
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            justify-content: flex-end;
+            padding: 1.2rem 1.8rem;
+            border-top: 1px solid var(--border);
+        }
+        .btn-save,
+        .btn-cancel {
+            padding: 0.6rem 1.2rem;
+            border-radius: 999px;
+            border: 1.5px solid var(--border2);
+            background: var(--s2);
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 0.7rem;
+            cursor: pointer;
+            transition: all 0.2s;
+            font-weight: 800;
+            letter-spacing: 0.04em;
+        }
+        .btn-save {
+            background: rgba(0, 240, 255, 0.08);
+            border-color: rgba(0, 240, 255, 0.25);
+            color: var(--glow-cyan);
+        }
+        .btn-save:hover {
+            background: rgba(0, 240, 255, 0.18);
+            transform: translateY(-2px);
+            box-shadow: 0 0 30px rgba(0, 240, 255, 0.06);
+        }
+        .btn-save:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+            transform: none !important;
+        }
+        .btn-cancel {
+            background: transparent;
+            border-color: var(--border);
+            color: var(--text2);
+        }
+        .btn-cancel:hover {
+            border-color: var(--border2);
+            color: var(--text);
+        }
+        .spinner {
+            display: inline-block;
+            width: 12px;
+            height: 12px;
+            border: 2px solid currentColor;
+            border-top-color: transparent;
+            border-radius: 50%;
+            animation: spin 0.6s linear infinite;
+        }
+        @keyframes spin {
+            to {
+                transform: rotate(360deg);
+            }
+        }
+
+        /* ─── TOAST ─── */
+        .toast {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 2000;
+            background: var(--s1);
+            backdrop-filter: blur(16px);
+            border: 1px solid var(--border);
+            border-radius: 12px;
+            padding: 0.8rem 1.5rem;
+            font-size: 0.85rem;
+            color: var(--text);
+            font-family: var(--mono);
+            opacity: 0;
+            transform: translateY(80px);
+            transition: all 0.4s cubic-bezier(0.22, 1, 0.36, 1);
+            pointer-events: none;
+            font-weight: 700;
+            box-shadow: var(--shadow);
+            max-width: 400px;
+        }
+        .toast.show {
+            opacity: 1;
+            transform: translateY(0);
+            pointer-events: auto;
+        }
+        .toast.success {
+            border-color: rgba(34, 211, 167, 0.3);
+            background: rgba(34, 211, 167, 0.08);
+            color: var(--glow-green);
+        }
+        .toast.error {
+            border-color: rgba(255, 45, 138, 0.3);
+            background: rgba(255, 45, 138, 0.08);
+            color: var(--glow-pink);
+        }
+
+        /* ─── CALCULATOR ─── */
+        #calc-panel {
+            position: fixed;
+            bottom: 24px;
+            right: 24px;
+            z-index: 1600;
+            width: 270px;
+            background: var(--s1);
+            backdrop-filter: blur(24px);
+            border: 1px solid var(--border);
+            border-radius: 18px;
+            overflow: hidden;
+            box-shadow: 0 16px 60px rgba(0, 0, 0, 0.5);
+            animation: modalFade 0.3s ease;
+        }
+        .calc-head {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 0.7rem 1rem;
+            border-bottom: 1px solid var(--border);
+            background: linear-gradient(90deg, rgba(0, 240, 255, 0.04), transparent);
+        }
+        .calc-head span.t {
+            flex: 1;
+            font-family: var(--mono);
+            font-size: 0.6rem;
+            color: var(--text3);
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            font-weight: 800;
+        }
+        .calc-close {
+            background: none;
+            border: none;
+            color: var(--text3);
+            cursor: pointer;
+            font-size: 0.85rem;
+            padding: 2px 8px;
+            border-radius: 6px;
+            transition: all 0.15s;
+        }
+        .calc-close:hover {
+            color: var(--text);
+            background: rgba(255, 255, 255, 0.04);
+        }
+        .calc-body {
+            padding: 0.9rem;
+        }
+        #calc-display {
+            width: 100%;
+            background: var(--s2);
+            border: 1.5px solid var(--border2);
+            border-radius: 10px;
+            color: var(--glow-cyan);
+            font-family: var(--mono);
+            font-size: 1.3rem;
+            font-weight: 800;
+            text-align: right;
+            padding: 0.6rem 0.8rem;
+            outline: none;
+            margin-bottom: 10px;
+        }
+        .calc-grid {
+            display: grid;
+            grid-template-columns: repeat(4, 1fr);
+            gap: 6px;
+        }
+        .calc-key {
+            padding: 0.65rem 0;
+            border-radius: 10px;
+            border: 1.5px solid var(--border2);
+            background: var(--s2);
+            color: var(--text);
+            font-family: var(--mono);
+            font-size: 0.85rem;
+            font-weight: 800;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+        .calc-key:hover {
+            background: var(--s3);
+            transform: translateY(-1px);
+        }
+        .calc-key.op {
+            background: rgba(0, 240, 255, 0.08);
+            color: var(--glow-cyan);
+            border-color: rgba(0, 240, 255, 0.15);
+        }
+        .calc-key.op:hover {
+            background: rgba(0, 240, 255, 0.16);
+        }
+        .calc-key.zero {
+            grid-column: span 2;
+        }
+
+        /* ─── RESPONSIVE ─── */
+        @media (max-width: 640px) {
+            .login-card {
+                padding: 2rem 1.5rem;
+            }
+            .login-logo {
+                font-size: 1.6rem;
+            }
+            nav {
+                padding: 0 1rem;
+                height: 58px;
+            }
+            .nav-logo {
+                font-size: 0.95rem;
+            }
+            .nav-btn {
+                font-size: 0.6rem;
+                padding: 0.4rem 0.8rem;
+            }
+            .nav-badge {
+                font-size: 0.5rem;
+                padding: 0.15rem 0.5rem;
+            }
+            #proj-links-section {
+                padding: 0.8rem 0.8rem 3rem;
+            }
+            .section-header {
+                padding: 1rem 1.2rem;
+            }
+            .section-header .title-group .main {
+                font-size: 1rem;
+            }
+            #status-summary {
+                padding: 0.8rem 1.2rem;
+                grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+            }
+            .stat-block .n {
+                font-size: 1.1rem;
+            }
+            .filter-bar {
+                padding: 0.6rem 1.2rem;
+                gap: 4px;
+            }
+            .ftab {
+                font-size: 0.5rem;
+                padding: 0.25rem 0.6rem;
+            }
+            #proj-links-list {
+                padding: 1rem 1.2rem;
+                grid-template-columns: 1fr;
+            }
+            .modal-box {
+                max-width: 100%;
+                margin: 0.5rem;
+                border-radius: 14px;
+            }
+            .modal-body {
+                padding: 1.2rem;
+            }
+            .modal-head {
+                padding: 1rem 1.2rem;
+            }
+            .modal-actions {
+                padding: 1rem 1.2rem;
+            }
+            #calc-panel {
+                width: 240px;
+                bottom: 14px;
+                right: 14px;
+            }
+            .toast {
+                bottom: 14px;
+                right: 14px;
+                left: 14px;
+                max-width: none;
+                font-size: 0.75rem;
+                padding: 0.6rem 1.2rem;
+            }
+        }
+
+        /* ─── EMPTY STATE ─── */
+        .empty-state {
+            font-family: var(--mono);
+            font-size: 0.75rem;
+            color: var(--text3);
+            grid-column: 1 / -1;
+            text-align: center;
+            padding: 3rem 0;
+        }
+        .empty-state .emoji {
+            font-size: 2.4rem;
+            display: block;
+            margin-bottom: 0.6rem;
+        }
+    </style>
 </head>
 <body>
 
-<div id="login-section">
-  <canvas id="login-canvas" style="position:absolute;inset:0;width:100%;height:100%;pointer-events:none;"></canvas>
-  <div class="login-card">
-    <div class="login-logo">AirdropXI</div>
-    <div class="login-title">Admin Panel</div>
-    <div class="login-sub">Login dengan Google untuk akses</div>
-    <div id="g_id_onload"
-      data-client_id="1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com"
-      data-callback="handleCredentialResponse">
+    <!-- ─── ANIMATED BG ORBS ─── -->
+    <div class="bg-orbs">
+        <span></span><span></span><span></span><span></span>
     </div>
-  </div>
+
+    <!-- ─── LOGIN ─── -->
+    <div id="login-section">
+        <div class="login-card">
+            <div class="login-logo">🪂 AirdropXI</div>
+            <div class="login-title">Admin Panel</div>
+            <div class="login-divider"></div>
+            <div class="login-sub">Masuk dengan Google untuk akses penuh</div>
+            <div id="g_id_onload"
+            data-client_id="1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com"
+            data-callback="handleCredentialResponse">
+        </div>
+    </div>
 </div>
 
+<!-- ─── ADMIN CONTENT ─── -->
 <div id="admin-content" class="hidden">
-  <nav>
-    <div class="nav-left">
-      <a href="#" class="nav-logo">AirdropXI</a>
-      <span class="nav-badge">ADMIN</span>
+
+    <!-- NAV -->
+    <nav>
+        <div class="nav-left">
+            <a href="#" class="nav-logo">🪂 AirdropXI</a>
+            <span class="nav-badge">ADMIN</span>
+        </div>
+        <div class="nav-actions">
+            <button class="nav-btn pink" onclick="toggleCalc()">🧮 Calc</button>
+        </div>
+    </nav>
+
+    <!-- PROJECT LINKS SECTION -->
+    <div id="proj-links-section">
+        <div class="section-card">
+
+            <!-- Header -->
+            <div class="section-header">
+                <span class="icon-dot"></span>
+                <div class="title-group">
+                    <div class="label">🔗 Project Links</div>
+                    <div class="main">Quick Access — Official Websites</div>
+                </div>
+                <span class="count-badge" id="proj-links-count">0</span>
+            </div>
+
+            <!-- Status Summary -->
+            <div id="status-summary"></div>
+
+            <!-- Filter Tabs -->
+            <div class="filter-bar">
+                <button class="ftab active" id="plf-all" onclick="setPLFilter('all',this)">Semua</button>
+                <button class="ftab" id="plf-active" onclick="setPLFilter('active',this)">Active</button>
+                <button class="ftab" id="plf-waitlist" onclick="setPLFilter('waitlist',this)">Waitlist</button>
+                <button class="ftab" id="plf-ended" onclick="setPLFilter('ended',this)">Ended</button>
+                <button class="ftab" id="plf-confirmed" onclick="setPLFilter('confirmed',this)">Confirmed</button>
+                <button class="ftab" id="plf-potential" onclick="setPLFilter('potential',this)">Potential</button>
+                <button class="ftab haslink" id="plf-haslink" onclick="setPLFilter('haslink',this)">✓ Ada Link</button>
+                <button class="ftab nolink" id="plf-nolink" onclick="setPLFilter('nolink',this)">✕ No Link</button>
+            </div>
+
+            <!-- Grid -->
+            <div id="proj-links-list">
+                <div class="empty-state">
+                    <span class="emoji">⏳</span>
+                    Loading projects...
+                </div>
+            </div>
+        </div>
     </div>
-    <button class="nav-btn" onclick="toggleCalc()">🧮 Kalkulator</button>
-  </nav>
 
-  <!-- ── PROJECT LINKS SECTION ── -->
-  <div id="proj-links-section" style="position:relative;z-index:1;max-width:1280px;margin:0 auto;padding:1.5rem 1.5rem 4rem;">
-    <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;">
-
-      <!-- Header -->
-      <div style="padding:1.3rem 1.5rem;border-bottom:1px solid var(--border);
-                  background:linear-gradient(105deg,rgba(0,200,240,0.05),transparent);
-                  display:flex;align-items:center;gap:14px;flex-wrap:wrap;">
-        <span style="width:10px;height:10px;border-radius:50%;background:var(--cyan);
-                     box-shadow:0 0 10px var(--cyan);flex-shrink:0;display:inline-block"></span>
-        <div style="flex:1">
-          <div style="font-family:var(--mono);font-size:0.62rem;color:var(--text3);
-                      letter-spacing:0.12em;text-transform:uppercase;margin-bottom:0.25rem;font-weight:700">
-            🔗 Project Links — Admin Only
-          </div>
-          <div style="font-size:1.2rem;font-weight:800">
-            Quick Access — Website Resmi Project
-          </div>
+    <!-- ─── EDIT MODAL ─── -->
+    <div id="edit-modal" class="modal hidden">
+        <div class="modal-box">
+            <div class="modal-head">
+                <div class="modal-title" id="edit-modal-title">✏️ Edit Proyek</div>
+                <button class="modal-close" onclick="closeEditModal()">✕</button>
+            </div>
+            <div class="modal-body">
+                <div class="field">
+                    <label>Status Airdrop</label>
+                    <select id="e-status"></select>
+                </div>
+                <div class="field">
+                    <label>Tags <span class="hint">— pisah koma</span></label>
+                    <input id="e-tags" type="text" placeholder="DeFi, AI, Layer2" />
+                </div>
+                <div class="fg2">
+                    <div class="field">
+                        <label>Total Raised (ID)</label>
+                        <input id="e-raisedid" type="text" placeholder="$600 Juta" />
+                    </div>
+                    <div class="field">
+                        <label>Total Raised (EN)</label>
+                        <input id="e-raisedn" type="text" placeholder="$600M" />
+                    </div>
+                </div>
+                <div class="field">
+                    <label>Deskripsi (ID)</label>
+                    <textarea id="e-descid" placeholder="Jelaskan proyek ini..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Description (EN)</label>
+                    <textarea id="e-descen" placeholder="Describe this project..."></textarea>
+                </div>
+                <div class="field">
+                    <label>Link Official</label>
+                    <input id="e-link" type="url" placeholder="https://..." />
+                </div>
+            </div>
+            <div class="modal-actions">
+                <button class="btn-cancel" onclick="closeEditModal()">Batal</button>
+                <button class="btn-save" id="btn-save-edit" onclick="saveEdit()">💾 Simpan</button>
+            </div>
         </div>
-        <span style="font-family:var(--mono);font-size:0.8rem;color:var(--cyan);font-weight:800" id="proj-links-count">0</span>
-      </div>
-
-      <!-- Status Summary -->
-      <div id="status-summary" style="padding:1.1rem 1.5rem;border-bottom:1px solid var(--border);
-           display:grid;grid-template-columns:repeat(auto-fill,minmax(120px,1fr));gap:10px;"></div>
-
-      <!-- Filter tabs -->
-      <div style="display:flex;gap:6px;padding:12px 1.5rem;border-bottom:1px solid var(--border);flex-wrap:wrap;">
-        <button class="ftab active" id="plf-all"       onclick="setPLFilter('all',this)">Semua</button>
-        <button class="ftab"        id="plf-active"    onclick="setPLFilter('active',this)">Active</button>
-        <button class="ftab"        id="plf-waitlist"  onclick="setPLFilter('waitlist',this)">Waitlist</button>
-        <button class="ftab"        id="plf-ended"     onclick="setPLFilter('ended',this)">Ended</button>
-        <button class="ftab"        id="plf-confirmed" onclick="setPLFilter('confirmed',this)">Confirmed</button>
-        <button class="ftab"        id="plf-potential" onclick="setPLFilter('potential',this)">Potential</button>
-        <button class="ftab"        id="plf-haslink"   onclick="setPLFilter('haslink',this)"
-                style="border-color:rgba(0,229,160,0.25);color:var(--accent)">✓ Ada Link</button>
-        <button class="ftab"        id="plf-nolink"    onclick="setPLFilter('nolink',this)"
-                style="border-color:rgba(239,68,68,0.25);color:var(--red)">✕ No Link</button>
-      </div>
-
-      <!-- Grid cards -->
-      <div id="proj-links-list" style="padding:1.5rem;
-           display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:14px;">
-        <div style="font-family:var(--mono);font-size:0.72rem;color:var(--text3);
-                    grid-column:1/-1;text-align:center;padding:2.5rem">Loading...</div>
-      </div>
     </div>
-  </div>
 
-  <!-- ── EDIT MODAL ── -->
-  <div id="edit-modal" class="modal hidden">
-    <div class="modal-box">
-      <div class="modal-head">
-        <div class="modal-title" id="edit-modal-title">✏️ Edit Proyek</div>
-        <button class="calc-close" onclick="closeEditModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="field">
-          <label>Status Airdrop</label>
-          <select id="e-status"></select>
+    <!-- ─── CALCULATOR ─── -->
+    <div id="calc-panel" class="hidden">
+        <div class="calc-head">
+            <span class="t">🧮 Kalkulator</span>
+            <button class="calc-close" onclick="toggleCalc()">✕</button>
         </div>
-        <div class="field">
-          <label>Tags <span style="text-transform:none;color:var(--text3);font-weight:400">— pisah koma</span></label>
-          <input id="e-tags" type="text" placeholder="DeFi, AI, Layer2">
+        <div class="calc-body">
+            <input id="calc-display" type="text" readonly value="0" />
+            <div class="calc-grid" id="calc-grid"></div>
         </div>
-        <div class="fg2">
-          <div class="field">
-            <label>Total Raised (ID)</label>
-            <input id="e-raisedid" type="text" placeholder="$600 Juta">
-          </div>
-          <div class="field">
-            <label>Total Raised (EN)</label>
-            <input id="e-raisedn" type="text" placeholder="$600M">
-          </div>
-        </div>
-        <div class="field">
-          <label>Deskripsi (ID)</label>
-          <textarea id="e-descid" placeholder="Jelaskan proyek ini..."></textarea>
-        </div>
-        <div class="field">
-          <label>Description (EN)</label>
-          <textarea id="e-descen" placeholder="Describe this project..."></textarea>
-        </div>
-        <div class="field">
-          <label>Link Official</label>
-          <input id="e-link" type="url" placeholder="https://...">
-        </div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closeEditModal()">Batal</button>
-        <button class="btn-save" id="btn-save-edit" onclick="saveEdit()">💾 Simpan</button>
-      </div>
     </div>
-  </div>
 
-  <!-- ── CALCULATOR FLOATING PANEL ── -->
-  <div id="calc-panel" class="hidden">
-    <div class="calc-head">
-      <span class="t">🧮 Kalkulator</span>
-      <button class="calc-close" onclick="toggleCalc()">✕</button>
-    </div>
-    <div class="calc-body">
-      <input id="calc-display" type="text" readonly value="0">
-      <div class="calc-grid" id="calc-grid"></div>
-    </div>
-  </div>
-
-  <div class="toast" id="toast"></div>
+    <!-- ─── TOAST ─── -->
+    <div class="toast" id="toast"></div>
 </div>
 
 <script>
-  // ── STATUS OPTIONS (dari tabel proyek yang sudah ada) ──
-  const STATUS_OPTIONS = ['Active','Waitlist','Season 1','Season 2','Season 3','Season 4','Season 5','Seed Round','Private Round','Potential','Confirmed','Testnet','Mainnet','Listing / Selesai','Ended','TBA'];
-
-  // ── STATE ─────────────────────────────────────────────
-  let projects   = [];
-  let _plFilter  = 'all';
-  let _editingId = null;
-
-  function esc(s) {
-    return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
-  }
-  function getStCls(s) {
-    const l = (s||'').toLowerCase();
-    if (l.includes('active') || l.includes('mainnet')) return 'st-a';
-    if (l.includes('wait'))       return 'st-w';
-    if (l.includes('season'))     return 'st-s';
-    if (l.includes('confirmed') || l.includes('testnet')) return 'st-c';
-    if (l.includes('potential'))  return 'st-p';
-    return 'st-d';
-  }
-  function showToast(msg, type = 'success') {
-    const t = document.getElementById('toast');
-    if (!t) return;
-    t.textContent = msg; t.className = `toast ${type} show`;
-    setTimeout(() => t.classList.remove('show'), 3200);
-  }
-
-  // ── LOAD PROJECTS ─────────────────────────────────────
-  async function loadProjects() {
-    try {
-      const res = await fetch('/api/admin-airdrop');
-      if (!res.ok) throw new Error('Gagal fetch');
-      projects = await res.json();
-      renderStatusSummary();
-      renderProjectLinks();
-    } catch(e) {
-      const list = document.getElementById('proj-links-list');
-      if (list) list.innerHTML = `<div style="font-family:var(--mono);font-size:0.72rem;color:var(--red);grid-column:1/-1;text-align:center;padding:2.5rem">${esc(e.message)}</div>`;
-    }
-  }
-
-  // ── STATUS SUMMARY (total per status, contoh: Active 55) ──
-  function renderStatusSummary() {
-    const wrap = document.getElementById('status-summary');
-    if (!wrap) return;
-
-    const total     = projects.length;
-    const live      = projects.filter(p => p.published === true).length;
-    const draft     = total - live;
-    const active    = projects.filter(p => (p.status||'').toLowerCase().includes('active')).length;
-    const waitlist  = projects.filter(p => (p.status||'').toLowerCase().includes('wait')).length;
-    const ended     = projects.filter(p => (p.status||'').toLowerCase().includes('end') || (p.confirmation_status||'').toLowerCase().includes('ended')).length;
-    const confirmed = projects.filter(p => (p.confirmation_status||'').toLowerCase().includes('confirmed')).length;
-    const potential = projects.filter(p => (p.confirmation_status||'').toLowerCase().includes('potential')).length;
-    const hasLink   = projects.filter(p => !!p.link).length;
-    const noLink    = total - hasLink;
-
-    const blocks = [
-      ['Total',     total,     'var(--text)'],
-      ['Live',      live,      'var(--accent)'],
-      ['Draft',     draft,     'var(--warn)'],
-      ['Active',    active,    'var(--accent)'],
-      ['Waitlist',  waitlist,  'var(--warn)'],
-      ['Confirmed', confirmed, 'var(--cyan)'],
-      ['Potential', potential, 'var(--purple)'],
-      ['Ended',     ended,     'var(--text3)'],
-      ['Ada Link',  hasLink,   'var(--accent)'],
-      ['No Link',   noLink,    'var(--red)'],
+    // ─── STATUS OPTIONS ───
+    const STATUS_OPTIONS = ['Active', 'Waitlist', 'Season 1', 'Season 2', 'Season 3', 'Season 4', 'Season 5',
+        'Seed Round', 'Private Round', 'Potential', 'Confirmed', 'Testnet', 'Mainnet',
+        'Listing / Selesai', 'Ended', 'TBA'
     ];
 
-    wrap.innerHTML = blocks.map(([label, val, color]) => `
-      <div class="stat-block">
-        <div class="n" style="color:${color}">${val}</div>
-        <div class="l">${esc(label)}</div>
-      </div>`).join('');
-  }
+    // ─── STATE ───
+    let projects = [];
+    let _plFilter = 'all';
+    let _editingId = null;
 
-  // ── PROJECT LINKS (link diambil langsung dari kolom "link" yg sudah ada di tabel) ──
-  function setPLFilter(mode, btn) {
-    _plFilter = mode;
-    document.querySelectorAll('#proj-links-section .ftab').forEach(t => t.classList.remove('active'));
-    btn.classList.add('active');
-    renderProjectLinks();
-  }
-
-  function renderProjectLinks() {
-    const list  = document.getElementById('proj-links-list');
-    const count = document.getElementById('proj-links-count');
-    if (!list) return;
-
-    let filtered = [...projects];
-    if (_plFilter === 'active')    filtered = filtered.filter(p => (p.status||'').toLowerCase().includes('active'));
-    if (_plFilter === 'waitlist')  filtered = filtered.filter(p => (p.status||'').toLowerCase().includes('wait'));
-    if (_plFilter === 'ended')     filtered = filtered.filter(p => (p.status||'').toLowerCase().includes('end') || (p.confirmation_status||'').toLowerCase().includes('ended'));
-    if (_plFilter === 'confirmed') filtered = filtered.filter(p => (p.confirmation_status||'').toLowerCase().includes('confirmed'));
-    if (_plFilter === 'potential') filtered = filtered.filter(p => (p.confirmation_status||'').toLowerCase().includes('potential'));
-    if (_plFilter === 'nolink')    filtered = filtered.filter(p => !p.link);
-    if (_plFilter === 'haslink')   filtered = filtered.filter(p => !!p.link);
-
-    if (count) count.textContent = `${filtered.length}/${projects.length}`;
-
-    if (!filtered.length) {
-      list.innerHTML = `<div style="font-family:var(--mono);font-size:0.72rem;color:var(--text3);grid-column:1/-1;text-align:center;padding:2.5rem">Tidak ada proyek.</div>`;
-      return;
+    // ─── HELPERS ───
+    function esc(s) {
+        return String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
     }
 
-    list.innerHTML = filtered.map(p => {
-      const hasLink = !!(p.link);
-      const isLive  = p.published === true;
-      const confVal = (p.confirmation_status||'').toLowerCase();
-      const confCls = confVal.includes('confirmed') ? 'confirmed' : confVal.includes('potential') ? 'potential' : confVal.includes('ended') ? 'ended' : '';
-      const confLbl = confVal.includes('confirmed') ? '✓ Conf' : confVal.includes('potential') ? '◈ Pot' : confVal.includes('ended') ? '✕ End' : '';
+    function getStatusClass(s) {
+        const l = (s || '').toLowerCase();
+        if (l.includes('active') || l.includes('mainnet')) return 'st-a';
+        if (l.includes('wait')) return 'st-w';
+        if (l.includes('season')) return 'st-s';
+        if (l.includes('confirmed') || l.includes('testnet')) return 'st-c';
+        if (l.includes('potential')) return 'st-p';
+        return 'st-d';
+    }
 
-      return `
-        <div style="background:var(--s2);border:1.5px solid ${hasLink?'var(--border2)':'rgba(239,68,68,0.2)'};
-                    border-radius:14px;padding:18px;display:flex;flex-direction:column;gap:13px;
-                    transition:border-color 0.2s;">
-          <div style="display:flex;align-items:center;gap:12px;">
-            <div style="width:46px;height:46px;border-radius:11px;border:1.5px solid var(--border2);
-                        background:var(--s3);display:flex;align-items:center;justify-content:center;
-                        overflow:hidden;flex-shrink:0;font-size:1.3rem;">
-              ${p.logo_url ? `<img src="${esc(p.logo_url)}" style="width:100%;height:100%;object-fit:cover;border-radius:9px" onerror="this.parentElement.innerHTML='🪂'">` : '🪂'}
-            </div>
-            <div style="flex:1;min-width:0;">
-              <div style="font-size:0.98rem;font-weight:800;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${esc(p.name)}</div>
-              <div style="display:flex;gap:5px;margin-top:6px;flex-wrap:wrap;align-items:center;">
-                <span class="proj-item-status ${getStCls(p.status)}">${esc(p.status||'TBA')}</span>
-                <span class="live-dot ${isLive?'on':'off'}">${isLive?'● LIVE':'○ DRAFT'}</span>
-                ${confCls ? `<span class="conf-badge ${confCls}">${confLbl}</span>` : ''}
+    function showToast(msg, type = 'success') {
+        const t = document.getElementById('toast');
+        if (!t) return;
+        t.textContent = msg;
+        t.className = `toast ${type} show`;
+        clearTimeout(t._hide);
+        t._hide = setTimeout(() => t.classList.remove('show'), 3200);
+    }
+
+    // ─── LOAD PROJECTS ───
+    async function loadProjects() {
+        try {
+            const res = await fetch('/api/admin-airdrop');
+            if (!res.ok) throw new Error('Gagal fetch data');
+            projects = await res.json();
+            renderStatusSummary();
+            renderProjectLinks();
+        } catch (e) {
+            const list = document.getElementById('proj-links-list');
+            if (list) {
+                list.innerHTML =
+                    `<div class="empty-state"><span class="emoji">🚫</span>${esc(e.message)}</div>`;
+            }
+        }
+    }
+
+    // ─── STATUS SUMMARY ───
+    function renderStatusSummary() {
+        const wrap = document.getElementById('status-summary');
+        if (!wrap) return;
+
+        const total = projects.length;
+        const live = projects.filter(p => p.published === true).length;
+        const draft = total - live;
+        const active = projects.filter(p => (p.status || '').toLowerCase().includes('active')).length;
+        const waitlist = projects.filter(p => (p.status || '').toLowerCase().includes('wait')).length;
+        const ended = projects.filter(p => (p.status || '').toLowerCase().includes('end') || (p.confirmation_status || '')
+            .toLowerCase().includes('ended')).length;
+        const confirmed = projects.filter(p => (p.confirmation_status || '').toLowerCase().includes('confirmed')).length;
+        const potential = projects.filter(p => (p.confirmation_status || '').toLowerCase().includes('potential')).length;
+        const hasLink = projects.filter(p => !!p.link).length;
+        const noLink = total - hasLink;
+
+        const blocks = [
+            ['Total', total, 'var(--glow-cyan)'],
+            ['Live', live, 'var(--glow-green)'],
+            ['Draft', draft, 'var(--glow-orange)'],
+            ['Active', active, 'var(--glow-green)'],
+            ['Waitlist', waitlist, 'var(--glow-orange)'],
+            ['Confirmed', confirmed, 'var(--glow-cyan)'],
+            ['Potential', potential, 'var(--glow-purple)'],
+            ['Ended', ended, 'var(--text3)'],
+            ['Ada Link', hasLink, 'var(--glow-green)'],
+            ['No Link', noLink, 'var(--glow-pink)'],
+        ];
+
+        wrap.innerHTML = blocks.map(([label, val, color]) =>
+            `<div class="stat-block"><div class="n" style="color:${color}">${val}</div><div class="l">${esc(label)}</div></div>`
+        ).join('');
+    }
+
+    // ─── FILTER ───
+    function setPLFilter(mode, btn) {
+        _plFilter = mode;
+        document.querySelectorAll('#proj-links-section .ftab').forEach(t => t.classList.remove('active'));
+        if (btn) btn.classList.add('active');
+        renderProjectLinks();
+    }
+
+    // ─── RENDER PROJECT LINKS ───
+    function renderProjectLinks() {
+        const list = document.getElementById('proj-links-list');
+        const count = document.getElementById('proj-links-count');
+        if (!list) return;
+
+        let filtered = [...projects];
+        if (_plFilter === 'active') filtered = filtered.filter(p => (p.status || '').toLowerCase().includes('active'));
+        if (_plFilter === 'waitlist') filtered = filtered.filter(p => (p.status || '').toLowerCase().includes('wait'));
+        if (_plFilter === 'ended') filtered = filtered.filter(p => (p.status || '').toLowerCase().includes('end') || (p
+            .confirmation_status || '').toLowerCase().includes('ended'));
+        if (_plFilter === 'confirmed') filtered = filtered.filter(p => (p.confirmation_status || '').toLowerCase()
+            .includes('confirmed'));
+        if (_plFilter === 'potential') filtered = filtered.filter(p => (p.confirmation_status || '').toLowerCase()
+            .includes('potential'));
+        if (_plFilter === 'nolink') filtered = filtered.filter(p => !p.link);
+        if (_plFilter === 'haslink') filtered = filtered.filter(p => !!p.link);
+
+        if (count) count.textContent = `${filtered.length}/${projects.length}`;
+
+        if (!filtered.length) {
+            list.innerHTML =
+                `<div class="empty-state"><span class="emoji">🕳️</span>Tidak ada proyek dengan filter ini.</div>`;
+            return;
+        }
+
+        list.innerHTML = filtered.map(p => {
+            const hasLink = !!(p.link);
+            const isLive = p.published === true;
+            const confVal = (p.confirmation_status || '').toLowerCase();
+            let confCls = '',
+                confLbl = '';
+            if (confVal.includes('confirmed')) { confCls = 'confirmed';
+                confLbl = '✓ Conf'; } else if (confVal.includes('potential')) { confCls = 'potential';
+                confLbl = '◈ Pot'; } else if (confVal.includes('ended')) { confCls = 'ended';
+                confLbl = '✕ End'; }
+
+            const tags = (p.tags || '').split(',').map(t => t.trim()).filter(Boolean);
+
+            return `
+            <div class="proj-card ${hasLink?'':'nolink'}">
+              <div class="top">
+                <div class="logo-wrap">
+                  ${p.logo_url ? `<img src="${esc(p.logo_url)}" onerror="this.parentElement.innerHTML='🪂'" />` : '🪂'}
+                </div>
+                <div class="info">
+                  <div class="name">${esc(p.name)}</div>
+                  ${tags.length ? `<div class="tags">${tags.map(t => `<span class="tag">${esc(t)}</span>`).join('')}</div>` : ''}
+                </div>
+              </div>
+              <div class="badges">
+                <span class="badge-status ${getStatusClass(p.status)}">${esc(p.status||'TBA')}</span>
+                <span class="badge-live ${isLive?'on':'off'}">${isLive?'● LIVE':'○ DRAFT'}</span>
+                ${confCls ? `<span class="badge-conf ${confCls}">${confLbl}</span>` : ''}
+              </div>
+              <div class="actions">
+                ${hasLink
+                  ? `<a href="${esc(p.link)}" target="_blank" rel="noopener" class="link-btn">🌐 Buka Website</a>`
+                  : `<span class="link-btn nolink">✕ Belum ada link</span>`
+                }
+                <button class="edit-btn" onclick="openEditModal(${p.id})">✏️ Edit</button>
               </div>
             </div>
-          </div>
-          <div style="display:flex;gap:8px;">
-            ${hasLink
-              ? `<a href="${esc(p.link)}" target="_blank" rel="noopener"
-                    style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:0.65rem;
-                           border-radius:9px;background:rgba(0,229,160,0.1);border:1.5px solid rgba(0,229,160,0.25);
-                           color:var(--accent);font-family:var(--mono);font-size:0.72rem;text-decoration:none;font-weight:800">
-                  🌐 Buka Website</a>`
-              : `<div style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:0.65rem;
-                             border-radius:9px;background:rgba(239,68,68,0.08);border:1.5px solid rgba(239,68,68,0.2);
-                             color:var(--red);font-family:var(--mono);font-size:0.72rem;font-weight:800;">
-                   ✕ Belum ada link</div>`}
-            <button class="edit-btn" onclick="openEditModal(${p.id})" title="Edit proyek">✏️ Edit</button>
-          </div>
-        </div>`;
-    }).join('');
-  }
-
-  // ── EDIT MODAL (hanya: status, tags, funding, deskripsi, link) ──
-  function openEditModal(id) {
-    const p = projects.find(x => x.id === id);
-    if (!p) return;
-    _editingId = id;
-
-    const statusSel = document.getElementById('e-status');
-    statusSel.innerHTML = STATUS_OPTIONS.map(s => `<option value="${esc(s)}" ${p.status===s?'selected':''}>${esc(s)}</option>`).join('');
-
-    document.getElementById('edit-modal-title').textContent = `✏️ Edit: ${p.name || '—'}`;
-    document.getElementById('e-tags').value     = p.tags || '';
-    document.getElementById('e-raisedid').value = p.RaisedID || '';
-    document.getElementById('e-raisedn').value  = p.RaisedEN || '';
-    document.getElementById('e-descid').value   = p.descriptionID || '';
-    document.getElementById('e-descen').value   = p.descriptionEN || '';
-    document.getElementById('e-link').value     = p.link || '';
-
-    document.getElementById('edit-modal').classList.remove('hidden');
-  }
-
-  function closeEditModal() {
-    _editingId = null;
-    document.getElementById('edit-modal').classList.add('hidden');
-  }
-
-  async function saveEdit() {
-    if (!_editingId) return;
-    const p = projects.find(x => x.id === _editingId);
-
-    // PENTING: kolom "name" wajib diisi (NOT NULL) di tabel, jadi walau tidak diedit
-    // tetap harus disertakan supaya update tidak gagal karena constraint.
-    const payload = {
-      name:          p ? p.name : undefined,
-      status:        document.getElementById('e-status')?.value       || null,
-      tags:          document.getElementById('e-tags')?.value?.trim() || null,
-      RaisedID:      document.getElementById('e-raisedid')?.value?.trim() || null,
-      RaisedEN:      document.getElementById('e-raisedn')?.value?.trim()  || null,
-      descriptionID: document.getElementById('e-descid')?.value?.trim()   || null,
-      descriptionEN: document.getElementById('e-descen')?.value?.trim()   || null,
-      link:          document.getElementById('e-link')?.value?.trim()     || null,
-    };
-
-    const btn = document.getElementById('btn-save-edit');
-    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Menyimpan...'; }
-
-    try {
-      const res = await fetch(`/api/admin-airdrop?id=${_editingId}`, {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(payload),
-      });
-      if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error || `HTTP ${res.status}`); }
-      showToast('✓ Perubahan tersimpan!', 'success');
-      closeEditModal();
-      await loadProjects();
-    } catch(e) {
-      showToast('Error: ' + e.message, 'error');
-    } finally {
-      if (btn) { btn.disabled = false; btn.innerHTML = '💾 Simpan'; }
+          `;
+        }).join('');
     }
-  }
 
-  // ── CALCULATOR ─────────────────────────────────────────
-  const CALC_KEYS = ['C','←','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','='];
-  let _calcExpr = '';
+    // ─── EDIT MODAL ───
+    function openEditModal(id) {
+        const p = projects.find(x => x.id === id);
+        if (!p) return;
+        _editingId = id;
 
-  function buildCalcGrid() {
-    const grid = document.getElementById('calc-grid');
-    if (!grid) return;
-    grid.innerHTML = CALC_KEYS.map(k => {
-      const isOp   = '/*-+='.includes(k);
-      const isZero = k === '0';
-      return `<button class="calc-key ${isOp?'op':''} ${isZero?'zero':''}" onclick="calcPress('${k==='←'?'back':k}')">${k}</button>`;
-    }).join('');
-  }
+        const statusSel = document.getElementById('e-status');
+        statusSel.innerHTML = STATUS_OPTIONS.map(s =>
+            `<option value="${esc(s)}" ${p.status===s?'selected':''}>${esc(s)}</option>`
+        ).join('');
 
-  function calcPress(key) {
-    const disp = document.getElementById('calc-display');
-    if (!disp) return;
-    if (key === 'C') { _calcExpr = ''; disp.value = '0'; return; }
-    if (key === 'back') { _calcExpr = _calcExpr.slice(0, -1); disp.value = _calcExpr || '0'; return; }
-    if (key === '=') {
-      try {
-        if (!/^[0-9+\-*/.%\s]+$/.test(_calcExpr)) throw new Error();
-        const result = Function(`"use strict"; return (${_calcExpr})`)();
-        disp.value = String(result);
-        _calcExpr = String(result);
-      } catch(e) { disp.value = 'Error'; _calcExpr = ''; }
-      return;
+        document.getElementById('edit-modal-title').textContent = `✏️ Edit: ${p.name || '—'}`;
+        document.getElementById('e-tags').value = p.tags || '';
+        document.getElementById('e-raisedid').value = p.RaisedID || '';
+        document.getElementById('e-raisedn').value = p.RaisedEN || '';
+        document.getElementById('e-descid').value = p.descriptionID || '';
+        document.getElementById('e-descen').value = p.descriptionEN || '';
+        document.getElementById('e-link').value = p.link || '';
+
+        document.getElementById('edit-modal').classList.remove('hidden');
     }
-    _calcExpr += key;
-    disp.value = _calcExpr;
-  }
 
-  function toggleCalc() {
-    const panel = document.getElementById('calc-panel');
-    if (!panel) return;
-    panel.classList.toggle('hidden');
-  }
-
-  // ── LOGIN PARTICLE CANVAS ─────────────────────────────
-  (function initLoginParticles() {
-    const canvas = document.getElementById('login-canvas');
-    if (!canvas) return;
-    const ctx = canvas.getContext('2d');
-
-    const COLORS = ['#00e5a0','#00c8f0','#7c6dfa','#3b82f6'];
-    const PARTICLE_COUNT = 80;
-    let particles = [];
-    let W, H, animId;
-
-    function resize() { W = canvas.width = window.innerWidth; H = canvas.height = window.innerHeight; }
-    function randBetween(a, b) { return a + Math.random() * (b - a); }
-    function createParticle() {
-      return {
-        x: randBetween(0, W), y: randBetween(0, H), r: randBetween(0.8, 2.5),
-        vx: randBetween(-0.25, 0.25), vy: randBetween(-0.4, -0.1),
-        alpha: randBetween(0.2, 0.8), color: COLORS[Math.floor(Math.random() * COLORS.length)],
-        pulse: randBetween(0, Math.PI * 2),
-      };
+    function closeEditModal() {
+        _editingId = null;
+        document.getElementById('edit-modal').classList.add('hidden');
     }
-    function init() { resize(); particles = Array.from({ length: PARTICLE_COUNT }, createParticle); }
-    function drawHexagon(x, y, size) {
-      ctx.beginPath();
-      for (let i = 0; i < 6; i++) {
-        const angle = (Math.PI / 3) * i - Math.PI / 6;
-        const px = x + size * Math.cos(angle), py = y + size * Math.sin(angle);
-        i === 0 ? ctx.moveTo(px, py) : ctx.lineTo(px, py);
-      }
-      ctx.closePath();
-    }
-    function draw() {
-      ctx.clearRect(0, 0, W, H);
-      for (let i = 0; i < particles.length; i++) {
-        for (let j = i + 1; j < particles.length; j++) {
-          const dx = particles[i].x - particles[j].x, dy = particles[i].y - particles[j].y;
-          const dist = Math.sqrt(dx * dx + dy * dy);
-          if (dist < 120) {
-            ctx.beginPath();
-            ctx.moveTo(particles[i].x, particles[i].y);
-            ctx.lineTo(particles[j].x, particles[j].y);
-            ctx.strokeStyle = `rgba(0,229,160,${0.06 * (1 - dist / 120)})`;
-            ctx.lineWidth = 0.5;
-            ctx.stroke();
-          }
+
+    async function saveEdit() {
+        if (!_editingId) return;
+        const p = projects.find(x => x.id === _editingId);
+
+        const payload = {
+            name: p ? p.name : undefined,
+            status: document.getElementById('e-status')?.value || null,
+            tags: document.getElementById('e-tags')?.value?.trim() || null,
+            RaisedID: document.getElementById('e-raisedid')?.value?.trim() || null,
+            RaisedEN: document.getElementById('e-raisedn')?.value?.trim() || null,
+            descriptionID: document.getElementById('e-descid')?.value?.trim() || null,
+            descriptionEN: document.getElementById('e-descen')?.value?.trim() || null,
+            link: document.getElementById('e-link')?.value?.trim() || null,
+        };
+
+        const btn = document.getElementById('btn-save-edit');
+        if (btn) {
+            btn.disabled = true;
+            btn.innerHTML = '<span class="spinner"></span> Menyimpan...';
         }
-      }
-      particles.forEach(p => {
-        p.pulse += 0.02;
-        const pulsedAlpha = p.alpha * (0.7 + 0.3 * Math.sin(p.pulse));
-        const pulsedR = p.r * (0.9 + 0.2 * Math.sin(p.pulse));
-        const grd = ctx.createRadialGradient(p.x, p.y, 0, p.x, p.y, pulsedR * 4);
-        grd.addColorStop(0, p.color + Math.round(pulsedAlpha * 255).toString(16).padStart(2,'0'));
-        grd.addColorStop(1, 'transparent');
-        ctx.beginPath(); ctx.arc(p.x, p.y, pulsedR * 4, 0, Math.PI * 2); ctx.fillStyle = grd; ctx.fill();
-        ctx.fillStyle = p.color + Math.round(pulsedAlpha * 255).toString(16).padStart(2,'0');
-        if (p.r > 1.8) { drawHexagon(p.x, p.y, pulsedR * 1.5); ctx.fill(); }
-        else { ctx.beginPath(); ctx.arc(p.x, p.y, pulsedR, 0, Math.PI * 2); ctx.fill(); }
-        p.x += p.vx; p.y += p.vy;
-        if (p.y < -10) { p.y = H + 5; p.x = randBetween(0, W); }
-        if (p.x < -10) p.x = W + 5;
-        if (p.x > W + 10) p.x = -5;
-      });
-      animId = requestAnimationFrame(draw);
+
+        try {
+            const res = await fetch(`/api/admin-airdrop?id=${_editingId}`, {
+                method: 'PATCH',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(payload),
+            });
+            if (!res.ok) {
+                const err = await res.json().catch(() => ({}));
+                throw new Error(err.error || `HTTP ${res.status}`);
+            }
+            showToast('✓ Perubahan tersimpan!', 'success');
+            closeEditModal();
+            await loadProjects();
+        } catch (e) {
+            showToast('Error: ' + e.message, 'error');
+        } finally {
+            if (btn) {
+                btn.disabled = false;
+                btn.innerHTML = '💾 Simpan';
+            }
+        }
     }
-    function stopParticles() { if (animId) cancelAnimationFrame(animId); }
-    init(); draw();
-    window.addEventListener('resize', () => { resize(); });
-    window._stopLoginParticles = stopParticles;
-  })();
 
-  buildCalcGrid();
-  loadProjects();
-</script>
+    // ─── CALCULATOR ───
+    const CALC_KEYS = ['C', '←', '%', '/', '7', '8', '9', '*', '4', '5', '6', '-', '1', '2', '3', '+', '0', '.', '='];
+    let _calcExpr = '';
 
-<script>
-  const YOUR_CLIENT_ID = '1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com';
-
-  async function handleCredentialResponse(response) {
-    try {
-      const res = await fetch('/api/verify-token', {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ token: response.credential }),
-      });
-      const result = await res.json();
-      if (res.ok && result.success) {
-        document.getElementById('login-section').style.display = 'none';
-        if (window._stopLoginParticles) window._stopLoginParticles();
-        document.getElementById('admin-content').classList.remove('hidden');
-      } else {
-        alert(`Akses ditolak: ${result.message || 'Unauthorized'}`);
-        google.accounts.id.disableAutoSelect();
-      }
-    } catch(err) {
-      alert('Verifikasi gagal. Coba lagi nanti.');
+    function buildCalcGrid() {
+        const grid = document.getElementById('calc-grid');
+        if (!grid) return;
+        grid.innerHTML = CALC_KEYS.map(k => {
+            const isOp = '/*-+='.includes(k);
+            const isZero = k === '0';
+            return `<button class="calc-key ${isOp?'op':''} ${isZero?'zero':''}" onclick="calcPress('${k==='←'?'back':k}')">${k}</button>`;
+        }).join('');
     }
-  }
 
-  window.onload = function() {
-    google.accounts.id.initialize({ client_id: YOUR_CLIENT_ID, callback: handleCredentialResponse });
-    google.accounts.id.renderButton(document.getElementById('g_id_onload'), { theme: 'outline', size: 'large' });
-    google.accounts.id.prompt();
-  };
+    function calcPress(key) {
+        const disp = document.getElementById('calc-display');
+        if (!disp) return;
+        if (key === 'C') { _calcExpr = '';
+            disp.value = '0'; return; }
+        if (key === 'back') { _calcExpr = _calcExpr.slice(0, -1);
+            disp.value = _calcExpr || '0'; return; }
+        if (key === '=') {
+            try {
+                if (!/^[0-9+\-*/.%\s]+$/.test(_calcExpr)) throw new Error();
+                const result = Function(`"use strict"; return (${_calcExpr})`)();
+                disp.value = String(result);
+                _calcExpr = String(result);
+            } catch (e) { disp.value = 'Error';
+                _calcExpr = ''; }
+            return;
+        }
+        _calcExpr += key;
+        disp.value = _calcExpr;
+    }
+
+    function toggleCalc() {
+        const panel = document.getElementById('calc-panel');
+        if (!panel) return;
+        panel.classList.toggle('hidden');
+    }
+
+    // ─── GOOGLE LOGIN ───
+    const YOUR_CLIENT_ID = '1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com';
+
+    async function handleCredentialResponse(response) {
+        try {
+            const res = await fetch('/api/verify-token', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ token: response.credential }),
+            });
+            const result = await res.json();
+            if (res.ok && result.success) {
+                document.getElementById('login-section').style.display = 'none';
+                document.getElementById('admin-content').classList.remove('hidden');
+            } else {
+                alert(`Akses ditolak: ${result.message || 'Unauthorized'}`);
+                google.accounts.id.disableAutoSelect();
+            }
+        } catch (err) {
+            alert('Verifikasi gagal. Coba lagi nanti.');
+        }
+    }
+
+    // ─── INIT ───
+    window.onload = function() {
+        google.accounts.id.initialize({
+            client_id: YOUR_CLIENT_ID,
+            callback: handleCredentialResponse,
+        });
+        google.accounts.id.renderButton(document.getElementById('g_id_onload'), {
+            theme: 'outline',
+            size: 'large',
+            text: 'signin_with',
+            shape: 'pill',
+            logo_alignment: 'left',
+        });
+        google.accounts.id.prompt();
+
+        buildCalcGrid();
+        loadProjects();
+    };
 </script>
 
 </body>
