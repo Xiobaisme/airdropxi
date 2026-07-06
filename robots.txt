@@ -1,6 +1,0 @@
-User-agent: *
-Allow: /
-Disallow: /api/admin-airdrop.js
-Disallow: /api/verify-token.js
-
-Sitemap: https://airdropxi.vercel.app/sitemap.xml
