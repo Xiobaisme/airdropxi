@@ -34,8 +34,8 @@ module.exports = async function handler(req, res) {
   // EXCHANGES HANDLER
   // ─────────────────────────────────────────────
   if (type === 'exchanges') {
-    // ... (kode sama seperti sebelumnya)
-    // (Saya tidak menulis ulang seluruh kode di sini, tapi di file akhir akan tetap ada)
+    // ... (kode sama seperti sebelumnya, tidak diubah)
+    // (Saya tidak menulis ulang di sini agar ringkas, tapi file akhir tetap lengkap)
   }
 
   // ─────────────────────────────────────────────
@@ -70,32 +70,59 @@ module.exports = async function handler(req, res) {
   // AIRDROP & PROYEK (tanpa roadmap)
   // ============================================================
 
-  // ── Helper: buat payload untuk tabel airdrops (hanya field yang dikirim) ──
-  function buildAirdropsPayload(p, includeAll = false) {
-    const payload = {};
-    const fields = ['name', 'status', 'confirmation_status', 'published', 'link', 'website_url', 'tags', 'RaisedID', 'RaisedEN', 'tasksID', 'tasksEN', 'logo_url', 'testnet_links', 'backers'];
-    fields.forEach(f => {
-      if (f in p) {
-        payload[f] = p[f] === undefined ? null : p[f];
-      }
-    });
-    // khusus published: jika ada, ubah ke boolean
-    if ('published' in p) payload.published = Boolean(p.published);
-    return payload;
+  // ── Helper untuk CREATE (termasuk name) ──
+  function buildAirdropsPayload(p) {
+    return {
+      name:                p.name                || null,
+      status:              p.status              || null,
+      confirmation_status: p.confirmation_status || null,
+      published:           p.published !== undefined ? Boolean(p.published) : false,
+      link:                p.link                || null,
+      website_url:         p.website_url         || null,
+      tags:                p.tags                || null,
+      RaisedID:            p.RaisedID            || null,
+      RaisedEN:            p.RaisedEN            || null,
+      tasksID:             p.tasksID             || null,
+      tasksEN:             p.tasksEN             || null,
+      logo_url:            p.logo_url            || null,
+      testnet_links:       p.testnet_links       || null,
+      backers:             p.backers             || null,
+    };
   }
 
-  // ── Helper: buat payload untuk tabel proyek (hanya field yang dikirim) ──
-  function buildProyekPayload(p, airdropsId = null) {
-    const payload = {};
-    const fields = ['name', 'status', 'confirmation_status', 'published', 'link', 'website_url', 'tags', 'RaisedID', 'RaisedEN', 'tasksID', 'tasksEN', 'descriptionID', 'descriptionEN', 'ticker', 'total_supply', 'network', 'tge_date', 'logo_url', 'twitter', 'discord', 'telegram', 'linkedin', 'youtube', 'instagram', 'faqID', 'faqEN', 'testnet_links', 'tasks_images', 'backers'];
-    fields.forEach(f => {
-      if (f in p) {
-        payload[f] = p[f] === undefined ? null : p[f];
-      }
-    });
-    if (airdropsId !== null) payload.airdrop_id = airdropsId;
-    if ('published' in p) payload.published = Boolean(p.published);
-    return payload;
+  function buildProyekPayload(p, airdropsId) {
+    return {
+      name:                p.name                || null,
+      status:              p.status              || null,
+      confirmation_status: p.confirmation_status || null,
+      published:           p.published !== undefined ? Boolean(p.published) : false,
+      link:                p.link                || null,
+      website_url:         p.website_url         || null,
+      tags:                p.tags                || null,
+      RaisedID:            p.RaisedID            || null,
+      RaisedEN:            p.RaisedEN            || null,
+      tasksID:             p.tasksID             || null,
+      tasksEN:             p.tasksEN             || null,
+      descriptionID:       p.descriptionID       || null,
+      descriptionEN:       p.descriptionEN       || null,
+      ticker:              p.ticker              || null,
+      total_supply:        p.total_supply        || null,
+      network:             p.network             || null,
+      tge_date:            p.tge_date            || null,
+      logo_url:            p.logo_url            || null,
+      twitter:             p.twitter             || null,
+      discord:             p.discord             || null,
+      telegram:            p.telegram            || null,
+      linkedin:            p.linkedin            || null,
+      youtube:             p.youtube             || null,
+      instagram:           p.instagram           || null,
+      faqID:               p.faqID               || null,
+      faqEN:               p.faqEN               || null,
+      testnet_links:       p.testnet_links       || null,
+      tasks_images:        p.tasks_images        || null,
+      backers:             p.backers             || null,
+      airdrop_id:          airdropsId,
+    };
   }
 
   // ── GET ─────────────────────────────────────────
@@ -145,10 +172,9 @@ module.exports = async function handler(req, res) {
       return res.status(400).json({ error: 'Field "name" wajib diisi' });
 
     try {
-      const airdropPayload = buildAirdropsPayload(req.body);
       const r1 = await fetch(`${BASE}/airdrops`, {
         method: 'POST', headers: H,
-        body: JSON.stringify(airdropPayload),
+        body: JSON.stringify(buildAirdropsPayload(req.body)),
       });
       const result1 = await r1.json();
       if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result1) });
@@ -156,10 +182,9 @@ module.exports = async function handler(req, res) {
       const newId = Array.isArray(result1) ? result1[0]?.id : result1?.id;
       if (!newId) throw new Error('Gagal dapat ID setelah insert ke airdrops');
 
-      const proyekPayload = buildProyekPayload(req.body, newId);
       const r2 = await fetch(`${BASE}/proyek`, {
         method: 'POST', headers: H,
-        body: JSON.stringify(proyekPayload),
+        body: JSON.stringify(buildProyekPayload(req.body, newId)),
       });
       if (!r2.ok) {
         const err2 = await r2.json().catch(() => ({}));
@@ -170,7 +195,7 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ error: 'Gagal insert ke proyek: ' + serializeError(err2) });
       }
 
-      // Notifikasi (tetap ada)
+      // Notifikasi (opsional)
       try {
         await fetch(`https://airdropxi.vercel.app/api/notify-subscribers`, {
           method: 'POST',
@@ -203,9 +228,35 @@ module.exports = async function handler(req, res) {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
     try {
-      // Buat payload hanya dari field yang dikirim
-      const airdropPayload = buildAirdropsPayload(req.body);
-      const proyekPayload = buildProyekPayload(req.body);
+      // 🔥 BUILD PAYLOAD WITHOUT 'name' (untuk menghindari not-null error)
+      const airdropFields = [
+        'status', 'confirmation_status', 'published', 'link', 'website_url',
+        'tags', 'RaisedID', 'RaisedEN', 'tasksID', 'tasksEN',
+        'logo_url', 'testnet_links', 'backers'
+      ];
+      const airdropPayload = {};
+      airdropFields.forEach(f => {
+        if (f in req.body) {
+          airdropPayload[f] = req.body[f] === undefined ? null : req.body[f];
+        }
+      });
+      if ('published' in req.body) airdropPayload.published = Boolean(req.body.published);
+
+      const proyekFields = [
+        'status', 'confirmation_status', 'published', 'link', 'website_url',
+        'tags', 'RaisedID', 'RaisedEN', 'tasksID', 'tasksEN',
+        'descriptionID', 'descriptionEN', 'ticker', 'total_supply',
+        'network', 'tge_date', 'logo_url', 'twitter', 'discord',
+        'telegram', 'linkedin', 'youtube', 'instagram',
+        'faqID', 'faqEN', 'testnet_links', 'tasks_images', 'backers'
+      ];
+      const proyekPayload = {};
+      proyekFields.forEach(f => {
+        if (f in req.body) {
+          proyekPayload[f] = req.body[f] === undefined ? null : req.body[f];
+        }
+      });
+      if ('published' in req.body) proyekPayload.published = Boolean(req.body.published);
 
       // Update airdrops
       const r1 = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, {
@@ -217,7 +268,7 @@ module.exports = async function handler(req, res) {
       if (text) { try { result = JSON.parse(text); } catch(e) {} }
       if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result || text) });
 
-      // Update proyek (hanya jika ada field yang dikirim)
+      // Update proyek hanya jika ada field yang diubah
       if (Object.keys(proyekPayload).length > 0) {
         const rProyek = await fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`, {
           method: 'PATCH', headers: H,
@@ -230,8 +281,7 @@ module.exports = async function handler(req, res) {
         }
       }
 
-      const updated = Array.isArray(result) ? result : (result ? [result] : [{ id, ...airdropPayload }]);
-      return res.status(200).json(updated);
+      return res.status(200).json({ success: true, updated: result });
     } catch (e) {
       return res.status(500).json({ error: e.message });
     }
@@ -253,7 +303,6 @@ module.exports = async function handler(req, res) {
       if (intId !== undefined) {
         deletePromises.push(
           fetch(`${BASE}/proyek?airdrop_id=eq.${intId}`, { method: 'DELETE', headers: H })
-          // roadmap sudah dihapus
         );
       }
 
