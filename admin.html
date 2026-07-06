@@ -965,18 +965,6 @@
     renderList();
   }
 
-  async function saveReorder() {
-    const items = projects.map((p, idx) => ({ id: p.id, sort_order: idx }));
-    try {
-      await fetch('/api/admin-airdrop?type=reorder', {
-        method: 'PATCH',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ items }),
-      });
-    } catch(e) {
-      showToast('Gagal simpan urutan: ' + e.message, 'error');
-    }
-  }
 
  let _dragSrcIdx = null;
 
@@ -2725,53 +2713,51 @@ async function _deleteExManage(id, name) {
   } catch(e) { showToast('Error: ' + e.message, 'error'); }
 }
 
-  window.onload = function() {
+window.onload = function() {
     google.accounts.id.initialize({ client_id: YOUR_CLIENT_ID, callback: handleCredentialResponse });
     google.accounts.id.renderButton(document.getElementById('g_id_onload'), { theme: 'outline', size: 'large' });
     google.accounts.id.prompt();
   };
 
-  // ── TASK IMAGES BUILDER ───────────────────────────────
-// ── TASK ROWS BUILDER ─────────────────────────────────
-function initTaskRowsBuilder(data) {
-  const builder = document.getElementById('task-rows-builder');
-  if (!builder) return;
-  builder.innerHTML = '';
+  // ── TASK ROWS BUILDER ─────────────────────────────────
+  function initTaskRowsBuilder(data) {
+    const builder = document.getElementById('task-rows-builder');
+    if (!builder) return;
+    builder.innerHTML = '';
 
-  let tasksID = [], tasksEN = [], images = [], taskLinks = [];
-  try {
-    const rawID = data.tasksID || '';
-    const rawEN = data.tasksEN || '';
-    tasksID = rawID ? rawID.split('\n\n').map(l => l.trim()).filter(Boolean) : [];
-    tasksEN = rawEN ? rawEN.split('\n\n').map(l => l.trim()).filter(Boolean) : [];
-    const rawImgs = data.tasks_images;
-    if (Array.isArray(rawImgs)) images = rawImgs;
-    else if (typeof rawImgs === 'string' && rawImgs.trim()) images = JSON.parse(rawImgs);
-    // Parse testnet_links untuk link per task
-    if (data.testnet_links) {
-      const parsed = typeof data.testnet_links === 'string' ? JSON.parse(data.testnet_links) : data.testnet_links;
-      if (Array.isArray(parsed)) taskLinks = parsed;
+    let tasksID = [], tasksEN = [], images = [], taskLinks = [];
+    try {
+      const rawID = data.tasksID || '';
+      const rawEN = data.tasksEN || '';
+      tasksID = rawID ? rawID.split('\n\n').map(l => l.trim()).filter(Boolean) : [];
+      tasksEN = rawEN ? rawEN.split('\n\n').map(l => l.trim()).filter(Boolean) : [];
+      const rawImgs = data.tasks_images;
+      if (Array.isArray(rawImgs)) images = rawImgs;
+      else if (typeof rawImgs === 'string' && rawImgs.trim()) images = JSON.parse(rawImgs);
+      if (data.testnet_links) {
+        const parsed = typeof data.testnet_links === 'string' ? JSON.parse(data.testnet_links) : data.testnet_links;
+        if (Array.isArray(parsed)) taskLinks = parsed;
+      }
+    } catch(e) { images = []; taskLinks = []; }
+
+    const maxRows = Math.max(tasksID.length, tasksEN.length, 1);
+    for (let i = 0; i < maxRows; i++) {
+      addTaskRow({
+        idText:    tasksID[i]        || '',
+        enText:    tasksEN[i]        || '',
+        imgUrl:    images[i]?.url    || '',
+        caption:   images[i]?.caption || '',
+        link:      taskLinks[i]?.url  || '',
+        linkLabel: taskLinks[i]?.label || '',
+      });
     }
-  } catch(e) { images = []; taskLinks = []; }
-
-  const maxRows = Math.max(tasksID.length, tasksEN.length, 1);
-  for (let i = 0; i < maxRows; i++) {
-    addTaskRow({
-      idText:    tasksID[i]        || '',
-      enText:    tasksEN[i]        || '',
-      imgUrl:    images[i]?.url    || '',
-      caption:   images[i]?.caption || '',
-      link:      taskLinks[i]?.url  || '',
-      linkLabel: taskLinks[i]?.label || '',
-    });
+    setTimeout(() => {
+      document.querySelectorAll('.task-id-input, .task-en-input').forEach(el => {
+        el.style.height = 'auto';
+        el.style.height = el.scrollHeight + 'px';
+      });
+    }, 30);
   }
-  setTimeout(() => {
-    document.querySelectorAll('.task-id-input, .task-en-input').forEach(el => {
-      el.style.height = 'auto';
-      el.style.height = el.scrollHeight + 'px';
-    });
-  }, 30);
-}
 
 function addTaskRow(item) {
   const builder = document.getElementById('task-rows-builder');
