@@ -75,6 +75,12 @@
       background: rgba(239,68,68,0.1); border: 1px solid rgba(239,68,68,0.25);
       border-radius: 4px; color: var(--red); letter-spacing: 0.08em;
     }
+    .nav-btn {
+      font-family: var(--mono); font-size: 0.6rem; font-weight: 700; padding: 0.35rem 0.7rem;
+      border-radius: 6px; cursor: pointer; transition: all 0.15s; white-space: nowrap;
+      border: 1px solid rgba(0,200,240,0.3); background: rgba(0,200,240,0.06); color: var(--cyan);
+    }
+    .nav-btn:hover { background: rgba(0,200,240,0.14); }
 
     /* filter tabs (reused inside Project Links section) */
     .ftab {
@@ -101,6 +107,14 @@
     .conf-badge.potential { background: rgba(124,109,250,0.1); color: var(--purple); border: 1px solid rgba(124,109,250,0.2); }
     .conf-badge.ended     { background: rgba(100,100,100,0.1); color: var(--text3);  border: 1px solid rgba(100,100,100,0.2); }
 
+    .edit-btn {
+      display: inline-flex; align-items: center; justify-content: center; gap: 4px;
+      padding: 0.4rem; border-radius: 6px; border: 1px solid rgba(59,130,246,0.3);
+      background: rgba(59,130,246,0.08); color: var(--blue); font-family: var(--mono);
+      font-size: 0.6rem; font-weight: 700; cursor: pointer; transition: all 0.15s;
+    }
+    .edit-btn:hover { background: rgba(59,130,246,0.18); }
+
     .toast {
       position: fixed; bottom: 20px; right: 20px; z-index: 2000;
       background: var(--s1); border: 1px solid var(--border); border-radius: 8px;
@@ -111,6 +125,81 @@
     .toast.show    { opacity: 1; transform: translateY(0); pointer-events: auto; }
     .toast.success { border-color: rgba(0,229,160,0.3); background: rgba(0,229,160,0.08); color: var(--accent); }
     .toast.error   { border-color: rgba(239,68,68,0.3);  background: rgba(239,68,68,0.08);  color: var(--red); }
+
+    /* modal (edit form) */
+    .modal {
+      position: fixed; inset: 0; z-index: 1500;
+      background: rgba(0,0,0,0.6); backdrop-filter: blur(4px);
+      display: flex; align-items: center; justify-content: center; padding: 1rem;
+    }
+    .modal-box {
+      background: var(--s1); border: 1px solid var(--border); border-radius: 12px;
+      max-width: 520px; width: 100%; max-height: 92vh; overflow-y: auto;
+      display: flex; flex-direction: column; gap: 0;
+    }
+    .modal-head {
+      display: flex; align-items: center; justify-content: space-between; gap: 10px;
+      padding: 1rem 1.25rem; border-bottom: 1px solid var(--border);
+      background: linear-gradient(105deg, rgba(59,130,246,0.05), transparent);
+    }
+    .modal-title { font-size: 0.92rem; font-weight: 700; }
+    .modal-body { padding: 1.1rem 1.25rem; display: flex; flex-direction: column; gap: 0.9rem; }
+    .modal-actions { display: flex; gap: 8px; justify-content: flex-end; padding: 1rem 1.25rem; border-top: 1px solid var(--border); }
+    .field { display: flex; flex-direction: column; gap: 5px; }
+    label { font-family: var(--mono); font-size: 0.6rem; color: var(--text2); letter-spacing: 0.06em; text-transform: uppercase; }
+    input, select, textarea {
+      width: 100%; background: var(--s2); border: 1px solid var(--border2); border-radius: 6px;
+      color: var(--text); font-family: var(--mono); font-size: 0.76rem;
+      padding: 0.58rem 0.75rem; outline: none; transition: border-color 0.2s; resize: vertical;
+    }
+    input:focus, select:focus, textarea:focus { border-color: var(--accent); }
+    textarea { min-height: 80px; line-height: 1.5; }
+    .fg2 { display: grid; grid-template-columns: 1fr 1fr; gap: 0.75rem; }
+    @media (max-width: 500px) { .fg2 { grid-template-columns: 1fr; } }
+    .btn-save, .btn-cancel {
+      padding: 0.52rem 0.9rem; border-radius: 6px; border: 1px solid var(--border2);
+      background: var(--s2); color: var(--text); font-family: var(--mono); font-size: 0.65rem;
+      cursor: pointer; transition: all 0.15s; font-weight: 600;
+    }
+    .btn-save { background: var(--adim); border-color: var(--aborder); color: var(--accent); }
+    .btn-save:hover { background: rgba(0,229,160,0.14); }
+    .btn-save:disabled { opacity: 0.5; cursor: not-allowed; }
+    .btn-cancel { background: transparent; border-color: var(--border); color: var(--text2); }
+    .btn-cancel:hover { border-color: var(--border2); color: var(--text); }
+    .spinner {
+      display: inline-block; width: 10px; height: 10px; border: 2px solid currentColor;
+      border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite;
+    }
+    @keyframes spin { to { transform: rotate(360deg); } }
+
+    /* calculator floating panel */
+    #calc-panel {
+      position: fixed; bottom: 20px; right: 20px; z-index: 1600;
+      width: 230px; background: var(--s1); border: 1px solid var(--border); border-radius: 12px;
+      overflow: hidden; box-shadow: 0 10px 30px rgba(0,0,0,0.4);
+    }
+    .calc-head {
+      display: flex; align-items: center; gap: 8px; padding: 0.6rem 0.8rem;
+      border-bottom: 1px solid var(--border); background: linear-gradient(90deg, rgba(0,200,240,0.06), transparent);
+      cursor: default;
+    }
+    .calc-head span.t { flex: 1; font-family: var(--mono); font-size: 0.58rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; }
+    .calc-close { background: none; border: none; color: var(--text3); cursor: pointer; font-size: 0.75rem; padding: 2px 6px; }
+    .calc-close:hover { color: var(--text); }
+    .calc-body { padding: 0.8rem; }
+    #calc-display {
+      width: 100%; background: var(--s2); border: 1px solid var(--border2); border-radius: 8px;
+      color: var(--accent); font-family: var(--mono); font-size: 1.1rem; font-weight: 700;
+      text-align: right; padding: 0.55rem 0.65rem; outline: none; margin-bottom: 8px;
+    }
+    .calc-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 5px; }
+    .calc-key {
+      padding: 0.6rem 0; border-radius: 6px; border: 1px solid var(--border2);
+      background: var(--s2); color: var(--text); font-family: var(--mono); font-size: 0.75rem;
+      font-weight: 700; cursor: pointer;
+    }
+    .calc-key.op { background: rgba(0,229,160,0.1); color: var(--accent); }
+    .calc-key.zero { grid-column: span 2; }
   </style>
 </head>
 <body>
@@ -134,9 +223,10 @@
       <a href="#" class="nav-logo">AirdropXI</a>
       <span class="nav-badge">ADMIN</span>
     </div>
+    <button class="nav-btn" onclick="toggleCalc()">🧮 Kalkulator</button>
   </nav>
 
-  <!-- ── PROJECT LINKS SECTION (only feature kept) ── -->
+  <!-- ── PROJECT LINKS SECTION ── -->
   <div id="proj-links-section" style="position:relative;z-index:1;max-width:1160px;margin:0 auto;padding:1.25rem 1.25rem 4rem;">
     <div style="background:var(--s1);border:1px solid var(--border);border-radius:var(--r);overflow:hidden;">
 
@@ -174,10 +264,68 @@
 
       <!-- Grid cards -->
       <div id="proj-links-list" style="padding:1.25rem;
-           display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:10px;">
+           display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:10px;">
         <div style="font-family:var(--mono);font-size:0.65rem;color:var(--text3);
                     grid-column:1/-1;text-align:center;padding:2rem">Loading...</div>
       </div>
+    </div>
+  </div>
+
+  <!-- ── EDIT MODAL ── -->
+  <div id="edit-modal" class="modal hidden">
+    <div class="modal-box">
+      <div class="modal-head">
+        <div class="modal-title" id="edit-modal-title">✏️ Edit Proyek</div>
+        <button class="calc-close" onclick="closeEditModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="field">
+          <label>Status Airdrop</label>
+          <select id="e-status"></select>
+        </div>
+        <div class="field">
+          <label>Tags <span style="text-transform:none;color:var(--text3)">— pisah koma</span></label>
+          <input id="e-tags" type="text" placeholder="DeFi, AI, Layer2">
+        </div>
+        <div class="fg2">
+          <div class="field">
+            <label>Total Raised (ID)</label>
+            <input id="e-raisedid" type="text" placeholder="$600 Juta">
+          </div>
+          <div class="field">
+            <label>Total Raised (EN)</label>
+            <input id="e-raisedn" type="text" placeholder="$600M">
+          </div>
+        </div>
+        <div class="field">
+          <label>Deskripsi (ID)</label>
+          <textarea id="e-descid" placeholder="Jelaskan proyek ini..."></textarea>
+        </div>
+        <div class="field">
+          <label>Description (EN)</label>
+          <textarea id="e-descen" placeholder="Describe this project..."></textarea>
+        </div>
+        <div class="field">
+          <label>Link Official</label>
+          <input id="e-link" type="url" placeholder="https://...">
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeEditModal()">Batal</button>
+        <button class="btn-save" id="btn-save-edit" onclick="saveEdit()">💾 Simpan</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- ── CALCULATOR FLOATING PANEL ── -->
+  <div id="calc-panel" class="hidden">
+    <div class="calc-head">
+      <span class="t">🧮 Kalkulator</span>
+      <button class="calc-close" onclick="toggleCalc()">✕</button>
+    </div>
+    <div class="calc-body">
+      <input id="calc-display" type="text" readonly value="0">
+      <div class="calc-grid" id="calc-grid"></div>
     </div>
   </div>
 
@@ -185,9 +333,13 @@
 </div>
 
 <script>
+  // ── STATUS OPTIONS (dari tabel proyek yang sudah ada) ──
+  const STATUS_OPTIONS = ['Active','Waitlist','Season 1','Season 2','Season 3','Season 4','Season 5','Seed Round','Private Round','Potential','Confirmed','Testnet','Mainnet','Listing / Selesai','Ended','TBA'];
+
   // ── STATE ─────────────────────────────────────────────
-  let projects  = [];
-  let _plFilter = 'all';
+  let projects   = [];
+  let _plFilter  = 'all';
+  let _editingId = null;
 
   function esc(s) {
     return String(s||'').replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
@@ -221,7 +373,7 @@
     }
   }
 
-  // ── PROJECT LINKS ──────────────────────────────────────
+  // ── PROJECT LINKS (link diambil langsung dari kolom "link" yg sudah ada di tabel) ──
   function setPLFilter(mode, btn) {
     _plFilter = mode;
     document.querySelectorAll('#proj-links-section .ftab').forEach(t => t.classList.remove('active'));
@@ -240,8 +392,8 @@
     if (_plFilter === 'ended')     filtered = filtered.filter(p => (p.status||'').toLowerCase().includes('end') || (p.confirmation_status||'').toLowerCase().includes('ended'));
     if (_plFilter === 'confirmed') filtered = filtered.filter(p => (p.confirmation_status||'').toLowerCase().includes('confirmed'));
     if (_plFilter === 'potential') filtered = filtered.filter(p => (p.confirmation_status||'').toLowerCase().includes('potential'));
-    if (_plFilter === 'nolink')    filtered = filtered.filter(p => !p.website_url);
-    if (_plFilter === 'haslink')   filtered = filtered.filter(p => !!p.website_url);
+    if (_plFilter === 'nolink')    filtered = filtered.filter(p => !p.link);
+    if (_plFilter === 'haslink')   filtered = filtered.filter(p => !!p.link);
 
     if (count) count.textContent = `${filtered.length}/${projects.length}`;
 
@@ -251,7 +403,7 @@
     }
 
     list.innerHTML = filtered.map(p => {
-      const hasLink = !!(p.website_url);
+      const hasLink = !!(p.link);
       const isLive  = p.published === true;
       const confVal = (p.confirmation_status||'').toLowerCase();
       const confCls = confVal.includes('confirmed') ? 'confirmed' : confVal.includes('potential') ? 'potential' : confVal.includes('ended') ? 'ended' : '';
@@ -276,18 +428,116 @@
               </div>
             </div>
           </div>
-          ${hasLink
-            ? `<a href="${esc(p.website_url)}" target="_blank" rel="noopener"
-                  style="display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;
-                         border-radius:6px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);
-                         color:var(--accent);font-family:var(--mono);font-size:0.6rem;text-decoration:none;font-weight:700">
-                🌐 Buka Website</a>`
-            : `<div style="display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;
-                           border-radius:6px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);
-                           color:var(--red);font-family:var(--mono);font-size:0.6rem;font-weight:700;">
-                 ✕ Belum ada link</div>`}
+          <div style="display:flex;gap:6px;">
+            ${hasLink
+              ? `<a href="${esc(p.link)}" target="_blank" rel="noopener"
+                    style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;
+                           border-radius:6px;background:rgba(0,229,160,0.08);border:1px solid rgba(0,229,160,0.2);
+                           color:var(--accent);font-family:var(--mono);font-size:0.6rem;text-decoration:none;font-weight:700">
+                  🌐 Buka Website</a>`
+              : `<div style="flex:1;display:flex;align-items:center;justify-content:center;gap:6px;padding:0.5rem;
+                             border-radius:6px;background:rgba(239,68,68,0.06);border:1px solid rgba(239,68,68,0.15);
+                             color:var(--red);font-family:var(--mono);font-size:0.6rem;font-weight:700;">
+                   ✕ Belum ada link</div>`}
+            <button class="edit-btn" onclick="openEditModal(${p.id})" title="Edit proyek">✏️ Edit</button>
+          </div>
         </div>`;
     }).join('');
+  }
+
+  // ── EDIT MODAL (hanya: status, tags, funding, deskripsi, link) ──
+  function openEditModal(id) {
+    const p = projects.find(x => x.id === id);
+    if (!p) return;
+    _editingId = id;
+
+    const statusSel = document.getElementById('e-status');
+    statusSel.innerHTML = STATUS_OPTIONS.map(s => `<option value="${esc(s)}" ${p.status===s?'selected':''}>${esc(s)}</option>`).join('');
+
+    document.getElementById('edit-modal-title').textContent = `✏️ Edit: ${p.name || '—'}`;
+    document.getElementById('e-tags').value     = p.tags || '';
+    document.getElementById('e-raisedid').value = p.RaisedID || '';
+    document.getElementById('e-raisedn').value  = p.RaisedEN || '';
+    document.getElementById('e-descid').value   = p.descriptionID || '';
+    document.getElementById('e-descen').value   = p.descriptionEN || '';
+    document.getElementById('e-link').value     = p.link || '';
+
+    document.getElementById('edit-modal').classList.remove('hidden');
+  }
+
+  function closeEditModal() {
+    _editingId = null;
+    document.getElementById('edit-modal').classList.add('hidden');
+  }
+
+  async function saveEdit() {
+    if (!_editingId) return;
+    const payload = {
+      status:        document.getElementById('e-status')?.value       || null,
+      tags:          document.getElementById('e-tags')?.value?.trim() || null,
+      RaisedID:      document.getElementById('e-raisedid')?.value?.trim() || null,
+      RaisedEN:      document.getElementById('e-raisedn')?.value?.trim()  || null,
+      descriptionID: document.getElementById('e-descid')?.value?.trim()   || null,
+      descriptionEN: document.getElementById('e-descen')?.value?.trim()   || null,
+      link:          document.getElementById('e-link')?.value?.trim()     || null,
+    };
+
+    const btn = document.getElementById('btn-save-edit');
+    if (btn) { btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Menyimpan...'; }
+
+    try {
+      const res = await fetch(`/api/admin-airdrop?id=${_editingId}`, {
+        method: 'PATCH',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(payload),
+      });
+      if (!res.ok) { const err = await res.json().catch(()=>({})); throw new Error(err.error || `HTTP ${res.status}`); }
+      showToast('✓ Perubahan tersimpan!', 'success');
+      closeEditModal();
+      await loadProjects();
+    } catch(e) {
+      showToast('Error: ' + e.message, 'error');
+    } finally {
+      if (btn) { btn.disabled = false; btn.innerHTML = '💾 Simpan'; }
+    }
+  }
+
+  // ── CALCULATOR ─────────────────────────────────────────
+  const CALC_KEYS = ['C','←','%','/','7','8','9','*','4','5','6','-','1','2','3','+','0','.','='];
+  let _calcExpr = '';
+
+  function buildCalcGrid() {
+    const grid = document.getElementById('calc-grid');
+    if (!grid) return;
+    grid.innerHTML = CALC_KEYS.map(k => {
+      const isOp   = '/*-+='.includes(k);
+      const isZero = k === '0';
+      return `<button class="calc-key ${isOp?'op':''} ${isZero?'zero':''}" onclick="calcPress('${k==='←'?'back':k}')">${k}</button>`;
+    }).join('');
+  }
+
+  function calcPress(key) {
+    const disp = document.getElementById('calc-display');
+    if (!disp) return;
+    if (key === 'C') { _calcExpr = ''; disp.value = '0'; return; }
+    if (key === 'back') { _calcExpr = _calcExpr.slice(0, -1); disp.value = _calcExpr || '0'; return; }
+    if (key === '=') {
+      try {
+        if (!/^[0-9+\-*/.%\s]+$/.test(_calcExpr)) throw new Error();
+        const result = Function(`"use strict"; return (${_calcExpr})`)();
+        disp.value = String(result);
+        _calcExpr = String(result);
+      } catch(e) { disp.value = 'Error'; _calcExpr = ''; }
+      return;
+    }
+    _calcExpr += key;
+    disp.value = _calcExpr;
+  }
+
+  function toggleCalc() {
+    const panel = document.getElementById('calc-panel');
+    if (!panel) return;
+    panel.classList.toggle('hidden');
   }
 
   // ── LOGIN PARTICLE CANVAS ─────────────────────────────
@@ -361,6 +611,7 @@
     window._stopLoginParticles = stopParticles;
   })();
 
+  buildCalcGrid();
   loadProjects();
 </script>
 
