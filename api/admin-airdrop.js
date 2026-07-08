@@ -223,27 +223,36 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // ── PATCH ─────────────────────────────────────────
+// ── PATCH ─────────────────────────────────────────
   if (req.method === 'PATCH') {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
     try {
-      // 🔥 BUILD PAYLOAD WITHOUT 'name' (untuk menghindari not-null error)
+      // Fields yang bisa diupdate di tabel airdrops
       const airdropFields = [
-        'status', 'confirmation_status', 'published', 'link', 'website_url',
+        'name', 'status', 'confirmation_status', 'published', 'link', 'website_url',
         'tags', 'RaisedID', 'RaisedEN', 'tasksID', 'tasksEN',
         'logo_url', 'testnet_links', 'backers'
       ];
       const airdropPayload = {};
       airdropFields.forEach(f => {
         if (f in req.body) {
-          airdropPayload[f] = req.body[f] === undefined ? null : req.body[f];
+          // 'name' gak boleh null (NOT NULL constraint) — skip kalau kosong,
+          // tapi field lain boleh di-null-kan kalau memang mau dikosongkan
+          if (f === 'name') {
+            if (req.body.name && String(req.body.name).trim()) {
+              airdropPayload.name = String(req.body.name).trim();
+            }
+          } else {
+            airdropPayload[f] = req.body[f] === undefined ? null : req.body[f];
+          }
         }
       });
       if ('published' in req.body) airdropPayload.published = Boolean(req.body.published);
 
+      // Fields yang bisa diupdate di tabel proyek
       const proyekFields = [
-        'status', 'confirmation_status', 'published', 'link', 'website_url',
+        'name', 'status', 'confirmation_status', 'published', 'link', 'website_url',
         'tags', 'RaisedID', 'RaisedEN', 'tasksID', 'tasksEN',
         'descriptionID', 'descriptionEN', 'ticker', 'total_supply',
         'network', 'tge_date', 'logo_url', 'twitter', 'discord',
@@ -253,7 +262,13 @@ module.exports = async function handler(req, res) {
       const proyekPayload = {};
       proyekFields.forEach(f => {
         if (f in req.body) {
-          proyekPayload[f] = req.body[f] === undefined ? null : req.body[f];
+          if (f === 'name') {
+            if (req.body.name && String(req.body.name).trim()) {
+              proyekPayload.name = String(req.body.name).trim();
+            }
+          } else {
+            proyekPayload[f] = req.body[f] === undefined ? null : req.body[f];
+          }
         }
       });
       if ('published' in req.body) proyekPayload.published = Boolean(req.body.published);
@@ -268,16 +283,40 @@ module.exports = async function handler(req, res) {
       if (text) { try { result = JSON.parse(text); } catch(e) {} }
       if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result || text) });
 
-      // Update proyek hanya jika ada field yang diubah
+      // Update proyek — dan kalau ternyata row-nya belum ada, BUAT (jangan silent no-op)
       if (Object.keys(proyekPayload).length > 0) {
-        const rProyek = await fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`, {
-          method: 'PATCH', headers: H,
-          body: JSON.stringify(proyekPayload),
-        });
+        const rProyek = await fetch(
+          `${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`,
+          { method: 'PATCH', headers: H, body: JSON.stringify(proyekPayload) }
+        );
         const proyekText = await rProyek.text();
         if (!rProyek.ok) {
           console.error('PATCH proyek gagal:', proyekText);
           return res.status(500).json({ error: 'PATCH proyek gagal: ' + proyekText });
+        }
+
+        // 🔑 Cek apakah PATCH beneran kena row. Kalau kosong (row proyek belum ada),
+        // INSERT baru supaya data gak diam-diam hilang.
+        let proyekResult = [];
+        try { proyekResult = proyekText ? JSON.parse(proyekText) : []; } catch (e) {}
+
+        if (Array.isArray(proyekResult) && proyekResult.length === 0) {
+          const insertPayload = {
+            ...proyekPayload,
+            name: proyekPayload.name || (result?.[0]?.name ?? req.body.name ?? null),
+            airdrop_id: Number(id),
+          };
+          const rInsert = await fetch(`${BASE}/proyek`, {
+            method: 'POST', headers: H,
+            body: JSON.stringify(insertPayload),
+          });
+          if (!rInsert.ok) {
+            const errInsert = await rInsert.json().catch(() => ({}));
+            console.error('Auto-create proyek gagal:', JSON.stringify(errInsert));
+            return res.status(500).json({
+              error: 'Row proyek belum ada dan gagal dibuat otomatis: ' + serializeError(errInsert)
+            });
+          }
         }
       }
 
