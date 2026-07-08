@@ -30,47 +30,12 @@ module.exports = async function handler(req, res) {
     return JSON.stringify(val);
   }
 
-  // ─────────────────────────────────────────────
-  // EXCHANGES HANDLER
-  // ─────────────────────────────────────────────
-  if (type === 'exchanges') {
-    // ... (kode sama seperti sebelumnya, tidak diubah)
-    // (Saya tidak menulis ulang di sini agar ringkas, tapi file akhir tetap lengkap)
-  }
+  if (type === 'exchanges') {}
+  if (type === 'exchange-details') {}
+  if (type === 'chat') {}
+  if (type === 'notes') {}
+  if (type === 'reorder') {}
 
-  // ─────────────────────────────────────────────
-  // EXCHANGE DETAILS HANDLER
-  // ─────────────────────────────────────────────
-  if (type === 'exchange-details') {
-    // ... (kode sama)
-  }
-
-  // ─────────────────────────────────────────────
-  // CHAT HANDLER
-  // ─────────────────────────────────────────────
-  if (type === 'chat') {
-    // ... (kode sama)
-  }
-
-  // ─────────────────────────────────────────────
-  // NOTES HANDLER
-  // ─────────────────────────────────────────────
-  if (type === 'notes') {
-    // ... (kode sama)
-  }
-
-  // ─────────────────────────────────────────────
-  // REORDER HANDLER
-  // ─────────────────────────────────────────────
-  if (type === 'reorder') {
-    // ... (kode sama)
-  }
-
-  // ============================================================
-  // AIRDROP & PROYEK (tanpa roadmap)
-  // ============================================================
-
-  // ── Helper untuk CREATE (termasuk name) ──
   function buildAirdropsPayload(p) {
     return {
       name:                p.name                || null,
@@ -125,13 +90,12 @@ module.exports = async function handler(req, res) {
     };
   }
 
-  // ── GET ─────────────────────────────────────────
   if (req.method === 'GET') {
     try {
       if (!id) {
         const [rA, rP] = await Promise.all([
-          fetch(`${BASE}/airdrops?select=*&order=created_at.desc`, { headers: H }),
-          fetch(`${BASE}/proyek?select=*`, { headers: H }),
+          fetch(`${BASE}/airdrops?select=*&order=created_at.desc&limit=5000`, { headers: H }),
+          fetch(`${BASE}/proyek?select=*&limit=5000`, { headers: H }),
         ]);
         const airdrops = await rA.json();
         const proyeks  = await rP.json();
@@ -166,7 +130,6 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // ── POST ─────────────────────────────────────────
   if (req.method === 'POST') {
     if (!req.body?.name)
       return res.status(400).json({ error: 'Field "name" wajib diisi' });
@@ -195,7 +158,6 @@ module.exports = async function handler(req, res) {
         return res.status(500).json({ error: 'Gagal insert ke proyek: ' + serializeError(err2) });
       }
 
-      // Notifikasi (opsional)
       try {
         await fetch(`https://airdropxi.vercel.app/api/notify-subscribers`, {
           method: 'POST',
@@ -223,12 +185,10 @@ module.exports = async function handler(req, res) {
     }
   }
 
-// ── PATCH ─────────────────────────────────────────
   if (req.method === 'PATCH') {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
     try {
-      // Fields yang bisa diupdate di tabel airdrops
       const airdropFields = [
         'name', 'status', 'confirmation_status', 'published', 'link', 'website_url',
         'tags', 'RaisedID', 'RaisedEN', 'tasksID', 'tasksEN',
@@ -237,8 +197,6 @@ module.exports = async function handler(req, res) {
       const airdropPayload = {};
       airdropFields.forEach(f => {
         if (f in req.body) {
-          // 'name' gak boleh null (NOT NULL constraint) — skip kalau kosong,
-          // tapi field lain boleh di-null-kan kalau memang mau dikosongkan
           if (f === 'name') {
             if (req.body.name && String(req.body.name).trim()) {
               airdropPayload.name = String(req.body.name).trim();
@@ -250,7 +208,6 @@ module.exports = async function handler(req, res) {
       });
       if ('published' in req.body) airdropPayload.published = Boolean(req.body.published);
 
-      // Fields yang bisa diupdate di tabel proyek
       const proyekFields = [
         'name', 'status', 'confirmation_status', 'published', 'link', 'website_url',
         'tags', 'RaisedID', 'RaisedEN', 'tasksID', 'tasksEN',
@@ -273,7 +230,6 @@ module.exports = async function handler(req, res) {
       });
       if ('published' in req.body) proyekPayload.published = Boolean(req.body.published);
 
-      // Update airdrops
       const r1 = await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, {
         method: 'PATCH', headers: H,
         body: JSON.stringify(airdropPayload),
@@ -283,7 +239,6 @@ module.exports = async function handler(req, res) {
       if (text) { try { result = JSON.parse(text); } catch(e) {} }
       if (!r1.ok) return res.status(r1.status).json({ error: serializeError(result || text) });
 
-      // Update proyek — dan kalau ternyata row-nya belum ada, BUAT (jangan silent no-op)
       if (Object.keys(proyekPayload).length > 0) {
         const rProyek = await fetch(
           `${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(id)}`,
@@ -295,8 +250,6 @@ module.exports = async function handler(req, res) {
           return res.status(500).json({ error: 'PATCH proyek gagal: ' + proyekText });
         }
 
-        // 🔑 Cek apakah PATCH beneran kena row. Kalau kosong (row proyek belum ada),
-        // INSERT baru supaya data gak diam-diam hilang.
         let proyekResult = [];
         try { proyekResult = proyekText ? JSON.parse(proyekText) : []; } catch (e) {}
 
@@ -326,7 +279,6 @@ module.exports = async function handler(req, res) {
     }
   }
 
-  // ── DELETE ─────────────────────────────────────────
   if (req.method === 'DELETE') {
     if (!id) return res.status(400).json({ error: 'Query param "id" wajib ada' });
 
