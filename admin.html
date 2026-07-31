@@ -376,6 +376,60 @@
         .calc-key.op:hover { background: rgba(179, 77, 255, 0.2); }
         .calc-key.zero { grid-column: span 2; }
 
+        /* ─── GARAP SCHEDULE WIDGET ───
+           Reminder waktu garap airdrop: dua slot jam per hari (13:00 & 19:00 WIB).
+           Blur dihindari (cuma 1 elemen sih, tapi tetep ngikutin konvensi file ini). */
+        #garap-widget {
+            position: relative; z-index: 1; max-width: 1360px; margin: 0 auto 1.8rem; padding: 0 1.5rem;
+        }
+        .garap-card {
+            background: var(--s1); border: 1.5px solid var(--border);
+            border-radius: 18px; padding: 1.3rem 1.6rem;
+            display: flex; align-items: center; gap: 1.4rem; flex-wrap: wrap;
+            box-shadow: var(--shadow);
+            transition: border-color .3s, background .3s;
+        }
+        .garap-card.is-active { border-color: rgba(57, 255, 106, 0.4); background: rgba(57, 255, 106, 0.06); }
+        .garap-left { display: flex; align-items: center; gap: 12px; min-width: 220px; }
+        .garap-clock-icon {
+            width: 42px; height: 42px; border-radius: 12px; flex-shrink: 0;
+            background: rgba(179, 77, 255, 0.1); border: 1.5px solid rgba(179, 77, 255, 0.28);
+            display: flex; align-items: center; justify-content: center; color: var(--glow-cyan);
+        }
+        .garap-card.is-active .garap-clock-icon { background: rgba(57, 255, 106, 0.12); border-color: rgba(57, 255, 106, 0.35); color: var(--glow-green); }
+        .garap-clock-icon .icon { width: 20px; height: 20px; }
+        .garap-now { font-family: var(--mono); font-size: 0.6rem; color: var(--text3); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 700; margin-bottom: 2px; }
+        .garap-now-time { font-family: var(--mono); font-size: 1.15rem; font-weight: 800; color: var(--text); }
+
+        .garap-status { flex: 1; min-width: 200px; }
+        .garap-status-label { font-family: var(--mono); font-size: 0.62rem; color: var(--glow-green); letter-spacing: 0.1em; text-transform: uppercase; font-weight: 800; display: none; align-items: center; gap: 6px; margin-bottom: 3px; }
+        .garap-card.is-active .garap-status-label { display: flex; }
+        .garap-status-label::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--glow-green); box-shadow: 0 0 10px var(--glow-green); animation: pulseDot 1.4s ease-in-out infinite; }
+        .garap-status-main { font-family: var(--sans); font-size: 0.92rem; font-weight: 700; color: var(--text); }
+        .garap-status-sub { font-family: var(--mono); font-size: 0.68rem; color: var(--text2); margin-top: 2px; }
+        .garap-status-sub b { color: var(--glow-cyan); font-weight: 800; }
+
+        .garap-slots { display: flex; gap: 10px; flex-wrap: wrap; }
+        .garap-slot {
+            display: flex; flex-direction: column; align-items: center; gap: 2px;
+            padding: 0.55rem 0.9rem; border-radius: 14px; border: 1.5px solid var(--border);
+            background: rgba(255, 255, 255, 0.02); min-width: 88px; transition: border-color .3s, background .3s;
+        }
+        .garap-slot .t { font-family: var(--mono); font-size: 0.95rem; font-weight: 800; color: var(--text2); }
+        .garap-slot .l { font-family: var(--mono); font-size: 0.52rem; color: var(--text3); text-transform: uppercase; letter-spacing: 0.06em; }
+        .garap-slot.slot-active { border-color: rgba(57, 255, 106, 0.45); background: rgba(57, 255, 106, 0.1); }
+        .garap-slot.slot-active .t { color: var(--glow-green); }
+        .garap-slot.slot-next { border-color: rgba(179, 77, 255, 0.4); background: rgba(179, 77, 255, 0.08); }
+        .garap-slot.slot-next .t { color: var(--glow-cyan); }
+
+        @media (max-width: 640px) {
+            #garap-widget { padding: 0 0.8rem; margin-bottom: 1.2rem; }
+            .garap-card { padding: 1rem 1.1rem; gap: 1rem; }
+            .garap-left { min-width: 0; }
+            .garap-now-time { font-size: 1rem; }
+            .garap-slot { min-width: 74px; padding: 0.45rem 0.6rem; }
+        }
+
         /* ─── RESPONSIVE ─── */
         @media (max-width: 640px) {
             .login-card { padding: 2rem 1.5rem; }
@@ -448,6 +502,37 @@
         <div id="dash-hero">
             <div class="hero-eyebrow">Control Center</div>
             <h1>Every airdrop, every status, <span>one command deck</span>.</h1>
+        </div>
+
+        <!-- ─── GARAP SCHEDULE WIDGET ─── -->
+        <div id="garap-widget">
+            <div class="garap-card" id="garap-card">
+                <div class="garap-left">
+                    <div class="garap-clock-icon" id="garap-clock-icon"></div>
+                    <div>
+                        <div class="garap-now">Waktu Sekarang (WIB)</div>
+                        <div class="garap-now-time" id="garap-now-time">--:--:--</div>
+                    </div>
+                </div>
+                <div class="garap-status">
+                    <div class="garap-status-label">Saatnya Garap Airdrop</div>
+                    <div class="garap-status-main" id="garap-status-main">Memuat jadwal...</div>
+                    <div class="garap-status-sub" id="garap-status-sub"></div>
+                </div>
+                <div class="garap-slots">
+                    <div class="garap-slot" data-slot="13" id="garap-slot-13">
+                        <div class="t">13:00</div>
+                        <div class="l">WIB</div>
+                    </div>
+                    <div class="garap-slot" data-slot="19" id="garap-slot-19">
+                        <div class="t">19:00</div>
+                        <div class="l">WIB</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <div id="dash-hero-metrics-wrap" style="position:relative;z-index:1;max-width:1360px;margin:0 auto;padding:0 1.5rem;">
             <div class="hero-metrics" id="hero-metrics">
                 <div class="hero-metric"><div class="n" style="color:var(--glow-cyan)" data-metric="total">0</div><div class="l">Total Proyek</div></div>
                 <div class="hero-metric"><div class="n" style="color:var(--glow-green)" data-metric="live">0</div><div class="l">Live</div></div>
@@ -632,6 +717,7 @@
             check: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>',
             target: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><circle cx="12" cy="12" r="6"/><circle cx="12" cy="12" r="2"/></svg>',
             box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg>',
+            clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
         };
         function icon(name) { return `<span class="icon">${ICONS[name] || ''}</span>`; }
 
@@ -687,6 +773,103 @@
             } else {
                 el.textContent = target.toLocaleString('en-US');
             }
+        }
+
+        // ═══════════════════════════════════════════════════════════
+        // ─── GARAP SCHEDULE WIDGET ───
+        // Reminder waktu garap airdrop: dua slot per hari, 13:00 & 19:00 WIB.
+        // Widget ini menghitung waktu WIB langsung dari client (Asia/Jakarta),
+        // jadi gak butuh backend/API tambahan.
+        // ═══════════════════════════════════════════════════════════
+        const GARAP_SLOTS = [13, 19]; // jam garap (WIB, 24h)
+        const GARAP_WINDOW_MIN = 60;  // dianggap "aktif" selama 60 menit sejak jam slot
+
+        function getWIBParts() {
+            // Ambil waktu WIB (Asia/Jakarta) tanpa bikin objek Date yang salah timezone,
+            // cukup ambil komponen jam/menit/detiknya via Intl.
+            const fmt = new Intl.DateTimeFormat('en-GB', {
+                timeZone: 'Asia/Jakarta',
+                hour: '2-digit', minute: '2-digit', second: '2-digit', hour12: false
+            });
+            const parts = fmt.formatToParts(new Date());
+            const get = (t) => +parts.find(p => p.type === t).value;
+            return { h: get('hour'), m: get('minute'), s: get('second') };
+        }
+
+        function formatHMS(h, m, s) {
+            const p = (n) => String(n).padStart(2, '0');
+            return `${p(h)}:${p(m)}:${p(s)}`;
+        }
+
+        function formatCountdown(totalMinutes) {
+            const h = Math.floor(totalMinutes / 60);
+            const m = totalMinutes % 60;
+            if (h <= 0) return `${m} menit`;
+            return `${h} jam ${m} menit`;
+        }
+
+        function updateGarapWidget() {
+            const { h, m, s } = getWIBParts();
+            const nowTimeEl = document.getElementById('garap-now-time');
+            if (nowTimeEl) nowTimeEl.textContent = formatHMS(h, m, s);
+
+            const nowMinutes = h * 60 + m;
+            const card = document.getElementById('garap-card');
+            const mainEl = document.getElementById('garap-status-main');
+            const subEl = document.getElementById('garap-status-sub');
+            const clockIconEl = document.getElementById('garap-clock-icon');
+
+            // Cek apakah sekarang lagi dalam window aktif salah satu slot
+            let activeSlot = null;
+            for (const slot of GARAP_SLOTS) {
+                const slotStart = slot * 60;
+                const diff = nowMinutes - slotStart;
+                if (diff >= 0 && diff < GARAP_WINDOW_MIN) { activeSlot = slot; break; }
+            }
+
+            // Tandai slot chip mana yang aktif / berikutnya
+            GARAP_SLOTS.forEach(slot => {
+                const el = document.getElementById(`garap-slot-${slot}`);
+                if (el) el.classList.remove('slot-active', 'slot-next');
+            });
+
+            if (activeSlot !== null) {
+                card.classList.add('is-active');
+                if (clockIconEl) clockIconEl.innerHTML = icon('rocket');
+                const remain = (activeSlot * 60 + GARAP_WINDOW_MIN) - nowMinutes;
+                mainEl.textContent = `Sekarang jam ${String(activeSlot).padStart(2,'0')}:00 WIB — waktunya garap airdrop!`;
+                subEl.innerHTML = `Sisa <b>${remain} menit</b> di window ini.`;
+                const activeEl = document.getElementById(`garap-slot-${activeSlot}`);
+                if (activeEl) activeEl.classList.add('slot-active');
+            } else {
+                card.classList.remove('is-active');
+                if (clockIconEl) clockIconEl.innerHTML = icon('clock');
+
+                // Cari slot berikutnya (hari ini, atau slot pertama besok kalau semua sudah lewat)
+                let nextSlot = GARAP_SLOTS.find(slot => slot * 60 > nowMinutes);
+                let minutesUntil;
+                if (nextSlot !== undefined) {
+                    minutesUntil = nextSlot * 60 - nowMinutes;
+                } else {
+                    nextSlot = GARAP_SLOTS[0];
+                    minutesUntil = (24 * 60 - nowMinutes) + nextSlot * 60;
+                }
+
+                mainEl.textContent = `Garap berikutnya jam ${String(nextSlot).padStart(2,'0')}:00 WIB`;
+                subEl.innerHTML = `${formatCountdown(minutesUntil)} lagi.`;
+                const nextEl = document.getElementById(`garap-slot-${nextSlot}`);
+                if (nextEl) nextEl.classList.add('slot-next');
+            }
+        }
+
+        let _garapInterval = null;
+        function startGarapWidget() {
+            if (document.getElementById('garap-clock-icon')) {
+                document.getElementById('garap-clock-icon').innerHTML = icon('clock');
+            }
+            updateGarapWidget();
+            clearInterval(_garapInterval);
+            _garapInterval = setInterval(updateGarapWidget, 1000);
         }
 
         // ─── LOAD PROJECTS ───
@@ -1117,6 +1300,7 @@
             google.accounts.id.prompt();
 
             buildCalcGrid();
+            startGarapWidget();
             loadProjects();
         };
     </script>
