@@ -1454,13 +1454,18 @@
                 icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>' },
         ];
 
-        let agentState = {
-            agent: 'opus5',
-            mode: 'chat',
-            attachedImage: null, // {dataUrl, name}
-            busy: false,
-            history: [], // {role, content} — dikirim ke /api/agent-chat biar chat-nya inget konteks
-        };
+       let agentState = {
+        agent: 'opus5',
+        mode: 'chat',
+        attachedImage: null, // {dataUrl, name}
+        busy: false,
+        // Tiap agent = chat terpisah (kayak tab). history dikirim ke backend,
+        // messages dipakai buat render ulang bubble pas pindah chip.
+       chats: Object.fromEntries(AGENTS.map(a => [a.id, { history: [], messages: [] }])),
+     };
+        function currentChat() {
+        return agentState.chats[agentState.agent];
+      }
 
         const agentEl = {
             agentRow: document.getElementById('agentRow'),
@@ -1495,7 +1500,13 @@
                     ${esc(a.name)}
                     <span class="tag">${esc(a.tag)}</span>
                 `;
-                chip.onclick = () => { agentState.agent = a.id; renderAgents(); };
+                chip.onclick = () => {
+               if (agentState.busy) return; // NEW: cegah pindah chat pas masih nunggu balasan
+               if (agentState.agent === a.id) return;
+               agentState.agent = a.id;
+               renderAgents();
+               renderChatFromHistory();
+             };
                 agentEl.agentRow.appendChild(chip);
             });
         }
@@ -1543,7 +1554,7 @@
         }
 
         /* ---------- message rendering ---------- */
-        function addMessage({ role, kind = 'text', text = '', imgSrc = null, meta = null }) {
+        function addMessage({ role, kind = 'text', text = '', imgSrc = null, meta = null }, record = true) {
             const wrap = document.createElement('div');
             wrap.className = 'agent-msg ' + role;
 
@@ -1579,8 +1590,16 @@
             if (kind === 'code' && window.hljs) {
                 wrap.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
             }
-            return wrap;
+            if (record) currentChat().messages.push({ role, kind, text, imgSrc, meta });
+           return wrap;
         }
+
+         function renderChatFromHistory() {
+         agentEl.messages.innerHTML = '';
+         const chat = currentChat();
+         if (!chat.messages.length) { seedAgentWelcome(); return; }
+         chat.messages.forEach(m => addMessage(m, false)); // false = jangan dobel-catat
+         }
 
         function addTyping() {
             const wrap = document.createElement('div');
@@ -1605,7 +1624,7 @@
                     body: JSON.stringify({
                         agent, mode, prompt,
                         image: image ? image.dataUrl : null,
-                        history: agentState.history,
+                        history: agentState.chats[agent].history,
                     }),
                 });
             } catch (networkErr) {
@@ -1749,9 +1768,10 @@ const onSearch = debounce((q) => {
 
                 // simpan konteks buat multi-turn (mode chat/code aja, gambar nggak perlu)
                 if (agentState.mode !== 'image' && typeof result.text === 'string') {
-                    agentState.history.push({ role: 'user', content: prompt });
-                    agentState.history.push({ role: 'assistant', content: result.text });
-                    if (agentState.history.length > 20) agentState.history = agentState.history.slice(-20);
+                 const chat = currentChat();
+                 chat.history.push({ role: 'user', content: prompt });
+                 chat.history.push({ role: 'assistant', content: result.text });
+                 if (chat.history.length > 20) chat.history = chat.history.slice(-20);
                 }
             } catch (err) {
                 // Error asli dari API (bukan mock) -> tampilkan bubble merah, jujur ke user.
@@ -1780,10 +1800,14 @@ const onSearch = debounce((q) => {
         agentEl.input.addEventListener('input', agentAutosize);
 
         agentEl.newChatBtn.onclick = () => {
-            agentEl.messages.innerHTML = '';
-            agentState.history = [];
-            seedAgentWelcome();
-        };
+    if (agentState.busy) return; // NEW: cegah reset chat pas masih nunggu balasan
+    const chat = currentChat();
+    chat.history = [];
+    chat.messages = [];
+    agentEl.messages.innerHTML = '';
+    seedAgentWelcome();
+};
+
 
         function seedAgentWelcome() {
             addMessage({
