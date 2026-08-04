@@ -152,7 +152,18 @@ module.exports = async function handler(req, res) {
     return res.status(400).json({ error: 'Field "prompt" wajib diisi' });
   }
 
-  const mapping = AGENT_MODEL_MAP[agent] || AGENT_MODEL_MAP.auto;
+  // Mode-based override: mode "image" butuh model vision-capable.
+  // Llama 3.1 8B dan GPT 5.6 Sol TIDAK bisa baca gambar, jadi kalau user
+  // pilih chip itu tapi mode-nya Gambar, kita paksa pindah ke Claude Opus
+  // (yang vision-capable) supaya request tidak gagal sia-sia.
+  const VISION_CAPABLE = new Set(['opus5', 'opus48']);
+  let effectiveAgent = agent;
+  if (mode === 'image' && !VISION_CAPABLE.has(agent)) {
+    effectiveAgent = 'opus48';
+  }
+
+  const mapping = AGENT_MODEL_MAP[effectiveAgent] || AGENT_MODEL_MAP.auto;
+  const overrodeAgent = effectiveAgent !== agent;
   const systemPrompt = buildSystemPrompt(mode);
   const t0 = Date.now();
 
@@ -169,7 +180,7 @@ module.exports = async function handler(req, res) {
     return res.status(200).json({
       kind: mode === 'code' ? 'code' : 'text', // generate gambar asli butuh model image-gen terpisah, lihat catatan di atas
       text: result.text,
-      modelUsed: result.modelUsed,
+      modelUsed: overrodeAgent ? `${result.modelUsed} (auto-switch: mode Gambar butuh vision)` : result.modelUsed,
       ms: Date.now() - t0,
     });
   } catch (primaryErr) {
