@@ -1594,11 +1594,12 @@
             document.getElementById('agentTypingIndicator')?.remove();
         }
 
-        /* ---------- backend integration ---------- */
+       /* ---------- backend integration ---------- */
         async function callAgent({ agent, mode, prompt, image }) {
             const t0 = Date.now();
+            let res;
             try {
-                const res = await fetch('/api/agent-chat', {
+                res = await fetch('/api/agent-chat', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({
@@ -1607,20 +1608,44 @@
                         history: agentState.history,
                     }),
                 });
-                if (!res.ok) throw new Error('endpoint belum ada / error ' + res.status);
-                const data = await res.json();
-                return {
-                    kind: data.kind || (mode === 'image' ? 'image' : mode === 'code' ? 'code' : 'text'),
-                    agentUsed: AGENTS.find(a => a.id === agent) || AGENTS[0],
-                    ms: data.ms ?? (Date.now() - t0),
-                    text: data.text,
-                    imgSrc: data.imgSrc,
-                    modelUsedLabel: data.modelUsed, // nama model asli yg dipakai router, kalau ada
-                };
-            } catch (err) {
-                console.warn('[agent-panel] /api/agent-chat belum tersedia, pakai mock:', err.message);
+            } catch (networkErr) {
+                // Fetch gagal total (endpoint belum ada / tidak terjangkau sama sekali)
+                // -> fallback ke mock, biar panel tetap kerasa hidup pas dev lokal.
+                console.warn('[agent-panel] /api/agent-chat tidak terjangkau, pakai mock:', networkErr.message);
                 return mockCallAgent({ agent, mode, prompt, image });
             }
+
+            if (!res.ok) {
+                // Endpoint ADA tapi balikin error (500, quota habis, key salah, dll)
+                // -> jangan mock, kasih tau user secara jujur & ramah.
+                let detail = '';
+                try { const errBody = await res.json(); detail = errBody?.error || ''; } catch (e) {}
+
+                const friendlyMap = {
+                    401: 'Model ini butuh API key yang valid, tapi sepertinya belum terpasang atau salah.',
+                    403: 'Akses ke model ini ditolak. Cek key atau restriction di dashboard provider.',
+                    429: 'Model ini lagi kena limit permintaan (rate limit). Coba lagi sebentar ya.',
+                    500: 'Ada gangguan teknis waktu manggil model. Coba lagi, atau pilih model lain dulu.',
+                    502: 'Server model lagi nggak merespons dengan benar. Coba lagi sebentar lagi.',
+                    503: 'Model ini lagi nggak tersedia (kemungkinan quota/key habis). Coba ganti ke model lain.',
+                };
+                const friendlyMsg = friendlyMap[res.status]
+                    || 'Waduh, semua model lagi susah dihubungi. Coba lagi sebentar ya, atau cek koneksi API di pengaturan.';
+
+                const err = new Error(friendlyMsg + (detail ? ` (${detail})` : ''));
+                err.isApiError = true;
+                throw err;
+            }
+
+            const data = await res.json();
+            return {
+                kind: data.kind || (mode === 'image' ? 'image' : mode === 'code' ? 'code' : 'text'),
+                agentUsed: AGENTS.find(a => a.id === agent) || AGENTS[0],
+                ms: data.ms ?? (Date.now() - t0),
+                text: data.text,
+                imgSrc: data.imgSrc,
+                modelUsedLabel: data.modelUsed, // nama model asli yg dipakai router, kalau ada
+            };
         }
 
         async function mockCallAgent({ agent, mode, prompt, image }) {
@@ -1704,28 +1729,40 @@ const onSearch = debounce((q) => {
             agentEl.sendBtn.disabled = true;
             addTyping();
 
-            const result = await callAgent({ agent: agentState.agent, mode: agentState.mode, prompt, image: attachedImg });
+            try {
+                const result = await callAgent({ agent: agentState.agent, mode: agentState.mode, prompt, image: attachedImg });
 
-            removeTyping();
-            const shownName = result.modelUsedLabel || result.agentUsed.name;
-            addMessage({
-                role: 'assistant',
-                kind: result.kind,
-                text: result.text,
-                imgSrc: result.imgSrc,
-                meta: {
-                    color: result.agentUsed.color || 'var(--secondary)',
-                    label: agentState.agent === 'auto'
-                        ? `Auto → dialihkan ke ${shownName} · ${result.ms}ms`
-                        : `via ${shownName} · ${result.ms}ms`
+                removeTyping();
+                const shownName = result.modelUsedLabel || result.agentUsed.name;
+                addMessage({
+                    role: 'assistant',
+                    kind: result.kind,
+                    text: result.text,
+                    imgSrc: result.imgSrc,
+                    meta: {
+                        color: result.agentUsed.color || 'var(--secondary)',
+                        label: agentState.agent === 'auto'
+                            ? `Auto → dialihkan ke ${shownName} · ${result.ms}ms`
+                            : `via ${shownName} · ${result.ms}ms`
+                    }
+                });
+
+                // simpan konteks buat multi-turn (mode chat/code aja, gambar nggak perlu)
+                if (agentState.mode !== 'image' && typeof result.text === 'string') {
+                    agentState.history.push({ role: 'user', content: prompt });
+                    agentState.history.push({ role: 'assistant', content: result.text });
+                    if (agentState.history.length > 20) agentState.history = agentState.history.slice(-20);
                 }
-            });
-
-            // simpan konteks buat multi-turn (mode chat/code aja, gambar nggak perlu)
-            if (agentState.mode !== 'image' && typeof result.text === 'string') {
-                agentState.history.push({ role: 'user', content: prompt });
-                agentState.history.push({ role: 'assistant', content: result.text });
-                if (agentState.history.length > 20) agentState.history = agentState.history.slice(-20);
+            } catch (err) {
+                // Error asli dari API (bukan mock) -> tampilkan bubble merah, jujur ke user.
+                removeTyping();
+                const bubble = addMessage({
+                    role: 'assistant',
+                    text: err.message || 'Terjadi kesalahan yang tidak diketahui.',
+                    meta: { color: 'var(--danger)', label: 'Gagal mendapat balasan' }
+                });
+                bubble.querySelector('.agent-bubble').style.borderColor = 'var(--danger-line)';
+                bubble.querySelector('.agent-bubble').style.background = 'var(--danger-dim)';
             }
 
             agentState.busy = false;
