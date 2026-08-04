@@ -44,11 +44,11 @@ const PROVIDERS = {
 //   - api.hcnsec.cn    -> "auto" (router internal milih model otomatis)
 //   - openrouter.ai    -> meta-llama/llama-3.1-8b-instruct
 const AGENT_MODEL_MAP = {
-  opus5: { provider: 'agentrouter', model: 'claude-opus-5' },
-  opus48: { provider: 'agentrouter', model: 'claude-opus-4-8' },
-  gpt56: { provider: 'agentrouter', model: 'gpt-5.6-sol' },
-  auto: { provider: 'hcnsec', model: 'auto' },
-  llama: { provider: 'openrouter', model: 'meta-llama/llama-3.1-8b-instruct' },
+  opus5: { provider: 'agentrouter', model: 'claude-opus-5', displayName: 'Claude Opus 5' },
+  opus48: { provider: 'agentrouter', model: 'claude-opus-4-8', displayName: 'Claude Opus 4.8' },
+  gpt56: { provider: 'agentrouter', model: 'gpt-5.6-sol', displayName: 'GPT 5.6' },
+  auto: { provider: 'hcnsec', model: 'auto', displayName: 'Auto' },
+  llama: { provider: 'openrouter', model: 'meta-llama/llama-3.1-8b-instruct', displayName: 'Llama 3.1 8B' },
 };
 
 function getApiKey(providerName) {
@@ -57,18 +57,22 @@ function getApiKey(providerName) {
   return process.env[cfg.apiKeyEnv] || null;
 }
 
-function buildSystemPrompt(mode) {
+function buildSystemPrompt(mode, displayName) {
+  const identity = displayName
+    ? `Kamu adalah ${displayName}. Kalau ditanya model/nama kamu apa, jawab jujur sebagai ${displayName} — jangan mengaku sebagai model lain.`
+    : '';
+
   if (mode === 'code') {
-    return 'Kamu adalah asisten coding. Jawab dengan kode yang siap pakai, ' +
+    return `${identity} Kamu adalah asisten coding. Jawab dengan kode yang siap pakai, ` +
       'beri komentar singkat kalau perlu. Jangan tambahkan basa-basi panjang di luar kode.';
   }
   if (mode === 'image') {
-    return 'Kamu menerima gambar dari user. Karena endpoint ini adalah model ' +
+    return `${identity} Kamu menerima gambar dari user. Karena endpoint ini adalah model ` +
       'chat/vision (bukan model generate/edit gambar), jelaskan apa yang kamu ' +
       'lihat di gambar dan berikan instruksi/edit yang diminta secara tekstual. ' +
       'Jujur kalau kamu tidak bisa menghasilkan file gambar baru.';
   }
-  return 'Kamu adalah asisten AI yang membantu admin mengelola dashboard airdrop. Jawab singkat dan jelas dalam Bahasa Indonesia kecuali diminta lain.';
+  return `${identity} Kamu adalah asisten AI yang membantu admin mengelola dashboard airdrop. Jawab singkat dan jelas dalam Bahasa Indonesia kecuali diminta lain.`;
 }
 
 async function callProvider({ providerName, model, systemPrompt, history, prompt, image }) {
@@ -164,7 +168,7 @@ module.exports = async function handler(req, res) {
 
   const mapping = AGENT_MODEL_MAP[effectiveAgent] || AGENT_MODEL_MAP.auto;
   const overrodeAgent = effectiveAgent !== agent;
-  const systemPrompt = buildSystemPrompt(mode);
+  const systemPrompt = buildSystemPrompt(mode, mapping.displayName);
   const t0 = Date.now();
 
   try {
@@ -193,10 +197,17 @@ module.exports = async function handler(req, res) {
         const fallbackModel = providerName === 'openrouter'
           ? 'meta-llama/llama-3.1-8b-instruct'
           : (providerName === 'hcnsec' ? 'auto' : mapping.model);
+        // Penting: system prompt fallback HARUS pakai identitas provider yang
+        // sebenarnya dipanggil, bukan identitas model utama yang gagal —
+        // supaya modelnya tidak ikut ngaku jadi model lain.
+        const fallbackDisplayName = providerName === 'openrouter'
+          ? 'Llama 3.1 8B'
+          : (providerName === 'hcnsec' ? 'Auto (router hcnsec)' : mapping.displayName);
+        const fallbackSystemPrompt = buildSystemPrompt(mode, fallbackDisplayName);
         const result = await callProvider({
           providerName,
           model: fallbackModel,
-          systemPrompt,
+          systemPrompt: fallbackSystemPrompt,
           history,
           prompt,
           image: mode === 'image' ? image : null,
