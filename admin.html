@@ -1454,18 +1454,24 @@
                 icon: '<rect x="3" y="3" width="18" height="18" rx="2"/><circle cx="8.5" cy="8.5" r="1.5"/><path d="M21 15l-5-5L5 21"/>' },
         ];
 
-       let agentState = {
-        agent: 'opus5',
-        mode: 'chat',
-        attachedImage: null, // {dataUrl, name}
-        busy: false,
-        // Tiap agent = chat terpisah (kayak tab). history dikirim ke backend,
-        // messages dipakai buat render ulang bubble pas pindah chip.
-       chats: Object.fromEntries(AGENTS.map(a => [a.id, { history: [], messages: [] }])),
-     };
-        function currentChat() {
-        return agentState.chats[agentState.agent];
-      }
+        let agentState = {
+            agent: 'opus5',
+            mode: 'chat',
+            attachedImage: null, // {dataUrl, name}
+            busy: false,
+        };
+
+        // Riwayat chat sekarang dipisah PER AGENT — ganti model = pindah ke
+        // "tab" percakapan yang beda, bukan nyambung ke satu riwayat bersama.
+        // Struktur: { [agentId]: { messages: [...record], history: [...] } }
+        //   - messages: dipakai buat render ulang bubble pas pindah tab
+        //   - history:  konteks {role, content} yang dikirim ke /api/agent-chat
+        let agentChats = {};
+
+        function ensureAgentChat(id) {
+            if (!agentChats[id]) agentChats[id] = { messages: [], history: [] };
+            return agentChats[id];
+        }
 
         const agentEl = {
             agentRow: document.getElementById('agentRow'),
@@ -1501,12 +1507,11 @@
                     <span class="tag">${esc(a.tag)}</span>
                 `;
                 chip.onclick = () => {
-               if (agentState.busy) return; // NEW: cegah pindah chat pas masih nunggu balasan
-               if (agentState.agent === a.id) return;
-               agentState.agent = a.id;
-               renderAgents();
-               renderChatFromHistory();
-             };
+                    if (agentState.agent === a.id) return; // udah di tab ini
+                    agentState.agent = a.id;
+                    renderAgents();
+                    renderMessagesForAgent(a.id);
+                };
                 agentEl.agentRow.appendChild(chip);
             });
         }
@@ -1553,8 +1558,17 @@
             };
         }
 
-        /* ---------- message rendering ---------- */
-        function addMessage({ role, kind = 'text', text = '', imgSrc = null, meta = null }, record = true) {
+        /* ---------- message rendering ----------
+           renderMessageNode() cuma bikin & nempel elemen DOM (nggak nyimpen
+           apa-apa) — dipakai baik buat pesan baru maupun buat render ulang
+           riwayat lama pas pindah tab.
+           addMessage() yang nyimpen record ke chat milik agent tsb, BARU
+           render ke layar kalau agent itu yang lagi kebuka (`forAgentId`,
+           default ke tab yang lagi aktif). Kalau balasan model A baru
+           datang sementara user udah pindah lihat tab B, tetap kesimpen di
+           chat si A tapi nggak nongol dadakan di tab B.
+        ---------- */
+        function renderMessageNode({ role, kind = 'text', text = '', imgSrc = null, meta = null }) {
             const wrap = document.createElement('div');
             wrap.className = 'agent-msg ' + role;
 
@@ -1590,16 +1604,28 @@
             if (kind === 'code' && window.hljs) {
                 wrap.querySelectorAll('pre code').forEach(b => hljs.highlightElement(b));
             }
-            if (record) currentChat().messages.push({ role, kind, text, imgSrc, meta });
-           return wrap;
+            return wrap;
         }
 
-         function renderChatFromHistory() {
-         agentEl.messages.innerHTML = '';
-         const chat = currentChat();
-         if (!chat.messages.length) { seedAgentWelcome(); return; }
-         chat.messages.forEach(m => addMessage(m, false)); // false = jangan dobel-catat
-         }
+        function addMessage(record, forAgentId = agentState.agent) {
+            ensureAgentChat(forAgentId).messages.push(record);
+            // Cuma render langsung ke layar kalau tab si agent itu yang lagi kebuka.
+            if (forAgentId === agentState.agent) {
+                return renderMessageNode(record);
+            }
+            return null;
+        }
+
+        function renderMessagesForAgent(id) {
+            agentEl.messages.innerHTML = '';
+            const chat = ensureAgentChat(id);
+            if (chat.messages.length === 0) {
+                seedAgentWelcome(); // agentState.agent udah = id di titik ini, jadi kesimpen di chat yang bener
+            } else {
+                chat.messages.forEach(record => renderMessageNode(record));
+            }
+            agentEl.messages.scrollTop = agentEl.messages.scrollHeight;
+        }
 
         function addTyping() {
             const wrap = document.createElement('div');
@@ -1624,7 +1650,7 @@
                     body: JSON.stringify({
                         agent, mode, prompt,
                         image: image ? image.dataUrl : null,
-                        history: agentState.chats[agent].history,
+                        history: ensureAgentChat(agent).history,
                     }),
                 });
             } catch (networkErr) {
@@ -1735,9 +1761,15 @@ const onSearch = debounce((q) => {
             const prompt = agentEl.input.value.trim();
             if (!prompt || agentState.busy) return;
 
-            addMessage({ role: 'user', text: prompt });
+            // Kunci agent & mode di titik ini — kalau user pindah tab sementara
+            // nunggu balasan, balasannya tetap nyasar ke chat yang BENER
+            // (bukan ke tab yang kebetulan lagi kebuka pas response-nya nyampe).
+            const originAgent = agentState.agent;
+            const originMode = agentState.mode;
+
+            addMessage({ role: 'user', text: prompt }, originAgent);
             if (agentState.attachedImage) {
-                addMessage({ role: 'user', kind: 'image', imgSrc: agentState.attachedImage.dataUrl, text: agentState.attachedImage.name });
+                addMessage({ role: 'user', kind: 'image', imgSrc: agentState.attachedImage.dataUrl, text: agentState.attachedImage.name }, originAgent);
             }
             const attachedImg = agentState.attachedImage;
             agentEl.input.value = '';
@@ -1746,12 +1778,12 @@ const onSearch = debounce((q) => {
             agentAutosize();
             agentState.busy = true;
             agentEl.sendBtn.disabled = true;
-            addTyping();
+            if (originAgent === agentState.agent) addTyping();
 
             try {
-                const result = await callAgent({ agent: agentState.agent, mode: agentState.mode, prompt, image: attachedImg });
+                const result = await callAgent({ agent: originAgent, mode: originMode, prompt, image: attachedImg });
 
-                removeTyping();
+                if (originAgent === agentState.agent) removeTyping();
                 const shownName = result.modelUsedLabel || result.agentUsed.name;
                 addMessage({
                     role: 'assistant',
@@ -1760,29 +1792,32 @@ const onSearch = debounce((q) => {
                     imgSrc: result.imgSrc,
                     meta: {
                         color: result.agentUsed.color || 'var(--secondary)',
-                        label: agentState.agent === 'auto'
+                        label: originAgent === 'auto'
                             ? `Auto → dialihkan ke ${shownName} · ${result.ms}ms`
                             : `via ${shownName} · ${result.ms}ms`
                     }
-                });
+                }, originAgent);
 
-                // simpan konteks buat multi-turn (mode chat/code aja, gambar nggak perlu)
-                if (agentState.mode !== 'image' && typeof result.text === 'string') {
-                 const chat = currentChat();
-                 chat.history.push({ role: 'user', content: prompt });
-                 chat.history.push({ role: 'assistant', content: result.text });
-                 if (chat.history.length > 20) chat.history = chat.history.slice(-20);
+                // simpan konteks buat multi-turn (mode chat/code aja, gambar nggak perlu),
+                // masuk ke riwayat milik agent ASALNYA, bukan tab yang lagi kebuka sekarang.
+                if (originMode !== 'image' && typeof result.text === 'string') {
+                    const chat = ensureAgentChat(originAgent);
+                    chat.history.push({ role: 'user', content: prompt });
+                    chat.history.push({ role: 'assistant', content: result.text });
+                    if (chat.history.length > 20) chat.history = chat.history.slice(-20);
                 }
             } catch (err) {
                 // Error asli dari API (bukan mock) -> tampilkan bubble merah, jujur ke user.
-                removeTyping();
+                if (originAgent === agentState.agent) removeTyping();
                 const bubble = addMessage({
                     role: 'assistant',
                     text: err.message || 'Terjadi kesalahan yang tidak diketahui.',
                     meta: { color: 'var(--danger)', label: 'Gagal mendapat balasan' }
-                });
-                bubble.querySelector('.agent-bubble').style.borderColor = 'var(--danger-line)';
-                bubble.querySelector('.agent-bubble').style.background = 'var(--danger-dim)';
+                }, originAgent);
+                if (bubble) {
+                    bubble.querySelector('.agent-bubble').style.borderColor = 'var(--danger-line)';
+                    bubble.querySelector('.agent-bubble').style.background = 'var(--danger-dim)';
+                }
             }
 
             agentState.busy = false;
@@ -1800,14 +1835,12 @@ const onSearch = debounce((q) => {
         agentEl.input.addEventListener('input', agentAutosize);
 
         agentEl.newChatBtn.onclick = () => {
-    if (agentState.busy) return; // NEW: cegah reset chat pas masih nunggu balasan
-    const chat = currentChat();
-    chat.history = [];
-    chat.messages = [];
-    agentEl.messages.innerHTML = '';
-    seedAgentWelcome();
-};
-
+            // "Chat baru" cuma reset chat milik model yang lagi aktif —
+            // chat model lain (di tab lain) tetap utuh, nggak ikut kehapus.
+            agentChats[agentState.agent] = { messages: [], history: [] };
+            agentEl.messages.innerHTML = '';
+            seedAgentWelcome();
+        };
 
         function seedAgentWelcome() {
             addMessage({
@@ -1819,7 +1852,7 @@ const onSearch = debounce((q) => {
 
         renderAgents();
         renderModes();
-        seedAgentWelcome();
+        renderMessagesForAgent(agentState.agent);
 
         // ─── MOUSE GLOW ───
         // Dimatikan lewat CSS (.mouse-glow { display:none }) supaya gak ada
