@@ -1,0 +1,19 @@
+name: Fetch News Terminal
+
+# Vercel Cron di plan Hobby cuma bisa 1x/hari, jadi penjadwal beneran
+# dipindah ke sini (GitHub Actions gratis). Workflow ini cuma nge-hit
+# endpoint yang udah di-deploy di Vercel, gak nge-build apa-apa.
+on:
+  schedule:
+    - cron: '*/10 * * * *'   # tiap 10 menit (UTC). GitHub kadang delay
+                              # beberapa menit pas lagi rame, itu normal.
+  workflow_dispatch: {}       # biar bisa trigger manual dari tab Actions
+
+jobs:
+  fetch:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Panggil endpoint fetch-news
+        run: |
+          curl -sf -X GET "${{ secrets.NEWS_TERMINAL_URL }}/api/cron/fetch-news" \
+            -H "Authorization: Bearer ${{ secrets.CRON_SECRET }}"
