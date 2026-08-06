@@ -1,8 +1,4 @@
 // api/news-terminal.js
-// GET /api/news-terminal — balikin berita yang UDAH ke-cache di Supabase.
-// Fetching asli ke sumber luar (RSS/CMC/Lookonchain) dilakukan terpisah oleh
-// api/cron/fetch-news.js, biar endpoint ini tetap cepat & gak nunggu network
-// call ke 5 sumber luar tiap kali admin buka panel News Terminal.
 
 const { createClient } = require('@supabase/supabase-js');
 
