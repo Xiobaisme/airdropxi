@@ -49,7 +49,6 @@ module.exports = async function handler(req, res) {
       RaisedEN:            p.RaisedEN            || null,
       tasksID:             p.tasksID             || null,
       tasksEN:             p.tasksEN             || null,
-      logo_url:            p.logo_url            || null,
       testnet_links:       p.testnet_links       || null,
       backers:             p.backers             || null,
     };
@@ -74,7 +73,6 @@ module.exports = async function handler(req, res) {
       total_supply:        p.total_supply        || null,
       network:             p.network             || null,
       tge_date:            p.tge_date            || null,
-      logo_url:            p.logo_url            || null,
       twitter:             p.twitter             || null,
       discord:             p.discord             || null,
       telegram:            p.telegram            || null,
@@ -212,7 +210,7 @@ module.exports = async function handler(req, res) {
         'name', 'status', 'confirmation_status', 'published', 'link', 'website_url',
         'tags', 'RaisedID', 'RaisedEN', 'tasksID', 'tasksEN',
         'descriptionID', 'descriptionEN', 'ticker', 'total_supply',
-        'network', 'tge_date', 'logo_url', 'twitter', 'discord',
+        'network', 'tge_date', 'twitter', 'discord',
         'telegram', 'linkedin', 'youtube', 'instagram',
         'faqID', 'faqEN', 'testnet_links', 'tasks_images', 'backers'
       ];
