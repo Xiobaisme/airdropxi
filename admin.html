@@ -420,6 +420,26 @@
         .btn-cancel:hover { border-color: var(--border-strong); color: var(--text); }
         .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; }
 
+        /* ─── CONFIRM MODAL (custom, ganti native confirm()) ─── */
+       .confirm-box { max-width: 380px; padding: 2.2rem 1.8rem 1.7rem; text-align: center; }
+       .confirm-icon {
+       width: 52px; height: 52px; border-radius: 50%; margin: 0 auto 1.1rem;
+       background: var(--danger-dim); border: 2px solid var(--danger-line);
+       display: flex; align-items: center; justify-content: center; color: var(--danger);
+     }
+      .confirm-icon .icon { width: 24px; height: 24px; }
+      .confirm-title { font-family: var(--display); font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 0.5rem; }
+      .confirm-msg { font-family: var(--sans); font-size: 0.86rem; color: var(--text2); line-height: 1.55; margin-bottom: 1.7rem; }
+      .confirm-actions { display: flex; gap: 10px; }
+      .confirm-actions button { flex: 1; justify-content: center; }
+      .btn-danger-confirm {
+       padding: 0.7rem 1.4rem; border-radius: 999px; border: 2px solid var(--danger);
+       background: var(--danger); color: #fff; font-family: var(--label); font-size: 0.75rem;
+       cursor: pointer; transition: transform var(--ease), background var(--ease); font-weight: 700; letter-spacing: 0.02em;
+       display: inline-flex; align-items: center; gap: 6px;
+      }
+       .btn-danger-confirm:hover { background: #dc2626; transform: translateY(-2px); }
+
         /* ═══════════════════════════════════════════════════════════
            TOAST — solid surface, colored left border only
            ═══════════════════════════════════════════════════════════ */
@@ -863,6 +883,19 @@
             </div>
         </div>
 
+              <!-- ─── CONFIRM MODAL (custom, ganti native confirm()) ─── -->
+<div id="confirm-modal" class="modal hidden">
+    <div class="modal-box confirm-box">
+        <div class="confirm-icon" id="confirm-icon"></div>
+        <div class="confirm-title" id="confirm-title">Konfirmasi</div>
+        <div class="confirm-msg" id="confirm-msg">Yakin ingin melanjutkan?</div>
+        <div class="confirm-actions">
+            <button class="btn-cancel" id="confirm-cancel-btn">Batal</button>
+            <button class="btn-danger-confirm" id="confirm-ok-btn">Ya, Hapus</button>
+        </div>
+    </div>
+</div>
+
         <!-- ─── AI AGENT PANEL ─── -->
         <div id="agent-modal" class="modal hidden">
             <div class="agent-app">
@@ -1009,6 +1042,25 @@
             clearTimeout(t._hide);
             t._hide = setTimeout(() => t.classList.remove('show'), 3200);
         }
+
+        // ─── CUSTOM CONFIRM MODAL (ganti native confirm()) ───
+let _confirmResolve = null;
+function showConfirmModal({ title = 'Konfirmasi', message = 'Yakin ingin melanjutkan?', okLabel = 'Ya, Lanjutkan' } = {}) {
+    return new Promise(resolve => {
+        _confirmResolve = resolve;
+        document.getElementById('confirm-icon').innerHTML = icon('alert');
+        document.getElementById('confirm-title').textContent = title;
+        document.getElementById('confirm-msg').textContent = message;
+        document.getElementById('confirm-ok-btn').textContent = okLabel;
+        document.getElementById('confirm-modal').classList.remove('hidden');
+    });
+}
+function closeConfirmModal(result) {
+    document.getElementById('confirm-modal').classList.add('hidden');
+    if (_confirmResolve) { _confirmResolve(result); _confirmResolve = null; }
+}
+document.getElementById('confirm-cancel-btn').onclick = () => closeConfirmModal(false);
+document.getElementById('confirm-ok-btn').onclick = () => closeConfirmModal(true);
 
         // Count-up animation helper (GSAP kalau ada, fallback manual)
         function animateCount(el, target) {
@@ -1420,8 +1472,13 @@
         }
 
         // ─── HAPUS PROYEK ─────────────────────────────────────
-        async function deleteProject(id) {
-            if (!confirm('Yakin ingin menghapus proyek ini? Tindakan ini tidak dapat dibatalkan.')) return;
+           async function deleteProject(id) {
+           const ok = await showConfirmModal({
+            title: 'Hapus Proyek?',
+            message: 'Yakin ingin menghapus proyek ini? Tindakan ini tidak dapat dibatalkan.',
+             okLabel: 'Ya, Hapus'
+             });
+             if (!ok) return;
             try {
                 const res = await fetch(`/api/admin-airdrop?id=${id}`, { method: 'DELETE' });
                 if (!res.ok) {
