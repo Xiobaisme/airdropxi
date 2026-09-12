@@ -234,6 +234,15 @@
         .garap-status-sub { font-family: var(--label); font-size: 0.72rem; color: var(--text2); margin-top: 3px; }
         .garap-status-sub b { color: var(--primary); font-weight: 700; }
 
+        .garap-session {
+    display: flex; align-items: center; gap: 8px;
+    padding: 0.55rem 1rem; border-radius: var(--r-sm); border: 2px solid var(--border);
+    background: var(--card-2); flex-shrink: 0;
+}
+.garap-session-dot { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; animation: pulseDot 1.4s ease-in-out infinite; }
+.garap-session-label { font-family: var(--label); font-size: 0.72rem; font-weight: 700; color: var(--text2); white-space: nowrap; }
+
+
         .garap-slots { display: flex; gap: 10px; flex-wrap: wrap; }
         .garap-slot {
             display: flex; flex-direction: column; align-items: center; gap: 2px;
@@ -626,6 +635,7 @@
             .garap-card { padding: 1rem 1.1rem; gap: 1rem; }
             .garap-left { min-width: 0; }
             .garap-now-time { font-size: 1rem; }
+            .garap-now-utc { font-family: var(--mono); font-size: 0.68rem; color: var(--text3); margin-top: 3px; letter-spacing: 0.02em; }
             .garap-slot { min-width: 74px; padding: 0.5rem 0.7rem; }
             #proj-links-section { padding: 1.6rem 0.8rem 3rem; }
             .section-header { padding: 1.1rem 1.2rem; }
@@ -715,33 +725,25 @@
         </div>
 
         <!-- ─── GARAP SCHEDULE WIDGET ─── -->
-        <div id="garap-widget">
-            <div class="garap-card" id="garap-card">
-                <div class="garap-left">
-                    <div class="garap-clock-icon" id="garap-clock-icon"></div>
-                    <div>
-                        <div class="garap-now">Waktu Sekarang (WIB)</div>
-                        <div class="garap-now-time" id="garap-now-time">--:--:--</div>
-                    </div>
-                </div>
-                <div class="garap-status">
-                    <div class="garap-status-label">Saatnya Garap Airdrop</div>
-                    <div class="garap-status-main" id="garap-status-main">Memuat jadwal...</div>
-                    <div class="garap-status-sub" id="garap-status-sub"></div>
-                </div>
-                <div class="garap-slots">
-                    <div class="garap-slot" data-slot="13" id="garap-slot-13">
-                        <div class="t">13:00</div>
-                        <div class="l">WIB</div>
-                    </div>
-                    <div class="garap-slot" data-slot="19" id="garap-slot-19">
-                        <div class="t">19:00</div>
-                        <div class="l">WIB</div>
-                    </div>
-                </div>
-            </div>
-        </div>
-
+        <div class="garap-left">
+    <div class="garap-clock-icon" id="garap-clock-icon"></div>
+    <div>
+        <div class="garap-now">Waktu Sekarang (WIB)</div>
+        <div class="garap-now-time" id="garap-now-time">--:--:--</div>
+        <div class="garap-now-utc" id="garap-now-utc">UTC --:--:--</div>
+    </div>
+</div>
+<div class="garap-status">
+    <div class="garap-status-label">Saatnya Garap Airdrop</div>
+    <div class="garap-status-main" id="garap-status-main">Memuat jadwal...</div>
+    <div class="garap-status-sub" id="garap-status-sub"></div>
+</div>
+<div class="garap-session" id="garap-session">
+    <span class="garap-session-dot" id="garap-session-dot"></span>
+    <span class="garap-session-label" id="garap-session-label">Sesi Market</span>
+</div>
+<div class="garap-slots">
+    <div class="garap-slot" data-slot="13" id="garap-slot-13">
         <!-- PROJECT LINKS SECTION -->
         <div id="proj-links-section">
             <div class="section-card">
@@ -1085,6 +1087,41 @@ document.getElementById('confirm-ok-btn').onclick = () => closeConfirmModal(true
         const GARAP_SLOTS = [13, 19]; // jam garap (WIB, 24h)
         const GARAP_WINDOW_MIN = 60;  // dianggap "aktif" selama 60 menit sejak jam slot
 
+        // ─── SESI MARKET (forex, jam dalam UTC) ───
+const MARKET_SESSIONS = [
+    { id: 'sydney',  label: 'Sesi Sydney',         color: '#EC4899', start: 22, end: 7 },
+    { id: 'tokyo',   label: 'Sesi Tokyo / Asia',   color: '#8B5CF6', start: 0,  end: 9 },
+    { id: 'london',  label: 'Sesi London / Eropa', color: '#38BDF8', start: 8,  end: 17 },
+    { id: 'newyork', label: 'Sesi New York / US',  color: '#22C55E', start: 13, end: 22 },
+];
+
+function isHourInSession(hourUTC, start, end) {
+    if (start < end) return hourUTC >= start && hourUTC < end;
+    return hourUTC >= start || hourUTC < end; // sesi yang lewat tengah malam (Sydney)
+}
+
+function getActiveMarketSessions(hourUTC) {
+    return MARKET_SESSIONS.filter(s => isHourInSession(hourUTC, s.start, s.end));
+}
+
+function updateMarketSessionBadge(hourUTC) {
+    const dot = document.getElementById('garap-session-dot');
+    const label = document.getElementById('garap-session-label');
+    if (!dot || !label) return;
+
+    const active = getActiveMarketSessions(hourUTC);
+    if (!active.length) {
+        dot.style.background = 'var(--text3)';
+        label.textContent = 'Market Tutup';
+    } else if (active.length > 1) {
+        dot.style.background = 'var(--grad)';
+        label.textContent = active.map(s => s.label.replace('Sesi ', '')).join(' + ') + ' (Overlap)';
+    } else {
+        dot.style.background = active[0].color;
+        label.textContent = active[0].label;
+    }
+}
+
         function getWIBParts() {
             // Ambil waktu WIB (Asia/Jakarta) tanpa bikin objek Date yang salah timezone,
             // cukup ambil komponen jam/menit/detiknya via Intl.
@@ -1095,6 +1132,10 @@ document.getElementById('confirm-ok-btn').onclick = () => closeConfirmModal(true
             const parts = fmt.formatToParts(new Date());
             const get = (t) => +parts.find(p => p.type === t).value;
             return { h: get('hour'), m: get('minute'), s: get('second') };
+        }
+         function getUTCParts() {
+            const now = new Date();
+            return { h: now.getUTCHours(), m: now.getUTCMinutes(), s: now.getUTCSeconds() };
         }
 
         function formatHMS(h, m, s) {
@@ -1113,6 +1154,10 @@ document.getElementById('confirm-ok-btn').onclick = () => closeConfirmModal(true
             const { h, m, s } = getWIBParts();
             const nowTimeEl = document.getElementById('garap-now-time');
             if (nowTimeEl) nowTimeEl.textContent = formatHMS(h, m, s);
+            const utc = getUTCParts();
+    const utcTimeEl = document.getElementById('garap-now-utc');
+    if (utcTimeEl) utcTimeEl.textContent = `UTC ${formatHMS(utc.h, utc.m, utc.s)}`;
+    updateMarketSessionBadge(utc.h);
 
             const nowMinutes = h * 60 + m;
             const card = document.getElementById('garap-card');
@@ -1127,6 +1172,7 @@ document.getElementById('confirm-ok-btn').onclick = () => closeConfirmModal(true
                 const diff = nowMinutes - slotStart;
                 if (diff >= 0 && diff < GARAP_WINDOW_MIN) { activeSlot = slot; break; }
             }
+            
 
             // Tandai slot chip mana yang aktif / berikutnya
             GARAP_SLOTS.forEach(slot => {
