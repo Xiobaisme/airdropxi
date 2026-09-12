@@ -127,10 +127,52 @@
             animation: loginFade 0.4s ease forwards;
         }
         @keyframes loginFade { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
-        .login-logo { font-family: var(--display); font-weight: 800; font-size: 1.7rem; color: var(--text); margin-bottom: 0.5rem; letter-spacing: -0.01em; }
+       .login-logo {
+    font-family: var(--display); font-weight: 800; font-size: 1.7rem; margin-bottom: 0.5rem; letter-spacing: -0.01em;
+    background: linear-gradient(120deg, var(--text) 40%, var(--primary) 50%, var(--text) 60%);
+    background-size: 200% auto; -webkit-background-clip: text; background-clip: text; color: transparent;
+    animation: logoShimmer 3s linear infinite;
+}
+@keyframes logoShimmer { to { background-position: -200% center; } }
         .login-title { font-size: 1.15rem; font-weight: 700; color: var(--text); margin-bottom: 0.3rem; }
         .login-sub { font-size: 0.88rem; color: var(--text2); margin-bottom: 2rem; }
         .login-divider { width: 44px; height: 3px; background: var(--primary); border-radius: 999px; margin: 0 auto 2rem; }
+
+        /* ─── LOGIN — efek partikel, pulse ring, shimmer, entrance stagger ─── */
+.login-particles { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.login-particle {
+    position: absolute; bottom: -10px; border-radius: 50%;
+    opacity: 0; filter: blur(0.5px);
+    animation: particleFloat linear infinite;
+}
+@keyframes particleFloat {
+    0%   { transform: translate(0, 0) scale(0.6); opacity: 0; }
+    10%  { opacity: 0.7; }
+    90%  { opacity: 0.5; }
+    100% { transform: translate(var(--drift, 20px), -100vh) scale(1); opacity: 0; }
+}
+
+.login-mascot-wrap { position: relative; width: 76px; height: 76px; margin: 0 auto 1.4rem; }
+.login-mascot-wrap .login-mascot { margin: 0; position: relative; z-index: 2; }
+.login-mascot-ring {
+    position: absolute; inset: 0; border-radius: var(--r-md);
+    border: 2px solid var(--primary-line);
+    animation: mascotPulse 2.4s ease-out infinite;
+}
+.login-mascot-ring.delay { animation-delay: 1.2s; }
+@keyframes mascotPulse {
+    0%   { transform: scale(1); opacity: 0.8; }
+    100% { transform: scale(1.8); opacity: 0; }
+}
+
+@keyframes popIn { from { opacity: 0; transform: translateY(14px) scale(0.9); } to { opacity: 1; transform: translateY(0) scale(1); } }
+.login-card > * { animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1) both; }
+.login-card > *:nth-child(1) { animation-delay: 0.05s; }
+.login-card > *:nth-child(2) { animation-delay: 0.15s; }
+.login-card > *:nth-child(3) { animation-delay: 0.25s; }
+.login-card > *:nth-child(4) { animation-delay: 0.35s; }
+.login-card > *:nth-child(5) { animation-delay: 0.45s; }
+.login-card > *:nth-child(6) { animation-delay: 0.55s; }
 
         /* ═══════════════════════════════════════════════════════════
            NAV
@@ -669,20 +711,25 @@
         <span></span><span></span><span></span><span></span>
     </div>
 
-    <!-- ─── LOGIN ─── -->
-    <div id="login-section">
-        <div class="login-card">
+   <!-- ─── LOGIN ─── -->
+<div id="login-section">
+    <div class="login-particles" id="login-particles"></div>
+    <div class="login-card">
+        <div class="login-mascot-wrap">
+            <span class="login-mascot-ring"></span>
+            <span class="login-mascot-ring delay"></span>
             <div class="login-mascot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></div>
-            <div class="login-logo">Xiobaii</div>
-            <div class="login-title">Admin Control Center</div>
-            <div class="login-divider"></div>
-            <div class="login-sub">Much access. Very Google login. Wow.</div>
-            <div id="g_id_onload"
-                data-client_id="1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com"
-                data-callback="handleCredentialResponse">
-            </div>
+        </div>
+        <div class="login-logo">Xiobaii</div>
+        <div class="login-title">Admin Control Center</div>
+        <div class="login-divider"></div>
+        <div class="login-sub">Much access. Very Google login. Wow.</div>
+        <div id="g_id_onload"
+            data-client_id="1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com"
+            data-callback="handleCredentialResponse">
         </div>
     </div>
+</div>
 
     <!-- ─── ADMIN CONTENT ─── -->
     <div id="admin-content" class="hidden">
@@ -2113,6 +2160,26 @@ const onSearch = debounce((q) => {
             if (glow) { glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px'; }
         }, { passive: true });
 
+        // ─── LOGIN PARTICLES (efek visual doang, gak ada suara) ───
+function spawnLoginParticles(count = 22) {
+    const wrap = document.getElementById('login-particles');
+    if (!wrap) return;
+    wrap.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+        const p = document.createElement('span');
+        p.className = 'login-particle';
+        const size = 2 + Math.random() * 4;
+        p.style.left = Math.random() * 100 + '%';
+        p.style.width = size + 'px';
+        p.style.height = size + 'px';
+        p.style.animationDuration = (5 + Math.random() * 6) + 's';
+        p.style.animationDelay = (Math.random() * 6) + 's';
+        p.style.setProperty('--drift', (Math.random() * 60 - 30) + 'px');
+        p.style.background = Math.random() > 0.5 ? 'var(--primary)' : 'var(--secondary)';
+        wrap.appendChild(p);
+    }
+}
+
         // ─── GOOGLE LOGIN ───
         const YOUR_CLIENT_ID = '1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com';
 
@@ -2137,7 +2204,9 @@ const onSearch = debounce((q) => {
         }
 
         // ─── INIT (juga menyuntik semua icon SVG ke tombol/label statis) ───
-        window.onload = function() {
+               window.onload = function() {
+            spawnLoginParticles();
+
             // Icon-fill untuk elemen statis (bukan hasil render dinamis)
             document.getElementById('calc-toggle-btn').innerHTML = icon('calculator') + 'Calc';
             document.getElementById('section-label-link-icon').innerHTML = icon('link') + 'Project Links';
