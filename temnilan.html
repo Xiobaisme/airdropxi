@@ -313,6 +313,10 @@ function renderMain() {
   renderFeed();
 }
 
+/* ───────── link explorer ───────── */
+const txUrl = t => (t.signature ? 'https://solscan.io/tx/' + encodeURIComponent(t.signature) : null);
+const txLink = (t, label) => (txUrl(t) ? `<a href="${esc(txUrl(t))}" target="_blank" rel="noopener noreferrer" title="Lihat transaksi di Solscan">${label} ↗</a>` : label);
+
 /* ───────── import history ───────── */
 async function importHistory(days) {
   const id = S.sel; if (!id || S.importing) return;
@@ -390,7 +394,7 @@ function historyHTML(d) {
   else {
     const fmt = iso => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
     body = `<div class="scroll"><table><thead><tr><th>TIME</th><th>TOKEN</th><th>SIDE</th><th>AMOUNT</th><th>PRICE</th><th>VALUE</th><th>PNL</th></tr></thead><tbody>` +
-      rows.slice(0, S.hshown).map(t => `<tr><td>${fmt(t.occurred_at)}</td><td>$${esc(t.token_symbol || short(t.token_address))}</td>
+      rows.slice(0, S.hshown).map(t => `<tr><td>${txLink(t, fmt(t.occurred_at))}</td><td>$${esc(t.token_symbol || short(t.token_address))}</td>
         <td class="${t.side === 'buy' ? 'up' : 'down'}">${t.side === 'buy' ? 'BUY' : 'SELL'}</td>
         <td>${num(t.amount_sol) === null ? '—' : Number(t.amount_sol).toFixed(2) + ' SOL'}</td><td>${px(t.price)}</td><td>${usd(t.amount_usd)}</td>
         <td class="${cls(t.pnl_usd)}">${usd(t.pnl_usd, true)}</td></tr>`).join('') + '</tbody></table></div>' +
@@ -432,7 +436,7 @@ function txRow(t, showW) {
   const buy = t.side === 'buy', c = t._new ? ' in' : ''; delete t._new;
   return `<div class="fr${c}"><span class="${buy ? 'up' : 'down'}">● ${buy ? 'BUY' : 'SELL'}</span><span>$${esc(t.token_symbol || short(t.token_address))}</span>
     <span>${num(t.amount_sol) === null ? '—' : Number(t.amount_sol).toFixed(2) + ' SOL'}</span><span>${usd(t.amount_usd)}</span>
-    <span class="mut">${new Date(t.occurred_at).toLocaleTimeString('en-GB')}</span>${showW ? `<span class="mut">${esc(wn(t))}</span>` : ''}<span class="mut">${esc(t.dex || '')}</span></div>`;
+    <span class="mut">${txLink(t, new Date(t.occurred_at).toLocaleTimeString('en-GB'))}</span>${showW ? `<span class="mut">${esc(wn(t))}</span>` : ''}<span class="mut">${esc(t.dex || '')}</span></div>`;
 }
 
 function alertRow(a) {
@@ -477,7 +481,8 @@ async function markRead(id) {
 function renderTabs() { document.querySelectorAll('#tabs [data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === S.view)); }
 
 function onTx(t) {
-  if (!t) return; t._new = true;
+  if (!t || Date.now() - new Date(t.occurred_at) > 10 * 60 * 1000) return; // abaikan hasil import history (bukan transaksi live)
+  t._new = true;
   if (Array.isArray(S.gfeed) && !S.gfeed.some(x => x.id === t.id)) S.gfeed = [t, ...S.gfeed].slice(0, 100);
   const mine = String(t.wallet_id) === String(S.sel);
   if (mine && Array.isArray(S.feed) && !S.feed.some(x => x.id === t.id)) S.feed = [t, ...S.feed].slice(0, 50);
