@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>TEMNILAN // DEGEN TERMINAL</title>
+<link rel="preconnect" href="https://fonts.googleapis.com" />
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@500;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet" />
+<style>
+  *,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+  :root{
+    --bg:#050607; --panel:#0c0e10; --panel2:#111417; --line:#1e242a;
+    --text:#e8eaec; --mut:#7d8790; --up:#22c55e; --down:#ef4444; --acc:#3b82f6;
+    --mono:'JetBrains Mono',ui-monospace,monospace; --sans:'Inter',system-ui,sans-serif;
+  }
+  html,body{height:100%}
+  body{background:var(--bg);color:var(--text);font:12px/1.4 var(--mono);display:flex;flex-direction:column;overflow:hidden}
+  button{font:inherit;color:inherit;background:none;border:1px solid var(--line);border-radius:2px;cursor:pointer;padding:4px 10px}
+  button:hover:not(:disabled){border-color:var(--mut)}
+  button:disabled{opacity:.35;cursor:not-allowed}
+  button:focus-visible,input:focus-visible{outline:1px solid var(--acc);outline-offset:1px}
+  .up{color:var(--up)} .down{color:var(--down)} .mut{color:var(--mut)}
+  .na{color:var(--mut);font-size:10px}
+
+  /* header */
+  .top{display:flex;align-items:center;gap:24px;padding:0 16px;height:44px;border-bottom:1px solid var(--line);background:#000;flex-shrink:0}
+  .brand{font:700 14px var(--sans);letter-spacing:.06em;white-space:nowrap}
+  .brand span{color:var(--mut);font-weight:500}
+  .tabs{display:flex;gap:2px;flex:1}
+  .tabs button{border:0;border-bottom:2px solid transparent;border-radius:0;padding:12px 12px;color:var(--mut);letter-spacing:.06em}
+  .tabs button.on{color:var(--text);border-bottom-color:var(--acc)}
+  .status{display:flex;gap:16px;align-items:center;color:var(--mut);font-size:11px;white-space:nowrap}
+  .dot{display:inline-block;width:7px;height:7px;border-radius:50%;background:var(--mut);margin-right:6px}
+  .dot.ok{background:var(--up);animation:pulse 2s ease-in-out infinite}
+  .dot.bad{background:var(--down)}
+  @keyframes pulse{50%{opacity:.35}}
+
+  /* global stats */
+  .stats{display:flex;border-bottom:1px solid var(--line);flex-shrink:0;overflow-x:auto}
+  .stat{flex:1 0 150px;padding:10px 16px;border-right:1px solid var(--line)}
+  .stat:last-child{border-right:0}
+  .stat .l{color:var(--mut);font-size:10px;letter-spacing:.08em;margin-bottom:2px}
+  .stat .v{font-size:18px;font-weight:700}
+
+  /* layout */
+  .layout{flex:1;min-height:0;display:grid;grid-template-columns:300px 1fr}
+  .side{border-right:1px solid var(--line);display:flex;flex-direction:column;min-height:0}
+  .side h2,.panel h3{font:500 10px var(--mono);letter-spacing:.1em;color:var(--mut)}
+  .side-head{padding:12px 12px 8px}
+  .side input{width:100%;margin-top:8px;background:var(--panel);border:1px solid var(--line);border-radius:2px;color:var(--text);font:inherit;padding:6px 8px}
+  .chips{display:flex;flex-wrap:wrap;gap:4px;margin-top:8px}
+  .chips button{font-size:10px;padding:2px 7px;color:var(--mut)}
+  .chips button.on{color:var(--text);border-color:var(--acc)}
+  .list{flex:1;overflow-y:auto;border-top:1px solid var(--line)}
+  .w{display:grid;grid-template-columns:1fr auto;gap:2px 8px;width:100%;text-align:left;border:0;border-bottom:1px solid var(--line);border-left:2px solid transparent;border-radius:0;padding:9px 12px}
+  .w.on{background:var(--panel2);border-left-color:var(--acc)}
+  .w .n{font-weight:700}
+  .w .r{text-align:right}
+  .w .sub{color:var(--mut);font-size:10px}
+
+  /* main */
+  main{overflow-y:auto;padding:16px;min-width:0}
+  .empty{color:var(--mut);padding:40px 0;text-align:center}
+  .wh{display:flex;align-items:flex-end;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:14px}
+  .wh h1{font:700 20px var(--sans);letter-spacing:.04em}
+  .range{display:flex;gap:4px}
+  .range button{font-size:10px;padding:3px 9px;color:var(--mut)}
+  .range button.on{color:var(--text);border-color:var(--acc)}
+  .grid5{display:grid;grid-template-columns:repeat(5,1fr);gap:1px;background:var(--line);border:1px solid var(--line);margin-bottom:14px}
+  .grid5 .stat{background:var(--panel);border:0}
+  .panel{border:1px solid var(--line);background:var(--panel);margin-bottom:14px}
+  .panel>h3{padding:8px 12px;border-bottom:1px solid var(--line)}
+  .ph{padding:28px 12px;color:var(--mut);text-align:center;font-size:11px}
+  .scroll{overflow-x:auto}
+  table{width:100%;border-collapse:collapse;white-space:nowrap}
+  th{color:var(--mut);font-weight:400;font-size:10px;letter-spacing:.08em;text-align:right;padding:6px 12px;border-bottom:1px solid var(--line)}
+  td{text-align:right;padding:6px 12px;border-bottom:1px solid var(--line)}
+  th:first-child,td:first-child{text-align:left}
+  tbody tr:hover{background:var(--panel2)}
+
+  @media(max-width:900px){
+    body{overflow:auto;height:auto}
+    .top{flex-wrap:wrap;height:auto;padding:8px 12px;gap:8px}
+    .tabs{order:3;flex-basis:100%}
+    .layout{grid-template-columns:1fr}
+    .side{max-height:320px;border-right:0;border-bottom:1px solid var(--line)}
+    .grid5{grid-template-columns:repeat(2,1fr)}
+    .status{flex-wrap:wrap;gap:8px}
+  }
+  @media(prefers-reduced-motion:reduce){.dot.ok{animation:none}}
+</style>
+</head>
+<body>
+
+<header class="top">
+  <div class="brand">TEMNILAN <span>// DEGEN TERMINAL</span></div>
+  <nav class="tabs" id="tabs">
+    <button class="on">OVERVIEW</button>
+    <button disabled title="Belum dibuat">WALLETS</button>
+    <button disabled title="Belum dibuat">ACTIVITY</button>
+    <button disabled title="Belum dibuat">ALERTS</button>
+  </nav>
+  <div class="status" id="status"></div>
+</header>
+
+<section class="stats" id="stats"></section>
+
+<div class="layout">
+  <aside class="side">
+    <div class="side-head">
+      <h2>TRACKED WALLETS</h2>
+      <input id="q" type="search" placeholder="Search tracked wallet..." autocomplete="off" />
+      <div class="chips" id="chips"></div>
+    </div>
+    <div class="list" id="list"></div>
+  </aside>
+  <main id="main"></main>
+</div>
+
+<script>
+const API = '/api/temnilan-wallets';
+const FILTERS = [
+  ['ALL', () => true],
+  ['ACTIVE', w => w.status === 'active'],
+  ['SMART MONEY', w => w.category === 'smart_money'],
+  ['WHALE', w => w.category === 'whale'],
+  ['SNIPER', w => w.category === 'sniper'],
+  ['DEGEN', w => w.category === 'degen'],
+];
+const RANGES = ['7D', '30D', '90D', 'ALL'];
+const S = { wallets: [], stats: null, filter: 'ALL', q: '', sel: null, range: 'ALL', detail: null, ok: null, err: '', lastOk: null };
+
+const $ = id => document.getElementById(id);
+const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+const short = a => a && a.length > 9 ? a.slice(0, 4) + '...' + a.slice(-4) : (a || '');
+const catLabel = c => String(c || '').replace(/_/g, ' ').toUpperCase();
+const num = v => (v === null || v === undefined || v === '' ? null : Number(v));
+
+// Angka kosong SELALU tampil "—" / INSUFFICIENT DATA, tidak pernah diganti angka karangan.
+function usd(v, signed) {
+  const n = num(v); if (n === null || isNaN(n)) return '—';
+  const s = Math.abs(n).toLocaleString('en-US', { maximumFractionDigits: n > -1000 && n < 1000 ? 2 : 0 });
+  return (n < 0 ? '-' : signed && n > 0 ? '+' : '') + '$' + s;
+}
+function pct(v, signed) {
+  const n = num(v); if (n === null || isNaN(n)) return '—';
+  return (n < 0 ? '' : signed ? '+' : '') + n.toFixed(1) + '%';
+}
+function px(v) {
+  const n = num(v); if (n === null || isNaN(n)) return '—';
+  return n >= 1 ? '$' + n.toLocaleString('en-US', { maximumFractionDigits: 2 }) : '$' + n.toPrecision(3);
+}
+function dur(ms) {
+  if (ms === null || ms === undefined || isNaN(ms)) return '—';
+  const m = Math.floor(ms / 60000), d = Math.floor(m / 1440), h = Math.floor((m % 1440) / 60);
+  return d ? `${d}d ${h}h` : h ? `${h}h ${m % 60}m` : `${m}m`;
+}
+function ago(iso) {
+  if (!iso) return 'no activity';
+  const s = Math.max(0, (Date.now() - new Date(iso)) / 1000);
+  return s < 60 ? Math.floor(s) + 's ago' : s < 3600 ? Math.floor(s / 60) + 'm ago' : s < 86400 ? Math.floor(s / 3600) + 'h ago' : Math.floor(s / 86400) + 'd ago';
+}
+const cls = v => (num(v) > 0 ? 'up' : num(v) < 0 ? 'down' : '');
+const nd = html => html ?? '<span class="na">INSUFFICIENT DATA</span>';
+
+/* ───────── data ───────── */
+async function loadList() {
+  try {
+    const r = await fetch(API);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    S.wallets = d.wallets || []; S.stats = d.stats || null;
+    S.ok = true; S.lastOk = new Date();
+  } catch (e) { S.ok = false; S.err = e.message; }
+  renderStatus(); renderStats(); renderList();
+}
+
+async function loadDetail() {
+  const id = S.sel; if (!id) return;
+  S.detail = null; renderMain();
+  try {
+    const r = await fetch(`${API}?id=${encodeURIComponent(id)}&range=${S.range}`);
+    if (!r.ok) throw new Error('HTTP ' + r.status);
+    const d = await r.json();
+    if (S.sel !== id) return; // user sudah pindah wallet
+    S.detail = d;
+  } catch (e) { if (S.sel !== id) return; S.detail = { error: e.message }; }
+  renderMain();
+}
+
+/* ───────── render ───────── */
+function renderStatus() {
+  $('status').innerHTML =
+    `<span><span class="dot ${S.ok ? 'ok' : S.ok === false ? 'bad' : ''}"></span>${S.ok ? 'SOLANA · API OK' : S.ok === false ? 'API OFFLINE' : 'CONNECTING'}</span>` +
+    `<span><span class="dot"></span>RH CHAIN · NOT CONNECTED</span>` +
+    `<span>LAST UPDATE ${S.lastOk ? S.lastOk.toLocaleTimeString('en-GB') : '--:--:--'}</span>`;
+}
+
+function renderStats() {
+  const st = S.stats, v = k => (st ? st[k] : null);
+  const cell = (l, val) => `<div class="stat"><div class="l">${l}</div><div class="v">${val ?? '<span class="na">DATA NOT CONNECTED</span>'}</div></div>`;
+  $('stats').innerHTML =
+    cell('TRACKED WALLETS', v('tracked_wallets')) +
+    cell('ACTIVE NOW', v('active_now')) +
+    cell('VOLUME 24H', st ? usd(v('volume_24h')) : null) +
+    cell('TRANSACTIONS 24H', st ? Number(v('transactions_24h')).toLocaleString('en-US') : null) +
+    cell('SOLANA PRICE', null); // belum ada sumber harga; diisi di tahap berikutnya
+}
+
+function renderChips() {
+  $('chips').innerHTML = FILTERS.map(([n]) => `<button class="${n === S.filter ? 'on' : ''}" data-f="${n}">${n}</button>`).join('');
+}
+
+function renderList() {
+  const fn = FILTERS.find(f => f[0] === S.filter)[1], q = S.q.toLowerCase();
+  const rows = S.wallets.filter(fn).filter(w => !q || (w.name + ' ' + w.address).toLowerCase().includes(q));
+  const el = $('list');
+  if (S.ok === false && !S.wallets.length) { el.innerHTML = `<div class="empty">DATA NOT CONNECTED<br><span class="na">${esc(S.err)}</span></div>`; return; }
+  if (S.ok === null) { el.innerHTML = '<div class="empty">WAITING FOR LIVE DATA</div>'; return; }
+  if (!rows.length) { el.innerHTML = `<div class="empty">${S.wallets.length ? 'NO MATCH' : 'NO TRACKED WALLETS'}</div>`; return; }
+  el.innerHTML = rows.map(w => {
+    const pnl = num(w.total_pnl); // 0 = belum ada posisi tercatat, jadi ditampilkan "—"
+    return `<button class="w ${String(w.id) === String(S.sel) ? 'on' : ''}" data-id="${esc(w.id)}">
+      <span class="n">${esc(w.name)}</span>
+      <span class="r ${w.status === 'active' ? 'up' : 'mut'}">${w.status === 'active' ? '● ACTIVE' : '○ IDLE'}</span>
+      <span class="sub">${esc(short(w.address))} · ${esc(catLabel(w.category))}</span>
+      <span class="r sub ${pnl ? cls(pnl) : ''}">${pnl ? usd(pnl, true) : '—'}</span>
+      <span class="sub">${esc(ago(w.last_activity))}</span>
+    </button>`;
+  }).join('');
+}
+
+function renderMain() {
+  const el = $('main'), w = S.wallets.find(x => String(x.id) === String(S.sel));
+  if (!w) { el.innerHTML = '<div class="empty">Pilih wallet di sidebar untuk melihat detailnya.</div>'; return; }
+  const d = S.detail;
+  const head = `<div class="wh"><div>
+      <h1>${esc(w.name)}</h1>
+      <div class="mut">${esc(short(w.address))} · ${esc((w.chain || '').toUpperCase())} · <span class="${w.status === 'active' ? 'up' : ''}">${w.status === 'active' ? '● ACTIVE' : '○ IDLE'}</span></div>
+    </div>
+    <div class="range">${RANGES.map(r => `<button class="${r === S.range ? 'on' : ''}" data-r="${r}">${r}</button>`).join('')}</div></div>`;
+
+  if (!d) { el.innerHTML = head + '<div class="empty">WAITING FOR LIVE DATA</div>'; return; }
+  if (d.error) { el.innerHTML = head + `<div class="empty">DATA NOT CONNECTED<br><span class="na">${esc(d.error)}</span></div>`; return; }
+
+  const st = d.stats || {};
+  const box = (l, v) => `<div class="stat"><div class="l">${l}</div><div class="v">${v}</div></div>`;
+  const stats = '<div class="grid5">' +
+    box('TOTAL PNL', st.total_pnl == null ? nd() : `<span class="${cls(st.total_pnl)}">${usd(st.total_pnl, true)}</span>`) +
+    box('ROI', st.roi_pct == null ? nd() : `<span class="${cls(st.roi_pct)}">${pct(st.roi_pct, true)}</span>`) +
+    box('WIN RATE', st.win_rate == null ? nd() : pct(st.win_rate)) +
+    box('TOTAL TRADES', Number(st.total_trades || 0).toLocaleString('en-US')) +
+    box('AVG HOLD', st.avg_hold_ms == null ? nd() : dur(st.avg_hold_ms)) + '</div>';
+
+  const pos = d.positions || [];
+  const posTable = pos.length ? `<div class="scroll"><table><thead><tr>
+      <th>TOKEN</th><th>ENTRY</th><th>CURRENT</th><th>SIZE</th><th>PNL</th><th>ROI</th><th>HOLD TIME</th></tr></thead><tbody>` +
+    pos.map(p => `<tr><td>$${esc(p.token_symbol || short(p.token_address))}</td><td>${px(p.entry_price)}</td><td>${px(p.current_price)}</td>
+      <td>${num(p.size_sol) === null ? '—' : Number(p.size_sol).toFixed(2) + ' SOL'}</td>
+      <td class="${cls(p.pnl_usd)}">${usd(p.pnl_usd, true)}</td><td class="${cls(p.roi_pct)}">${pct(p.roi_pct, true)}</td>
+      <td>${dur(Date.now() - new Date(p.opened_at))}</td></tr>`).join('') + '</tbody></table></div>'
+    : '<div class="ph">Tidak ada posisi terbuka.</div>';
+
+  el.innerHTML = head + stats +
+    `<div class="panel"><h3>PERFORMANCE</h3><div class="ph">DATA NOT CONNECTED — chart menyusul di tahap berikutnya</div></div>` +
+    `<div class="panel"><h3>LIVE WALLET ACTIVITY</h3><div class="ph">WAITING FOR LIVE DATA — realtime menyusul di tahap berikutnya</div></div>` +
+    `<div class="panel"><h3>OPEN POSITIONS</h3>${posTable}</div>`;
+}
+
+/* ───────── events ───────── */
+$('chips').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; S.filter = b.dataset.f; renderChips(); renderList(); });
+$('q').addEventListener('input', e => { S.q = e.target.value; renderList(); });
+$('list').addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (!b) return; S.sel = b.dataset.id; renderList(); loadDetail(); });
+$('main').addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (!b) return; S.range = b.dataset.r; loadDetail(); });
+
+renderStatus(); renderStats(); renderChips(); renderList(); renderMain();
+loadList();
+setInterval(loadList, 60000); // sementara; diganti Realtime di tahap live activity
+</script>
+</body>
+</html>
