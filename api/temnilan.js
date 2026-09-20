@@ -2,25 +2,6 @@
 //
 // Dipanggil lewat ?resource=<nama>, tapi URL lama tetap jalan berkat
 // rewrites di vercel.json (lihat catatan di bawah):
-//
-//   /api/temnilan-wallets    -> ?resource=wallets
-//     GET    (?id=123&range=7D|30D|90D|ALL)   list / detail wallet
-//     POST                                    tambah wallet
-//     PATCH  ?id=123                          edit wallet
-//     DELETE ?id=123                          hapus wallet
-//
-//   /api/temnilan-activity   -> ?resource=activity
-//     GET ?limit=50&wallet_id=123&side=buy&before=<iso>   feed transaksi
-//
-//   /api/temnilan-positions  -> ?resource=positions
-//     GET ?wallet_id=123&status=open|closed               posisi wallet
-//
-//   /api/temnilan-alerts     -> ?resource=alerts
-//     GET   ?unread=true&limit=50                         feed alert
-//     PATCH ?id=123                                       tandai dibaca
-//
-//   /api/temnilan-webhook    -> ?resource=webhook
-//     POST  dari provider indexer (Helius Enhanced Webhooks, dll)
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -44,6 +25,7 @@ const ROUTES = {
   positions: handlePositions,
   alerts: handleAlerts,
   webhook: handleWebhook,
+  sync: handleSync,
 };
 
 module.exports = async function handler(req, res) {
@@ -227,7 +209,7 @@ async function createWallet(req, res) {
     .select()
     .single();
   if (error) throw error;
-  return res.status(201).json(data);
+  return res.status(201).json({ ...data, helius_sync: await safeSync() });
 }
 
 async function updateWallet(req, res, id) {
@@ -239,14 +221,85 @@ async function updateWallet(req, res, id) {
     .select()
     .single();
   if (error) throw error;
-  return res.status(200).json(data);
+  const touchesAddress = req.body && ('address' in req.body || 'chain' in req.body);
+  return res.status(200).json(touchesAddress ? { ...data, helius_sync: await safeSync() } : data);
 }
 
 async function deleteWallet(req, res, id) {
   if (!id) return res.status(400).json({ error: 'id wajib ada di query' });
   const { error } = await supabase.from('temnilan_wallets').delete().eq('id', id);
   if (error) throw error;
-  return res.status(200).json({ success: true });
+  return res.status(200).json({ success: true, helius_sync: await safeSync() });
+}
+
+// ─────────────────────────────────────────────────────────────
+// SYNC WALLET -> HELIUS
+//
+// Database = sumber kebenaran. Setiap wallet Solana di temnilan_wallets otomatis
+// dimasukkan ke daftar accountAddresses webhook Helius lewat Helius API
+// (maks 100.000 alamat per webhook). Cuma kirim PUT kalau daftarnya beda, karena
+// tiap edit webhook via API kena 100 credit.
+//
+// Env: HELIUS_API_KEY, HELIUS_WEBHOOK_ID (+ TEMNILAN_WEBHOOK_SECRET yang sudah ada)
+// Manual / bulk: POST /api/temnilan?resource=sync
+// ─────────────────────────────────────────────────────────────
+
+async function syncHelius() {
+  const key = process.env.HELIUS_API_KEY;
+  const id = process.env.HELIUS_WEBHOOK_ID;
+  if (!key || !id) return { synced: false, reason: 'HELIUS_API_KEY / HELIUS_WEBHOOK_ID belum diisi' };
+
+  const { data: rows, error } = await supabase
+    .from('temnilan_wallets')
+    .select('address')
+    .eq('chain', 'solana'); // wallet Robinhood chain tidak ikut dikirim ke Helius
+  if (error) throw error;
+  const addresses = [...new Set((rows || []).map(r => r.address))].sort();
+  if (!addresses.length) return { synced: false, reason: 'belum ada wallet Solana di database' };
+
+  const url = `https://api.helius.xyz/v0/webhooks/${id}?api-key=${key}`;
+  const curRes = await fetch(url);
+  if (!curRes.ok) throw new Error(`Helius GET webhook gagal (HTTP ${curRes.status})`);
+  const cur = await curRes.json();
+
+  const current = [...(cur.accountAddresses || [])].sort();
+  if (JSON.stringify(current) === JSON.stringify(addresses)) {
+    return { synced: true, changed: false, count: addresses.length };
+  }
+
+  // PUT butuh konfigurasi webhook lengkap, jadi field lain dibawa dari config yang sekarang.
+  const putRes = await fetch(url, {
+    method: 'PUT',
+    headers: { 'Content-Type': 'application/json' },
+    body: JSON.stringify({
+      webhookURL: cur.webhookURL,
+      transactionTypes: cur.transactionTypes,
+      webhookType: cur.webhookType,
+      authHeader: process.env.TEMNILAN_WEBHOOK_SECRET,
+      accountAddresses: addresses,
+    }),
+  });
+  if (!putRes.ok) throw new Error(`Helius PUT webhook gagal (HTTP ${putRes.status})`);
+  return { synced: true, changed: true, count: addresses.length }; // Helius butuh sampai ~2 menit buat aktif
+}
+
+// Gagal sync tidak boleh menggagalkan tambah/hapus wallet; hasilnya dikembalikan di respons.
+async function safeSync() {
+  try { return await syncHelius(); }
+  catch (err) { console.error('[temnilan-sync]', err); return { synced: false, reason: err.message }; }
+}
+
+async function handleSync(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: `Method ${req.method} not allowed` });
+  }
+  try {
+    return res.status(200).json(await syncHelius());
+  } catch (err) {
+    console.error('[temnilan-sync]', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
 }
 
 // ─────────────────────────────────────────────────────────────
