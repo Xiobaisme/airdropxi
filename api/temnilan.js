@@ -1,4 +1,26 @@
 // api/temnilan.js — TEMNILAN Degen Terminal (semua endpoint dalam 1 function)
+//
+// Dipanggil lewat ?resource=<nama>, tapi URL lama tetap jalan berkat
+// rewrites di vercel.json (lihat catatan di bawah):
+//
+//   /api/temnilan-wallets    -> ?resource=wallets
+//     GET    (?id=123&range=7D|30D|90D|ALL)   list / detail wallet
+//     POST                                    tambah wallet
+//     PATCH  ?id=123                          edit wallet
+//     DELETE ?id=123                          hapus wallet
+//
+//   /api/temnilan-activity   -> ?resource=activity
+//     GET ?limit=50&wallet_id=123&side=buy&before=<iso>   feed transaksi
+//
+//   /api/temnilan-positions  -> ?resource=positions
+//     GET ?wallet_id=123&status=open|closed               posisi wallet
+//
+//   /api/temnilan-alerts     -> ?resource=alerts
+//     GET   ?unread=true&limit=50                         feed alert
+//     PATCH ?id=123                                       tandai dibaca
+//
+//   /api/temnilan-webhook    -> ?resource=webhook
+//     POST  dari provider indexer (Helius Enhanced Webhooks, dll)
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -160,7 +182,8 @@ function computeWalletStats(transactions, positions) {
   const wins = closed.filter(p => Number(p.pnl_usd) > 0).length;
   const winRate = closed.length ? (wins / closed.length) * 100 : null;
 
-  const totalInvested = positions.reduce((s, p) => s + (Number(p.size_sol) || 0), 0) || null;
+  // ROI = PnL (USD) / total modal beli (USD). Dulu dibagi size_sol (SOL) -> beda satuan.
+  const totalInvested = positions.reduce((s, p) => s + (Number(p.bought_usd) || 0), 0) || null;
   const roiPct = totalInvested ? (totalPnl / totalInvested) * 100 : null;
 
   const holdTimesMs = closed
@@ -417,11 +440,13 @@ async function processSwap(p) {
     .maybeSingle();
   if (!wallet) return null;
 
+  // Tanpa harga SOL, nilai USD jadi 0 (data palsu). Lempar error -> respons 500 -> provider retry nanti.
   const solPriceUsd = await getSolPriceUsd();
+  if (!solPriceUsd) throw new Error('SOL price unavailable');
   const amountUsd = p.amountSol * solPriceUsd;
 
-  // 2) Simpan transaksi (upsert by signature -> aman kalau webhook retry).
-  const { error: txErr } = await supabase.from('temnilan_transactions').upsert({
+  // 2) Simpan transaksi (upsert by signature). .select() cuma balikin baris yang BENAR-BENAR baru.
+  const { data: inserted, error: txErr } = await supabase.from('temnilan_transactions').upsert({
     wallet_id: wallet.id,
     signature: p.signature,
     token_address: p.tokenAddress,
@@ -433,8 +458,10 @@ async function processSwap(p) {
     price: p.tokenAmount ? amountUsd / p.tokenAmount : null,
     dex: p.dex,
     occurred_at: p.occurredAt,
-  }, { onConflict: 'signature', ignoreDuplicates: true });
+  }, { onConflict: 'signature', ignoreDuplicates: true }).select('id');
   if (txErr) throw txErr;
+  // Signature sudah pernah diproses (webhook retry) -> jangan hitung posisi & alert dua kali.
+  if (!inserted || !inserted.length) return null;
 
   // 3) Update status wallet.
   await supabase.from('temnilan_wallets')
@@ -451,7 +478,11 @@ async function processSwap(p) {
 }
 
 async function upsertPosition(walletId, p, amountUsd) {
-  const { data: existing } = await supabase
+  // Tanpa jumlah token, posisi tidak bisa dihitung. Transaksinya tetap tersimpan.
+  if (!p.tokenAmount) return;
+  const price = amountUsd / p.tokenAmount;
+
+  const { data: pos } = await supabase
     .from('temnilan_positions')
     .select('*')
     .eq('wallet_id', walletId)
@@ -459,35 +490,61 @@ async function upsertPosition(walletId, p, amountUsd) {
     .is('closed_at', null)
     .maybeSingle();
 
+  // Kolom posisi:
+  //   token_amount = token yang masih dipegang | cost_usd = modal (USD) dari token yang masih dipegang
+  //   bought_usd   = total USD yang pernah dipakai beli (penyebut ROI)
+  //   realized_usd = profit/loss yang sudah terealisasi dari sell | size_sol = sisa modal dalam SOL
   if (p.side === 'buy') {
-    if (existing) {
-      const newSize = Number(existing.size_sol) + p.amountSol;
-      await supabase.from('temnilan_positions').update({ size_sol: newSize }).eq('id', existing.id);
+    if (pos) {
+      const tokens = Number(pos.token_amount || 0) + p.tokenAmount;
+      const cost = Number(pos.cost_usd || 0) + amountUsd;
+      await supabase.from('temnilan_positions').update({
+        token_amount: tokens,
+        cost_usd: cost,
+        bought_usd: Number(pos.bought_usd || 0) + amountUsd,
+        size_sol: Number(pos.size_sol || 0) + p.amountSol,
+        entry_price: cost / tokens, // harga masuk rata-rata
+      }).eq('id', pos.id);
     } else {
       await supabase.from('temnilan_positions').insert({
         wallet_id: walletId,
         token_address: p.tokenAddress,
         token_symbol: p.tokenSymbol,
-        entry_price: p.tokenAmount ? amountUsd / p.tokenAmount : null,
-        current_price: p.tokenAmount ? amountUsd / p.tokenAmount : null,
+        entry_price: price,
+        current_price: price,
         size_sol: p.amountSol,
+        token_amount: p.tokenAmount,
+        cost_usd: amountUsd,
+        bought_usd: amountUsd,
         opened_at: p.occurredAt,
       });
     }
-  } else if (existing) {
-    // Sell -> tutup posisi & hitung realized PnL sederhana.
-    const entryValueUsd = Number(existing.size_sol) * Number(existing.entry_price || 0);
-    const pnlUsd = amountUsd - entryValueUsd;
-    const roiPct = entryValueUsd ? (pnlUsd / entryValueUsd) * 100 : null;
-    await supabase.from('temnilan_positions').update({
-      closed_at: p.occurredAt,
-      current_price: p.tokenAmount ? amountUsd / p.tokenAmount : existing.current_price,
-      pnl_usd: pnlUsd,
-      roi_pct: roiPct,
-    }).eq('id', existing.id);
+    return;
   }
-  // Sell tapi gak ada posisi terbuka (data historis sebelum tracking dimulai)
-  // -> sengaja dilewati, bukan bikin posisi negatif ngarang (poin 14).
+
+  // SELL tanpa posisi terbuka (trade lama sebelum tracking dimulai) -> dilewati, bukan bikin angka karangan.
+  const held = pos ? Number(pos.token_amount) : 0;
+  if (!pos || !held) return;
+
+  const fraction = Math.min(1, p.tokenAmount / held);   // porsi posisi yang dijual
+  const costSold = Number(pos.cost_usd) * fraction;
+  const realized = Number(pos.realized_usd || 0) + (amountUsd - costSold);
+  const closing = fraction >= 0.99;
+  const bought = Number(pos.bought_usd || 0);
+
+  const update = {
+    token_amount: closing ? 0 : held - p.tokenAmount,
+    cost_usd: closing ? 0 : Number(pos.cost_usd) - costSold,
+    size_sol: closing ? pos.size_sol : Number(pos.size_sol) * (1 - fraction),
+    realized_usd: realized,
+    pnl_usd: realized,
+    roi_pct: bought ? (realized / bought) * 100 : null,
+  };
+  if (closing) {
+    update.closed_at = p.occurredAt;
+    update.current_price = price;
+  }
+  await supabase.from('temnilan_positions').update(update).eq('id', pos.id);
 }
 
 async function evaluateAlerts(walletId, p, amountUsd) {
