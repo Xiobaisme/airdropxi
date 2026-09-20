@@ -398,10 +398,11 @@ async function handleBackfill(req, res) {
           if (!sample) sample = { type: tx.type, source: tx.source, feePayerIsWallet: tx.feePayer === wallet.address, hasSwapEvent: !!(tx.events && tx.events.swap), tokenTransfers: (tx.tokenTransfers || []).length };
           continue;
         }
-        const usd = p.amountSol * solPriceAt(prices, tx.timestamp * 1000);
+        const sp = solPriceAt(prices, tx.timestamp * 1000), usd = tradeUsd(p, sp);
+        if (!(usd > 0)) { skipped++; continue; }
         rows.push({
           wallet_id: wallet.id, signature: p.signature, token_address: p.tokenAddress, token_symbol: p.tokenSymbol,
-          side: p.side, amount_sol: p.amountSol, amount_usd: usd, token_amount: p.tokenAmount,
+          side: p.side, amount_sol: usd / sp, amount_usd: usd, token_amount: p.tokenAmount,
           price: p.tokenAmount ? usd / p.tokenAmount : null, dex: p.dex, occurred_at: p.occurredAt,
         });
       }
@@ -618,9 +619,10 @@ async function handleWebhook(req, res) {
     const events = Array.isArray(req.body) ? req.body : [req.body];
     const results = [];
     for (const evt of events) {
-      const parsed = parseSwapEvent(evt);
-      if (!parsed) continue; // bukan swap / bukan wallet yang di-track
-      results.push(await processSwap(parsed));
+      for (const address of await trackedAddressesIn(evt)) {
+        const parsed = parseSwap(evt, address);
+        if (parsed) results.push(await processSwap(parsed)); // bukan swap token yang jelas -> dilewati
+      }
     }
     return res.status(200).json({ processed: results.filter(Boolean).length });
   } catch (err) {
@@ -630,6 +632,10 @@ async function handleWebhook(req, res) {
 }
 
 const WSOL = 'So11111111111111111111111111111111111111112';
+const STABLES = new Set([
+  'EPjFWdd5AufqSSqeM2qN1xzybapC8G4wEGGkZwyTDt1v', // USDC
+  'Es9vMFrzaCERmJfrF4H2FYD4KCoNkY11McCe8BenwNYB', // USDT
+]);
 
 // rawTokenAmount berisi bilangan bulat mentah; harus dibagi 10^decimals biar jadi jumlah token sebenarnya.
 function tokenAmt(leg) {
@@ -637,53 +643,74 @@ function tokenAmt(leg) {
   return Number(leg && leg.tokenAmount || 0);
 }
 
-// Baca satu transaksi Helius sebagai BUY/SELL token terhadap SOL untuk wallet `address`.
-// Jalur 1: events.swap. Jalur 2 (cadangan): perubahan saldo wallet itu sendiri.
-// Hasil null = bukan swap SOL <-> satu token yang jelas.
+// Baca satu transaksi Helius sebagai BUY/SELL SATU token untuk wallet `address`.
+// Dasarnya perubahan saldo wallet itu sendiri (bukan ringkasan events.swap, yang bisa menyesatkan pada rute
+// bercabang lewat wSOL). Aset yang diperdagangkan = satu-satunya token non-SOL non-stablecoin yang saldonya berubah;
+// SOL/wSOL dan USDC/USDT dianggap sebagai "kuotasi" (pembayaran). Swap SOL <-> stablecoin bukan trade token -> null.
 function parseSwap(evt, address) {
   if (!evt || !address) return null;
   const base = {
     address, signature: evt.signature, dex: evt.source || null,
     occurredAt: evt.timestamp ? new Date(evt.timestamp * 1000).toISOString() : new Date().toISOString(),
   };
-  const mk = (side, amountSol, mint, leg) => ({
-    ...base, side, amountSol, tokenAddress: mint,
-    tokenSymbol: (leg && leg.symbol) || (mint ? mint.slice(0, 4) : '???'), tokenAmount: leg ? tokenAmt(leg) : 0,
+  const mk = (side, mint, amount, quoteSol, quoteUsd, symbol) => ({
+    ...base, side, tokenAddress: mint, tokenSymbol: symbol || mint.slice(0, 4), tokenAmount: amount, quoteSol, quoteUsd,
   });
 
-  // Jalur 1 (utama): perubahan saldo wallet itu sendiri. Jumlahnya bersih dan akurat walau rute swap bercabang
-  // (satu swap bisa punya beberapa leg token yang sama; mengambil leg pertama saja bikin jumlah token salah).
-  let lamports = 0;
-  const tok = new Map();
-  for (const a of evt.accountData || []) {
-    if (a.account === address) lamports += Number(a.nativeBalanceChange || 0);
-    for (const c of a.tokenBalanceChanges || []) {
-      if (c.userAccount === address) tok.set(c.mint, (tok.get(c.mint) || 0) + tokenAmt(c));
+  const data = evt.accountData || [];
+  if (data.length) {
+    let lamports = 0;
+    const tok = new Map();
+    for (const a of data) {
+      if (a.account === address) lamports += Number(a.nativeBalanceChange || 0);
+      for (const c of a.tokenBalanceChanges || []) {
+        if (c.userAccount === address) tok.set(c.mint, (tok.get(c.mint) || 0) + tokenAmt(c));
+      }
     }
-  }
-  const solNet = lamports / 1e9 + (tok.get(WSOL) || 0); // perubahan SOL bersih wallet (wSOL ikut dihitung)
-  tok.delete(WSOL);
-  const moved = [...tok].filter(([, d]) => d !== 0);
-  if (moved.length === 1) {
+    const quoteSol = lamports / 1e9 + (tok.get(WSOL) || 0);          // perubahan SOL bersih (wSOL ikut)
+    let quoteUsd = 0;
+    for (const m of STABLES) quoteUsd += tok.get(m) || 0;             // perubahan stablecoin (USD)
+    const moved = [...tok].filter(([m, d]) => m !== WSOL && !STABLES.has(m) && d !== 0);
+    if (moved.length !== 1) return null;                              // 0 atau >1 token -> bukan trade satu token yang jelas
     const [mint, d] = moved[0];
-    if (d > 0 && solNet < 0) return mk('buy', -solNet, mint, { tokenAmount: d });
-    if (d < 0 && solNet > 0) return mk('sell', solNet, mint, { tokenAmount: -d });
+    if (d > 0 && (quoteSol < 0 || quoteUsd < 0)) return mk('buy', mint, d, quoteSol, quoteUsd);
+    if (d < 0 && (quoteSol > 0 || quoteUsd > 0)) return mk('sell', mint, -d, quoteSol, quoteUsd);
+    return null;
   }
 
-  // Jalur 2 (cadangan): events.swap, dengan jumlah token dijumlahkan dari SEMUA leg milik wallet.
+  // Cadangan kalau payload tidak membawa accountData: events.swap (hanya swap SOL <-> token).
   const sw = evt.events && evt.events.swap;
-  if (sw) {
-    const net = Number(sw.nativeInput?.amount || 0) / 1e9 - Number(sw.nativeOutput?.amount || 0) / 1e9;
-    const outs = sw.tokenOutputs || [], ins = sw.tokenInputs || [];
-    const outLeg = outs.find(t => t.mint && t.mint !== WSOL), inLeg = ins.find(t => t.mint && t.mint !== WSOL);
-    const sum = (legs, mint) => legs.filter(t => t.mint === mint && (!t.userAccount || t.userAccount === address)).reduce((x, t) => x + tokenAmt(t), 0);
-    if (net > 0 && outLeg) return mk('buy', net, outLeg.mint, { symbol: outLeg.symbol, tokenAmount: sum(outs, outLeg.mint) });
-    if (net < 0 && inLeg) return mk('sell', -net, inLeg.mint, { symbol: inLeg.symbol, tokenAmount: sum(ins, inLeg.mint) });
-  }
+  if (!sw) return null;
+  const net = Number(sw.nativeInput?.amount || 0) / 1e9 - Number(sw.nativeOutput?.amount || 0) / 1e9;
+  const outs = sw.tokenOutputs || [], ins = sw.tokenInputs || [];
+  const outLeg = outs.find(t => t.mint && t.mint !== WSOL && !STABLES.has(t.mint));
+  const inLeg = ins.find(t => t.mint && t.mint !== WSOL && !STABLES.has(t.mint));
+  const sum = (legs, mint) => legs.filter(t => t.mint === mint && (!t.userAccount || t.userAccount === address)).reduce((x, t) => x + tokenAmt(t), 0);
+  if (net > 0 && outLeg) return mk('buy', outLeg.mint, sum(outs, outLeg.mint), -net, 0, outLeg.symbol);
+  if (net < 0 && inLeg) return mk('sell', inLeg.mint, sum(ins, inLeg.mint), -net, 0, inLeg.symbol);
   return null;
 }
 
-function parseSwapEvent(evt) { return parseSwap(evt, evt && evt.feePayer); } // dipakai webhook
+// Nilai trade dalam USD = nilai kuotasi bersih (SOL x harga SOL + stablecoin). Hasil <= 0 berarti tidak jelas.
+function tradeUsd(p, solPrice) {
+  const v = p.quoteSol * solPrice + p.quoteUsd;
+  return p.side === 'buy' ? -v : v;
+}
+
+// Wallet ter-track yang terlibat di transaksi ini. Fee payer sering BUKAN wallet-nya (co-signer, relayer, bot trading),
+// jadi semua akun yang saldonya berubah ikut dicek.
+async function trackedAddressesIn(evt) {
+  const seen = new Set();
+  if (evt.feePayer) seen.add(evt.feePayer);
+  for (const a of evt.accountData || []) {
+    if (a.account) seen.add(a.account);
+    for (const c of a.tokenBalanceChanges || []) if (c.userAccount) seen.add(c.userAccount);
+  }
+  if (!seen.size) return [];
+  const { data, error } = await supabase.from('temnilan_wallets').select('address').eq('chain', 'solana').in('address', [...seen].slice(0, 150));
+  if (error) throw error;
+  return (data || []).map(w => w.address);
+}
 
 async function processSwap(p) {
   // 1) Wallet ini beneran di-track? Kalau gak ada di DB, abaikan — bukan
@@ -698,7 +725,9 @@ async function processSwap(p) {
   // Tanpa harga SOL, nilai USD jadi 0 (data palsu). Lempar error -> respons 500 -> provider retry nanti.
   const solPriceUsd = await getSolPriceUsd();
   if (!solPriceUsd) throw new Error('SOL price unavailable');
-  const amountUsd = p.amountSol * solPriceUsd;
+  const amountUsd = tradeUsd(p, solPriceUsd);
+  if (!(amountUsd > 0)) return null; // nilai kuotasi tidak jelas -> dilewati, bukan angka karangan
+  p.amountSol = amountUsd / solPriceUsd; // setara SOL (untuk tampilan)
 
   // 2) Simpan transaksi (upsert by signature). .select() cuma balikin baris yang BENAR-BENAR baru.
   const { data: inserted, error: txErr } = await supabase.from('temnilan_transactions').upsert({
