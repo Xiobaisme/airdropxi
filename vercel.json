@@ -1,5 +1,10 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/admin.html" }
+    { "source": "/", "destination": "/admin.html" },
+    { "source": "/api/temnilan-wallets",   "destination": "/api/temnilan?resource=wallets" },
+    { "source": "/api/temnilan-activity",  "destination": "/api/temnilan?resource=activity" },
+    { "source": "/api/temnilan-positions", "destination": "/api/temnilan?resource=positions" },
+    { "source": "/api/temnilan-alerts",    "destination": "/api/temnilan?resource=alerts" },
+    { "source": "/api/temnilan-webhook",   "destination": "/api/temnilan?resource=webhook" }
   ]
 }
