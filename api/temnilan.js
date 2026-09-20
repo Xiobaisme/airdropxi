@@ -2,7 +2,25 @@
 //
 // Dipanggil lewat ?resource=<nama>, tapi URL lama tetap jalan berkat
 // rewrites di vercel.json (lihat catatan di bawah):
-
+//
+//   /api/temnilan-wallets    -> ?resource=wallets
+//     GET    (?id=123&range=7D|30D|90D|ALL)   list / detail wallet
+//     POST                                    tambah wallet
+//     PATCH  ?id=123                          edit wallet
+//     DELETE ?id=123                          hapus wallet
+//
+//   /api/temnilan-activity   -> ?resource=activity
+//     GET ?limit=50&wallet_id=123&side=buy&before=<iso>   feed transaksi
+//
+//   /api/temnilan-positions  -> ?resource=positions
+//     GET ?wallet_id=123&status=open|closed               posisi wallet
+//
+//   /api/temnilan-alerts     -> ?resource=alerts
+//     GET   ?unread=true&limit=50                         feed alert
+//     PATCH ?id=123                                       tandai dibaca
+//
+//   /api/temnilan-webhook    -> ?resource=webhook
+//     POST  dari provider indexer (Helius Enhanced Webhooks, dll)
 const { createClient } = require('@supabase/supabase-js');
 
 // Ganti ke require('../lib/supabase') kalau kamu udah punya util client sendiri.
@@ -119,8 +137,11 @@ async function getWalletDetail(req, res, id) {
   if (txErr) throw txErr;
   if (posErr) throw posErr;
 
-  const stats = computeWalletStats(transactions || [], positions || []);
-  const behavior = computeBehavior(transactions || [], positions || []);
+  // Statistik ikut filter periode: posisi dihitung dari waktu tutup (atau waktu buka kalau masih terbuka).
+  const sinceMs = new Date(rangeToSince(range)).getTime();
+  const inRange = (positions || []).filter(p => new Date(p.closed_at || p.opened_at).getTime() >= sinceMs);
+  const stats = computeWalletStats(transactions || [], inRange);
+  const behavior = computeBehavior(transactions || [], inRange);
 
   return res.status(200).json({
     wallet,
@@ -522,7 +543,10 @@ async function processSwap(p) {
     .eq('id', wallet.id);
 
   // 4) Buka/tutup posisi (simplifikasi: 1 posisi aktif per token per wallet).
-  await upsertPosition(wallet.id, p, amountUsd);
+  const tradePnl = await upsertPosition(wallet.id, p, amountUsd); // angka hanya untuk SELL yang punya posisi
+  if (typeof tradePnl === 'number') {
+    await supabase.from('temnilan_transactions').update({ pnl_usd: tradePnl }).eq('id', inserted[0].id);
+  }
 
   // 5) Evaluasi alert (poin 10).
   await evaluateAlerts(wallet.id, p, amountUsd);
@@ -598,6 +622,7 @@ async function upsertPosition(walletId, p, amountUsd) {
     update.current_price = price;
   }
   await supabase.from('temnilan_positions').update(update).eq('id', pos.id);
+  return amountUsd - costSold; // realized PnL dari sell ini
 }
 
 async function evaluateAlerts(walletId, p, amountUsd) {
