@@ -1,6 +1,7 @@
 {
   "rewrites": [
     { "source": "/", "destination": "/admin.html" },
+    { "source": "/temnilan", "destination": "/temnilan.html" },
     { "source": "/api/temnilan-wallets",   "destination": "/api/temnilan?resource=wallets" },
     { "source": "/api/temnilan-activity",  "destination": "/api/temnilan?resource=activity" },
     { "source": "/api/temnilan-positions", "destination": "/api/temnilan?resource=positions" },
