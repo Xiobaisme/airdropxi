@@ -157,7 +157,7 @@ const FILTERS = [
   ['DEGEN', w => w.category === 'degen'],
 ];
 const RANGES = ['7D', '30D', '90D', 'ALL'];
-const S = { wallets: [], stats: null, filter: 'ALL', q: '', sel: null, range: 'ALL', detail: null, closed: [], mode: 'pnl', hf: 'ALL', hshown: 25, pts: [], view: 'overview', feed: [], gfeed: [], alerts: [], rt: null, ok: null, err: '', lastOk: null };
+const S = { wallets: [], stats: null, filter: 'ALL', q: '', sel: null, range: 'ALL', detail: null, closed: [], mode: 'pnl', hf: 'ALL', hshown: 25, pts: [], impMsg: '', importing: false, view: 'overview', feed: [], gfeed: [], alerts: [], rt: null, ok: null, err: '', lastOk: null };
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -277,6 +277,7 @@ function renderMain() {
   const head = `<div class="wh"><div>
       <h1>${esc(w.name)}</h1>
       <div class="mut">${esc(short(w.address))} · ${esc((w.chain || '').toUpperCase())} · <span class="${w.status === 'active' ? 'up' : ''}">${w.status === 'active' ? '● ACTIVE' : '○ IDLE'}</span>${explorer(w) ? ` · <a href="${esc(explorer(w))}" target="_blank" rel="noopener noreferrer">VIEW ON SOLSCAN ↗</a>` : ''}</div>
+      <div class="range" style="margin-top:8px;align-items:center"><button data-imp="90">IMPORT 90D</button><button data-imp="365">IMPORT 1Y</button><span class="mut" id="imp">${esc(S.impMsg)}</span></div>
     </div>
     <div class="range">${RANGES.map(r => `<button class="${r === S.range ? 'on' : ''}" data-r="${r}">${r}</button>`).join('')}</div></div>`;
 
@@ -310,6 +311,27 @@ function renderMain() {
     historyHTML(d) +
     `<div class="panel"><h3>WALLET BEHAVIOR</h3>${behaviorHTML(d)}</div>`;
   renderFeed();
+}
+
+/* ───────── import history ───────── */
+async function importHistory(days) {
+  const id = S.sel; if (!id || S.importing) return;
+  S.importing = true;
+  const say = m => { S.impMsg = m; if ($('imp')) $('imp').textContent = m; };
+  let cursor = '', swaps = 0, pages = 0;
+  try {
+    for (let i = 0; i < 300; i++) { // 1 request = beberapa halaman Helius; ulangi sampai done
+      say(`IMPORTING… ${pages} halaman, ${swaps} swap`);
+      const r = await fetch(`/api/temnilan?resource=backfill&id=${encodeURIComponent(id)}&days=${days}` + (cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''), { method: 'POST' });
+      const d = await r.json();
+      if (!r.ok) throw new Error(d.error || 'HTTP ' + r.status);
+      swaps += d.swaps; pages += d.pages;
+      if (d.done) { say(`DONE · ${swaps} swap diimpor, ${d.positions} posisi dihitung`); break; }
+      cursor = d.cursor;
+    }
+  } catch (e) { say('GAGAL: ' + e.message); }
+  S.importing = false;
+  loadList(); loadDetail(true); loadFeed();
 }
 
 /* ───────── wallets ───────── */
@@ -493,8 +515,9 @@ $('list').addEventListener('click', e => { const b = e.target.closest('[data-id]
 $('tabs').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b) return; S.view = b.dataset.v; renderTabs(); renderMain(); if (S.view !== 'overview') loadView(); });
 $('main').addEventListener('click', e => {
   if (e.target.closest('a')) return; // klik link Solscan jangan ikut ngebuka detail wallet
-  const t = e.target.closest('[data-r],[data-m],[data-hf],[data-more],[data-aid],[data-wid]'); if (!t) return;
+  const t = e.target.closest('[data-r],[data-m],[data-hf],[data-more],[data-aid],[data-wid],[data-imp]'); if (!t) return;
   if (t.dataset.wid) return selectWallet(t.dataset.wid);
+  if (t.dataset.imp) return importHistory(Number(t.dataset.imp));
   if (t.dataset.aid) return markRead(t.dataset.aid);
   if (t.dataset.r) { S.range = t.dataset.r; S.hshown = 25; return loadDetail(); }
   if (t.dataset.m) S.mode = t.dataset.m;
