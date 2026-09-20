@@ -21,6 +21,7 @@
 //
 //   /api/temnilan-webhook    -> ?resource=webhook
 //     POST  dari provider indexer (Helius Enhanced Webhooks, dll)
+//
 const { createClient } = require('@supabase/supabase-js');
 
 // Ganti ke require('../lib/supabase') kalau kamu udah punya util client sendiri.
@@ -44,6 +45,7 @@ const ROUTES = {
   alerts: handleAlerts,
   webhook: handleWebhook,
   sync: handleSync,
+  backfill: handleBackfill,
 };
 
 module.exports = async function handler(req, res) {
@@ -324,6 +326,156 @@ async function handleSync(req, res) {
 }
 
 // ─────────────────────────────────────────────────────────────
+// BACKFILL HISTORY
+//
+// Menarik swap lama sebuah wallet dari Helius (terbaru -> lama, sampai batas hari),
+// menyimpan ke temnilan_transactions, lalu MEMBANGUN ULANG posisi & PnL per trade
+// dari seluruh transaksi wallet itu secara berurutan waktu (aman dijalankan ulang).
+//
+// POST /api/temnilan?resource=backfill&id=1&days=90[&cursor=...]   (dipanggil berulang sampai done=true)
+// POST /api/temnilan?resource=backfill&id=1&rebuild=1               (hitung ulang saja, tanpa Helius)
+//
+// Harga SOL historis dari CoinGecko (tier gratis/Demo maks 365 hari). Opsional: COINGECKO_API_KEY.
+// ─────────────────────────────────────────────────────────────
+
+let _solSeries = { days: 0, at: 0, pts: [] };
+async function getSolSeries(days) {
+  if (_solSeries.days === days && _solSeries.pts.length && Date.now() - _solSeries.at < 600000) return _solSeries.pts;
+  const headers = process.env.COINGECKO_API_KEY ? { 'x-cg-demo-api-key': process.env.COINGECKO_API_KEY } : {};
+  const r = await fetch(`https://api.coingecko.com/api/v3/coins/solana/market_chart?vs_currency=usd&days=${days}`, { headers });
+  if (!r.ok) throw new Error(`Harga SOL historis gagal diambil (CoinGecko HTTP ${r.status}). Coba lagi sebentar, atau isi COINGECKO_API_KEY.`);
+  const pts = (await r.json()).prices;
+  if (!Array.isArray(pts) || !pts.length) throw new Error('Data harga SOL historis kosong');
+  _solSeries = { days, at: Date.now(), pts };
+  return pts;
+}
+function solPriceAt(pts, ms) { // titik harga terdekat dengan waktu transaksi
+  let lo = 0, hi = pts.length - 1;
+  while (lo < hi) { const mid = (lo + hi) >> 1; if (pts[mid][0] < ms) lo = mid + 1; else hi = mid; }
+  const a = pts[Math.max(0, lo - 1)], b = pts[lo];
+  return Math.abs(a[0] - ms) <= Math.abs(b[0] - ms) ? a[1] : b[1];
+}
+
+async function handleBackfill(req, res) {
+  if (req.method !== 'POST') {
+    res.setHeader('Allow', 'POST');
+    return res.status(405).json({ error: `Method ${req.method} not allowed` });
+  }
+  try {
+    const { id, cursor, rebuild } = req.query;
+    const days = Math.min(365, Math.max(1, Number(req.query.days) || 90));
+    const key = process.env.HELIUS_API_KEY;
+    if (!id) return res.status(400).json({ error: 'id wajib ada di query' });
+
+    const { data: wallet, error: wErr } = await supabase.from('temnilan_wallets').select('id, address, chain').eq('id', id).maybeSingle();
+    if (wErr) throw wErr;
+    if (!wallet) return res.status(404).json({ error: 'Wallet tidak ditemukan' });
+    if (wallet.chain !== 'solana') return res.status(400).json({ error: 'Import history baru mendukung wallet Solana' });
+    if (rebuild) return res.status(200).json({ done: true, ...(await rebuildWallet(wallet.id)) });
+    if (!key) return res.status(400).json({ error: 'HELIUS_API_KEY belum diisi' });
+
+    const t0 = Date.now(), cutoff = t0 - days * 864e5;
+    const prices = await getSolSeries(Math.min(365, days + 1));
+    let before = cursor || null, pages = 0, seen = 0, done = false;
+    const rows = [];
+
+    // Beberapa halaman per request supaya muat di batas waktu function; frontend memanggil ulang pakai cursor.
+    while (!done && pages < 8 && Date.now() - t0 < 6000) {
+      const url = `https://api-mainnet.helius-rpc.com/v0/addresses/${wallet.address}/transactions?api-key=${key}&type=SWAP&limit=100` +
+        (before ? `&before-signature=${before}` : '');
+      const r = await fetch(url);
+      const page = await r.json().catch(() => null);
+      if (!r.ok || !Array.isArray(page)) throw new Error('Helius: ' + ((page && page.error) || `HTTP ${r.status}`));
+      pages++;
+      if (!page.length) { done = true; break; }
+      before = page[page.length - 1].signature;
+      for (const tx of page) {
+        seen++;
+        if (tx.timestamp * 1000 < cutoff) { done = true; continue; } // lebih lama dari batas hari
+        const p = parseSwapEvent(tx);
+        if (!p || p.address !== wallet.address) continue;
+        const usd = p.amountSol * solPriceAt(prices, tx.timestamp * 1000);
+        rows.push({
+          wallet_id: wallet.id, signature: p.signature, token_address: p.tokenAddress, token_symbol: p.tokenSymbol,
+          side: p.side, amount_sol: p.amountSol, amount_usd: usd, token_amount: p.tokenAmount,
+          price: p.tokenAmount ? usd / p.tokenAmount : null, dex: p.dex, occurred_at: p.occurredAt,
+        });
+      }
+    }
+
+    for (let i = 0; i < rows.length; i += 500) {
+      // ignoreDuplicates: transaksi yang sudah masuk lewat webhook tidak ditimpa
+      const { error } = await supabase.from('temnilan_transactions').upsert(rows.slice(i, i + 500), { onConflict: 'signature', ignoreDuplicates: true });
+      if (error) throw error;
+    }
+    const out = { done, cursor: done ? null : before, pages, seen, swaps: rows.length };
+    if (done) Object.assign(out, await rebuildWallet(wallet.id));
+    return res.status(200).json(out);
+  } catch (err) {
+    console.error('[temnilan-backfill]', err);
+    return res.status(500).json({ error: err.message || 'Internal error' });
+  }
+}
+
+// Posisi & PnL per trade = turunan dari temnilan_transactions. Dihitung ulang dari nol, berurutan waktu.
+async function rebuildWallet(walletId) {
+  const txs = [];
+  for (let from = 0; ; from += 1000) {
+    const { data, error } = await supabase.from('temnilan_transactions').select('*').eq('wallet_id', walletId)
+      .order('occurred_at', { ascending: true }).order('id', { ascending: true }).range(from, from + 999);
+    if (error) throw error;
+    txs.push(...data);
+    if (data.length < 1000) break;
+  }
+
+  const open = new Map(), positions = [], sellPnl = new Map();
+  for (const t of txs) {
+    const tokens = Number(t.token_amount), usd = Number(t.amount_usd), sol = Number(t.amount_sol);
+    if (!t.token_address || !tokens || !isFinite(usd)) continue;
+    let pos = open.get(t.token_address);
+    if (t.side === 'buy') {
+      if (!pos) {
+        pos = { wallet_id: walletId, token_address: t.token_address, token_symbol: t.token_symbol, token_amount: 0, cost_usd: 0,
+          bought_usd: 0, realized_usd: 0, size_sol: 0, opened_at: t.occurred_at, closed_at: null, current_price: null, sold: false };
+        open.set(t.token_address, pos); positions.push(pos);
+      }
+      pos.token_amount += tokens; pos.cost_usd += usd; pos.bought_usd += usd; pos.size_sol += sol;
+      pos.entry_price = pos.cost_usd / pos.token_amount; // harga masuk rata-rata
+    } else {
+      if (!pos || !pos.token_amount) continue; // sell tanpa posisi di data yang ada -> dilewati, bukan angka karangan
+      const fraction = Math.min(1, tokens / pos.token_amount), costSold = pos.cost_usd * fraction, pnl = usd - costSold;
+      sellPnl.set(t.id, pnl); pos.realized_usd += pnl; pos.sold = true;
+      if (fraction >= 0.99) {
+        pos.token_amount = 0; pos.cost_usd = 0; pos.closed_at = t.occurred_at; pos.current_price = usd / tokens; open.delete(t.token_address);
+      } else { pos.token_amount -= tokens; pos.cost_usd -= costSold; pos.size_sol *= 1 - fraction; }
+    }
+  }
+
+  const out = positions.map(({ sold, ...p }) => ({
+    ...p, pnl_usd: sold ? p.realized_usd : null, roi_pct: sold && p.bought_usd ? (p.realized_usd / p.bought_usd) * 100 : null,
+  }));
+  const del = await supabase.from('temnilan_positions').delete().eq('wallet_id', walletId);
+  if (del.error) throw del.error;
+  for (let i = 0; i < out.length; i += 500) {
+    const { error } = await supabase.from('temnilan_positions').insert(out.slice(i, i + 500));
+    if (error) throw error;
+  }
+
+  const changed = txs.filter(t => sellPnl.has(t.id) && Number(t.pnl_usd) !== sellPnl.get(t.id)).map(t => ({ ...t, pnl_usd: sellPnl.get(t.id) }));
+  for (let i = 0; i < changed.length; i += 500) {
+    const { error } = await supabase.from('temnilan_transactions').upsert(changed.slice(i, i + 500), { onConflict: 'id' });
+    if (error) throw error;
+  }
+
+  const latest = txs.length ? txs[txs.length - 1].occurred_at : null;
+  const { data: w } = await supabase.from('temnilan_wallets').select('last_activity').eq('id', walletId).maybeSingle();
+  if (latest && (!w || !w.last_activity || new Date(latest) > new Date(w.last_activity))) {
+    await supabase.from('temnilan_wallets').update({ last_activity: latest }).eq('id', walletId); // status TIDAK diubah
+  }
+  return { trades: txs.length, positions: out.length, open_positions: out.filter(p => !p.closed_at).length };
+}
+
+// ─────────────────────────────────────────────────────────────
 // ACTIVITY  (LIVE WALLET ACTIVITY section 6 & TRADE HISTORY section 8)
 //
 // Update live di frontend TIDAK lewat polling endpoint ini — lewat Supabase
@@ -588,7 +740,7 @@ async function upsertPosition(walletId, p, amountUsd) {
         token_address: p.tokenAddress,
         token_symbol: p.tokenSymbol,
         entry_price: price,
-        current_price: price,
+        current_price: null, // belum ada harga terkini (price refresher belum ada)
         size_sol: p.amountSol,
         token_amount: p.tokenAmount,
         cost_usd: amountUsd,
