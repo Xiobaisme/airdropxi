@@ -78,6 +78,21 @@
   th:first-child,td:first-child{text-align:left}
   tbody tr:hover{background:var(--panel2)}
 
+  .hd{display:flex;justify-content:space-between;align-items:center;gap:8px}
+  .hd .range{flex-wrap:wrap}
+  .cw{position:relative;padding:12px}
+  #chart{width:100%;height:200px;display:block}
+  #chart .grid line{stroke:var(--line);stroke-width:1;vector-effect:non-scaling-stroke}
+  #chart .zero{stroke:var(--mut);stroke-dasharray:4 4;stroke-width:1;vector-effect:non-scaling-stroke}
+  .tip{position:absolute;top:12px;display:none;background:#000;border:1px solid var(--line);padding:4px 8px;pointer-events:none;white-space:nowrap}
+  .grid5.g6{grid-template-columns:repeat(6,1fr)}
+  .bar{display:grid;grid-template-columns:110px 1fr 44px;gap:10px;align-items:center;padding:5px 12px}
+  .bar i{height:6px;background:var(--line);position:relative}
+  .bar i::after{content:'';position:absolute;inset:0;width:var(--w);background:var(--acc)}
+  .bar b{text-align:right;font-weight:500}
+  .more{display:block;margin:10px auto}
+  .side-note{padding:8px 12px;color:var(--mut);font-size:10px}
+  @media(max-width:900px){.grid5.g6{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:900px){
     body{overflow:auto;height:auto}
     .top{flex-wrap:wrap;height:auto;padding:8px 12px;gap:8px}
@@ -128,7 +143,7 @@ const FILTERS = [
   ['DEGEN', w => w.category === 'degen'],
 ];
 const RANGES = ['7D', '30D', '90D', 'ALL'];
-const S = { wallets: [], stats: null, filter: 'ALL', q: '', sel: null, range: 'ALL', detail: null, ok: null, err: '', lastOk: null };
+const S = { wallets: [], stats: null, filter: 'ALL', q: '', sel: null, range: 'ALL', detail: null, closed: [], mode: 'pnl', hf: 'ALL', hshown: 25, pts: [], ok: null, err: '', lastOk: null };
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -179,11 +194,15 @@ async function loadDetail() {
   const id = S.sel; if (!id) return;
   S.detail = null; renderMain();
   try {
-    const r = await fetch(`${API}?id=${encodeURIComponent(id)}&range=${S.range}`);
+    const [r, rc] = await Promise.all([
+      fetch(`${API}?id=${encodeURIComponent(id)}&range=${S.range}`),
+      fetch(`/api/temnilan-positions?wallet_id=${encodeURIComponent(id)}&status=closed`),
+    ]);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
+    const closed = rc.ok ? await rc.json() : null; // null = gagal dimuat, bukan "tidak ada data"
     if (S.sel !== id) return; // user sudah pindah wallet
-    S.detail = d;
+    S.detail = d; S.closed = closed;
   } catch (e) { if (S.sel !== id) return; S.detail = { error: e.message }; }
   renderMain();
 }
@@ -261,17 +280,103 @@ function renderMain() {
       <td>${dur(Date.now() - new Date(p.opened_at))}</td></tr>`).join('') + '</tbody></table></div>'
     : '<div class="ph">Tidak ada posisi terbuka.</div>';
 
+  const modes = [['pnl', 'PNL'], ['roi', 'ROI'], ['value', 'PORTFOLIO VALUE']]
+    .map(([k, l]) => `<button class="${S.mode === k ? 'on' : ''}" data-m="${k}">${l}</button>`).join('');
   el.innerHTML = head + stats +
-    `<div class="panel"><h3>PERFORMANCE</h3><div class="ph">DATA NOT CONNECTED — chart menyusul di tahap berikutnya</div></div>` +
+    `<div class="panel"><h3 class="hd">PERFORMANCE <span class="range">${modes}</span></h3>${chartHTML()}<div class="side-note">Realized PnL dari posisi yang sudah ditutup. Belum termasuk PnL yang belum terealisasi.</div></div>` +
     `<div class="panel"><h3>LIVE WALLET ACTIVITY</h3><div class="ph">WAITING FOR LIVE DATA — realtime menyusul di tahap berikutnya</div></div>` +
-    `<div class="panel"><h3>OPEN POSITIONS</h3>${posTable}</div>`;
+    `<div class="panel"><h3>OPEN POSITIONS</h3>${posTable}</div>` +
+    historyHTML(d) +
+    `<div class="panel"><h3>WALLET BEHAVIOR</h3>${behaviorHTML(d)}</div>`;
+}
+
+/* ───────── chart, history, behavior ───────── */
+const sinceMs = () => { const n = { '7D': 7, '30D': 30, '90D': 90 }[S.range]; return n ? Date.now() - n * 864e5 : 0; };
+const inRange = p => p.closed_at && new Date(p.closed_at) >= sinceMs();
+
+function chartHTML() {
+  if (S.mode === 'value') return '<div class="ph">DATA NOT CONNECTED — nilai portofolio butuh data saldo dan harga token</div>';
+  if (S.closed === null) return '<div class="ph">DATA NOT CONNECTED</div>';
+  const rows = S.closed.filter(p => inRange(p) && num(p.pnl_usd) !== null).sort((a, b) => new Date(a.closed_at) - new Date(b.closed_at));
+  let cum = 0, inv = 0;
+  S.pts = rows.map(p => { cum += Number(p.pnl_usd); inv += num(p.bought_usd) || 0; return { t: p.closed_at, v: S.mode === 'roi' ? (inv ? cum / inv * 100 : 0) : cum }; });
+  if (!S.pts.length) return '<div class="ph">WAITING FOR LIVE DATA — belum ada posisi yang ditutup pada periode ini</div>';
+  const W = 800, H = 200, P = 10, vs = S.pts.map(p => p.v), n = vs.length;
+  const lo = Math.min(0, ...vs), hi = Math.max(0, ...vs), span = (hi - lo) || 1;
+  const X = i => P + i / (n - 1) * (W - 2 * P), Y = v => H - P - (v - lo) / span * (H - 2 * P);
+  const line = n > 1 ? vs.map((v, i) => X(i).toFixed(1) + ',' + Y(v).toFixed(1)).join(' ') : `${P},${Y(vs[0])} ${W - P},${Y(vs[0])}`;
+  const grid = [0, .25, .5, .75, 1].map(f => { const y = P + f * (H - 2 * P); return `<line x1="0" x2="${W}" y1="${y}" y2="${y}"/>`; }).join('');
+  return `<div class="cw"><svg id="chart" viewBox="0 0 ${W} ${H}" preserveAspectRatio="none"><g class="grid">${grid}</g>
+    <line class="zero" x1="0" x2="${W}" y1="${Y(0)}" y2="${Y(0)}"/>
+    <polyline points="${line}" fill="none" stroke="${vs[n - 1] >= 0 ? 'var(--up)' : 'var(--down)'}" stroke-width="1.5" vector-effect="non-scaling-stroke"/></svg><div id="tip" class="tip"></div></div>`;
+}
+
+function historyHTML(d) {
+  const all = d.transactions || [], f = S.hf;
+  const rows = all.filter(t => f === 'ALL' || (f === 'BUY' && t.side === 'buy') || (f === 'SELL' && t.side === 'sell') ||
+    (f === 'PROFIT' && num(t.pnl_usd) > 0) || (f === 'LOSS' && num(t.pnl_usd) < 0));
+  const bar = ['ALL', 'BUY', 'SELL', 'PROFIT', 'LOSS'].map(x => `<button class="${x === f ? 'on' : ''}" data-hf="${x}">${x}</button>`).join('');
+  let body;
+  if (!all.length) body = '<div class="ph">WAITING FOR LIVE DATA — belum ada transaksi pada periode ini</div>';
+  else if (!rows.length) body = '<div class="ph">NO MATCH</div>';
+  else {
+    const fmt = iso => new Date(iso).toLocaleString('en-GB', { day: '2-digit', month: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false });
+    body = `<div class="scroll"><table><thead><tr><th>TIME</th><th>TOKEN</th><th>SIDE</th><th>AMOUNT</th><th>PRICE</th><th>VALUE</th><th>PNL</th></tr></thead><tbody>` +
+      rows.slice(0, S.hshown).map(t => `<tr><td>${fmt(t.occurred_at)}</td><td>$${esc(t.token_symbol || short(t.token_address))}</td>
+        <td class="${t.side === 'buy' ? 'up' : 'down'}">${t.side === 'buy' ? 'BUY' : 'SELL'}</td>
+        <td>${num(t.amount_sol) === null ? '—' : Number(t.amount_sol).toFixed(2) + ' SOL'}</td><td>${px(t.price)}</td><td>${usd(t.amount_usd)}</td>
+        <td class="${cls(t.pnl_usd)}">${usd(t.pnl_usd, true)}</td></tr>`).join('') + '</tbody></table></div>' +
+      `<div class="side-note">Menampilkan ${Math.min(S.hshown, rows.length)} dari ${rows.length} transaksi (maks 500 terbaru pada periode ini).</div>` +
+      (rows.length > S.hshown ? '<button class="more" data-more>SHOW MORE</button>' : '');
+  }
+  return `<div class="panel"><h3 class="hd">TRADE HISTORY <span class="range">${bar}</span></h3>${body}</div>`;
+}
+
+function behaviorHTML(d) {
+  const b = d.behavior, st = d.stats || {};
+  if (!b || b.insufficient_data) return '<div class="ph"><span class="na">INSUFFICIENT DATA</span> — butuh minimal 5 transaksi pada periode ini</div>';
+  const cl = (S.closed || []).filter(p => inRange(p) && num(p.pnl_usd) !== null);
+  const wins = cl.filter(p => p.pnl_usd > 0), losses = cl.filter(p => p.pnl_usd < 0);
+  const avg = a => a.reduce((s, p) => s + Number(p.pnl_usd), 0) / a.length;
+  const pos = cl.length ? cl.reduce((s, p) => s + (num(p.bought_usd) || 0), 0) / cl.length : null;
+  const m = (l, v) => `<div class="stat"><div class="l">${l}</div><div class="v">${v}</div></div>`;
+  const hasHold = b.avg_hold_minutes != null;
+  const bar = (l, v) => `<div class="bar"><span>${l}</span><i style="--w:${Math.round(v * 100)}%"></i><b>${Math.round(v * 100)}%</b></div>`;
+  const off = l => `<div class="bar"><span>${l}</span><span class="na">NEEDS TOKEN DATA</span></div>`;
+  return '<div class="grid5 g6">' +
+    m('AVG HOLD TIME', hasHold ? dur(b.avg_hold_minutes * 60000) : nd()) +
+    m('WIN RATE', st.win_rate == null ? nd() : pct(st.win_rate)) +
+    m('AVG WIN', wins.length ? `<span class="up">${usd(avg(wins), true)}</span>` : nd()) +
+    m('AVG LOSS', losses.length ? `<span class="down">${usd(avg(losses), true)}</span>` : nd()) +
+    m('TRADES / DAY', Number(b.trades_per_day).toFixed(1)) +
+    m('AVG POSITION', pos == null ? nd() : usd(pos)) + '</div>' +
+    '<div style="padding:8px 0">' +
+    (hasHold ? bar('SCALPING', b.scalping_score) : `<div class="bar"><span>SCALPING</span><span class="na">INSUFFICIENT DATA</span></div>`) +
+    off('EARLY ENTRY') + off('QUICK EXIT') +
+    (hasHold ? bar('LONG HOLD', b.long_hold_score) : `<div class="bar"><span>LONG HOLD</span><span class="na">INSUFFICIENT DATA</span></div>`) + '</div>';
 }
 
 /* ───────── events ───────── */
 $('chips').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; S.filter = b.dataset.f; renderChips(); renderList(); });
 $('q').addEventListener('input', e => { S.q = e.target.value; renderList(); });
 $('list').addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (!b) return; S.sel = b.dataset.id; renderList(); loadDetail(); });
-$('main').addEventListener('click', e => { const b = e.target.closest('[data-r]'); if (!b) return; S.range = b.dataset.r; loadDetail(); });
+$('main').addEventListener('click', e => {
+  const t = e.target.closest('[data-r],[data-m],[data-hf],[data-more]'); if (!t) return;
+  if (t.dataset.r) { S.range = t.dataset.r; S.hshown = 25; return loadDetail(); }
+  if (t.dataset.m) S.mode = t.dataset.m;
+  if (t.dataset.hf) { S.hf = t.dataset.hf; S.hshown = 25; }
+  if ('more' in t.dataset) S.hshown += 25;
+  renderMain();
+});
+$('main').addEventListener('mousemove', e => {
+  const c = e.target.closest('#chart'), tip = $('tip'), n = S.pts.length;
+  if (!c || !tip || !n) return;
+  const b = c.getBoundingClientRect();
+  const p = S.pts[n > 1 ? Math.max(0, Math.min(n - 1, Math.round((e.clientX - b.left) / b.width * (n - 1)))) : 0];
+  tip.style.display = 'block'; tip.style.left = Math.max(0, Math.min(e.clientX - b.left, b.width - 170)) + 'px';
+  tip.textContent = new Date(p.t).toLocaleString('en-GB', { hour12: false }) + '  ' + (S.mode === 'roi' ? pct(p.v, true) : usd(p.v, true));
+});
+$('main').addEventListener('mouseout', e => { const tip = $('tip'); if (tip && e.target.closest('#chart')) tip.style.display = 'none'; });
 
 renderStatus(); renderStats(); renderChips(); renderList(); renderMain();
 loadList();
