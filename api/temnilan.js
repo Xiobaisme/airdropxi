@@ -21,9 +21,6 @@
 //
 //   /api/temnilan-webhook    -> ?resource=webhook
 //     POST  dari provider indexer (Helius Enhanced Webhooks, dll)
-//
-// vercel.json:
-// {
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -411,8 +408,8 @@ async function handleBackfill(req, res) {
     }
 
     for (let i = 0; i < rows.length; i += 500) {
-      // ignoreDuplicates: transaksi yang sudah masuk lewat webhook tidak ditimpa
-      const { error } = await supabase.from('temnilan_transactions').upsert(rows.slice(i, i + 500), { onConflict: 'signature', ignoreDuplicates: true });
+      // data Helius = sumber otoritatif, jadi baris yang sudah ada ikut diperbarui (pnl_usd dihitung ulang oleh rebuild)
+      const { error } = await supabase.from('temnilan_transactions').upsert(rows.slice(i, i + 500), { onConflict: 'signature' }); // update: import ulang memperbaiki baris lama yang salah
       if (error) throw error;
     }
     const out = { done, cursor: done ? null : before, pages, seen, old, skipped, sample, swaps: rows.length };
@@ -654,33 +651,35 @@ function parseSwap(evt, address) {
     tokenSymbol: (leg && leg.symbol) || (mint ? mint.slice(0, 4) : '???'), tokenAmount: leg ? tokenAmt(leg) : 0,
   });
 
-  const sw = evt.events && evt.events.swap;
-  if (sw) {
-    const net = Number(sw.nativeInput?.amount || 0) / 1e9 - Number(sw.nativeOutput?.amount || 0) / 1e9; // SOL bersih keluar(+)/masuk(-)
-    const outLeg = (sw.tokenOutputs || []).find(t => t.mint && t.mint !== WSOL);
-    const inLeg = (sw.tokenInputs || []).find(t => t.mint && t.mint !== WSOL);
-    if (net > 0 && outLeg) return mk('buy', net, outLeg.mint, outLeg);
-    if (net < 0 && inLeg) return mk('sell', -net, inLeg.mint, inLeg);
-  }
-
+  // Jalur 1 (utama): perubahan saldo wallet itu sendiri. Jumlahnya bersih dan akurat walau rute swap bercabang
+  // (satu swap bisa punya beberapa leg token yang sama; mengambil leg pertama saja bikin jumlah token salah).
   let lamports = 0;
-  const tok = new Map(), leg = new Map();
+  const tok = new Map();
   for (const a of evt.accountData || []) {
     if (a.account === address) lamports += Number(a.nativeBalanceChange || 0);
     for (const c of a.tokenBalanceChanges || []) {
-      if (c.userAccount !== address) continue;
-      tok.set(c.mint, (tok.get(c.mint) || 0) + tokenAmt(c));
-      leg.set(c.mint, c);
+      if (c.userAccount === address) tok.set(c.mint, (tok.get(c.mint) || 0) + tokenAmt(c));
     }
   }
   const solNet = lamports / 1e9 + (tok.get(WSOL) || 0); // perubahan SOL bersih wallet (wSOL ikut dihitung)
   tok.delete(WSOL);
   const moved = [...tok].filter(([, d]) => d !== 0);
-  if (moved.length !== 1) return null; // 0 atau >1 token berbeda -> tidak jelas, dilewati
-  const [mint, d] = moved[0];
-  const l = { ...leg.get(mint), rawTokenAmount: undefined, tokenAmount: Math.abs(d) };
-  if (d > 0 && solNet < 0) return mk('buy', -solNet, mint, l);
-  if (d < 0 && solNet > 0) return mk('sell', solNet, mint, l);
+  if (moved.length === 1) {
+    const [mint, d] = moved[0];
+    if (d > 0 && solNet < 0) return mk('buy', -solNet, mint, { tokenAmount: d });
+    if (d < 0 && solNet > 0) return mk('sell', solNet, mint, { tokenAmount: -d });
+  }
+
+  // Jalur 2 (cadangan): events.swap, dengan jumlah token dijumlahkan dari SEMUA leg milik wallet.
+  const sw = evt.events && evt.events.swap;
+  if (sw) {
+    const net = Number(sw.nativeInput?.amount || 0) / 1e9 - Number(sw.nativeOutput?.amount || 0) / 1e9;
+    const outs = sw.tokenOutputs || [], ins = sw.tokenInputs || [];
+    const outLeg = outs.find(t => t.mint && t.mint !== WSOL), inLeg = ins.find(t => t.mint && t.mint !== WSOL);
+    const sum = (legs, mint) => legs.filter(t => t.mint === mint && (!t.userAccount || t.userAccount === address)).reduce((x, t) => x + tokenAmt(t), 0);
+    if (net > 0 && outLeg) return mk('buy', net, outLeg.mint, { symbol: outLeg.symbol, tokenAmount: sum(outs, outLeg.mint) });
+    if (net < 0 && inLeg) return mk('sell', -net, inLeg.mint, { symbol: inLeg.symbol, tokenAmount: sum(ins, inLeg.mint) });
+  }
   return null;
 }
 
