@@ -91,6 +91,9 @@
   .bar i::after{content:'';position:absolute;inset:0;width:var(--w);background:var(--acc)}
   .bar b{text-align:right;font-weight:500}
   .more{display:block;margin:10px auto}
+  .clk{cursor:pointer}
+  a{color:var(--acc);text-decoration:none}
+  a:hover{text-decoration:underline}
   .side-note{padding:8px 12px;color:var(--mut);font-size:10px}
   .fr{display:flex;gap:14px;flex-wrap:wrap;padding:6px 12px;border-bottom:1px solid var(--line)}
   .fr.al{justify-content:space-between;align-items:flex-start;cursor:pointer;padding:9px 12px}
@@ -116,7 +119,7 @@
   <div class="brand">TEMNILAN <span>// DEGEN TERMINAL</span></div>
   <nav class="tabs" id="tabs">
     <button class="on" data-v="overview">OVERVIEW</button>
-    <button disabled title="Belum dibuat">WALLETS</button>
+    <button data-v="wallets">WALLETS</button>
     <button data-v="activity">ACTIVITY</button>
     <button data-v="alerts">ALERTS</button>
   </nav>
@@ -199,6 +202,7 @@ async function loadList() {
     S.ok = true; S.lastOk = new Date();
   } catch (e) { S.ok = false; S.err = e.message; }
   renderStatus(); renderStats(); renderList();
+  if (S.view === 'wallets') renderMain();
 }
 
 async function loadDetail(silent) {
@@ -263,6 +267,7 @@ function renderList() {
 
 function renderMain() {
   const el = $('main'), w = S.wallets.find(x => String(x.id) === String(S.sel));
+  if (S.view === 'wallets') { el.innerHTML = walletsHTML(); return; }
   if (S.view !== 'overview') {
     el.innerHTML = `<div class="panel"><h3>${S.view === 'alerts' ? 'ALERTS' : 'LIVE ACTIVITY — ALL WALLETS'}</h3><div id="feed"></div></div>`;
     renderFeed(); return;
@@ -271,7 +276,7 @@ function renderMain() {
   const d = S.detail;
   const head = `<div class="wh"><div>
       <h1>${esc(w.name)}</h1>
-      <div class="mut">${esc(short(w.address))} · ${esc((w.chain || '').toUpperCase())} · <span class="${w.status === 'active' ? 'up' : ''}">${w.status === 'active' ? '● ACTIVE' : '○ IDLE'}</span></div>
+      <div class="mut">${esc(short(w.address))} · ${esc((w.chain || '').toUpperCase())} · <span class="${w.status === 'active' ? 'up' : ''}">${w.status === 'active' ? '● ACTIVE' : '○ IDLE'}</span>${explorer(w) ? ` · <a href="${esc(explorer(w))}" target="_blank" rel="noopener noreferrer">VIEW ON SOLSCAN ↗</a>` : ''}</div>
     </div>
     <div class="range">${RANGES.map(r => `<button class="${r === S.range ? 'on' : ''}" data-r="${r}">${r}</button>`).join('')}</div></div>`;
 
@@ -305,6 +310,30 @@ function renderMain() {
     historyHTML(d) +
     `<div class="panel"><h3>WALLET BEHAVIOR</h3>${behaviorHTML(d)}</div>`;
   renderFeed();
+}
+
+/* ───────── wallets ───────── */
+const explorer = w => (w.chain === 'solana' ? 'https://solscan.io/account/' + encodeURIComponent(w.address) : null); // chain lain: belum ada explorer, tidak ada link
+const filteredWallets = () => { const fn = FILTERS.find(f => f[0] === S.filter)[1], q = S.q.toLowerCase(); return S.wallets.filter(fn).filter(w => !q || (w.name + ' ' + w.address).toLowerCase().includes(q)); };
+
+function walletsHTML() {
+  const rows = filteredWallets();
+  if (S.ok === false && !S.wallets.length) return '<div class="empty">DATA NOT CONNECTED</div>';
+  if (!rows.length) return `<div class="empty">${S.wallets.length ? 'NO MATCH' : 'NO TRACKED WALLETS'}</div>`;
+  return `<div class="panel"><h3>TRACKED WALLETS — ${rows.length}</h3><div class="scroll"><table><thead><tr><th>NAME</th><th>ADDRESS</th><th>CHAIN</th><th>CATEGORY</th><th>STATUS</th><th>LAST ACTIVITY</th><th>TOTAL PNL</th><th></th></tr></thead><tbody>` +
+    rows.map(w => {
+      const pnl = num(w.total_pnl), url = explorer(w);
+      return `<tr class="clk" data-wid="${esc(w.id)}"><td><b>${esc(w.name)}</b></td><td class="mut">${esc(w.address)}</td><td>${esc((w.chain || '').toUpperCase())}</td>
+        <td>${esc(catLabel(w.category))}</td><td class="${w.status === 'active' ? 'up' : 'mut'}">${w.status === 'active' ? '● ACTIVE' : '○ IDLE'}</td>
+        <td>${esc(ago(w.last_activity))}</td><td class="${pnl ? cls(pnl) : ''}">${pnl ? usd(pnl, true) : '—'}</td>
+        <td>${url ? `<a href="${esc(url)}" target="_blank" rel="noopener noreferrer">SOLSCAN ↗</a>` : ''}</td></tr>`;
+    }).join('') + '</tbody></table></div></div>';
+}
+
+function selectWallet(id) {
+  S.sel = String(id); S.view = 'overview'; S.feed = [];
+  history.replaceState(null, '', '#/wallet/' + encodeURIComponent(S.sel)); // link langsung ke wallet
+  renderTabs(); renderList(); loadDetail(); loadFeed();
 }
 
 /* ───────── chart, history, behavior ───────── */
@@ -458,12 +487,14 @@ function startRealtime() {
 }
 
 /* ───────── events ───────── */
-$('chips').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; S.filter = b.dataset.f; renderChips(); renderList(); });
-$('q').addEventListener('input', e => { S.q = e.target.value; renderList(); });
-$('list').addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (!b) return; S.sel = b.dataset.id; S.view = 'overview'; S.feed = []; renderTabs(); renderList(); loadDetail(); loadFeed(); });
+$('chips').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; S.filter = b.dataset.f; renderChips(); renderList(); if (S.view === 'wallets') renderMain(); });
+$('q').addEventListener('input', e => { S.q = e.target.value; renderList(); if (S.view === 'wallets') renderMain(); });
+$('list').addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (!b) return; selectWallet(b.dataset.id); });
 $('tabs').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b) return; S.view = b.dataset.v; renderTabs(); renderMain(); if (S.view !== 'overview') loadView(); });
 $('main').addEventListener('click', e => {
-  const t = e.target.closest('[data-r],[data-m],[data-hf],[data-more],[data-aid]'); if (!t) return;
+  if (e.target.closest('a')) return; // klik link Solscan jangan ikut ngebuka detail wallet
+  const t = e.target.closest('[data-r],[data-m],[data-hf],[data-more],[data-aid],[data-wid]'); if (!t) return;
+  if (t.dataset.wid) return selectWallet(t.dataset.wid);
   if (t.dataset.aid) return markRead(t.dataset.aid);
   if (t.dataset.r) { S.range = t.dataset.r; S.hshown = 25; return loadDetail(); }
   if (t.dataset.m) S.mode = t.dataset.m;
@@ -482,7 +513,7 @@ $('main').addEventListener('mousemove', e => {
 $('main').addEventListener('mouseout', e => { const tip = $('tip'); if (tip && e.target.closest('#chart')) tip.style.display = 'none'; });
 
 renderStatus(); renderStats(); renderChips(); renderList(); renderMain();
-loadList();
+loadList().then(() => { const m = location.hash.match(/^#\/wallet\/(.+)$/); if (m) selectWallet(decodeURIComponent(m[1])); });
 startRealtime();
 setInterval(() => { if (S.rt !== 'live') loadList(); }, 60000); // polling cuma jadi cadangan kalau realtime mati
 setInterval(renderFeed, 15000); // update label "x sec ago"
