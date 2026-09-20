@@ -92,6 +92,11 @@
   .bar b{text-align:right;font-weight:500}
   .more{display:block;margin:10px auto}
   .side-note{padding:8px 12px;color:var(--mut);font-size:10px}
+  .fr{display:flex;gap:14px;flex-wrap:wrap;padding:6px 12px;border-bottom:1px solid var(--line)}
+  .fr.al{justify-content:space-between;align-items:flex-start;cursor:pointer;padding:9px 12px}
+  .fr.unread{border-left:2px solid var(--acc)}
+  .in{animation:in .35s ease-out}
+  @keyframes in{from{opacity:0;transform:translateY(-6px)}}
   @media(max-width:900px){.grid5.g6{grid-template-columns:repeat(2,1fr)}}
   @media(max-width:900px){
     body{overflow:auto;height:auto}
@@ -102,7 +107,7 @@
     .grid5{grid-template-columns:repeat(2,1fr)}
     .status{flex-wrap:wrap;gap:8px}
   }
-  @media(prefers-reduced-motion:reduce){.dot.ok{animation:none}}
+  @media(prefers-reduced-motion:reduce){.dot.ok,.in{animation:none}}
 </style>
 </head>
 <body>
@@ -110,10 +115,10 @@
 <header class="top">
   <div class="brand">TEMNILAN <span>// DEGEN TERMINAL</span></div>
   <nav class="tabs" id="tabs">
-    <button class="on">OVERVIEW</button>
+    <button class="on" data-v="overview">OVERVIEW</button>
     <button disabled title="Belum dibuat">WALLETS</button>
-    <button disabled title="Belum dibuat">ACTIVITY</button>
-    <button disabled title="Belum dibuat">ALERTS</button>
+    <button data-v="activity">ACTIVITY</button>
+    <button data-v="alerts">ALERTS</button>
   </nav>
   <div class="status" id="status"></div>
 </header>
@@ -132,7 +137,13 @@
   <main id="main"></main>
 </div>
 
+<script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
 <script>
+// Supabase → Project Settings → API. Pakai Project URL + anon/publishable key.
+// Key ini memang publik (dilindungi RLS). JANGAN pernah taruh service role key di sini.
+const SB_URL = '';
+const SB_KEY = '';
+
 const API = '/api/temnilan-wallets';
 const FILTERS = [
   ['ALL', () => true],
@@ -143,7 +154,7 @@ const FILTERS = [
   ['DEGEN', w => w.category === 'degen'],
 ];
 const RANGES = ['7D', '30D', '90D', 'ALL'];
-const S = { wallets: [], stats: null, filter: 'ALL', q: '', sel: null, range: 'ALL', detail: null, closed: [], mode: 'pnl', hf: 'ALL', hshown: 25, pts: [], ok: null, err: '', lastOk: null };
+const S = { wallets: [], stats: null, filter: 'ALL', q: '', sel: null, range: 'ALL', detail: null, closed: [], mode: 'pnl', hf: 'ALL', hshown: 25, pts: [], view: 'overview', feed: [], gfeed: [], alerts: [], rt: null, ok: null, err: '', lastOk: null };
 
 const $ = id => document.getElementById(id);
 const esc = s => String(s ?? '').replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
@@ -190,9 +201,9 @@ async function loadList() {
   renderStatus(); renderStats(); renderList();
 }
 
-async function loadDetail() {
+async function loadDetail(silent) {
   const id = S.sel; if (!id) return;
-  S.detail = null; renderMain();
+  if (!silent) { S.detail = null; renderMain(); }
   try {
     const [r, rc] = await Promise.all([
       fetch(`${API}?id=${encodeURIComponent(id)}&range=${S.range}`),
@@ -210,7 +221,8 @@ async function loadDetail() {
 /* ───────── render ───────── */
 function renderStatus() {
   $('status').innerHTML =
-    `<span><span class="dot ${S.ok ? 'ok' : S.ok === false ? 'bad' : ''}"></span>${S.ok ? 'SOLANA · API OK' : S.ok === false ? 'API OFFLINE' : 'CONNECTING'}</span>` +
+    `<span><span class="dot ${S.ok ? 'ok' : S.ok === false ? 'bad' : ''}"></span>${S.ok ? (S.rt === 'live' ? 'SOLANA · LIVE' : 'SOLANA · API OK') : S.ok === false ? 'API OFFLINE' : 'CONNECTING'}</span>` +
+    `<span>REALTIME ${{ live: 'ON', connecting: 'CONNECTING', off: 'OFF' }[S.rt] || 'NOT SET'}</span>` +
     `<span><span class="dot"></span>RH CHAIN · NOT CONNECTED</span>` +
     `<span>LAST UPDATE ${S.lastOk ? S.lastOk.toLocaleTimeString('en-GB') : '--:--:--'}</span>`;
 }
@@ -251,6 +263,10 @@ function renderList() {
 
 function renderMain() {
   const el = $('main'), w = S.wallets.find(x => String(x.id) === String(S.sel));
+  if (S.view !== 'overview') {
+    el.innerHTML = `<div class="panel"><h3>${S.view === 'alerts' ? 'ALERTS' : 'LIVE ACTIVITY — ALL WALLETS'}</h3><div id="feed"></div></div>`;
+    renderFeed(); return;
+  }
   if (!w) { el.innerHTML = '<div class="empty">Pilih wallet di sidebar untuk melihat detailnya.</div>'; return; }
   const d = S.detail;
   const head = `<div class="wh"><div>
@@ -284,10 +300,11 @@ function renderMain() {
     .map(([k, l]) => `<button class="${S.mode === k ? 'on' : ''}" data-m="${k}">${l}</button>`).join('');
   el.innerHTML = head + stats +
     `<div class="panel"><h3 class="hd">PERFORMANCE <span class="range">${modes}</span></h3>${chartHTML()}<div class="side-note">Realized PnL dari posisi yang sudah ditutup. Belum termasuk PnL yang belum terealisasi.</div></div>` +
-    `<div class="panel"><h3>LIVE WALLET ACTIVITY</h3><div class="ph">WAITING FOR LIVE DATA — realtime menyusul di tahap berikutnya</div></div>` +
+    `<div class="panel"><h3>LIVE WALLET ACTIVITY</h3><div id="feed"></div></div>` +
     `<div class="panel"><h3>OPEN POSITIONS</h3>${posTable}</div>` +
     historyHTML(d) +
     `<div class="panel"><h3>WALLET BEHAVIOR</h3>${behaviorHTML(d)}</div>`;
+  renderFeed();
 }
 
 /* ───────── chart, history, behavior ───────── */
@@ -356,12 +373,98 @@ function behaviorHTML(d) {
     (hasHold ? bar('LONG HOLD', b.long_hold_score) : `<div class="bar"><span>LONG HOLD</span><span class="na">INSUFFICIENT DATA</span></div>`) + '</div>';
 }
 
+/* ───────── feed + realtime ───────── */
+const wn = x => (x.temnilan_wallets && x.temnilan_wallets.name) || (S.wallets.find(w => String(w.id) === String(x.wallet_id)) || {}).name || (x.wallet_id ? 'WALLET #' + x.wallet_id : '');
+const getJSON = async u => { const r = await fetch(u); if (!r.ok) throw new Error('HTTP ' + r.status); return r.json(); };
+
+function txRow(t, showW) {
+  const buy = t.side === 'buy', c = t._new ? ' in' : ''; delete t._new;
+  return `<div class="fr${c}"><span class="${buy ? 'up' : 'down'}">● ${buy ? 'BUY' : 'SELL'}</span><span>$${esc(t.token_symbol || short(t.token_address))}</span>
+    <span>${num(t.amount_sol) === null ? '—' : Number(t.amount_sol).toFixed(2) + ' SOL'}</span><span>${usd(t.amount_usd)}</span>
+    <span class="mut">${new Date(t.occurred_at).toLocaleTimeString('en-GB')}</span>${showW ? `<span class="mut">${esc(wn(t))}</span>` : ''}<span class="mut">${esc(t.dex || '')}</span></div>`;
+}
+
+function alertRow(a) {
+  const c = (a._new ? ' in' : '') + (a.is_read ? '' : ' unread'); delete a._new;
+  const sym = '$' + esc(a.token_symbol || '?'), m = a.meta || {};
+  const kind = { large_buy: 'LARGE BUY', large_sell: 'LARGE SELL', multi_wallet: 'MULTI-WALLET ACTIVITY' }[a.type] || esc(a.type);
+  const line = a.type === 'multi_wallet'
+    ? `${Number(m.wallet_count || 0)} tracked wallets bought ${sym} within ${Number(m.window_seconds || 0)} seconds`
+    : `${esc(wn(a))} ${a.type === 'large_buy' ? 'bought' : 'sold'} ${sym}`;
+  const amt = a.type === 'multi_wallet' ? '' : `<div>${num(a.amount_sol) === null ? '—' : Number(a.amount_sol).toFixed(1) + ' SOL'} · ${usd(a.amount_usd)}</div>`;
+  return `<div class="fr al${c}" data-aid="${esc(a.id)}"><div><b class="${a.type === 'large_sell' ? 'down' : 'up'}">${kind}</b><div>${line}</div>${amt}</div><span class="mut">${ago(a.created_at)}</span></div>`;
+}
+
+function renderFeed() {
+  const el = $('feed'); if (!el) return;
+  const src = S.view === 'alerts' ? S.alerts : S.view === 'activity' ? S.gfeed : S.feed;
+  if (src === null) { el.innerHTML = '<div class="ph">DATA NOT CONNECTED</div>'; return; }
+  el.innerHTML = src.length
+    ? src.map(x => S.view === 'alerts' ? alertRow(x) : txRow(x, S.view === 'activity')).join('')
+    : '<div class="ph">WAITING FOR LIVE DATA</div>';
+}
+
+async function loadFeed() { // feed wallet yang dipilih
+  const id = S.sel; if (!id) return;
+  try { const d = await getJSON(`/api/temnilan-activity?limit=30&wallet_id=${encodeURIComponent(id)}`); if (S.sel === id) S.feed = d; }
+  catch (e) { if (S.sel === id) S.feed = null; }
+  renderFeed();
+}
+async function loadView() { // tab ACTIVITY / ALERTS
+  try {
+    if (S.view === 'activity') S.gfeed = await getJSON('/api/temnilan-activity?limit=50');
+    if (S.view === 'alerts') S.alerts = await getJSON('/api/temnilan-alerts?limit=50');
+  } catch (e) { if (S.view === 'activity') S.gfeed = null; else S.alerts = null; }
+  renderFeed();
+}
+async function markRead(id) {
+  const a = (S.alerts || []).find(x => String(x.id) === String(id)); if (!a || a.is_read) return;
+  a.is_read = true; renderFeed();
+  try { const r = await fetch(`/api/temnilan-alerts?id=${encodeURIComponent(id)}`, { method: 'PATCH' }); if (!r.ok) throw 0; }
+  catch (e) { a.is_read = false; renderFeed(); }
+}
+function renderTabs() { document.querySelectorAll('#tabs [data-v]').forEach(b => b.classList.toggle('on', b.dataset.v === S.view)); }
+
+function onTx(t) {
+  if (!t) return; t._new = true;
+  if (Array.isArray(S.gfeed) && !S.gfeed.some(x => x.id === t.id)) S.gfeed = [t, ...S.gfeed].slice(0, 100);
+  const mine = String(t.wallet_id) === String(S.sel);
+  if (mine && Array.isArray(S.feed) && !S.feed.some(x => x.id === t.id)) S.feed = [t, ...S.feed].slice(0, 50);
+  renderFeed();
+  clearTimeout(S._rf); // stat global & status wallet di-refresh sekali setelah event berhenti
+  S._rf = setTimeout(() => { loadList(); if (mine) loadDetail(true); }, 1500);
+}
+function onAlert(a) {
+  if (!a) return; a._new = true;
+  if (Array.isArray(S.alerts) && !S.alerts.some(x => x.id === a.id)) S.alerts = [a, ...S.alerts].slice(0, 100);
+  renderFeed();
+}
+
+function startRealtime() {
+  if (!SB_URL || !SB_KEY) return; // belum diisi -> header nulis REALTIME NOT SET
+  if (!window.supabase) { S.rt = 'off'; renderStatus(); return; }
+  S.rt = 'connecting'; renderStatus();
+  const sb = window.supabase.createClient(SB_URL, SB_KEY);
+  let wasOff = false;
+  sb.channel('temnilan-live')
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'temnilan_transactions' }, p => onTx(p.new))
+    .on('postgres_changes', { event: 'INSERT', schema: 'public', table: 'temnilan_alerts' }, p => onAlert(p.new))
+    .subscribe(st => {
+      S.rt = st === 'SUBSCRIBED' ? 'live' : st === 'CONNECTING' ? 'connecting' : 'off';
+      renderStatus();
+      if (S.rt === 'off') wasOff = true;
+      else if (S.rt === 'live' && wasOff) { wasOff = false; loadList(); loadFeed(); loadView(); } // kejar event yang kelewat
+    });
+}
+
 /* ───────── events ───────── */
 $('chips').addEventListener('click', e => { const b = e.target.closest('[data-f]'); if (!b) return; S.filter = b.dataset.f; renderChips(); renderList(); });
 $('q').addEventListener('input', e => { S.q = e.target.value; renderList(); });
-$('list').addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (!b) return; S.sel = b.dataset.id; renderList(); loadDetail(); });
+$('list').addEventListener('click', e => { const b = e.target.closest('[data-id]'); if (!b) return; S.sel = b.dataset.id; S.view = 'overview'; S.feed = []; renderTabs(); renderList(); loadDetail(); loadFeed(); });
+$('tabs').addEventListener('click', e => { const b = e.target.closest('[data-v]'); if (!b) return; S.view = b.dataset.v; renderTabs(); renderMain(); if (S.view !== 'overview') loadView(); });
 $('main').addEventListener('click', e => {
-  const t = e.target.closest('[data-r],[data-m],[data-hf],[data-more]'); if (!t) return;
+  const t = e.target.closest('[data-r],[data-m],[data-hf],[data-more],[data-aid]'); if (!t) return;
+  if (t.dataset.aid) return markRead(t.dataset.aid);
   if (t.dataset.r) { S.range = t.dataset.r; S.hshown = 25; return loadDetail(); }
   if (t.dataset.m) S.mode = t.dataset.m;
   if (t.dataset.hf) { S.hf = t.dataset.hf; S.hshown = 25; }
@@ -380,7 +483,9 @@ $('main').addEventListener('mouseout', e => { const tip = $('tip'); if (tip && e
 
 renderStatus(); renderStats(); renderChips(); renderList(); renderMain();
 loadList();
-setInterval(loadList, 60000); // sementara; diganti Realtime di tahap live activity
+startRealtime();
+setInterval(() => { if (S.rt !== 'live') loadList(); }, 60000); // polling cuma jadi cadangan kalau realtime mati
+setInterval(renderFeed, 15000); // update label "x sec ago"
 </script>
 </body>
 </html>
