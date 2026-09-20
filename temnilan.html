@@ -318,15 +318,15 @@ async function importHistory(days) {
   const id = S.sel; if (!id || S.importing) return;
   S.importing = true;
   const say = m => { S.impMsg = m; if ($('imp')) $('imp').textContent = m; };
-  let cursor = '', swaps = 0, pages = 0;
+  let cursor = '', swaps = 0, pages = 0, seen = 0, old = 0, skipped = 0;
   try {
     for (let i = 0; i < 300; i++) { // 1 request = beberapa halaman Helius; ulangi sampai done
       say(`IMPORTING… ${pages} halaman, ${swaps} swap`);
       const r = await fetch(`/api/temnilan?resource=backfill&id=${encodeURIComponent(id)}&days=${days}` + (cursor ? `&cursor=${encodeURIComponent(cursor)}` : ''), { method: 'POST' });
       const d = await r.json();
       if (!r.ok) throw new Error(d.error || 'HTTP ' + r.status);
-      swaps += d.swaps; pages += d.pages;
-      if (d.done) { say(`DONE · ${swaps} swap diimpor, ${d.positions} posisi dihitung`); break; }
+      swaps += d.swaps; pages += d.pages; seen += d.seen; old += d.old; skipped += d.skipped;
+      if (d.done) { say(`DONE · ${swaps} swap diimpor, ${d.positions} posisi dihitung` + (swaps ? '' : ` · dari ${seen} tx: ${old} lebih lama dari ${days} hari, ${skipped} tidak dikenali`)); break; }
       cursor = d.cursor;
     }
   } catch (e) { say('GAGAL: ' + e.message); }
