@@ -54,7 +54,7 @@ module.exports = async function handler(req, res) {
       const LOGO_URL = 'https://airdropxi.vercel.app/logo1.png'; // ganti kalau path logo asli beda
 
       const embed = {
-        author: { name: '📢 XIOBAII BROADCAST', icon_url: LOGO_URL },
+        author: { name: '🗣 CMIC BROADCAST', icon_url: LOGO_URL },
         title: String(title).slice(0, 256),
         description: String(description || '').slice(0, 4096),
         url: url || undefined,
@@ -90,14 +90,20 @@ module.exports = async function handler(req, res) {
       const escHtml = (s) => String(s || '')
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-      const buildCaption = (desc) =>
-        `📢 <b>XIOBAII BROADCAST</b>\n\n` +
-        `<b>${escHtml(title)}</b>\n\n` +
-        `${escHtml(desc)}`;
+        const buildCaption = (desc) =>
+        `🗣 <b>${escHtml(title)}</b>\n\n` +
+        `${escHtml(desc)}\n\n` +
+        `<i>Xiobaii • Crypto Monkey Inner Circle</i>`;
+
+       const inlineKeyboard = {
+        inline_keyboard: [[
+          { text: 'TikTok', url: 'https://tiktok.com/@hellovry' },
+          { text: 'Discord', url: 'https://discord.gg/xvm9eZEjwf' },
+        ]],
+      };
 
       let tRes;
-      if (imageBuffer) {
-        // caption sendPhoto dibatasi 1024 char — description dipotong biar aman
+       if (imageBuffer) {
         const shortDesc = (description || '').length > 650
           ? description.slice(0, 650) + '…'
           : (description || '');
@@ -105,12 +111,13 @@ module.exports = async function handler(req, res) {
         form.append('chat_id', chatId);
         form.append('caption', buildCaption(shortDesc));
         form.append('parse_mode', 'HTML');
+        form.append('reply_markup', JSON.stringify(inlineKeyboard));
         form.append('photo', new Blob([imageBuffer], { type: imageMime }), `image.${ext}`);
         tRes = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: form });
       } else {
         tRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chatId, text: buildCaption(description || ''), parse_mode: 'HTML' }),
+          body: JSON.stringify({ chat_id: chatId, text: buildCaption(description || ''), parse_mode: 'HTML', reply_markup: inlineKeyboard }),
         });
       }
       const tData = await tRes.json().catch(() => ({}));
