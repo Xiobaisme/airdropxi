@@ -17,7 +17,7 @@ module.exports = async function handler(req, res) {
 
   const { id, exchange_id, type } = req.query;
 
-  function serializeError(val) {
+   function serializeError(val) {
     if (!val) return 'Unknown error';
     if (typeof val === 'string') return val;
     if (val.message) {
@@ -30,12 +30,91 @@ module.exports = async function handler(req, res) {
     return JSON.stringify(val);
   }
 
-  if (type === 'exchanges') {}
-  if (type === 'exchange-details') {}
-  if (type === 'chat') {}
-  if (type === 'notes') {}
-  if (type === 'reorder') {}
+    // ─── BROADCAST NEWS KE DISCORD & TELEGRAM ───
+  async function handleBroadcastNews(req, res) {
+    const { title, description, image_base64, url, source } = req.body || {};
+    if (!title) return res.status(400).json({ error: 'title wajib diisi' });
 
+    // Decode gambar dari data URL (hasil paste) jadi Buffer, biar bisa
+    // di-attach sebagai FILE langsung — bukan link URL.
+    let imageBuffer = null, imageMime = 'image/png';
+    if (image_base64 && image_base64.startsWith('data:')) {
+      const match = image_base64.match(/^data:(image\/[a-zA-Z+]+);base64,(.+)$/);
+      if (match) { imageMime = match[1]; imageBuffer = Buffer.from(match[2], 'base64'); }
+    }
+    const ext = imageMime.split('/')[1] || 'png';
+
+    const results = { discord: null, telegram: null };
+
+    // ─── DISCORD ───
+    try {
+      const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+      if (!webhookUrl) throw new Error('DISCORD_WEBHOOK_URL belum di-set');
+
+      const embed = {
+        title: String(title).slice(0, 256),
+        description: String(description || '').slice(0, 2048),
+        url: url || undefined,
+        color: 0x8B5CF6,
+        footer: { text: source ? String(source).toUpperCase() : 'Xiobaii Admin' },
+      };
+
+      let dRes;
+      if (imageBuffer) {
+        embed.image = { url: `attachment://image.${ext}` };
+        const form = new FormData();
+        form.append('payload_json', JSON.stringify({ embeds: [embed] }));
+        form.append('files[0]', new Blob([imageBuffer], { type: imageMime }), `image.${ext}`);
+        dRes = await fetch(webhookUrl, { method: 'POST', body: form });
+      } else {
+        dRes = await fetch(webhookUrl, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ embeds: [embed] }),
+        });
+      }
+      results.discord = dRes.ok ? 'ok' : `error ${dRes.status}`;
+    } catch (e) {
+      results.discord = 'error: ' + e.message;
+    }
+
+    // ─── TELEGRAM ───
+    try {
+      const token = process.env.TELEGRAM_BOT_TOKEN;
+      const chatId = process.env.TELEGRAM_CHAT_ID;
+      if (!token || !chatId) throw new Error('TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID belum di-set');
+
+      const caption = `*${title}*\n\n${description || ''}${url ? `\n\n${url}` : ''}`.slice(0, 1024);
+      let tRes;
+      if (imageBuffer) {
+        const form = new FormData();
+        form.append('chat_id', chatId);
+        form.append('caption', caption);
+        form.append('parse_mode', 'Markdown');
+        form.append('photo', new Blob([imageBuffer], { type: imageMime }), `image.${ext}`);
+        tRes = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: form });
+      } else {
+        tRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text: caption, parse_mode: 'Markdown' }),
+        });
+      }
+      const tData = await tRes.json().catch(() => ({}));
+      results.telegram = tRes.ok && tData.ok ? 'ok' : `error: ${tData.description || tRes.status}`;
+    } catch (e) {
+      results.telegram = 'error: ' + e.message;
+    }
+
+    const anyOk = results.discord === 'ok' || results.telegram === 'ok';
+    return res.status(anyOk ? 200 : 500).json(results);
+  }
+
+  if (type === 'broadcast-news') {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method tidak diizinkan untuk broadcast-news' });
+    }
+    return await handleBroadcastNews(req, res);
+  }
+  
   function buildAirdropsPayload(p) {
     return {
       name:                p.name                || null,
