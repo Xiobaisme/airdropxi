@@ -946,6 +946,38 @@
             </div>
         </div>
 
+        <!-- ─── BROADCAST MODAL (compose manual, kirim ke Discord & Telegram) ─── -->
+<div id="broadcast-modal" class="modal hidden">
+    <div class="modal-box">
+        <div class="modal-head">
+            <div class="modal-title" id="broadcast-modal-title">Broadcast ke Discord & Telegram</div>
+            <button class="modal-close" onclick="closeBroadcastModal()" id="broadcast-modal-close-btn"></button>
+        </div>
+        <div class="modal-body">
+            <div class="field">
+                <label>Judul <span style="color:var(--secondary)">*</span></label>
+                <input id="b-title" type="text" placeholder="Judul broadcast..." />
+            </div>
+            <div class="field">
+                <label>Deskripsi</label>
+                <textarea id="b-desc" placeholder="Tulis deskripsi/isi berita..." style="min-height:120px;"></textarea>
+            </div>
+            <div class="field">
+                <label>Gambar <span class="hint">— klik kotak di bawah lalu Ctrl+V</span></label>
+                <div id="b-image-paste" tabindex="0" style="min-height:140px; border:2px dashed var(--border); border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; cursor:text; background:var(--card-2); position:relative; overflow:hidden; padding:10px;">
+                    <span id="b-image-placeholder" style="color:var(--text3); font-family:var(--label); font-size:0.8rem;">Klik di sini, lalu paste gambar (Ctrl+V)</span>
+                    <img id="b-image-preview" class="hidden" style="max-width:100%; max-height:220px; border-radius:8px;" />
+                    <button id="b-image-remove" class="modal-close hidden" style="position:absolute; top:6px; right:6px;" onclick="removeBroadcastImage(event)"></button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeBroadcastModal()">Batal</button>
+            <button class="btn-save" id="btn-send-broadcast" onclick="sendBroadcast()">Kirim</button>
+        </div>
+    </div>
+</div>
+
               <!-- ─── CONFIRM MODAL (custom, ganti native confirm()) ─── -->
 <div id="confirm-modal" class="modal hidden">
     <div class="modal-box confirm-box">
@@ -1723,52 +1755,86 @@ document.getElementById('news-overlay')?.addEventListener('click', toggleNewsPan
         
 
 // ═══════════════════════════════════════════════════════════
-// ─── BROADCAST NEWS KE DISCORD & TELEGRAM ───
-// Ambil newsItems yang lagi ke-load di News Terminal, kirim satu-satu
-// ke /api/broadcast-news. Ada jeda antar pesan biar gak kena rate limit.
+// ─── BROADCAST MODAL (compose manual, kirim ke Discord & Telegram) ───
+// Judul + deskripsi diketik manual, gambar di-paste langsung (Ctrl+V)
+// dari clipboard — dikirim sebagai FILE, bukan link, jadi nggak perlu
+// upload/download dulu di kedua platform.
 // ═══════════════════════════════════════════════════════════
-async function openBroadcastModal() {
-    if (!newsItems.length) await loadNews();
-    if (!newsItems.length) { showToast('Belum ada berita untuk dikirim', 'error'); return; }
+let _broadcastImageBase64 = null;
 
-    const ok = await showConfirmModal({
-        title: 'Kirim Semua Berita?',
-        message: `Ini akan mengirim ${newsItems.length} berita ke Discord & Telegram sekaligus. Lanjutkan?`,
-        okLabel: 'Ya, Kirim'
-    });
-    if (!ok) return;
-    await broadcastAllNews();
+function openBroadcastModal() {
+    document.getElementById('b-title').value = '';
+    document.getElementById('b-desc').value = '';
+    removeBroadcastImage();
+    document.getElementById('broadcast-modal').classList.remove('hidden');
 }
 
-async function broadcastAllNews() {
-    const btn = document.getElementById('broadcast-toggle-btn');
-    if (btn) btn.disabled = true;
+function closeBroadcastModal() {
+    document.getElementById('broadcast-modal').classList.add('hidden');
+}
 
-    let sent = 0, failed = 0;
-    for (const item of newsItems) {
-        try {
-            const res = await fetch('/api/broadcast-news', {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify({
-                    title: item.title,
-                    description: item.excerpt || '',
-                    image_url: item.image_url || null,
-                    url: item.url,
-                    source: item.source,
-                }),
-            });
-            if (!res.ok) throw new Error();
-            sent++;
-        } catch (e) { failed++; }
-        showToast(`Mengirim... ${sent + failed}/${newsItems.length}`, failed ? 'error' : 'success');
-        await new Promise(r => setTimeout(r, 1200)); // jeda antar pesan
+function removeBroadcastImage(e) {
+    if (e) e.stopPropagation();
+    _broadcastImageBase64 = null;
+    document.getElementById('b-image-preview').classList.add('hidden');
+    document.getElementById('b-image-preview').src = '';
+    document.getElementById('b-image-placeholder').classList.remove('hidden');
+    document.getElementById('b-image-remove').classList.add('hidden');
+}
+
+document.getElementById('b-image-paste').addEventListener('paste', (e) => {
+    const items = e.clipboardData?.items;
+    if (!items) return;
+    for (const item of items) {
+        if (item.type.startsWith('image/')) {
+            const blob = item.getAsFile();
+            const reader = new FileReader();
+            reader.onload = () => {
+                _broadcastImageBase64 = reader.result;
+                const preview = document.getElementById('b-image-preview');
+                preview.src = _broadcastImageBase64;
+                preview.classList.remove('hidden');
+                document.getElementById('b-image-placeholder').classList.add('hidden');
+                document.getElementById('b-image-remove').classList.remove('hidden');
+            };
+            reader.readAsDataURL(blob);
+            e.preventDefault();
+            break;
+        }
     }
+});
 
-    if (btn) btn.disabled = false;
-    showToast(`Selesai: ${sent} terkirim, ${failed} gagal`, failed ? 'error' : 'success');
+async function sendBroadcast() {
+    const title = document.getElementById('b-title').value.trim();
+    const description = document.getElementById('b-desc').value.trim();
+    if (!title) { showToast('Judul wajib diisi!', 'error'); return; }
+
+    const btn = document.getElementById('btn-send-broadcast');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Mengirim...';
+
+    try {
+        const res = await fetch('/api/admin-airdrop?type=broadcast-news', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title, description, image_base64: _broadcastImageBase64 }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.discord || data.telegram || `HTTP ${res.status}`);
+
+        const dOk = data.discord === 'ok', tOk = data.telegram === 'ok';
+        if (dOk && tOk) showToast('Terkirim ke Discord & Telegram!', 'success');
+        else if (dOk || tOk) showToast(`Terkirim sebagian — Discord: ${data.discord}, Telegram: ${data.telegram}`, 'error');
+        else throw new Error(`Discord: ${data.discord} | Telegram: ${data.telegram}`);
+
+        closeBroadcastModal();
+    } catch (e) {
+        showToast('Gagal kirim: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = icon('send') + 'Kirim';
+    }
 }
-        
         // ═══════════════════════════════════════════════════════════
         // ─── AI AGENT PANEL ───
         // Dulu file terpisah (agent-panel.html), sekarang jadi modal
