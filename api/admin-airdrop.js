@@ -44,45 +44,41 @@ module.exports = async function handler(req, res) {
     }
     const ext = imageMime.split('/')[1] || 'png';
 
-    const results = { discord: null, telegram: null };
-
     // ─── DISCORD ───
-    try {
-      const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
-      if (!webhookUrl) throw new Error('DISCORD_WEBHOOK_URL belum di-set');
+async function sendDiscord() {
+  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  if (!webhookUrl) throw new Error('DISCORD_WEBHOOK_URL belum di-set');
 
-      const LOGO_URL = 'https://airdropxi.vercel.app/logo1.png'; // ganti kalau path logo asli beda
+  const LOGO_URL = 'https://airdropxi.vercel.app/logo1.png'; // ganti kalau path logo asli beda
 
-      const embed = {
-        author: { name: '🗣 CMIC BROADCAST', icon_url: LOGO_URL },
-        title: String(title).slice(0, 256),
-        description: String(description || '').slice(0, 4096),
-        url: url || undefined,
-        color: 0x3B82F6,
-        footer: { text: 'Xiobaii • Crypto Monkey Inner Circle', icon_url: LOGO_URL },
-        timestamp: new Date().toISOString(),
-      };
+  const embed = {
+    author: { name: '🗣 CMIC BROADCAST', icon_url: LOGO_URL },
+    title: String(title).slice(0, 256),
+    description: String(description || '').slice(0, 4096),
+    url: url || undefined,
+    color: 0x3B82F6,
+    footer: { text: 'Xiobaii • Crypto Monkey Inner Circle', icon_url: LOGO_URL },
+    timestamp: new Date().toISOString(),
+  };
 
-      let dRes;
-      if (imageBuffer) {
-        embed.image = { url: `attachment://image.${ext}` };
-        const form = new FormData();
-        form.append('payload_json', JSON.stringify({ embeds: [embed] }));
-        form.append('files[0]', new Blob([imageBuffer], { type: imageMime }), `image.${ext}`);
-        dRes = await fetch(webhookUrl, { method: 'POST', body: form });
-      } else {
-        dRes = await fetch(webhookUrl, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ embeds: [embed] }),
-        });
-      }
-      results.discord = dRes.ok ? 'ok' : `error ${dRes.status}`;
-    } catch (e) {
-      results.discord = 'error: ' + e.message;
-    }
+  let dRes;
+  if (imageBuffer) {
+    embed.image = { url: `attachment://image.${ext}` };
+    const form = new FormData();
+    form.append('payload_json', JSON.stringify({ embeds: [embed] }));
+    form.append('files[0]', new Blob([imageBuffer], { type: imageMime }), `image.${ext}`);
+    dRes = await fetch(webhookUrl, { method: 'POST', body: form });
+  } else {
+    dRes = await fetch(webhookUrl, {
+      method: 'POST', headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({ embeds: [embed] }),
+    });
+  }
+  return dRes.ok ? 'ok' : `error ${dRes.status}`;
+}
 
         // ─── TELEGRAM ───
-    try {
+    async function sendTelegram() {
       const token = process.env.TELEGRAM_BOT_TOKEN;
       const chatId = process.env.TELEGRAM_CHAT_ID;
       if (!token || !chatId) throw new Error('TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID belum di-set');
@@ -90,12 +86,12 @@ module.exports = async function handler(req, res) {
       const escHtml = (s) => String(s || '')
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-        const buildCaption = (desc) =>
+      const buildCaption = (desc) =>
         `🗣 <b>${escHtml(title)}</b>\n\n` +
         `${escHtml(desc)}\n\n` +
         `<i>Xiobaii • Crypto Monkey Inner Circle</i>`;
 
-       const inlineKeyboard = {
+      const inlineKeyboard = {
         inline_keyboard: [[
           { text: 'TikTok', url: 'https://tiktok.com/@hellovry' },
           { text: 'Discord', url: 'https://discord.gg/xvm9eZEjwf' },
@@ -103,7 +99,7 @@ module.exports = async function handler(req, res) {
       };
 
       let tRes;
-       if (imageBuffer) {
+      if (imageBuffer) {
         const shortDesc = (description || '').length > 650
           ? description.slice(0, 650) + '…'
           : (description || '');
@@ -121,10 +117,19 @@ module.exports = async function handler(req, res) {
         });
       }
       const tData = await tRes.json().catch(() => ({}));
-      results.telegram = tRes.ok && tData.ok ? 'ok' : `error: ${tData.description || tRes.status}`;
-    } catch (e) {
-      results.telegram = 'error: ' + e.message;
+      return tRes.ok && tData.ok ? 'ok' : `error: ${tData.description || tRes.status}`;
     }
+
+    const [discordSettled, telegramSettled] = await Promise.allSettled([
+      sendDiscord(),
+      sendTelegram(),
+    ]);
+
+    const results = {
+      discord:  discordSettled.status  === 'fulfilled' ? discordSettled.value  : 'error: ' + discordSettled.reason.message,
+      telegram: telegramSettled.status === 'fulfilled' ? telegramSettled.value : 'error: ' + telegramSettled.reason.message,
+    };
+
     const anyOk = results.discord === 'ok' || results.telegram === 'ok';
     return res.status(anyOk ? 200 : 500).json(results);
   }
