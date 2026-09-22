@@ -740,13 +740,14 @@
                 <a href="#" class="nav-logo">Xiobaii</a>
                 <span class="nav-badge">ADMIN</span>
             </div>
-            <div class="nav-actions">
-             <button class="nav-btn" onclick="toggleNewsPanel()" id="news-toggle-btn">
-               <span class="news-live-dot"></span>News Terminal
-                  </button>
-                <button class="nav-btn" onclick="toggleAgentPanel()" id="agent-toggle-btn">AI Agent</button>
-                <button class="nav-btn pink" onclick="toggleCalc()" id="calc-toggle-btn">Calc</button>
-            </div>
+           <div class="nav-actions">
+          <button class="nav-btn" onclick="toggleNewsPanel()" id="news-toggle-btn">
+         <span class="news-live-dot"></span>News Terminal
+          </button>
+        <button class="nav-btn" onclick="openBroadcastModal()" id="broadcast-toggle-btn">Broadcast</button>
+      <button class="nav-btn" onclick="toggleAgentPanel()" id="agent-toggle-btn">AI Agent</button>
+   <button class="nav-btn pink" onclick="toggleCalc()" id="calc-toggle-btn">Calc</button>
+</div>
         </nav>
 
         <!-- HERO -->
@@ -1062,6 +1063,7 @@
             box: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16Z"/><path d="M3.3 7 12 12l8.7-5"/><path d="M12 22V12"/></svg>',
             clock: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
             chat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>',
+            send: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg>',        
         };
         function icon(name) { return `<span class="icon">${ICONS[name] || ''}</span>`; }
 
@@ -1720,6 +1722,53 @@ function renderNewsFeed() {
 document.getElementById('news-overlay')?.addEventListener('click', toggleNewsPanel);
         
 
+// ═══════════════════════════════════════════════════════════
+// ─── BROADCAST NEWS KE DISCORD & TELEGRAM ───
+// Ambil newsItems yang lagi ke-load di News Terminal, kirim satu-satu
+// ke /api/broadcast-news. Ada jeda antar pesan biar gak kena rate limit.
+// ═══════════════════════════════════════════════════════════
+async function openBroadcastModal() {
+    if (!newsItems.length) await loadNews();
+    if (!newsItems.length) { showToast('Belum ada berita untuk dikirim', 'error'); return; }
+
+    const ok = await showConfirmModal({
+        title: 'Kirim Semua Berita?',
+        message: `Ini akan mengirim ${newsItems.length} berita ke Discord & Telegram sekaligus. Lanjutkan?`,
+        okLabel: 'Ya, Kirim'
+    });
+    if (!ok) return;
+    await broadcastAllNews();
+}
+
+async function broadcastAllNews() {
+    const btn = document.getElementById('broadcast-toggle-btn');
+    if (btn) btn.disabled = true;
+
+    let sent = 0, failed = 0;
+    for (const item of newsItems) {
+        try {
+            const res = await fetch('/api/broadcast-news', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    title: item.title,
+                    description: item.excerpt || '',
+                    image_url: item.image_url || null,
+                    url: item.url,
+                    source: item.source,
+                }),
+            });
+            if (!res.ok) throw new Error();
+            sent++;
+        } catch (e) { failed++; }
+        showToast(`Mengirim... ${sent + failed}/${newsItems.length}`, failed ? 'error' : 'success');
+        await new Promise(r => setTimeout(r, 1200)); // jeda antar pesan
+    }
+
+    if (btn) btn.disabled = false;
+    showToast(`Selesai: ${sent} terkirim, ${failed} gagal`, failed ? 'error' : 'success');
+}
+        
         // ═══════════════════════════════════════════════════════════
         // ─── AI AGENT PANEL ───
         // Dulu file terpisah (agent-panel.html), sekarang jadi modal
@@ -2209,6 +2258,7 @@ function spawnLoginParticles(count = 22) {
 
             // Icon-fill untuk elemen statis (bukan hasil render dinamis)
             document.getElementById('calc-toggle-btn').innerHTML = icon('calculator') + 'Calc';
+            document.getElementById('broadcast-toggle-btn').innerHTML = icon('send') + 'Broadcast';
             document.getElementById('section-label-link-icon').innerHTML = icon('link') + 'Project Links';
             document.getElementById('add-proj-btn').innerHTML = icon('plus') + 'Tambah Proyek';
             document.getElementById('initial-loading-state').innerHTML = icon('hourglass') + 'Loading projects...';
