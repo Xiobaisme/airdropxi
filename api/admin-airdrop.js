@@ -51,12 +51,16 @@ module.exports = async function handler(req, res) {
       const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
       if (!webhookUrl) throw new Error('DISCORD_WEBHOOK_URL belum di-set');
 
+      const LOGO_URL = 'https://airdropxi.vercel.app/logo1.png'; // ganti kalau path logo asli beda
+
       const embed = {
+        author: { name: '📢 XIOBAII BROADCAST', icon_url: LOGO_URL },
         title: String(title).slice(0, 256),
-        description: String(description || '').slice(0, 2048),
+        description: String(description || '').slice(0, 4096),
         url: url || undefined,
-        color: 0x8B5CF6,
-        footer: { text: source ? String(source).toUpperCase() : 'Xiobaii Admin' },
+        color: 0x3B82F6,
+        footer: { text: 'Xiobaii • Crypto Monkey Inner Circle', icon_url: LOGO_URL },
+        timestamp: new Date().toISOString(),
       };
 
       let dRes;
@@ -77,25 +81,36 @@ module.exports = async function handler(req, res) {
       results.discord = 'error: ' + e.message;
     }
 
-    // ─── TELEGRAM ───
+        // ─── TELEGRAM ───
     try {
       const token = process.env.TELEGRAM_BOT_TOKEN;
       const chatId = process.env.TELEGRAM_CHAT_ID;
       if (!token || !chatId) throw new Error('TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID belum di-set');
 
-      const caption = `*${title}*\n\n${description || ''}${url ? `\n\n${url}` : ''}`.slice(0, 1024);
+      const escHtml = (s) => String(s || '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+      const buildCaption = (desc) =>
+        `📢 <b>XIOBAII BROADCAST</b>\n\n` +
+        `<b>${escHtml(title)}</b>\n\n` +
+        `${escHtml(desc)}`;
+
       let tRes;
       if (imageBuffer) {
+        // caption sendPhoto dibatasi 1024 char — description dipotong biar aman
+        const shortDesc = (description || '').length > 650
+          ? description.slice(0, 650) + '…'
+          : (description || '');
         const form = new FormData();
         form.append('chat_id', chatId);
-        form.append('caption', caption);
-        form.append('parse_mode', 'Markdown');
+        form.append('caption', buildCaption(shortDesc));
+        form.append('parse_mode', 'HTML');
         form.append('photo', new Blob([imageBuffer], { type: imageMime }), `image.${ext}`);
         tRes = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: form });
       } else {
         tRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chatId, text: caption, parse_mode: 'Markdown' }),
+          body: JSON.stringify({ chat_id: chatId, text: buildCaption(description || ''), parse_mode: 'HTML' }),
         });
       }
       const tData = await tRes.json().catch(() => ({}));
@@ -103,7 +118,6 @@ module.exports = async function handler(req, res) {
     } catch (e) {
       results.telegram = 'error: ' + e.message;
     }
-
     const anyOk = results.discord === 'ok' || results.telegram === 'ok';
     return res.status(anyOk ? 200 : 500).json(results);
   }
