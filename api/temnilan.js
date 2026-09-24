@@ -21,6 +21,7 @@
 //
 //   /api/temnilan-webhook    -> ?resource=webhook
 //     POST  dari provider indexer (Helius Enhanced Webhooks, dll)
+const { verifyAdminToken } = require('./_auth');
 
 const { createClient } = require('@supabase/supabase-js');
 
@@ -54,6 +55,10 @@ module.exports = async function handler(req, res) {
     return res.status(404).json({
       error: `Unknown resource "${resource || ''}". Valid: ${Object.keys(ROUTES).join(', ')}`,
     });
+  }
+    const publicRead = req.method === 'GET' && ['wallets', 'activity', 'positions', 'alerts'].includes(resource);
+  if (resource !== 'webhook' && !publicRead && !verifyAdminToken(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
   }
   return ROUTES[resource](req, res);
 };
