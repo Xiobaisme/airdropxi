@@ -675,7 +675,7 @@
    CRYPTO TICKER — Top 10 Marketcap (scrolling marquee)
    ═══════════════════════════════════════════════════════════ */
 #crypto-ticker {
-    position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 1000;
     background: #000000; border-top: 2px solid var(--border);
     overflow: hidden; padding: 14px 0;
     box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.5);
@@ -776,6 +776,14 @@
     </div>
 </div>
 
+<!-- ─── CRYPTO TICKER (Top 10 Marketcap) ─── -->
+<div id="crypto-ticker">
+    <div class="ticker-label"><span class="dot"></span>LIVE</div>
+    <div class="ticker-track" id="ticker-track">
+        <div class="empty-state" style="padding:0 1.6rem;">Loading market data...</div>
+    </div>
+</div>
+    
     <!-- ─── ADMIN CONTENT ─── -->
     <div id="admin-content" class="hidden">
 
@@ -888,6 +896,14 @@
                         Loading projects...
                     </div>
                 </div>
+            </div>
+        </div>
+
+                <!-- ─── CRYPTO TICKER (Top 10 Marketcap) ─── -->
+        <div id="crypto-ticker">
+            <div class="ticker-label"><span class="dot"></span>LIVE</div>
+            <div class="ticker-track" id="ticker-track">
+                <div class="empty-state" style="padding:0 1.6rem;">Loading market data...</div>
             </div>
         </div>
 
