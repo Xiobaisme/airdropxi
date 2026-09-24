@@ -140,6 +140,28 @@ async function sendDiscord() {
     }
     return await handleBroadcastNews(req, res);
   }
+  // ─── TERMINAL LOGIN (verifikasi kata sandi custom di halaman login) ───
+  // Secret-nya HANYA hidup di env var TERMINAL_LOGIN_SECRET (server-side),
+  // gak pernah dikirim/ditulis di HTML/JS yang jalan di browser.
+  async function handleTerminalLogin(req, res) {
+    const { input } = req.body || {};
+    const secret = process.env.TERMINAL_LOGIN_SECRET;
+
+    if (!secret) {
+      return res.status(500).json({ success: false, error: 'TERMINAL_LOGIN_SECRET belum di-set di env' });
+    }
+    if (typeof input !== 'string' || input !== secret) {
+      return res.status(401).json({ success: false });
+    }
+    return res.status(200).json({ success: true });
+  }
+
+  if (type === 'terminal-login') {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method tidak diizinkan untuk terminal-login' });
+    }
+    return await handleTerminalLogin(req, res);
+  }
   
   function buildAirdropsPayload(p) {
     return {
