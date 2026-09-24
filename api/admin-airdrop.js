@@ -87,7 +87,7 @@ async function sendDiscord() {
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
       const buildCaption = (desc) =>
-        `🗣 <b>${escHtml(title)}</b>\n\n` +
+        ` <b>${escHtml(title)}</b>\n\n` +
         `${escHtml(desc)}\n\n` +
         `<i>Xiobaii • Crypto Monkey Inner Circle</i>`;
 
