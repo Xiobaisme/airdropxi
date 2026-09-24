@@ -471,6 +471,20 @@
         .btn-cancel:hover { border-color: var(--border-strong); color: var(--text); }
         .spinner { display: inline-block; width: 12px; height: 12px; border: 2px solid currentColor; border-top-color: transparent; border-radius: 50%; animation: spin 0.6s linear infinite; }
 
+        .tag-row { display:flex; gap:8px; flex-wrap:wrap; }
+.btag {
+    display:inline-flex; align-items:center; gap:6px;
+    font-family: var(--label); font-size:0.72rem; font-weight:700;
+    padding:0.5rem 0.85rem; border-radius:999px; cursor:pointer;
+    border:2px solid var(--border); background:var(--card-2); color:var(--text2);
+    transition: border-color var(--ease), color var(--ease), background var(--ease), transform var(--ease);
+    letter-spacing:0.02em; white-space:nowrap;
+}
+.btag .dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.btag:hover { border-color:var(--border-strong); color:var(--text); transform:translateY(-2px); }
+.btag.active { background:var(--card-3); color:var(--text); border-color:var(--tag-color, var(--primary)); }
+.btag.active .dot { box-shadow:0 0 8px var(--tag-color, var(--primary)); }
+
         /* ─── CONFIRM MODAL (custom, ganti native confirm()) ─── */
        .confirm-box { max-width: 380px; padding: 2.2rem 1.8rem 1.7rem; text-align: center; }
        .confirm-icon {
@@ -955,11 +969,15 @@
         </div>
         <div class="modal-body">
             <div class="field">
-                <label>Judul <span style="color:var(--secondary)">*</span></label>
-                <input id="b-title" type="text" placeholder="Judul broadcast..." />
-            </div>
-            <div class="field">
-                <label>Deskripsi</label>
+                  <label>Judul <span style="color:var(--secondary)">*</span></label>
+                    <input id="b-title" type="text" placeholder="Judul broadcast..." />
+                 </div>
+              <div class="field">
+          <label>Quick Tags <span class="hint">— klik buat nempel ke judul</span></label>
+      <div class="tag-row" id="b-tag-row"></div>
+  </div>
+<div class="field">
+    <label>Deskripsi</label>
                 <textarea id="b-desc" placeholder="Tulis deskripsi/isi berita..." style="min-height:120px;"></textarea>
             </div>
             <div class="field">
@@ -1765,10 +1783,13 @@ let _broadcastImageBase64 = null;
 function openBroadcastModal() {
     document.getElementById('b-title').value = '';
     document.getElementById('b-desc').value = '';
+    _activeBroadcastTag = null;
+    renderBroadcastTags();
     removeBroadcastImage();
     document.getElementById('broadcast-modal').classList.remove('hidden');
 }
 
+        
 function closeBroadcastModal() {
     document.getElementById('broadcast-modal').classList.add('hidden');
 }
@@ -1782,6 +1803,57 @@ function removeBroadcastImage(e) {
     document.getElementById('b-image-remove').classList.add('hidden');
 }
 
+const BROADCAST_TAGS = [
+    { key:'adoption',     label:'ADOPTION',     emoji:'📈', color:'var(--success)' },
+    { key:'big',          label:'BIG',          emoji:'🚨', color:'var(--danger)'  },
+    { key:'insight',      label:'INSIGHT',      emoji:'💡', color:'var(--primary)' },
+    { key:'justin',       label:'JUST IN',      emoji:'⚡', color:'#f59e0b'        },
+    { key:'now',          label:'NOW',          emoji:'🔔', color:'var(--secondary)' },
+    // saran tambahan — hapus aja kalau nggak kepake
+    { key:'breaking',     label:'BREAKING',     emoji:'🔴', color:'var(--danger)'  },
+    { key:'alert',        label:'ALERT',        emoji:'⚠️', color:'#f59e0b'        },
+    { key:'hot',          label:'HOT',          emoji:'🔥', color:'var(--danger)'  },
+    { key:'market',      label:'MARKET',        emoji:'📊', color:'var(--success)' },
+    { key:'announcement', label:'ANNOUNCEMENT', emoji:'📢', color:'var(--primary)' },
+];
+let _activeBroadcastTag = null;
+
+function renderBroadcastTags() {
+    const row = document.getElementById('b-tag-row');
+    if (!row) return;
+    row.innerHTML = BROADCAST_TAGS.map(t => `
+        <button type="button" class="btag ${_activeBroadcastTag === t.key ? 'active' : ''}" data-key="${t.key}" style="--tag-color:${t.color}">
+            <span class="dot" style="background:${t.color}"></span>${t.emoji} ${esc(t.label)}
+        </button>
+    `).join('');
+    row.querySelectorAll('.btag').forEach(btn => {
+        btn.onclick = () => applyBroadcastTag(btn.dataset.key);
+    });
+}
+
+function applyBroadcastTag(key) {
+    const tag = BROADCAST_TAGS.find(t => t.key === key);
+    if (!tag) return;
+    const input = document.getElementById('b-title'); // ganti ke 'b-desc' kalau mau nempel ke deskripsi
+    if (!input) return;
+
+    // buang prefix tag lama dulu biar gak numpuk pas ganti-ganti tag
+    let current = input.value;
+    BROADCAST_TAGS.forEach(t => {
+        const prefix = `${t.emoji} ${t.label}: `;
+        if (current.startsWith(prefix)) current = current.slice(prefix.length);
+    });
+
+    if (_activeBroadcastTag === key) {
+        _activeBroadcastTag = null; // klik tag yang sama -> lepas
+        input.value = current;
+    } else {
+        _activeBroadcastTag = key;
+        input.value = `${tag.emoji} ${tag.label}: ${current}`;
+    }
+    renderBroadcastTags();
+    input.focus();
+}
 document.getElementById('b-image-paste').addEventListener('paste', (e) => {
     const items = e.clipboardData?.items;
     if (!items) return;
