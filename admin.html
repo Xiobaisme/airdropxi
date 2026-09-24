@@ -138,6 +138,28 @@
         .login-sub { font-size: 0.88rem; color: var(--text2); margin-bottom: 2rem; }
         .login-divider { width: 44px; height: 3px; background: var(--primary); border-radius: 999px; margin: 0 auto 2rem; }
 
+         /* ─── LOGIN TERMINAL WARNING ─── */
+        .login-stack { position: relative; z-index: 2; display: flex; flex-direction: column; align-items: center; gap: 20px; }
+        .login-terminal-warning {
+            width: 90%; max-width: 420px;
+            background: #050505; border: 2px solid var(--danger-line);
+            border-radius: var(--r-md); overflow: hidden;
+            box-shadow: 0 0 24px rgba(239, 68, 68, 0.12);
+            animation: popIn 0.5s cubic-bezier(.34,1.56,.64,1) both;
+        }
+        .term-bar { display: flex; align-items: center; gap: 6px; padding: 8px 12px; background: #0d0d0d; border-bottom: 1px solid var(--border); }
+        .term-dot { width: 8px; height: 8px; border-radius: 50%; }
+        .term-dot.r { background: #EF4444; }
+        .term-dot.y { background: #F59E0B; }
+        .term-dot.g { background: #22C55E; }
+        .term-label { margin-left: 6px; font-family: var(--mono); font-size: 0.62rem; color: var(--text3); letter-spacing: 0.04em; }
+        .term-body { padding: 14px 16px; font-family: var(--mono); font-size: 0.74rem; line-height: 1.75; text-align: left; }
+        .term-line { color: var(--text2); }
+        .term-prompt { color: var(--success); }
+        .term-warn { color: var(--danger); font-weight: 700; }
+        .term-cursor { display: inline-block; width: 7px; height: 13px; background: var(--success); vertical-align: middle; animation: termBlink 1s steps(1) infinite; }
+        @keyframes termBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
+
         /* ─── LOGIN — efek partikel, pulse ring, shimmer, entrance stagger ─── */
 .login-particles { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
 .login-particle {
@@ -711,6 +733,8 @@
         }
         @media (max-width: 640px) {
             .login-card { padding: 2.2rem 1.6rem; }
+            .login-terminal-warning { max-width: 92%; }
+            .term-body { font-size: 0.64rem; padding: 12px 14px; }
             nav { padding: 0 1rem; height: 62px; }
             .nav-logo { font-size: 0.95rem; }
             .nav-btn { font-size: 0.65rem; padding: 0.45rem 0.85rem; }
@@ -756,22 +780,39 @@
         <span></span><span></span><span></span><span></span>
     </div>
 
-   <!-- ─── LOGIN ─── -->
+      <!-- ─── LOGIN ─── -->
 <div id="login-section">
     <div class="login-particles" id="login-particles"></div>
-    <div class="login-card">
-        <div class="login-mascot-wrap">
-            <span class="login-mascot-ring"></span>
-            <span class="login-mascot-ring delay"></span>
-            <div class="login-mascot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></div>
+    <div class="login-stack">
+        <div class="login-terminal-warning">
+            <div class="term-bar">
+                <span class="term-dot r"></span>
+                <span class="term-dot y"></span>
+                <span class="term-dot g"></span>
+                <span class="term-label">security@xiobaii-admin</span>
+            </div>
+            <div class="term-body">
+                <div class="term-line"><span class="term-prompt">$</span> whoami --check-access</div>
+                <div class="term-line term-warn">[WARNING] RESTRICTED SYSTEM — AUTHORIZED PERSONNEL ONLY</div>
+                <div class="term-line">Dilarang masuk bagi yang tidak berkepentingan.</div>
+                <div class="term-line">Unauthorized access attempts are logged &amp; monitored.</div>
+                <div class="term-line"><span class="term-prompt">$</span> <span class="term-cursor"></span></div>
+            </div>
         </div>
-        <div class="login-logo">Xiobaii</div>
-        <div class="login-title">Admin Control Center</div>
-        <div class="login-divider"></div>
-        <div class="login-sub">Much access. Very Google login. Wow.</div>
-        <div id="g_id_onload"
-            data-client_id="1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com"
-            data-callback="handleCredentialResponse">
+        <div class="login-card">
+            <div class="login-mascot-wrap">
+                <span class="login-mascot-ring"></span>
+                <span class="login-mascot-ring delay"></span>
+                <div class="login-mascot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></div>
+            </div>
+            <div class="login-logo">Xiobaii</div>
+            <div class="login-title">Admin Control Center</div>
+            <div class="login-divider"></div>
+            <div class="login-sub">Much access. Very Google login. Wow.</div>
+            <div id="g_id_onload"
+                data-client_id="1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com"
+                data-callback="handleCredentialResponse">
+            </div>
         </div>
     </div>
 </div>
