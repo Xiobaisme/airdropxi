@@ -2574,7 +2574,7 @@ function spawnLoginParticles(count = 22) {
             out.appendChild(verifying);
 
             try {
-                const res = await fetch('/api/terminal-login', {
+                 const res = await fetch('/api/admin-airdrop?type=terminal-login', {
                     method: 'POST',
                     headers: { 'Content-Type': 'application/json' },
                     body: JSON.stringify({ input: value }),
