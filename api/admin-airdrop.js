@@ -93,7 +93,7 @@ async function sendDiscord() {
   return dRes.ok ? 'ok' : `error ${dRes.status}`;
 }
 
-        // ─── TELEGRAM ───
+            // ─── TELEGRAM ───
     async function sendTelegram() {
       const token = process.env.TELEGRAM_BOT_TOKEN;
       const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -102,9 +102,9 @@ async function sendDiscord() {
       const escHtml = (s) => String(s || '')
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 
-      const buildCaption = (desc) =>
+      const buildText = () =>
         ` <b>${escHtml(title)}</b>\n\n` +
-        `${escHtml(desc)}\n\n` +
+        `${escHtml(description || '')}\n\n` +
         `<i>Xiobaii • Crypto Monkey Inner Circle</i>`;
 
       const inlineKeyboard = {
@@ -114,24 +114,32 @@ async function sendDiscord() {
         ]],
       };
 
+      const fullText = buildText().slice(0, 4096);
       let tRes;
+
       if (imageBuffer) {
-        const shortDesc = (description || '').length > 650
-          ? description.slice(0, 650) + '…'
-          : (description || '');
-        const form = new FormData();
-        form.append('chat_id', chatId);
-        form.append('caption', buildCaption(shortDesc));
-        form.append('parse_mode', 'HTML');
-        form.append('reply_markup', JSON.stringify(inlineKeyboard));
-        form.append('photo', new Blob([imageBuffer], { type: imageMime }), `image.${ext}`);
-        tRes = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: form });
+        // 1. Kirim foto polos, tanpa caption
+        const formPhoto = new FormData();
+        formPhoto.append('chat_id', chatId);
+        formPhoto.append('photo', new Blob([imageBuffer], { type: imageMime }), `image.${ext}`);
+        const photoRes = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: formPhoto });
+        if (!photoRes.ok) {
+          const photoErr = await photoRes.json().catch(() => ({}));
+          return `error (photo): ${photoErr.description || photoRes.status}`;
+        }
+
+        // 2. Kirim teks lengkap + tombol, terpisah
+        tRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+          method: 'POST', headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ chat_id: chatId, text: fullText, parse_mode: 'HTML', reply_markup: inlineKeyboard }),
+        });
       } else {
         tRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chatId, text: buildCaption(description || ''), parse_mode: 'HTML', reply_markup: inlineKeyboard }),
+          body: JSON.stringify({ chat_id: chatId, text: fullText, parse_mode: 'HTML', reply_markup: inlineKeyboard }),
         });
       }
+
       const tData = await tRes.json().catch(() => ({}));
       return tRes.ok && tData.ok ? 'ok' : `error: ${tData.description || tRes.status}`;
     }
