@@ -160,6 +160,15 @@
         .term-cursor { display: inline-block; width: 7px; height: 13px; background: var(--success); vertical-align: middle; animation: termBlink 1s steps(1) infinite; }
         @keyframes termBlink { 0%, 49% { opacity: 1; } 50%, 100% { opacity: 0; } }
 
+        .term-input-line { display: flex; align-items: center; gap: 6px; }
+        .term-input {
+            flex: 1; background: transparent; border: none; outline: none;
+            color: var(--text2); font-family: var(--mono); font-size: 0.74rem;
+            caret-color: var(--success); padding: 0;
+        }
+        .term-output-line.denied { color: var(--danger); }
+        .term-output-line.ok { color: var(--success); }
+
         /* ─── LOGIN — efek partikel, pulse ring, shimmer, entrance stagger ─── */
 .login-particles { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
 .login-particle {
@@ -796,9 +805,15 @@
                 <div class="term-line term-warn">[WARNING] RESTRICTED SYSTEM — AUTHORIZED PERSONNEL ONLY</div>
                 <div class="term-line">Dilarang masuk bagi yang tidak berkepentingan.</div>
                 <div class="term-line">Unauthorized access attempts are logged &amp; monitored.</div>
-                <div class="term-line"><span class="term-prompt">$</span> <span class="term-cursor"></span></div>
+                 <div id="termOutput"></div>
+                <div class="term-line term-input-line">
+                    <span class="term-prompt">$</span>
+                    <input type="text" id="termInput" class="term-input" autocomplete="off" spellcheck="false" />
+                </div>
             </div>
         </div>
+
+        
         <div class="login-card">
             <div class="login-mascot-wrap">
                 <span class="login-mascot-ring"></span>
@@ -2533,6 +2548,62 @@ function spawnLoginParticles(count = 22) {
                 alert('Verifikasi gagal. Coba lagi nanti.');
             }
         }
+
+                // ─── TERMINAL LOGIN INPUT ───
+        // Sengaja TIDAK ada kata sandi/username apapun di-hardcode di file ini.
+        // Verifikasi WAJIB lewat backend (/api/terminal-login) yang kamu buat
+        // sendiri — samain pola dengan /api/verify-token yang udah ada.
+        function termPrintLine(text, cls = '') {
+            const out = document.getElementById('termOutput');
+            if (!out) return;
+            const line = document.createElement('div');
+            line.className = 'term-line term-output-line' + (cls ? ' ' + cls : '');
+            line.textContent = text; // textContent, bukan innerHTML -> anti HTML/script injection
+            out.appendChild(line);
+        }
+
+        async function handleTerminalSubmit(raw) {
+            const value = raw.trim();
+            if (!value) return;
+            termPrintLine('$ ' + value);
+
+            const out = document.getElementById('termOutput');
+            const verifying = document.createElement('div');
+            verifying.className = 'term-line term-output-line';
+            verifying.textContent = 'Verifying credentials...';
+            out.appendChild(verifying);
+
+            try {
+                const res = await fetch('/api/terminal-login', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ input: value }),
+                });
+                verifying.remove();
+
+                const data = await res.json().catch(() => ({}));
+                if (res.ok && data.success) {
+                    termPrintLine('[OK] Identity verified. Membuka panel...', 'ok');
+                    setTimeout(() => {
+                        document.getElementById('login-section').style.display = 'none';
+                        document.getElementById('admin-content').classList.remove('hidden');
+                    }, 500);
+                } else {
+                    termPrintLine('bash: access denied — gunakan Google Sign-In di bawah.', 'denied');
+                }
+            } catch (err) {
+                verifying.remove();
+                termPrintLine('bash: command not found — endpoint /api/terminal-login belum ada.', 'denied');
+            }
+        }
+
+        document.getElementById('termInput')?.addEventListener('keydown', (e) => {
+            if (e.key === 'Enter') {
+                const val = e.target.value;
+                e.target.value = '';
+                handleTerminalSubmit(val);
+            }
+        });
 
         // ─── INIT (juga menyuntik semua icon SVG ke tombol/label statis) ───
                window.onload = function() {
