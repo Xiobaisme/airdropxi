@@ -93,7 +93,7 @@ async function sendDiscord() {
   return dRes.ok ? 'ok' : `error ${dRes.status}`;
 }
 
-            // ─── TELEGRAM ───
+               // ─── TELEGRAM ───
     async function sendTelegram() {
       const token = process.env.TELEGRAM_BOT_TOKEN;
       const chatId = process.env.TELEGRAM_CHAT_ID;
@@ -107,6 +107,18 @@ async function sendDiscord() {
         `${escHtml(description || '')}\n\n` +
         `<i>Xiobaii • Crypto Monkey Inner Circle</i>`;
 
+      // Khusus buat caption sendPhoto: description dipotong SEBELUM dibungkus tag,
+      // jadi hasil potongannya nggak pernah motong di tengah <b> atau <i>
+      const buildCaption = () => {
+        const header = ` <b>${escHtml(title)}</b>\n\n`;
+        const footer = `\n\n<i>Xiobaii • Crypto Monkey Inner Circle</i>`;
+        const maxDescLen = Math.max(1024 - header.length - footer.length - 3, 0);
+        const descEsc = escHtml(description || '');
+        const truncated = descEsc.length > maxDescLen;
+        const desc = truncated ? descEsc.slice(0, maxDescLen) + '...' : descEsc;
+        return { caption: header + desc + footer, truncated };
+      };
+
       const inlineKeyboard = {
         inline_keyboard: [[
           { text: 'TikTok', url: 'https://tiktok.com/@hellovry' },
@@ -118,21 +130,23 @@ async function sendDiscord() {
       let tRes;
 
       if (imageBuffer) {
-        // 1. Kirim foto polos, tanpa caption
+        const { caption, truncated } = buildCaption();
+
         const formPhoto = new FormData();
         formPhoto.append('chat_id', chatId);
         formPhoto.append('photo', new Blob([imageBuffer], { type: imageMime }), `image.${ext}`);
-        const photoRes = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: formPhoto });
-        if (!photoRes.ok) {
-          const photoErr = await photoRes.json().catch(() => ({}));
-          return `error (photo): ${photoErr.description || photoRes.status}`;
-        }
+        formPhoto.append('caption', caption);
+        formPhoto.append('parse_mode', 'HTML');
+        formPhoto.append('reply_markup', JSON.stringify(inlineKeyboard));
 
-        // 2. Kirim teks lengkap + tombol, terpisah
-        tRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
-          method: 'POST', headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ chat_id: chatId, text: fullText, parse_mode: 'HTML', reply_markup: inlineKeyboard }),
-        });
+        tRes = await fetch(`https://api.telegram.org/bot${token}/sendPhoto`, { method: 'POST', body: formPhoto });
+
+        if (truncated) {
+          await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
+            method: 'POST', headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ chat_id: chatId, text: fullText, parse_mode: 'HTML' }),
+          });
+        }
       } else {
         tRes = await fetch(`https://api.telegram.org/bot${token}/sendMessage`, {
           method: 'POST', headers: { 'Content-Type': 'application/json' },
@@ -157,7 +171,6 @@ async function sendDiscord() {
     const anyOk = results.discord === 'ok' || results.telegram === 'ok';
     return res.status(anyOk ? 200 : 500).json(results);
   }
-
   // ─── TERMINAL LOGIN (verifikasi kata sandi custom di halaman login) ───
   // Secret-nya HANYA hidup di env var TERMINAL_LOGIN_SECRET (server-side),
   // gak pernah dikirim/ditulis di HTML/JS yang jalan di browser.
