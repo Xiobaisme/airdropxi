@@ -204,7 +204,7 @@
         /* ═══════════════════════════════════════════════════════════
            MAIN
            ═══════════════════════════════════════════════════════════ */
-        #admin-content { position: relative; z-index: 1; }
+        #admin-content { position: relative; z-index: 1; padding-bottom: 64px; }
 
         /* ─── HERO GRID (2 col: title/CTA left, dashboard stats right) ─── */
         .hero-grid {
@@ -509,7 +509,7 @@
            TOAST — solid surface, colored left border only
            ═══════════════════════════════════════════════════════════ */
         .toast {
-            position: fixed; bottom: 24px; right: 24px; z-index: 2000; background: var(--card);
+            position: fixed; bottom: 84px; right: 24px; z-index: 2000; background: var(--card);
             border: 2px solid var(--border); border-left: 4px solid var(--text3); border-radius: var(--r-sm);
             padding: 0.9rem 1.5rem; font-size: 0.85rem; color: var(--text); font-family: var(--label);
             opacity: 0; transform: translateY(50px); transition: opacity .25s, transform .25s;
@@ -527,7 +527,7 @@
            CALCULATOR
            ═══════════════════════════════════════════════════════════ */
         #calc-panel {
-            position: fixed; bottom: 24px; right: 24px; z-index: 1600; width: 270px;
+            position: fixed; bottom: 84px; right: 24px; z-index: 1600; width: 270px;
             background: var(--card); border: 2px solid var(--border);
             border-radius: var(--r-md); overflow: hidden; box-shadow: 0 16px 44px rgba(0, 0, 0, 0.55);
             animation: modalFade 0.2s ease;
@@ -675,9 +675,10 @@
    CRYPTO TICKER — Top 10 Marketcap (scrolling marquee)
    ═══════════════════════════════════════════════════════════ */
 #crypto-ticker {
-    position: relative; z-index: 1;
-    background: #000000; border-top: 2px solid var(--border); border-bottom: 2px solid var(--border);
-    overflow: hidden; padding: 14px 0; margin-top: 2.4rem;
+    position: fixed; left: 0; right: 0; bottom: 0; z-index: 900;
+    background: #000000; border-top: 2px solid var(--border);
+    overflow: hidden; padding: 14px 0;
+    box-shadow: 0 -6px 20px rgba(0, 0, 0, 0.5);
 }
 .ticker-label {
     position: absolute; left: 0; top: 0; bottom: 0; z-index: 2;
