@@ -1,4 +1,12 @@
 // api/admin-airdrop.js
+const { Ratelimit } = require('@upstash/ratelimit');
+const { Redis } = require('@upstash/redis');
+
+const ratelimit = new Ratelimit({
+  redis: Redis.fromEnv(),
+  limiter: Ratelimit.slidingWindow(5, '1 m'),
+});
+
 const crypto = require('crypto');
 
 function verifyAdminToken(req) {
@@ -145,7 +153,12 @@ async function sendDiscord() {
   // ─── TERMINAL LOGIN (verifikasi kata sandi custom di halaman login) ───
   // Secret-nya HANYA hidup di env var TERMINAL_LOGIN_SECRET (server-side),
   // gak pernah dikirim/ditulis di HTML/JS yang jalan di browser.
-  async function handleTerminalLogin(req, res) {
+    async function handleTerminalLogin(req, res) {
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
+    const { success } = await ratelimit.limit(`login:${ip}`);
+    if (!success) {
+      return res.status(429).json({ success: false, error: 'Terlalu banyak percobaan, coba lagi nanti' });
+    }
     const { input } = req.body || {};
     const secret = process.env.TERMINAL_LOGIN_SECRET;
 
