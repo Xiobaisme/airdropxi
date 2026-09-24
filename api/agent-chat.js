@@ -15,7 +15,7 @@
 //
 // Kalau salah satu env var kosong, provider itu otomatis dilewati /
 // dianggap tidak tersedia (tidak akan bikin request gagal ke provider lain).
-
+const { verifyAdminToken } = require('./_auth');
 const PROVIDERS = {
   agentrouter: {
     baseUrl: 'https://agentrouter.org/v1',
@@ -150,6 +150,10 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: `Method ${req.method} tidak diizinkan` });
   }
 
+    if (!verifyAdminToken(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
   const { agent, mode, prompt, image, history } = req.body || {};
 
   if (!prompt || !String(prompt).trim()) {
@@ -224,6 +228,6 @@ module.exports = async function handler(req, res) {
     }
 
     console.error('[agent-chat] semua provider gagal:', primaryErr.message);
-    return res.status(500).json({ error: primaryErr.message });
+    return res.status(500).json({ error: 'Semua provider gagal' });
   }
 };
