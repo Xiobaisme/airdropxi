@@ -1,4 +1,21 @@
 // api/admin-airdrop.js
+const crypto = require('crypto');
+
+function verifyAdminToken(req) {
+  const cookie = req.headers.cookie || '';
+  const match = cookie.match(/admin_token=([^;]+)/);
+  if (!match) return false;
+  try {
+    const decoded = Buffer.from(decodeURIComponent(match[1]), 'base64').toString();
+    const [payload, sig] = decoded.split('.');
+    if (!payload || !sig) return false;
+    const expectedSig = crypto.createHmac('sha256', process.env.ADMIN_SECRET_KEY).update(payload).digest('hex');
+    const sigBuf = Buffer.from(sig), expBuf = Buffer.from(expectedSig);
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) return false;
+    return Date.now() < Number(payload);
+  } catch { return false; }
+}
+
 module.exports = async function handler(req, res) {
   const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -17,19 +34,10 @@ module.exports = async function handler(req, res) {
 
   const { id, exchange_id, type } = req.query;
 
-   function serializeError(val) {
-    if (!val) return 'Unknown error';
-    if (typeof val === 'string') return val;
-    if (val.message) {
-      let msg = val.message;
-      if (val.details) msg += ` | ${val.details}`;
-      if (val.hint)    msg += ` | Hint: ${val.hint}`;
-      if (val.code)    msg += ` (code: ${val.code})`;
-      return msg;
-    }
-    return JSON.stringify(val);
+      function serializeError(val) {
+    console.error('[admin-airdrop] internal error:', val);
+    return 'Terjadi kesalahan internal';
   }
-
     // ─── BROADCAST NEWS KE DISCORD & TELEGRAM ───
   async function handleBroadcastNews(req, res) {
     const { title, description, image_base64, url, source } = req.body || {};
@@ -134,12 +142,6 @@ async function sendDiscord() {
     return res.status(anyOk ? 200 : 500).json(results);
   }
 
-  if (type === 'broadcast-news') {
-    if (req.method !== 'POST') {
-      return res.status(405).json({ error: 'Method tidak diizinkan untuk broadcast-news' });
-    }
-    return await handleBroadcastNews(req, res);
-  }
   // ─── TERMINAL LOGIN (verifikasi kata sandi custom di halaman login) ───
   // Secret-nya HANYA hidup di env var TERMINAL_LOGIN_SECRET (server-side),
   // gak pernah dikirim/ditulis di HTML/JS yang jalan di browser.
@@ -147,12 +149,21 @@ async function sendDiscord() {
     const { input } = req.body || {};
     const secret = process.env.TERMINAL_LOGIN_SECRET;
 
-    if (!secret) {
-      return res.status(500).json({ success: false, error: 'TERMINAL_LOGIN_SECRET belum di-set di env' });
+      if (!secret || !process.env.ADMIN_SECRET_KEY) {
+      return res.status(500).json({ success: false, error: 'Konfigurasi server belum lengkap' });
     }
-    if (typeof input !== 'string' || input !== secret) {
+        const inputBuf = Buffer.from(typeof input === 'string' ? input : '');
+    const secretBuf = Buffer.from(secret);
+    const valid = inputBuf.length === secretBuf.length && crypto.timingSafeEqual(inputBuf, secretBuf);
+    if (!valid) {
       return res.status(401).json({ success: false });
     }
+
+    const expiry = Date.now() + 1000 * 60 * 60 * 4;
+    const payload = `${expiry}`;
+    const sig = crypto.createHmac('sha256', process.env.ADMIN_SECRET_KEY).update(payload).digest('hex');
+    const token = Buffer.from(`${payload}.${sig}`).toString('base64');
+    res.setHeader('Set-Cookie', `admin_token=${encodeURIComponent(token)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=14400`);
     return res.status(200).json({ success: true });
   }
 
@@ -161,6 +172,16 @@ async function sendDiscord() {
       return res.status(405).json({ error: 'Method tidak diizinkan untuk terminal-login' });
     }
     return await handleTerminalLogin(req, res);
+  }
+    if (!verifyAdminToken(req)) {
+    return res.status(401).json({ error: 'Unauthorized' });
+  }
+
+  if (type === 'broadcast-news') {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method tidak diizinkan untuk broadcast-news' });
+    }
+    return await handleBroadcastNews(req, res);
   }
   
   function buildAirdropsPayload(p) {
@@ -250,8 +271,8 @@ async function sendDiscord() {
       const merged = { ...base, ...extra, id: base.id, view_count: base.view_count || 0 };
 
       return res.status(200).json(merged);
-    } catch (e) {
-      return res.status(500).json({ error: e.message });
+        } catch (e) {
+      return res.status(500).json({ error: serializeError(e) });
     }
   }
 
@@ -280,7 +301,7 @@ async function sendDiscord() {
         await fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(newId)}`, {
           method: 'DELETE', headers: H,
         });
-        return res.status(500).json({ error: 'Gagal insert ke proyek: ' + serializeError(err2) });
+        return res.status(500).json({ error: serializeError(err2) });
       }
 
       try {
@@ -306,7 +327,7 @@ async function sendDiscord() {
 
       return res.status(201).json(Array.isArray(result1) ? result1 : [result1]);
     } catch (e) {
-      return res.status(500).json({ error: e.message });
+     return res.status(500).json({ error: serializeError(e) });
     }
   }
 
@@ -372,7 +393,7 @@ async function sendDiscord() {
         const proyekText = await rProyek.text();
         if (!rProyek.ok) {
           console.error('PATCH proyek gagal:', proyekText);
-          return res.status(500).json({ error: 'PATCH proyek gagal: ' + proyekText });
+          return res.status(500).json({ error: serializeError(proyekText) });
         }
 
         let proyekResult = [];
@@ -391,16 +412,14 @@ async function sendDiscord() {
           if (!rInsert.ok) {
             const errInsert = await rInsert.json().catch(() => ({}));
             console.error('Auto-create proyek gagal:', JSON.stringify(errInsert));
-            return res.status(500).json({
-              error: 'Row proyek belum ada dan gagal dibuat otomatis: ' + serializeError(errInsert)
-            });
+           return res.status(500).json({ error: serializeError(errInsert) });
           }
         }
       }
 
       return res.status(200).json({ success: true, updated: result });
     } catch (e) {
-      return res.status(500).json({ error: e.message });
+     return res.status(500).json({ error: serializeError(e) });
     }
   }
 
@@ -416,11 +435,10 @@ async function sendDiscord() {
         fetch(`${BASE}/airdrops?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers: H }),
       ];
 
-      if (intId !== undefined) {
-        deletePromises.push(
-          fetch(`${BASE}/proyek?airdrop_id=eq.${intId}`, { method: 'DELETE', headers: H })
-        );
-      }
+      const proyekAirdropId = intId !== undefined ? intId : id;
+      deletePromises.push(
+        fetch(`${BASE}/proyek?airdrop_id=eq.${encodeURIComponent(proyekAirdropId)}`, { method: 'DELETE', headers: H })
+      );
 
       const [r1] = await Promise.all(deletePromises);
 
@@ -431,7 +449,7 @@ async function sendDiscord() {
 
       return res.status(200).json({ success: true });
     } catch (e) {
-      return res.status(500).json({ error: e.message });
+     return res.status(500).json({ error: serializeError(e) });
     }
   }
 
