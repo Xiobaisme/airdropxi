@@ -15,7 +15,23 @@
 //
 // Kalau salah satu env var kosong, provider itu otomatis dilewati /
 // dianggap tidak tersedia (tidak akan bikin request gagal ke provider lain).
-const { verifyAdminToken } = require('./_auth');
+const crypto = require('crypto');
+
+function verifyAdminToken(req) {
+  const cookie = req.headers.cookie || '';
+  const match = cookie.match(/admin_token=([^;]+)/);
+  if (!match) return false;
+  try {
+    const decoded = Buffer.from(decodeURIComponent(match[1]), 'base64').toString();
+    const [payload, sig] = decoded.split('.');
+    if (!payload || !sig) return false;
+    const expectedSig = crypto.createHmac('sha256', process.env.ADMIN_SECRET_KEY).update(payload).digest('hex');
+    const sigBuf = Buffer.from(sig), expBuf = Buffer.from(expectedSig);
+    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) return false;
+    return Date.now() < Number(payload);
+  } catch { return false; }
+}
+
 const PROVIDERS = {
   agentrouter: {
     baseUrl: 'https://agentrouter.org/v1',
