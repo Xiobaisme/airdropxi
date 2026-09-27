@@ -111,7 +111,7 @@ async function sendDiscord() {
       // jadi hasil potongannya nggak pernah motong di tengah <b> atau <i>
       const buildCaption = () => {
         const header = ` <b>${escHtml(title)}</b>\n\n`;
-        const footer = `\n\n<i>Xiobaii • Crypto Monkey Inner Circle</i>\n\n<i>`;
+        const footer = `\n\n<i>Xiobaii • Crypto Monkey Inner Circle</i>`;
         const maxDescLen = Math.max(1024 - header.length - footer.length - 3, 0);
         const descEsc = escHtml(description || '');
         const truncated = descEsc.length > maxDescLen;
