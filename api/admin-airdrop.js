@@ -106,13 +106,12 @@ async function sendDiscord() {
         ` <b>${escHtml(title)}</b>\n\n` +
         `${escHtml(description || '')}\n\n` +
         `<i>Xiobaii • Crypto Monkey Inner Circle</i>`;
-        `<i>TRADING PLATFORMS</i>`;
 
       // Khusus buat caption sendPhoto: description dipotong SEBELUM dibungkus tag,
       // jadi hasil potongannya nggak pernah motong di tengah <b> atau <i>
       const buildCaption = () => {
         const header = ` <b>${escHtml(title)}</b>\n\n`;
-        const footer = `\n\n<i>Xiobaii • Crypto Monkey Inner Circle</i>\n\n<i>TRADING PLATFORMS</i>`;
+        const footer = `\n\n<i>Xiobaii • Crypto Monkey Inner Circle</i>\n\n<i>`;
         const maxDescLen = Math.max(1024 - header.length - footer.length - 3, 0);
         const descEsc = escHtml(description || '');
         const truncated = descEsc.length > maxDescLen;
@@ -125,6 +124,9 @@ async function sendDiscord() {
           [
             { text: 'TikTok', url: 'https://tiktok.com/@hellovry' },
             { text: 'Discord', url: 'https://discord.gg/xvm9eZEjwf' },
+          ],
+          [
+            { text: 'TRADING PLATFORMS', callback_data: 'noop' },
           ],
           [
             { text: 'HIBT', url: 'https://hibt6.com/id/register?promotionCode=D95M' },
