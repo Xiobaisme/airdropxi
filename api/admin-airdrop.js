@@ -1,6 +1,7 @@
 // api/admin-airdrop.js
 const { Ratelimit } = require('@upstash/ratelimit');
 const { Redis } = require('@upstash/redis');
+const WebSocket = require('ws');
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -226,6 +227,56 @@ async function sendDiscord() {
       return res.status(405).json({ error: 'Method tidak diizinkan untuk broadcast-news' });
     }
     return await handleBroadcastNews(req, res);
+  }
+
+  // ─── NEW LISTINGS FEED (SSE relay ke NLF WebSocket) ───
+  if (type === 'nlf-stream') {
+    if (req.method !== 'GET') {
+      return res.status(405).json({ error: 'Method tidak diizinkan untuk nlf-stream' });
+    }
+    const nlfKey = process.env.NLF_KEY;
+    if (!nlfKey) return res.status(500).json({ error: 'NLF_KEY belum di-set' });
+
+    res.writeHead(200, {
+      'Content-Type': 'text/event-stream',
+      'Cache-Control': 'no-cache, no-transform',
+      Connection: 'keep-alive',
+      'X-Accel-Buffering': 'no',
+    });
+    res.write('retry: 5000\n\n');
+
+    // Promise ini baru resolve pas stream selesai, biar Vercel nggak matiin fungsi lebih awal
+    return new Promise((resolve) => {
+      const send = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`);
+      const ws = new WebSocket('wss://ws.newlistings.pro/v2/full', {
+        headers: { authorization: `Bearer ${nlfKey}` },
+        handshakeTimeout: 10000,
+      });
+
+      let ended = false;
+      const keepAlive = setInterval(() => res.write(': ping\n\n'), 15000);
+      const maxLife = setTimeout(end, 270000); // tutup sebelum limit, browser auto-reconnect
+
+      function end() {
+        if (ended) return;
+        ended = true;
+        clearInterval(keepAlive);
+        clearTimeout(maxLife);
+        try { ws.terminate(); } catch {}
+        res.end();
+        resolve();
+      }
+
+      ws.on('message', (d) => { try { send(JSON.parse(d.toString())); } catch {} });
+      ws.on('unexpected-response', (_q, r) => {
+        send({ type: 'error', code: 'AUTHENTICATION_FAILED', status: r.statusCode });
+        r.resume();
+        end();
+      });
+      ws.on('error', () => {});
+      ws.on('close', end);
+      req.on('close', end);
+    });
   }
   
   function buildAirdropsPayload(p) {
