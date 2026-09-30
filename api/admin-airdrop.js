@@ -2,6 +2,7 @@
 const { Ratelimit } = require('@upstash/ratelimit');
 const { Redis } = require('@upstash/redis');
 const WebSocket = require('ws');
+const redis = Redis.fromEnv();
 
 const ratelimit = new Ratelimit({
   redis: Redis.fromEnv(),
@@ -229,6 +230,33 @@ async function sendDiscord() {
     return await handleBroadcastNews(req, res);
   }
 
+    // ─── NLF HISTORY (riwayat yang kita simpan sendiri) ───
+  if (type === 'nlf-history') {
+    if (req.method !== 'GET') return res.status(405).json({ error: 'Method tidak diizinkan' });
+    try {
+      const rows = await redis.lrange('nlf:events', 0, 99);
+      const events = rows.map(r => (typeof r === 'string' ? JSON.parse(r) : r));
+      return res.status(200).json(events);
+    } catch (e) {
+      return res.status(500).json({ error: serializeError(e) });
+    }
+  }
+
+  async function saveNLFEvent(m) {
+    try {
+      if (m.type !== 'announcement' && m.type !== 'tweet') return;
+      const ev = m.parser?.classification?.event;
+      if (!ev || ev === 'none') return;             // simpan listing/delisting saja
+      // anti-dobel kalau ada beberapa tab yang buka relay
+      const ok = await redis.set(`nlf:seen:${m.detected_time_us}`, 1, { nx: true, ex: 60 * 60 * 24 * 7 });
+      if (!ok) return;
+      await redis.lpush('nlf:events', JSON.stringify(m));
+      await redis.ltrim('nlf:events', 0, 199);      // simpan 200 terakhir
+    } catch (e) {
+      console.warn('[nlf] save gagal:', e.message);
+    }
+  }
+
   // ─── NEW LISTINGS FEED (SSE relay ke NLF WebSocket) ───
   if (type === 'nlf-stream') {
     if (req.method !== 'GET') {
@@ -267,7 +295,11 @@ async function sendDiscord() {
         resolve();
       }
 
-      ws.on('message', (d) => { try { send(JSON.parse(d.toString())); } catch {} });
+      ws.on('message', (d) => {
+  let m; try { m = JSON.parse(d.toString()); } catch { return; }
+  send(m);
+  saveNLFEvent(m);
+});
       ws.on('unexpected-response', (_q, r) => {
         send({ type: 'error', code: 'AUTHENTICATION_FAILED', status: r.statusCode });
         r.resume();
