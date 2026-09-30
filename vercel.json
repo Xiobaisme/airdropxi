@@ -7,8 +7,5 @@
     { "source": "/api/temnilan-positions", "destination": "/api/temnilan?resource=positions" },
     { "source": "/api/temnilan-alerts",    "destination": "/api/temnilan?resource=alerts" },
     { "source": "/api/temnilan-webhook",   "destination": "/api/temnilan?resource=webhook" }
-  ]
-"functions": {
-    "api/admin-airdrop.js": { "maxDuration": 300 }
   }
 }
