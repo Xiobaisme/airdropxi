@@ -890,6 +890,7 @@
         <span class="nlf-dot" id="nlf-dot"></span>
         <span class="nlf-title">New Listings</span>
         <span class="nlf-status" id="nlf-status">Menghubungkan...</span>
+        <a class="nlf-btn" href="https://newlistings.pro" target="_blank" rel="noopener" style="text-decoration:none;">Riwayat lengkap ↗</a>
         <button class="nlf-btn" id="nlf-toggle" onclick="toggleNLFAll()">Semua event</button>
     </div>
     <div class="nlf-list" id="nlf-list"><div class="nlf-empty">Menunggu listing baru...</div></div>
@@ -2015,7 +2016,7 @@ function setNLFStatus(state, msg) {
     const dot = document.getElementById('nlf-dot'), st = document.getElementById('nlf-status');
     if (!dot || !st) return;
     dot.className = 'nlf-dot' + (state === 'live' ? ' live' : state === 'error' ? ' error' : '');
-    st.textContent = state === 'live' ? 'Live · FREE key (delay 3s)'
+    st.textContent = state === 'live' ? 'Live ·'
         : state === 'error' ? (msg || 'Terputus') : 'Menghubungkan...';
 }
 
