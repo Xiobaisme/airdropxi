@@ -2022,7 +2022,7 @@ function setNLFStatus(state, msg) {
 function startNLF() {
     if (_nlfSrc) return;
     setNLFStatus('connecting');
-    const src = new EventSource('/api/nlf-stream');
+    const src = new EventSource('/api/admin-airdrop?type=nlf-stream');
     _nlfSrc = src;
 
     src.onmessage = (e) => {
