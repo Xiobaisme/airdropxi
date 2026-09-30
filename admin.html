@@ -733,6 +733,31 @@
 .ticker-chg.up { color: var(--success); background: var(--success-dim); }
 .ticker-chg.down { color: var(--danger); background: var(--danger-dim); }
 
+/* ─── NEW LISTINGS FEED ─── */
+#nlf-section { position: relative; z-index: 1; max-width: 1360px; margin: 1.2rem auto 0; padding: 0 1.5rem; }
+.nlf-head { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; }
+.nlf-dot { width: 7px; height: 7px; border-radius: 50%; background: var(--text3); }
+.nlf-dot.live { background: var(--success); animation: pulseDot 1.4s ease-in-out infinite; }
+.nlf-dot.error { background: var(--danger); }
+.nlf-title { font-family: var(--label); font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--text); }
+.nlf-status { font-family: var(--mono); font-size: 0.68rem; color: var(--text3); flex: 1; }
+.nlf-btn { font-family: var(--label); font-size: 0.68rem; font-weight: 700; padding: 0.35rem 0.9rem; border-radius: 999px; cursor: pointer; border: 2px solid var(--border); background: transparent; color: var(--text2); }
+.nlf-btn.active { border-color: var(--primary); color: var(--primary); background: var(--primary-dim); }
+.nlf-list { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 6px; }
+.nlf-empty { font-family: var(--label); font-size: 0.78rem; color: var(--text3); padding: 0.9rem 0; }
+.nlf-card { flex: 0 0 280px; text-decoration: none; color: inherit; background: var(--card); border: 2px solid var(--border); border-left: 3px solid var(--text3); border-radius: var(--r-sm); padding: 10px 14px; transition: border-color var(--ease); }
+.nlf-card:hover { border-color: var(--border-strong); }
+.nlf-card.listing { border-left-color: var(--success); }
+.nlf-card.delisting { border-left-color: var(--danger); }
+.nlf-top { display: flex; justify-content: space-between; margin-bottom: 5px; font-family: var(--mono); font-size: 10px; }
+.nlf-ex { color: var(--primary); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.nlf-time { color: var(--text3); }
+.nlf-text { font-size: 13px; font-weight: 600; line-height: 1.4; color: var(--text); margin-bottom: 6px;
+  display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; overflow: hidden; }
+.nlf-badge { font-family: var(--mono); font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 4px; text-transform: uppercase; }
+.nlf-badge.listing { color: var(--success); background: var(--success-dim); }
+.nlf-badge.delisting { color: var(--danger); background: var(--danger-dim); }
+
         /* ═══════════════════════════════════════════════════════════
            RESPONSIVE
            ═══════════════════════════════════════════════════════════ */
@@ -858,6 +883,17 @@
    <button class="nav-btn pink" onclick="toggleCalc()" id="calc-toggle-btn">Calc</button>
 </div>
         </nav>
+
+    <!-- ─── NEW LISTINGS FEED ─── -->
+<div id="nlf-section">
+    <div class="nlf-head">
+        <span class="nlf-dot" id="nlf-dot"></span>
+        <span class="nlf-title">New Listings</span>
+        <span class="nlf-status" id="nlf-status">Menghubungkan...</span>
+        <button class="nlf-btn" id="nlf-toggle" onclick="toggleNLFAll()">Semua event</button>
+    </div>
+    <div class="nlf-list" id="nlf-list"><div class="nlf-empty">Menunggu listing baru...</div></div>
+</div>
 
         <!-- HERO -->
         <div class="hero-grid">
@@ -1883,53 +1919,163 @@ function renderNewsFeed() {
 document.getElementById('news-overlay')?.addEventListener('click', toggleNewsPanel);
 
         // ═══════════════════════════════════════════════════════════
-        // ─── CRYPTO TICKER — Top 10 by Market Cap (CoinGecko) ───
-        // ═══════════════════════════════════════════════════════════
-        const TICKER_REFRESH_MS = 60000; // refresh tiap 60 detik
-        let _tickerInterval = null;
+// ─── CRYPTO TICKER — Ranking dari CoinGecko (via /api/markets, cache 1 jam),
+//     harga live dari Binance (refresh 15 detik)
+// ═══════════════════════════════════════════════════════════
+const TICKER_REFRESH_MS = 15000;
+const RANK_REFRESH_MS = 60 * 60 * 1000;
+const BN = 'https://data-api.binance.vision/api/v3';
 
-        function formatTickerPrice(n) {
-            if (n >= 1) return '$' + n.toLocaleString('en-US', { maximumFractionDigits: n >= 100 ? 0 : 2 });
-            return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 6 });
+// Stablecoin & wrapped/staked token nggak punya pair USDT di Binance
+const TICKER_SKIP = new Set(['usdt','usdc','dai','usde','fdusd','usds','tusd','usdd',
+    'pyusd','usd1','steth','wsteth','weth','wbtc','weeth','wbeth','cbbtc','bsc-usd']);
+
+let _tickerInterval = null, _rankInterval = null;
+let _topCoins = []; // [{ sym, name, image }]
+
+function formatTickerPrice(n) {
+    if (n >= 1) return '$' + n.toLocaleString('en-US', { maximumFractionDigits: n >= 100 ? 0 : 2 });
+    return '$' + n.toLocaleString('en-US', { maximumFractionDigits: 6 });
+}
+
+async function loadTopCoins() {
+    try {
+        const [cg, all] = await Promise.all([
+            fetch('/api/markets').then(r => { if (!r.ok) throw new Error('markets ' + r.status); return r.json(); }),
+            fetch(`${BN}/ticker/price`).then(r => r.json()),
+        ]);
+        const pairs = new Set(all.map(x => x.symbol));
+        _topCoins = cg
+            .filter(c => !TICKER_SKIP.has(c.symbol.toLowerCase()) && pairs.has(c.symbol.toUpperCase() + 'USDT'))
+            .slice(0, 10)
+            .map(c => ({ sym: c.symbol.toUpperCase(), name: c.name, image: c.image }));
+    } catch (e) {
+        console.warn('[ticker] ranking gagal, pakai list lama/fallback:', e.message);
+        if (!_topCoins.length) {
+            _topCoins = ['BTC','ETH','BNB','SOL','XRP','DOGE','ADA','TRX','AVAX','LINK']
+                .map(s => ({ sym: s, name: s, image: null }));
         }
+    }
+}
 
-        async function loadCryptoTicker() {
-            const track = document.getElementById('ticker-track');
-            if (!track) return;
-            try {
-                const res = await fetch('https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=10&page=1&sparkline=false&price_change_percentage=24h');
-                if (!res.ok) throw new Error('Gagal fetch harga crypto');
-                const coins = await res.json();
+async function loadCryptoTicker() {
+    const track = document.getElementById('ticker-track');
+    if (!track) return;
+    try {
+        if (!_topCoins.length) await loadTopCoins();
 
-                const itemsHtml = coins.map((c, i) => {
-                    const chg = c.price_change_percentage_24h ?? 0;
-                    const chgCls = chg >= 0 ? 'up' : 'down';
-                    const chgSign = chg >= 0 ? '+' : '';
-                    return `
-                    <div class="ticker-item">
-                        <span class="ticker-rank">#${i + 1}</span>
-                        <img class="ticker-icon" src="${c.image}" alt="" onerror="this.style.display='none'" />
-                        <span class="ticker-sym">${esc(c.symbol.toUpperCase())}</span>
-                        <span class="ticker-name">${esc(c.name)}</span>
-                        <span class="ticker-price">${formatTickerPrice(c.current_price)}</span>
-                        <span class="ticker-chg ${chgCls}">${chgSign}${chg.toFixed(2)}%</span>
-                    </div>`;
-                }).join('');
+        const symbols = _topCoins.map(c => c.sym + 'USDT');
+        const res = await fetch(`${BN}/ticker/24hr?symbols=` + encodeURIComponent(JSON.stringify(symbols)));
+        if (!res.ok) throw new Error('Gagal fetch harga Binance');
+        const data = await res.json();
+        const map = Object.fromEntries(data.map(d => [d.symbol, d]));
 
-                // Duplikat sekali biar loop scroll-nya mulus (seamless infinite marquee)
-                track.innerHTML = itemsHtml + itemsHtml;
-            } catch (e) {
-                track.innerHTML = `<div class="empty-state" style="padding:0 1.6rem;">${icon('alert')}Gagal muat harga crypto</div>`;
+        const itemsHtml = _topCoins.map((c, i) => {
+            const d = map[c.sym + 'USDT'];
+            if (!d) return '';
+            const price = Number(d.lastPrice);
+            const chg = Number(d.priceChangePercent);
+            const chgCls = chg >= 0 ? 'up' : 'down';
+            const chgSign = chg >= 0 ? '+' : '';
+            return `
+            <div class="ticker-item">
+                <span class="ticker-rank">#${i + 1}</span>
+                ${c.image ? `<img class="ticker-icon" src="${esc(c.image)}" alt="" onerror="this.style.display='none'" />` : ''}
+                <span class="ticker-sym">${esc(c.sym)}</span>
+                <span class="ticker-name">${esc(c.name)}</span>
+                <span class="ticker-price">${formatTickerPrice(price)}</span>
+                <span class="ticker-chg ${chgCls}">${chgSign}${chg.toFixed(2)}%</span>
+            </div>`;
+        }).join('');
+
+        // Duplikat sekali biar loop scroll-nya mulus
+        track.innerHTML = itemsHtml + itemsHtml;
+    } catch (e) {
+        console.warn('[ticker]', e.message);
+        // Kalau udah ada data sebelumnya, biarin tampil (jangan diganti error)
+        if (!track.querySelector('.ticker-item')) {
+            track.innerHTML = `<div class="empty-state" style="padding:0 1.6rem;">${icon('alert')}Gagal muat harga crypto</div>`;
+        }
+    }
+}
+
+async function startCryptoTicker() {
+    await loadTopCoins();
+    await loadCryptoTicker();
+    clearInterval(_tickerInterval);
+    clearInterval(_rankInterval);
+    _tickerInterval = setInterval(loadCryptoTicker, TICKER_REFRESH_MS); // harga tiap 15 dtk
+    _rankInterval = setInterval(loadTopCoins, RANK_REFRESH_MS);         // ranking tiap 1 jam
+}
+
+// ═══ NEW LISTINGS FEED (via /api/nlf-stream) ═══
+let _nlfSrc = null, _nlfItems = [], _nlfShowAll = false, _nlfTimer = null;
+
+function setNLFStatus(state, msg) {
+    const dot = document.getElementById('nlf-dot'), st = document.getElementById('nlf-status');
+    if (!dot || !st) return;
+    dot.className = 'nlf-dot' + (state === 'live' ? ' live' : state === 'error' ? ' error' : '');
+    st.textContent = state === 'live' ? 'Live · FREE key (delay 3s)'
+        : state === 'error' ? (msg || 'Terputus') : 'Menghubungkan...';
+}
+
+function startNLF() {
+    if (_nlfSrc) return;
+    setNLFStatus('connecting');
+    const src = new EventSource('/api/nlf-stream');
+    _nlfSrc = src;
+
+    src.onmessage = (e) => {
+        let m; try { m = JSON.parse(e.data); } catch { return; }
+        if (m.type === 'success' && m.code === 'READY') { setNLFStatus('live'); return; }
+        if (m.type === 'error') {
+            if (m.code === 'AUTHENTICATION_FAILED' || m.code === 'KEY_EXPIRED') {
+                src.close(); _nlfSrc = null; setNLFStatus('error', 'Key ditolak / expired');
             }
+            return;
         }
+        if (m.type === 'announcement' || m.type === 'tweet') {
+            _nlfItems.unshift(m);
+            if (_nlfItems.length > 40) _nlfItems.pop();
+            renderNLF();
+        }
+    };
+    src.onerror = () => {
+        if (src.readyState === EventSource.CLOSED) {
+            _nlfSrc = null; setNLFStatus('error', 'Offline — login lewat terminal untuk aktifin feed');
+        } else setNLFStatus('connecting');
+    };
+    clearInterval(_nlfTimer);
+    _nlfTimer = setInterval(renderNLF, 30000); // update "x menit lalu"
+}
 
-        function startCryptoTicker() {
-            loadCryptoTicker();
-            clearInterval(_tickerInterval);
-            _tickerInterval = setInterval(loadCryptoTicker, TICKER_REFRESH_MS);
-        }
+function toggleNLFAll() {
+    _nlfShowAll = !_nlfShowAll;
+    document.getElementById('nlf-toggle').classList.toggle('active', _nlfShowAll);
+    renderNLF();
+}
+
+function renderNLF() {
+    const list = document.getElementById('nlf-list');
+    if (!list) return;
+    const items = _nlfItems.filter(m => _nlfShowAll || (m.parser?.classification?.event && m.parser.classification.event !== 'none'));
+    if (!items.length) { list.innerHTML = '<div class="nlf-empty">Menunggu listing baru...</div>'; return; }
+    list.innerHTML = items.map(m => {
+        const c = m.parser?.classification || {};
+        const ev = c.event || 'none';
+        const text = m.parser?.display || m.content?.title || m.content?.text || '(tanpa teks)';
+        const ex = m.parser?.exchange || m.username || '';
+        const href = /^https?:\/\//.test(m.url || '') ? m.url : '#';
+        const t = newsTimeAgo(new Date(m.sent_time_us / 1000).toISOString());
+        return `<a class="nlf-card ${esc(ev)}" href="${esc(href)}" target="_blank" rel="noopener">
+            <div class="nlf-top"><span class="nlf-ex">${esc(ex)}</span><span class="nlf-time">${t}</span></div>
+            <div class="nlf-text">${esc(text)}</div>
+            ${ev !== 'none' ? `<span class="nlf-badge ${esc(ev)}">${esc(ev)}${c.type ? ' · ' + esc(c.type) : ''}</span>` : ''}
+        </a>`;
+    }).join('');
+}
+
         
-
 // ═══════════════════════════════════════════════════════════
 // ─── BROADCAST MODAL (compose manual, kirim ke Discord & Telegram) ───
 // Judul + deskripsi diketik manual, gambar di-paste langsung (Ctrl+V)
@@ -2540,6 +2686,7 @@ function spawnLoginParticles(count = 22) {
                 if (res.ok && result.success) {
                     document.getElementById('login-section').style.display = 'none';
                     document.getElementById('admin-content').classList.remove('hidden');
+                    startNLF();
                 } else {
                     alert(`Akses ditolak: ${result.message || 'Unauthorized'}`);
                     google.accounts.id.disableAutoSelect();
@@ -2587,6 +2734,7 @@ function spawnLoginParticles(count = 22) {
                     setTimeout(() => {
                         document.getElementById('login-section').style.display = 'none';
                         document.getElementById('admin-content').classList.remove('hidden');
+                        startNLF();
                     }, 500);
                 } else {
                     termPrintLine('bash: access denied — gunakan Google Sign-In di bawah.', 'denied');
