@@ -2019,8 +2019,21 @@ function setNLFStatus(state, msg) {
         : state === 'error' ? (msg || 'Terputus') : 'Menghubungkan...';
 }
 
+async function loadNLFHistory() {
+    try {
+        const res = await fetch('/api/admin-airdrop?type=nlf-history');
+        if (!res.ok) return;
+        const rows = await res.json();
+        const seen = new Set(_nlfItems.map(x => x.detected_time_us));
+        rows.forEach(r => { if (!seen.has(r.detected_time_us)) _nlfItems.push(r); });
+        _nlfItems.sort((a, b) => b.sent_time_us - a.sent_time_us);
+        renderNLF();
+    } catch {}
+}
+
 function startNLF() {
     if (_nlfSrc) return;
+    loadNLFHistory();
     setNLFStatus('connecting');
     const src = new EventSource('/api/admin-airdrop?type=nlf-stream');
     _nlfSrc = src;
@@ -2034,9 +2047,10 @@ function startNLF() {
             }
             return;
         }
-        if (m.type === 'announcement' || m.type === 'tweet') {
+            if (m.type === 'announcement' || m.type === 'tweet') {
+            if (_nlfItems.some(x => x.detected_time_us === m.detected_time_us)) return;
             _nlfItems.unshift(m);
-            if (_nlfItems.length > 40) _nlfItems.pop();
+            if (_nlfItems.length > 100) _nlfItems.pop();
             renderNLF();
         }
     };
