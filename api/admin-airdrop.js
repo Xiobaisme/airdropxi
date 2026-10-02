@@ -258,7 +258,7 @@ async function sendDiscord() {
       if (m.type !== 'announcement' && m.type !== 'tweet') return;
       const ev = m.parser?.classification?.event;
       const isUpbit = /upbit/i.test(JSON.stringify(m));
-      if (!ev || ev === 'none') return;             // simpan listing/delisting saja
+      if ((!ev || ev === 'none') && !isUpbit) return;             // simpan listing/delisting saja
       // anti-dobel kalau ada beberapa tab yang buka relay
       const ok = await redis.set(`nlf:seen:${m.detected_time_us}`, 1, { nx: true, ex: 60 * 60 * 24 * 7 });
       if (!ok) return;
