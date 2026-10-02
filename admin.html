@@ -876,8 +876,9 @@
             </div>
            <div class="nav-actions">
           <button class="nav-btn" onclick="toggleNewsPanel()" id="news-toggle-btn">
-         <span class="news-live-dot"></span>News Terminal
-          </button>
+    <span class="news-live-dot"></span>News Terminal
+</button>
+<button class="nav-btn" id="btnWeexPromo" type="button">WEEX Promo</button>
         <button class="nav-btn" onclick="openBroadcastModal()" id="broadcast-toggle-btn">Broadcast</button>
       <button class="nav-btn" onclick="toggleAgentPanel()" id="agent-toggle-btn">AI Agent</button>
    <button class="nav-btn pink" onclick="toggleCalc()" id="calc-toggle-btn">Calc</button>
@@ -1236,6 +1237,25 @@
         <button class="news-refresh-btn" onclick="loadNews(true)">↻ REFRESH</button>
     </div>
 </div>
+
+        <!-- ─── WEEX PROMO MODAL ─── -->
+<div id="weex-modal" class="modal hidden">
+    <div class="modal-box">
+        <div class="modal-head">
+            <div class="modal-title">Send sekarang?</div>
+            <button class="modal-close" id="weex-close-btn"></button>
+        </div>
+        <div class="modal-body">
+            <div class="confirm-msg" style="margin:0;text-align:left;">Pesan WEEX Welcome Event akan dikirim ke Discord &amp; Telegram Crypto Monkey.</div>
+            <pre id="weex-preview" style="max-height:260px;overflow:auto;white-space:pre-wrap;background:var(--card-2);border:2px solid var(--border);border-radius:var(--r-sm);padding:12px;color:var(--text2);font-family:var(--sans);font-size:0.8rem;line-height:1.5;"></pre>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" id="weex-cancel-btn">Batal</button>
+            <button class="btn-save" id="weex-send-btn">Kirim</button>
+        </div>
+    </div>
+</div>
+        
 
         <!-- ─── TOAST ─── -->
         <div class="toast" id="toast"></div>
@@ -2818,6 +2838,61 @@ function spawnLoginParticles(count = 22) {
             startCryptoTicker();
             loadProjects();
         };
+
+        // ─── WEEX PROMO (quick send ke Discord & Telegram) ───
+const WEEX_TITLE = '🚀 WEEX WELCOME EVENT IS LIVE!';
+const WEEX_BODY = `New user bisa unlock berbagai reward hingga 10,000 USDT 🎁
+
+🔥 Yang bisa kamu claim:
+- Daily Futures Check-In → Daily Reward
+- Deposit 100 USDT + hold 3 hari → 10 USDT Trial Fund
+- AI Wars II → 500 USDT Position Airdrop
+- TOKEN2049 AI Trading → Event Pack
+- First Futures Trade → 0–30 USDT Trial Fund
+- Deposit + Trade → 100 USDT Position Airdrop (20×)
+- Trading volume 1M USDT → 120 USDT Trial Fund
+
+🔗 JOIN WEEX:
+https://www.weex.com/register?vipCode=jxpw
+🎟️ Referral Code: \`jxpw\`
+
+⚠️ Reward & eligibility mengikuti campaign yang tersedia di akun WEEX. Cek S&K sebelum ikut.`;
+
+const weexModal = document.getElementById('weex-modal');
+document.getElementById('weex-close-btn').innerHTML = icon('x');
+document.getElementById('weex-preview').textContent = WEEX_TITLE + '\n\n' + WEEX_BODY;
+
+document.getElementById('btnWeexPromo').onclick = () => weexModal.classList.remove('hidden');
+document.getElementById('weex-close-btn').onclick = () => weexModal.classList.add('hidden');
+document.getElementById('weex-cancel-btn').onclick = () => weexModal.classList.add('hidden');
+
+document.getElementById('weex-send-btn').onclick = async () => {
+    const btn = document.getElementById('weex-send-btn');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Mengirim...';
+    try {
+        const res = await fetch('/api/admin-airdrop?type=broadcast-news', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: WEEX_TITLE, description: WEEX_BODY, image_base64: null }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.discord || data.telegram || `HTTP ${res.status}`);
+
+        const dOk = data.discord === 'ok', tOk = data.telegram === 'ok';
+        if (dOk && tOk) showToast('Terkirim ke Discord & Telegram!', 'success');
+        else if (dOk || tOk) showToast(`Terkirim sebagian — Discord: ${data.discord}, Telegram: ${data.telegram}`, 'error');
+        else throw new Error(`Discord: ${data.discord} | Telegram: ${data.telegram}`);
+
+        weexModal.classList.add('hidden');
+    } catch (e) {
+        showToast('Gagal kirim: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = icon('send') + 'Kirim';
+    }
+};
+        
     </script>
 
 </body>
