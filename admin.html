@@ -2061,6 +2061,7 @@ function startNLF() {
 
     src.onmessage = (e) => {
         let m; try { m = JSON.parse(e.data); } catch { return; }
+        if (/upbit/i.test(e.data)) console.log('[NLF upbit]', m);
         if (m.type === 'success' && m.code === 'READY') { setNLFStatus('live'); return; }
         if (m.type === 'error') {
             if (m.code === 'AUTHENTICATION_FAILED' || m.code === 'KEY_EXPIRED') {
@@ -2093,7 +2094,7 @@ function toggleNLFAll() {
 function renderNLF() {
     const list = document.getElementById('nlf-list');
     if (!list) return;
-    const items = _nlfItems.filter(m => _nlfShowAll || (m.parser?.classification?.event && m.parser.classification.event !== 'none'));
+    const items = _nlfItems.filter(m => _nlfShowAll || /upbit/i.test(JSON.stringify(m)) || (m.parser?.classification?.event && m.parser.classification.event !== 'none'));
     if (!items.length) { list.innerHTML = '<div class="nlf-empty">Menunggu listing baru...</div>'; return; }
     list.innerHTML = items.map(m => {
         const c = m.parser?.classification || {};
