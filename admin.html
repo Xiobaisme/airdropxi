@@ -2227,7 +2227,7 @@ async function sendBroadcast() {
     btn.innerHTML = '<span class="spinner"></span> Mengirim...';
 
     try {
-        const res = await fetch('/api/admin-airdrop?type=broadcast-news', {
+            const res = await fetch('/api/admin-airdrop?type=broadcast-news', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
             body: JSON.stringify({ title, description, image_base64: _broadcastImageBase64 }),
@@ -2877,6 +2877,18 @@ async function urlToDataUrl(url) {
         fr.readAsDataURL(blob);
     });
 }
+
+     async function urlToDataUrl(url) {
+    const r = await fetch(url);
+    if (!r.ok) throw new Error('Gambar tidak ditemukan: ' + url);
+    const blob = await r.blob();
+    return new Promise((resolve, reject) => {
+        const fr = new FileReader();
+        fr.onload = () => resolve(fr.result);
+        fr.onerror = reject;
+        fr.readAsDataURL(blob);
+    });
+}
         
 document.getElementById('weex-send-btn').onclick = async () => {
     const btn = document.getElementById('weex-send-btn');
@@ -2887,7 +2899,7 @@ document.getElementById('weex-send-btn').onclick = async () => {
           const res = await fetch('/api/admin-airdrop?type=broadcast-news', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: WEEX_TITLE, description: WEEX_BODY, image_base64: img }),
+          body: JSON.stringify({ title: WEEX_TITLE, description: WEEX_BODY, image_base64: img, mention_everyone: true }),
         });
         const data = await res.json().catch(() => ({}));
         if (!res.ok) throw new Error(data.discord || data.telegram || `HTTP ${res.status}`);
