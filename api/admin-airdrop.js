@@ -103,6 +103,7 @@ async function sendDiscord() {
 
       const escHtml = (s) => String(s || '')
         .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+        .replace(/`([^`]+)`/g, '<code>$1</code>');
 
       const buildText = () =>
         ` <b>${escHtml(title)}</b>\n\n` +
