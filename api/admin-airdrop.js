@@ -50,7 +50,7 @@ module.exports = async function handler(req, res) {
   }
     // ─── BROADCAST NEWS KE DISCORD & TELEGRAM ───
   async function handleBroadcastNews(req, res) {
-    const { title, description, image_base64, url, source } = req.body || {};
+    const { title, description, image_base64, url, source, mention_everyone } = req.body || {};
     if (!title) return res.status(400).json({ error: 'title wajib diisi' });
 
     // Decode gambar dari data URL (hasil paste) jadi Buffer, biar bisa
@@ -92,6 +92,16 @@ async function sendDiscord() {
       body: JSON.stringify({ embeds: [embed] }),
     });
   }
+    if (dRes.ok && mention_everyone) {
+    await fetch(webhookUrl, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify({
+        content: '@everyone',
+        allowed_mentions: { parse: ['everyone'] },
+      }),
+    });
+  }
   return dRes.ok ? 'ok' : `error ${dRes.status}`;
 }
 
@@ -101,8 +111,8 @@ async function sendDiscord() {
       const chatId = process.env.TELEGRAM_CHAT_ID;
       if (!token || !chatId) throw new Error('TELEGRAM_BOT_TOKEN/TELEGRAM_CHAT_ID belum di-set');
 
-      const escHtml = (s) => String(s || '')
-        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+         const escHtml = (s) => String(s || '')
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/`([^`]+)`/g, '<code>$1</code>');
 
       const buildText = () =>
