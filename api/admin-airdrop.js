@@ -67,7 +67,15 @@ async function sendDiscord() {
   const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
   if (!webhookUrl) throw new Error('DISCORD_WEBHOOK_URL belum di-set');
 
-  const LOGO_URL = 'https://airdropxi.vercel.app/logo1.png'; // ganti kalau path logo asli beda
+    const LOGO_URL = 'https://airdropxi.vercel.app/logo1.png';
+
+  const LINKS = {
+    tiktok:   'https://tiktok.com/@hellovry',
+    telegram: 'https://t.me/CryptoMonk3y',   // pakai link yang sekarang kamu pasang
+    hibt:     'https://hibt6.com/id/register?promotionCode=D95M',
+    lbank:    'https://www.lbank.com/signup?icode=61ZWJ',
+    ourbit:   'https://www.ourbit.com/register?inviteCode=ourbitCMIC',
+  };
 
   const embed = {
     author: { name: '🗣 CMIC BROADCAST', icon_url: LOGO_URL },
@@ -75,18 +83,20 @@ async function sendDiscord() {
     description: String(description || '').slice(0, 4096),
     url: url || undefined,
     color: 0x3B82F6,
-    // ▼▼▼ TAMBAHKAN BLOK INI ▼▼▼
     fields: [
       {
-        name: '\u200b',
-        value: '[TikTok](https://tiktok.com/@hellovry)  •  [Telegram](https://t.me/CryptoMonk3y)',
+        name: '🌐 JOIN COMMUNITY',
+        value: `[🎵 TikTok](${LINKS.tiktok})  •  [✈️ Telegram](${LINKS.telegram})`,
         inline: false,
       },
       {
-        name: 'TRADING PLATFORMS',
-        value: '[HIBT](https://hibt6.com/id/register?promotionCode=D95M)  •  [LBank](https://www.lbank.com/signup?icode=61ZWJ)  •  [Ourbit](https://www.ourbit.com/register?inviteCode=ourbitCMIC)',
+        name: '💹 TRADING PLATFORMS',
+        value: '*Daftar lewat link kami:*',
         inline: false,
       },
+      { name: '🔹 HIBT',   value: `[Daftar →](${LINKS.hibt})`,   inline: true },
+      { name: '🔹 LBank',  value: `[Daftar →](${LINKS.lbank})`,  inline: true },
+      { name: '🔹 Ourbit', value: `[Daftar →](${LINKS.ourbit})`, inline: true },
     ],
     footer: { text: 'Xiobaii • Crypto Monkey Inner Circle', icon_url: LOGO_URL },
     timestamp: new Date().toISOString(),
