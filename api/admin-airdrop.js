@@ -151,7 +151,7 @@ async function sendDiscord() {
     ],
     [
       { text: 'TikTok', url: 'https://tiktok.com/@hellovry', style: 'primary' },
-      { text: 'Discord', url: 'https://discord.gg/xvm9eZEjwf', style: 'primary' },
+      { text: 'Discord', url: 'https://t.me/Hell0vry?text=Halo%20Bang%2C%20saya%20ingin%20bergabung%20ke%20komunitas%20Discord%20Crypto%20Monkey.%20Mohon%20info%20langkah%20pendaftarannya%20ya.%20Terima%20kasih%20%F0%9F%99%8F', style: 'primary' },
     ],
     [
       { text: 'TRADING PLATFORMS', callback_data: 'noop' },
