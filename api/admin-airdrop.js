@@ -144,20 +144,20 @@ async function sendDiscord() {
         return { caption: header + desc + footer, truncated };
       };
 
-        const inlineKeyboard = {
+       const inlineKeyboard = {
   inline_keyboard: [
     [
       { text: 'COMMUNITY', callback_data: 'noop' },
     ],
     [
-      { text: 'TikTok', url: 'https://tiktok.com/@hellovry' },
-      { text: 'Discord', url: 'https://discord.gg/xvm9eZEjwf' },
+      { text: 'TikTok', url: 'https://tiktok.com/@hellovry', style: 'primary' },
+      { text: 'Discord', url: 'https://discord.gg/xvm9eZEjwf', style: 'primary' },
     ],
     [
       { text: 'TRADING PLATFORMS', callback_data: 'noop' },
     ],
     [
-      { text: 'Ourbit', url: 'https://www.ourbit.com/register?inviteCode=ourbitCMIC' },
+      { text: 'Ourbit', url: 'https://www.ourbit.com/register?inviteCode=ourbitCMIC', style: 'primary' },
     ],
   ],
 };
