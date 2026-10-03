@@ -75,6 +75,19 @@ async function sendDiscord() {
     description: String(description || '').slice(0, 4096),
     url: url || undefined,
     color: 0x3B82F6,
+    // ▼▼▼ TAMBAHKAN BLOK INI ▼▼▼
+    fields: [
+      {
+        name: '\u200b',
+        value: '[TikTok](https://tiktok.com/@hellovry)  •  [Discord](https://discord.gg/xvm9eZEjwf)',
+        inline: false,
+      },
+      {
+        name: 'TRADING PLATFORMS',
+        value: '[HIBT](https://hibt6.com/id/register?promotionCode=D95M)  •  [LBank](https://www.lbank.com/signup?icode=61ZWJ)  •  [Ourbit](https://www.ourbit.com/register?inviteCode=ourbitCMIC)',
+        inline: false,
+      },
+    ],
     footer: { text: 'Xiobaii • Crypto Monkey Inner Circle', icon_url: LOGO_URL },
     timestamp: new Date().toISOString(),
   };
