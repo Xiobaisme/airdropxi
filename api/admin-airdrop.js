@@ -144,7 +144,7 @@ async function sendDiscord() {
           [
             { text: 'HIBT', url: 'https://hibt6.com/id/register?promotionCode=D95M' },
             { text: 'LBank', url: 'https://www.lbank.com/signup?icode=61ZWJ' },
-            { text: 'WEEX', url: 'https://www.weex.com/register?vipCode=jxpw' },
+            { text: 'Ourbit', url: 'https://www.ourbit.com/register?inviteCode=ourbitCMIC' },
           ],
         ],
       };
