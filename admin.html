@@ -887,6 +887,37 @@
     100% { transform: translateY(calc(100vh + 160px)) rotate(var(--rot1, 180deg)); opacity: 0; }
 }
 @media (prefers-reduced-motion: reduce) { .login-letters { display: none; } }
+
+        /* ── Koin crypto berjatuhan di login ── */
+.login-coins { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.fall-coin {
+    position: absolute; top: 0; left: 0; display: flex; align-items: center; gap: 8px;
+    padding: 5px 12px 5px 5px; border-radius: 999px; white-space: nowrap; will-change: transform;
+    background: rgba(16,16,16,.88); border: 2px solid var(--border-strong); font-family: var(--mono);
+}
+.fc-ico {
+    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; color: #000; object-fit: cover;
+    display: flex; align-items: center; justify-content: center; font-size: .5rem; font-weight: 800;
+}
+.fc-rank { font-size: .6rem; font-weight: 700; color: var(--text3); }
+.fc-sym { font-family: var(--display); font-weight: 800; font-size: .8rem; color: var(--text); }
+.fc-price { font-size: .76rem; font-weight: 600; color: var(--text); }
+.fc-chg { font-size: .64rem; font-weight: 700; padding: 2px 6px; border-radius: 6px; }
+.fall-coin.up { border-color: var(--success-line); }
+.fall-coin.up .fc-chg { color: var(--success); background: var(--success-dim); }
+.fall-coin.down { border-color: var(--danger-line); box-shadow: 0 0 18px rgba(239,68,68,.35); }
+.fall-coin.down .fc-chg { color: var(--danger); background: var(--danger-dim); }
+/* streak merah di atas koin yang lagi dump */
+.fall-coin.down::before {
+    content: ''; position: absolute; left: 50%; bottom: 100%; width: 3px; height: 90px; margin-left: -1.5px;
+    background: linear-gradient(to top, rgba(239,68,68,.6), transparent); border-radius: 3px;
+}
+.coin-impact {
+    position: absolute; width: 90px; height: 90px; margin: -45px 0 0 -45px; border-radius: 50%;
+    border: 3px solid var(--c, var(--danger)); pointer-events: none;
+}
+.coin-shard { position: absolute; width: 6px; height: 6px; border-radius: 1px; background: var(--c, var(--danger)); pointer-events: none; }
+@media (prefers-reduced-motion: reduce) { .login-coins { display: none; } }
         
         /* ═══════════════════════════════════════════════════════════
            RESPONSIVE
@@ -949,8 +980,9 @@
       <!-- ─── LOGIN ─── -->
 <div id="login-section">
     <div class="login-particles" id="login-particles"></div>
-        <div class="login-letters" id="login-letters"></div
-    <div class="login-stack">
+       <div class="login-letters" id="login-letters"></div>
+<div class="login-coins" id="login-coins"></div>
+<div class="login-stack">
         <div class="login-terminal-warning">
             <div class="term-bar">
                 <span class="term-dot r"></span>
@@ -1031,9 +1063,9 @@
         <!-- HERO -->
         <div class="hero-grid">
             <div id="dash-hero">
-                <div class="hero-eyebrow">Control Center</div>
+                <div class="hero-eyebrow">Xiobaii Center</div>
                 <h1>Every airdrop, every status, <span>one command deck</span>.</h1>
-                <p class="hero-sub">Kelola seluruh proyek airdrop dari satu dashboard — status, link resmi, dan progres, semuanya rapi dalam satu tempat.</p>
+                <p class="hero-sub">Private Control Center A secure internal workspace to manage, monitor, and update all airdrop project data from one centralized dashboard.</p>
                 <div class="hero-ctas">
                     <button class="hero-cta primary" onclick="openAddModal()">Tambah Proyek</button>
                     <a href="#proj-links-section" class="hero-cta secondary">Lihat Semua Proyek</a>
@@ -2860,29 +2892,213 @@ function spawnLoginLetters(count = 30) {
     }
 }
 
+        // ─── KOIN CRYPTO BERJATUHAN DI LOGIN — TOP 20 MARKETCAP (dinamis) ───
+const FC_TOP_N = 20;
+const FC_SLOTS = 16;
+const FC_RANK_REFRESH_MS = 60 * 60 * 1000; // cek ulang ranking tiap 1 jam
+const FC_FALLBACK = ['BTC','ETH','BNB','SOL','XRP','DOGE','ADA','TRX','AVAX','LINK',
+    'DOT','TON','SHIB','LTC','BCH','NEAR','UNI','APT','ICP','ETC'];
+const _fc = { coins: [], price: {}, chg: {}, ws: null, run: false, rankTimer: null };
+
+function fcFmt(n) {
+    if (!n) return '--';
+    if (n >= 1) return '$' + n.toLocaleString('en-US', { maximumFractionDigits: n >= 100 ? 0 : 2 });
+    return '$' + n.toLocaleString('en-US', { maximumSignificantDigits: 4 });
+}
+
+function fcColor(sym) { // warna fallback konsisten per simbol kalau logo gagal load
+    let h = 0; for (const ch of sym) h = (h * 31 + ch.charCodeAt(0)) % 360;
+    return `hsl(${h} 80% 62%)`;
+}
+
+function fcRefreshDom(sym) {
+    const p = _fc.price[sym], ch = _fc.chg[sym] || 0;
+    document.querySelectorAll(`.fall-coin[data-sym="${sym}"]`).forEach(el => {
+        el.querySelector('.fc-price').textContent = fcFmt(p);
+        el.querySelector('.fc-chg').textContent = (ch >= 0 ? '+' : '') + ch.toFixed(2) + '%';
+        el.classList.toggle('up', ch >= 0);
+        el.classList.toggle('down', ch < 0);
+    });
+}
+
+// Ambil ranking top 20 dari CoinGecko (via /api/markets), cocokkan dengan pair Binance
+async function fcLoadRanking() {
+    let next = [];
+    try {
+        const [cg, all] = await Promise.all([
+            fetch('/api/markets').then(r => { if (!r.ok) throw new Error('markets ' + r.status); return r.json(); }),
+            fetch(`${BN}/ticker/price`).then(r => r.json()),
+        ]);
+        const pairs = new Set(all.map(x => x.symbol));
+        const seen = new Set();
+        next = cg
+            .filter(c => {
+                const s = c.symbol.toUpperCase();
+                if (TICKER_SKIP.has(c.symbol.toLowerCase()) || seen.has(s)) return false;
+                if (!pairs.has(s + 'USDT')) return false;
+                seen.add(s); return true;
+            })
+            .slice(0, FC_TOP_N)
+            .map(c => ({ sym: c.symbol.toUpperCase(), name: c.name, image: c.image }));
+    } catch (e) {
+        console.warn('[fall-coins] ranking gagal:', e.message);
+        if (_fc.coins.length) return false; // pakai list lama
+        next = FC_FALLBACK.map(s => ({ sym: s, name: s, image: null }));
+    }
+    const changed = next.map(c => c.sym).join() !== _fc.coins.map(c => c.sym).join();
+    _fc.coins = next;
+    return changed;
+}
+
+async function fcLoadPrices() {
+    try {
+        const syms = _fc.coins.map(c => c.sym + 'USDT');
+        const res = await fetch(`${BN}/ticker/24hr?symbols=` + encodeURIComponent(JSON.stringify(syms)));
+        const data = await res.json();
+        data.forEach(d => {
+            const s = d.symbol.replace('USDT', '');
+            _fc.price[s] = +d.lastPrice; _fc.chg[s] = +d.priceChangePercent;
+        });
+    } catch (e) { console.warn('[fall-coins] REST gagal:', e.message); }
+}
+
+function fcConnectWS() {
+    if (_fc.ws) { _fc.ws.onclose = null; _fc.ws.close(); _fc.ws = null; } // tutup koneksi lama dulu
+    if (!_fc.run || !_fc.coins.length) return;
+    try {
+        const streams = _fc.coins.map(c => c.sym.toLowerCase() + 'usdt@miniTicker').join('/');
+        const ws = new WebSocket('wss://data-stream.binance.vision/stream?streams=' + streams);
+        _fc.ws = ws;
+        ws.onmessage = (e) => {
+            const d = JSON.parse(e.data).data;
+            if (!d) return;
+            const s = d.s.replace('USDT', '');
+            const price = +d.c, open = +d.o;
+            _fc.price[s] = price;
+            _fc.chg[s] = open ? ((price - open) / open) * 100 : 0;
+            fcRefreshDom(s);
+        };
+        ws.onclose = () => { if (_fc.run && _fc.ws === ws) setTimeout(fcConnectWS, 3000); };
+    } catch (e) { console.warn('[fall-coins] WS gagal:', e.message); }
+}
+
+// Dipanggil tiap jam: kalau ranking bergeser, update list + resubscribe WS
+async function fcRefreshRanking() {
+    const changed = await fcLoadRanking();
+    if (changed) { await fcLoadPrices(); fcConnectWS(); }
+}
+
+function fcImpact(wrap, x, y, color) {
+    const ring = document.createElement('div');
+    ring.className = 'coin-impact';
+    ring.style.cssText = `left:${x}px;top:${y}px;--c:${color}`;
+    wrap.appendChild(ring);
+    ring.animate(
+        [{ transform: 'scale(.15)', opacity: .9 }, { transform: 'scale(1.8)', opacity: 0 }],
+        { duration: 650, easing: 'ease-out' }
+    ).onfinish = () => ring.remove();
+
+    for (let i = 0; i < 8; i++) {
+        const sh = document.createElement('div');
+        sh.className = 'coin-shard';
+        sh.style.cssText = `left:${x}px;top:${y}px;--c:${color}`;
+        wrap.appendChild(sh);
+        const dx = (Math.random() - .5) * 220, up = 40 + Math.random() * 110;
+        sh.animate([
+            { transform: 'translate(0,0) rotate(0)', opacity: 1, offset: 0 },
+            { transform: `translate(${dx * .6}px,${-up}px) rotate(180deg)`, opacity: 1, offset: .45 },
+            { transform: `translate(${dx}px,${up * .4}px) rotate(420deg)`, opacity: 0, offset: 1 },
+        ], { duration: 700 + Math.random() * 300, easing: 'ease-out' }).onfinish = () => sh.remove();
+    }
+}
+
+function fcSpawn(wrap) {
+    if (!_fc.run || !_fc.coins.length) return;
+    const idx = Math.floor(Math.random() * _fc.coins.length);
+    const coin = _fc.coins[idx];
+    const ch = _fc.chg[coin.sym] || 0;
+    const dumping = ch < 0;
+
+    const el = document.createElement('div');
+    el.className = 'fall-coin ' + (dumping ? 'down' : 'up');
+    el.dataset.sym = coin.sym;
+    const fallbackIco = `<span class="fc-ico" style="background:${fcColor(coin.sym)}">${esc(coin.sym.slice(0, 3))}</span>`;
+    el.innerHTML = `${coin.image ? `<img class="fc-ico fc-img" src="${esc(coin.image)}" alt="" />` : fallbackIco}
+        <span class="fc-rank">#${idx + 1}</span>
+        <span class="fc-sym">${esc(coin.sym)}</span><span class="fc-price"></span><span class="fc-chg"></span>`;
+    const img = el.querySelector('.fc-img');
+    if (img) img.onerror = () => img.outerHTML = fallbackIco;
+    wrap.appendChild(el);
+    fcRefreshDom(coin.sym);
+
+    const W = wrap.clientWidth, H = wrap.clientHeight;
+    const x = Math.random() * Math.max(80, W - 260);
+    const drift = (Math.random() - .5) * 120;
+    const scale = .75 + Math.random() * .35;
+    const r0 = (Math.random() - .5) * 20, r1 = r0 + (dumping ? 1 : -1) * (15 + Math.random() * 40);
+    // koin merah jatuh cepat & brutal, koin hijau lebih "melayang"
+    const dur = dumping ? 1800 + Math.random() * 1400 : 3800 + Math.random() * 2600;
+    const yEnd = H - 34;
+
+    el.style.opacity = .9;
+    el.animate([
+        { transform: `translate(${x}px,-70px) scale(${scale}) rotate(${r0}deg)` },
+        { transform: `translate(${x + drift}px,${yEnd}px) scale(${scale}) rotate(${r1}deg)` },
+    ], {
+        duration: dur,
+        easing: 'cubic-bezier(.55,.05,.95,.4)', // pelan di awal, makin ngebut (gravitasi)
+        fill: 'forwards',
+    }).onfinish = () => {
+        fcImpact(wrap, x + drift + 60, yEnd + 20, dumping ? '#EF4444' : '#35E0A1');
+        el.animate([{ opacity: .9 }, { opacity: 0 }], { duration: 160, fill: 'forwards' }).onfinish = () => el.remove();
+        setTimeout(() => fcSpawn(wrap), 200 + Math.random() * 1200);
+    };
+}
+
+async function startFallingCoins() {
+    if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
+    const wrap = document.getElementById('login-coins');
+    if (!wrap) return;
+    _fc.run = true;
+    await fcLoadRanking();
+    await fcLoadPrices();
+    fcConnectWS();
+    clearInterval(_fc.rankTimer);
+    _fc.rankTimer = setInterval(fcRefreshRanking, FC_RANK_REFRESH_MS);
+    for (let i = 0; i < FC_SLOTS; i++) setTimeout(() => fcSpawn(wrap), Math.random() * 5000);
+}
+
+function stopFallingCoins() {
+    _fc.run = false;
+    clearInterval(_fc.rankTimer);
+    if (_fc.ws) { _fc.ws.onclose = null; _fc.ws.close(); _fc.ws = null; }
+    document.getElementById('login-coins')?.replaceChildren();
+}
+
         // ─── GOOGLE LOGIN ───
         const YOUR_CLIENT_ID = '1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com';
 
         async function handleCredentialResponse(response) {
-            try {
-                const res = await fetch('/api/verify-token', {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({ token: response.credential }),
-                });
-                const result = await res.json();
-                if (res.ok && result.success) {
-                    document.getElementById('login-section').style.display = 'none';
-                    document.getElementById('admin-content').classList.remove('hidden');
-                    startNLF();
-                } else {
-                    alert(`Akses ditolak: ${result.message || 'Unauthorized'}`);
-                    google.accounts.id.disableAutoSelect();
-                }
-            } catch (err) {
-                alert('Verifikasi gagal. Coba lagi nanti.');
-            }
+    try {
+        const res = await fetch('/api/verify-token', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ token: response.credential }),
+        });
+        const result = await res.json();
+        if (res.ok && result.success) {
+            stopFallingCoins();
+            document.getElementById('login-section').style.display = 'none';
+            document.getElementById('admin-content').classList.remove('hidden');
+            startNLF();
+        } else {
+            alert(`Akses ditolak: ${result.message || 'Unauthorized'}`);
+            google.accounts.id.disableAutoSelect();
         }
+    } catch (err) {
+        alert('Verifikasi gagal. Coba lagi nanti.');
+    }
+}
 
                 // ─── TERMINAL LOGIN INPUT ───
         // Sengaja TIDAK ada kata sandi/username apapun di-hardcode di file ini.
@@ -2920,10 +3136,11 @@ function spawnLoginLetters(count = 30) {
                 if (res.ok && data.success) {
                     termPrintLine('[OK] Identity verified. Membuka panel...', 'ok');
                     setTimeout(() => {
-                        document.getElementById('login-section').style.display = 'none';
-                        document.getElementById('admin-content').classList.remove('hidden');
-                        startNLF();
-                    }, 500);
+                   stopFallingCoins();
+                  document.getElementById('login-section').style.display = 'none';
+                 document.getElementById('admin-content').classList.remove('hidden');
+              startNLF();
+         }, 500);
                 } else {
                     termPrintLine('bash: access denied — gunakan Google Sign-In di bawah.', 'denied');
                 }
@@ -2945,6 +3162,7 @@ function spawnLoginLetters(count = 30) {
                window.onload = function() {
             spawnLoginParticles();
             spawnLoginLetters();
+            startFallingCoins();
 
             // Icon-fill untuk elemen statis (bukan hasil render dinamis)
             document.getElementById('calc-toggle-btn').innerHTML = icon('calculator') + 'Calc';
