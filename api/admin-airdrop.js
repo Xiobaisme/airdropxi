@@ -79,7 +79,7 @@ async function sendDiscord() {
     fields: [
       {
         name: '\u200b',
-        value: '[TikTok](https://tiktok.com/@hellovry)  •  [Discord](https://discord.gg/xvm9eZEjwf)',
+        value: '[TikTok](https://tiktok.com/@hellovry)  •  [Telegram](https://t.me/CryptoMonk3y)',
         inline: false,
       },
       {
