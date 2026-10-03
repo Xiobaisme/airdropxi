@@ -77,27 +77,16 @@ async function sendDiscord() {
     ourbit:   'https://www.ourbit.com/register?inviteCode=ourbitCMIC',
   };
 
-  const embed = {
+    const embed = {
     author: { name: '🗣 CMIC BROADCAST', icon_url: LOGO_URL },
     title: String(title).slice(0, 256),
-    description: String(description || '').slice(0, 4096),
+    description:
+      String(description || '').slice(0, 3700) +
+      '\n\u200b\n\u200b\n' +
+      `🌐 [TikTok](${LINKS.tiktok}) • [Telegram](${LINKS.telegram})\n` +
+      `💹 **Trading:** [HIBT](${LINKS.hibt}) • [LBank](${LINKS.lbank}) • [Ourbit](${LINKS.ourbit})`,
     url: url || undefined,
     color: 0x3B82F6,
-    fields: [
-      {
-        name: '🌐 JOIN COMMUNITY',
-        value: `[🎵 TikTok](${LINKS.tiktok})  •  [✈️ Telegram](${LINKS.telegram})`,
-        inline: false,
-      },
-      {
-        name: '💹 TRADING PLATFORMS',
-        value: '*Daftar lewat link kami:*',
-        inline: false,
-      },
-      { name: '🔹 HIBT',   value: `[Daftar →](${LINKS.hibt})`,   inline: true },
-      { name: '🔹 LBank',  value: `[Daftar →](${LINKS.lbank})`,  inline: true },
-      { name: '🔹 Ourbit', value: `[Daftar →](${LINKS.ourbit})`, inline: true },
-    ],
     footer: { text: 'Xiobaii • Crypto Monkey Inner Circle', icon_url: LOGO_URL },
     timestamp: new Date().toISOString(),
   };
