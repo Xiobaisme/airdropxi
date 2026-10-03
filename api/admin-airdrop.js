@@ -70,12 +70,10 @@ async function sendDiscord() {
     const LOGO_URL = 'https://airdropxi.vercel.app/logo1.png';
 
   const LINKS = {
-    tiktok:   'https://tiktok.com/@hellovry',
-    telegram: 'https://t.me/CryptoMonk3y',   // pakai link yang sekarang kamu pasang
-    hibt:     'https://hibt6.com/id/register?promotionCode=D95M',
-    lbank:    'https://www.lbank.com/signup?icode=61ZWJ',
-    ourbit:   'https://www.ourbit.com/register?inviteCode=ourbitCMIC',
-  };
+  tiktok:   'https://tiktok.com/@hellovry',
+  telegram: 'https://t.me/CryptoMonk3y',
+  ourbit:   'https://www.ourbit.com/register?inviteCode=ourbitCMIC',
+};
 
     const embed = {
     author: { name: '🗣 CMIC BROADCAST', icon_url: LOGO_URL },
@@ -83,8 +81,10 @@ async function sendDiscord() {
     description:
       String(description || '').slice(0, 3700) +
       '\n\u200b\n\u200b\n' +
-      `🌐 [TikTok](${LINKS.tiktok}) • [Telegram](${LINKS.telegram})\n` +
-      `💹 **Trading:** [HIBT](${LINKS.hibt}) • [LBank](${LINKS.lbank}) • [Ourbit](${LINKS.ourbit})`,
+      `**COMMUNITY**\n` +
+      `[TikTok](${LINKS.tiktok}) • [Telegram](${LINKS.telegram})\n\u200b\n` +
+      `**TRADING PLATFORMS**\n` +
+      `[Ourbit](${LINKS.ourbit})`,
     url: url || undefined,
     color: 0x3B82F6,
     footer: { text: 'Xiobaii • Crypto Monkey Inner Circle', icon_url: LOGO_URL },
@@ -145,21 +145,22 @@ async function sendDiscord() {
       };
 
         const inlineKeyboard = {
-        inline_keyboard: [
-          [
-            { text: 'TikTok', url: 'https://tiktok.com/@hellovry' },
-            { text: 'Discord', url: 'https://discord.gg/xvm9eZEjwf' },
-          ],
-          [
-            { text: 'TRADING PLATFORMS', callback_data: 'noop' },
-          ],
-          [
-            { text: 'HIBT', url: 'https://hibt6.com/id/register?promotionCode=D95M' },
-            { text: 'LBank', url: 'https://www.lbank.com/signup?icode=61ZWJ' },
-            { text: 'Ourbit', url: 'https://www.ourbit.com/register?inviteCode=ourbitCMIC' },
-          ],
-        ],
-      };
+  inline_keyboard: [
+    [
+      { text: 'COMMUNITY', callback_data: 'noop' },
+    ],
+    [
+      { text: 'TikTok', url: 'https://tiktok.com/@hellovry' },
+      { text: 'Discord', url: 'https://discord.gg/xvm9eZEjwf' },
+    ],
+    [
+      { text: 'TRADING PLATFORMS', callback_data: 'noop' },
+    ],
+    [
+      { text: 'Ourbit', url: 'https://www.ourbit.com/register?inviteCode=ourbitCMIC' },
+    ],
+  ],
+};
 
       const fullText = buildText().slice(0, 4096);
       let tRes;
