@@ -2121,7 +2121,7 @@ function formatTickerPrice(n) {
 async function loadTopCoins() {
     try {
         const [cg, all] = await Promise.all([
-            fetch('/api/markets').then(r => { if (!r.ok) throw new Error('markets ' + r.status); return r.json(); }),
+           fetch('/api/admin-airdrop?type=markets').then(r => { if (!r.ok) throw new Error('markets ' + r.status); return r.json(); }),
             fetch(`${BN}/ticker/price`).then(r => r.json()),
         ]);
         const pairs = new Set(all.map(x => x.symbol));
@@ -2924,9 +2924,9 @@ async function fcLoadRanking() {
     let next = [];
     try {
         const [cg, all] = await Promise.all([
-            fetch('/api/markets').then(r => { if (!r.ok) throw new Error('markets ' + r.status); return r.json(); }),
-            fetch(`${BN}/ticker/price`).then(r => r.json()),
-        ]);
+          fetch('/api/admin-airdrop?type=markets').then(r => { if (!r.ok) throw new Error('markets ' + r.status); return r.json(); }),
+         fetch(`${BN}/ticker/price`).then(r => r.json()),
+         ]);
         const pairs = new Set(all.map(x => x.symbol));
         const seen = new Set();
         next = cg
