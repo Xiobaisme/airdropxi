@@ -872,6 +872,22 @@
 .ticker-sym { font-weight: 800; font-size: 0.95rem; letter-spacing: 0.02em; }
 .ticker-price { font-weight: 700; }
 
+        /* ── Huruf berjatuhan di login ── */
+.login-letters { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+.login-letter {
+    position: absolute; top: -80px;
+    font-family: var(--display); font-weight: 800; line-height: 1;
+    opacity: 0; user-select: none;
+    animation: letterFall linear infinite;
+}
+@keyframes letterFall {
+    0%   { transform: translateY(0) rotate(var(--rot0, 0deg)); opacity: 0; }
+    8%   { opacity: var(--op, .35); }
+    92%  { opacity: var(--op, .35); }
+    100% { transform: translateY(calc(100vh + 160px)) rotate(var(--rot1, 180deg)); opacity: 0; }
+}
+@media (prefers-reduced-motion: reduce) { .login-letters { display: none; } }
+        
         /* ═══════════════════════════════════════════════════════════
            RESPONSIVE
            ═══════════════════════════════════════════════════════════ */
@@ -933,6 +949,7 @@
       <!-- ─── LOGIN ─── -->
 <div id="login-section">
     <div class="login-particles" id="login-particles"></div>
+        <div class="login-letters" id="login-letters"></div
     <div class="login-stack">
         <div class="login-terminal-warning">
             <div class="term-bar">
@@ -2819,6 +2836,29 @@ function spawnLoginParticles(count = 22) {
         wrap.appendChild(p);
     }
 }
+        // ─── HURUF BERJATUHAN DI LOGIN (X I O B A I I, warna-warni) ───
+function spawnLoginLetters(count = 30) {
+    const wrap = document.getElementById('login-letters');
+    if (!wrap) return;
+    const letters = 'XIOBAII'.split('');
+    const colors = ['#8B5CF6', '#FF4F9A', '#35E0A1', '#FFD23F', '#38BDF8', '#F59E0B'];
+    wrap.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+        const el = document.createElement('span');
+        el.className = 'login-letter';
+        el.textContent = letters[Math.floor(Math.random() * letters.length)];
+        const dur = 8 + Math.random() * 10;
+        el.style.left = Math.random() * 100 + '%';
+        el.style.fontSize = (20 + Math.random() * 40) + 'px';
+        el.style.color = colors[Math.floor(Math.random() * colors.length)];
+        el.style.animationDuration = dur + 's';
+        el.style.animationDelay = (-Math.random() * dur) + 's';   // negatif: langsung sudah jatuh saat dibuka
+        el.style.setProperty('--op', (0.18 + Math.random() * 0.25).toFixed(2));
+        el.style.setProperty('--rot0', (Math.random() * 60 - 30) + 'deg');
+        el.style.setProperty('--rot1', (Math.random() * 360 - 180) + 'deg');
+        wrap.appendChild(el);
+    }
+}
 
         // ─── GOOGLE LOGIN ───
         const YOUR_CLIENT_ID = '1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com';
@@ -2904,6 +2944,7 @@ function spawnLoginParticles(count = 22) {
         // ─── INIT (juga menyuntik semua icon SVG ke tombol/label statis) ───
                window.onload = function() {
             spawnLoginParticles();
+            spawnLoginLetters();
 
             // Icon-fill untuk elemen statis (bukan hasil render dinamis)
             document.getElementById('calc-toggle-btn').innerHTML = icon('calculator') + 'Calc';
