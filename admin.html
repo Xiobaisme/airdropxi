@@ -247,7 +247,7 @@
         /* ═══════════════════════════════════════════════════════════
            MAIN
            ═══════════════════════════════════════════════════════════ */
-        #admin-content { position: relative; z-index: 1; padding-bottom: 64px; }
+        #admin-content { position: relative; z-index: 1; padding-bottom: 110px; }
 
         /* ─── HERO GRID (2 col: title/CTA left, dashboard stats right) ─── */
         .hero-grid {
@@ -553,7 +553,7 @@
            TOAST — solid surface, colored left border only
            ═══════════════════════════════════════════════════════════ */
         .toast {
-            position: fixed; bottom: 84px; right: 24px; z-index: 2000; background: var(--card);
+            position: fixed; bottom: 110px; right: 24px; z-index: 2000; background: var(--card);
             border: 2px solid var(--border); border-left: 4px solid var(--text3); border-radius: var(--r-sm);
             padding: 0.9rem 1.5rem; font-size: 0.85rem; color: var(--text); font-family: var(--label);
             opacity: 0; transform: translateY(50px); transition: opacity .25s, transform .25s;
@@ -571,7 +571,7 @@
            CALCULATOR
            ═══════════════════════════════════════════════════════════ */
         #calc-panel {
-            position: fixed; bottom: 84px; right: 24px; z-index: 1600; width: 270px;
+            position: fixed; bottom: 110px; right: 24px; z-index: 1600; width: 270px;
             background: var(--card); border: 2px solid var(--border);
             border-radius: var(--r-md); overflow: hidden; box-shadow: 0 16px 44px rgba(0, 0, 0, 0.55);
             animation: modalFade 0.2s ease;
@@ -857,6 +857,20 @@
 .toast.warning { border-left-color: var(--secondary); }
 #btn-send-broadcast { background: var(--secondary); border-color: var(--secondary); color: #000; }
 #btn-send-broadcast:hover { background: #ff6aad; }
+        /* ── Ticker miring (pita) ── */
+#crypto-ticker {
+    left: -3%; right: -3%; width: 106%;   /* lebihkan supaya ujung miringnya tidak bolong */
+    bottom: 14px; padding: 13px 0;
+    background: #000;
+    border-top: 3px solid var(--border-light);
+    border-bottom: 3px solid var(--border-light);
+    box-shadow: 0 6px 0 var(--secondary);  /* bayangan pink, senada kartu hero */
+    transform: rotate(-1.2deg);
+}
+.ticker-item { border-right: 0; gap: 12px; padding: 0 1.1rem 0 1.6rem; }
+.ticker-item::after { content: '✦'; color: var(--secondary); font-size: 1.1rem; margin-left: 1.1rem; }
+.ticker-sym { font-weight: 800; font-size: 0.95rem; letter-spacing: 0.02em; }
+.ticker-price { font-weight: 700; }
 
         /* ═══════════════════════════════════════════════════════════
            RESPONSIVE
@@ -896,8 +910,8 @@
             .modal-body { padding: 1.3rem; }
             .modal-head { padding: 1.1rem 1.3rem; }
             .modal-actions { padding: 1.1rem 1.3rem; }
-            #calc-panel { width: 240px; bottom: 14px; right: 14px; }
-            .toast { bottom: 14px; right: 14px; left: 14px; max-width: none; font-size: 0.78rem; padding: 0.7rem 1.2rem; }
+            #calc-panel { width: 240px; bottom: 90px; right: 14px; }
+            .toast { bottom: 90px; right: 14px; left: 14px; max-width: none; font-size: 0.78rem; padding: 0.7rem 1.2rem; }
             .agent-app { height: min(680px, 94vh); border-radius: var(--r-md); }
             .agent-header { padding: 12px 14px; gap: 10px; }
             .agent-messages { padding: 16px 14px; }
