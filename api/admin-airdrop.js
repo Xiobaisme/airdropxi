@@ -230,6 +230,51 @@ async function sendDiscord() {
     }
     return await handleTerminalLogin(req, res);
   }
+    // ─── MARKETS (publik: ranking CoinGecko, cache Redis 1 jam) ───
+  // Dipakai ticker bawah + koin jatuh di halaman login, jadi harus di atas cek admin.
+  if (type === 'markets') {
+    if (req.method !== 'GET') {
+      return res.status(405).json({ error: 'Method tidak diizinkan untuk markets' });
+    }
+    const CACHE_KEY = 'markets:top50';
+    const STALE_KEY = 'markets:top50:stale';
+    const parse = (v) => {
+      if (Array.isArray(v)) return v;
+      if (typeof v === 'string') { try { return JSON.parse(v); } catch { return null; } }
+      return null;
+    };
+    try {
+      let data = parse(await redis.get(CACHE_KEY));
+
+      if (!data || !data.length) {
+        const r = await fetch(
+          'https://api.coingecko.com/api/v3/coins/markets?vs_currency=usd&order=market_cap_desc&per_page=50&page=1&sparkline=false',
+          { headers: { accept: 'application/json' } }
+        );
+        if (!r.ok) throw new Error('coingecko ' + r.status);
+        const raw = await r.json();
+        data = raw.map(c => ({
+          id: c.id,
+          symbol: c.symbol,
+          name: c.name,
+          image: c.image,
+          market_cap_rank: c.market_cap_rank,
+        }));
+        await redis.set(CACHE_KEY, JSON.stringify(data), { ex: 60 * 60 });
+        await redis.set(STALE_KEY, JSON.stringify(data), { ex: 60 * 60 * 24 * 7 });
+      }
+
+      res.setHeader('Cache-Control', 's-maxage=300, stale-while-revalidate=3600');
+      return res.status(200).json(data);
+    } catch (e) {
+      // CoinGecko down / kena rate limit: pakai salinan lama kalau ada
+      try {
+        const stale = parse(await redis.get(STALE_KEY));
+        if (stale && stale.length) return res.status(200).json(stale);
+      } catch {}
+      return res.status(502).json({ error: serializeError(e) });
+    }
+  }
     if (!verifyAdminToken(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
