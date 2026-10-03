@@ -888,25 +888,24 @@
 }
 @media (prefers-reduced-motion: reduce) { .login-letters { display: none; } }
 
-        /* ── Koin crypto berjatuhan di login ── */
+/* ── Koin crypto berjatuhan di login ── */
 .login-coins { position: absolute; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
 .fall-coin {
-    position: absolute; top: 0; left: 0; display: flex; align-items: center; gap: 8px;
-    padding: 5px 12px 5px 5px; border-radius: 999px; white-space: nowrap; will-change: transform;
-    background: rgba(16,16,16,.88); border: 2px solid var(--border-strong); font-family: var(--mono);
+    position: absolute; top: 0; left: 0; width: 84px;
+    display: flex; flex-direction: column; align-items: center; gap: 6px;
+    will-change: transform; font-family: var(--mono);
 }
 .fc-ico {
-    width: 22px; height: 22px; border-radius: 50%; flex-shrink: 0; color: #000; object-fit: cover;
-    display: flex; align-items: center; justify-content: center; font-size: .5rem; font-weight: 800;
+    width: 42px; height: 42px; border-radius: 50%; flex-shrink: 0; object-fit: cover;
+    background: #111; color: #000; font-size: .72rem; font-weight: 800;
+    display: flex; align-items: center; justify-content: center;
+    box-shadow: 0 0 0 2px var(--border-strong);
 }
-.fc-rank { font-size: .6rem; font-weight: 700; color: var(--text3); }
-.fc-sym { font-family: var(--display); font-weight: 800; font-size: .8rem; color: var(--text); }
-.fc-price { font-size: .76rem; font-weight: 600; color: var(--text); }
-.fc-chg { font-size: .64rem; font-weight: 700; padding: 2px 6px; border-radius: 6px; }
-.fall-coin.up { border-color: var(--success-line); }
-.fall-coin.up .fc-chg { color: var(--success); background: var(--success-dim); }
-.fall-coin.down { border-color: var(--danger-line); box-shadow: 0 0 18px rgba(239,68,68,.35); }
-.fall-coin.down .fc-chg { color: var(--danger); background: var(--danger-dim); }
+.fc-price { font-size: .76rem; font-weight: 700; color: var(--text); text-shadow: 0 1px 8px #000; white-space: nowrap; }
+.fall-coin.up .fc-ico { box-shadow: 0 0 0 2px var(--success), 0 0 14px rgba(53,224,161,.35); }
+.fall-coin.up .fc-price { color: var(--success); }
+.fall-coin.down .fc-ico { box-shadow: 0 0 0 2px var(--danger), 0 0 22px rgba(239,68,68,.55); }
+.fall-coin.down .fc-price { color: var(--danger); }
 /* streak merah di atas koin yang lagi dump */
 .fall-coin.down::before {
     content: ''; position: absolute; left: 50%; bottom: 100%; width: 3px; height: 90px; margin-left: -1.5px;
@@ -2915,7 +2914,6 @@ function fcRefreshDom(sym) {
     const p = _fc.price[sym], ch = _fc.chg[sym] || 0;
     document.querySelectorAll(`.fall-coin[data-sym="${sym}"]`).forEach(el => {
         el.querySelector('.fc-price').textContent = fcFmt(p);
-        el.querySelector('.fc-chg').textContent = (ch >= 0 ? '+' : '') + ch.toFixed(2) + '%';
         el.classList.toggle('up', ch >= 0);
         el.classList.toggle('down', ch < 0);
     });
@@ -3024,15 +3022,14 @@ function fcSpawn(wrap) {
     el.dataset.sym = coin.sym;
     const fallbackIco = `<span class="fc-ico" style="background:${fcColor(coin.sym)}">${esc(coin.sym.slice(0, 3))}</span>`;
     el.innerHTML = `${coin.image ? `<img class="fc-ico fc-img" src="${esc(coin.image)}" alt="" />` : fallbackIco}
-        <span class="fc-rank">#${idx + 1}</span>
-        <span class="fc-sym">${esc(coin.sym)}</span><span class="fc-price"></span><span class="fc-chg"></span>`;
+    <span class="fc-price"></span>`;
     const img = el.querySelector('.fc-img');
     if (img) img.onerror = () => img.outerHTML = fallbackIco;
     wrap.appendChild(el);
     fcRefreshDom(coin.sym);
 
     const W = wrap.clientWidth, H = wrap.clientHeight;
-    const x = Math.random() * Math.max(80, W - 260);
+    const x = Math.random() * Math.max(80, W - 100);
     const drift = (Math.random() - .5) * 120;
     const scale = .75 + Math.random() * .35;
     const r0 = (Math.random() - .5) * 20, r1 = r0 + (dumping ? 1 : -1) * (15 + Math.random() * 40);
@@ -3049,7 +3046,7 @@ function fcSpawn(wrap) {
         easing: 'cubic-bezier(.55,.05,.95,.4)', // pelan di awal, makin ngebut (gravitasi)
         fill: 'forwards',
     }).onfinish = () => {
-        fcImpact(wrap, x + drift + 60, yEnd + 20, dumping ? '#EF4444' : '#35E0A1');
+        fcImpact(wrap, x + drift + 42, yEnd + 30, dumping ? '#EF4444' : '#35E0A1');
         el.animate([{ opacity: .9 }, { opacity: 0 }], { duration: 160, fill: 'forwards' }).onfinish = () => el.remove();
         setTimeout(() => fcSpawn(wrap), 200 + Math.random() * 1200);
     };
