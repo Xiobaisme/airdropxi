@@ -300,6 +300,38 @@ async function sendDiscord() {
       return res.status(502).json({ error: serializeError(e) });
     }
   }
+
+     // ─── CEX FOUND (userbot Telegram -> dashboard) ───
+  if (type === 'cex-found') {
+    res.setHeader('Cache-Control', 'no-store');
+    try {
+      if (req.method === 'POST') {
+        const given = Buffer.from(String(req.headers['x-secret'] || ''));
+        const want = Buffer.from(process.env.ALERT_SECRET || '');
+        if (!want.length || given.length !== want.length || !crypto.timingSafeEqual(given, want))
+          return res.status(401).json({ error: 'Unauthorized' });
+
+        const { name, ticker, exchange, networks } = req.body || {};
+        if (!ticker || !exchange) return res.status(400).json({ error: 'Payload tidak valid' });
+
+        const fresh = await redis.set(`cexfound:seen:${ticker}:${exchange}`, 1, { nx: true, ex: 86400 });
+        if (!fresh) return res.status(200).json({ dup: true });
+
+        await redis.lpush('cexfound:events', JSON.stringify({ name, ticker, exchange, networks, ts: Date.now() }));
+        await redis.ltrim('cexfound:events', 0, 99);
+        return res.status(200).json({ ok: true });
+      }
+
+      if (req.method === 'GET') {
+        if (!verifyAdminToken(req)) return res.status(401).json({ error: 'Unauthorized' });
+        const rows = await redis.lrange('cexfound:events', 0, 29);
+        return res.status(200).json(rows.map(r => (typeof r === 'string' ? JSON.parse(r) : r)));
+      }
+      return res.status(405).json({ error: 'Method tidak diizinkan' });
+    } catch (e) {
+      return res.status(500).json({ error: serializeError(e) });
+    }
+  }
     if (!verifyAdminToken(req)) {
     return res.status(401).json({ error: 'Unauthorized' });
   }
