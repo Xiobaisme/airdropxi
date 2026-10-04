@@ -4,6 +4,10 @@ on:
   schedule:
     - cron: "*/5 * * * *"
   workflow_dispatch:
+    inputs:
+      lookback_minutes:
+        description: "Berapa menit ke belakang (30 = normal, 4320 = 3 hari)"
+        default: "30"
 
 concurrency:
   group: cexfound
@@ -12,7 +16,7 @@ concurrency:
 jobs:
   poll:
     runs-on: ubuntu-latest
-    timeout-minutes: 3
+    timeout-minutes: 10
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-python@v5
@@ -26,4 +30,5 @@ jobs:
           TG_SESSION: ${{ secrets.TG_SESSION }}
           ALERT_SECRET: ${{ secrets.ALERT_SECRET }}
           SOURCE_CHANNELS: ${{ secrets.SOURCE_CHANNELS }}
+          LOOKBACK_MIN: ${{ inputs.lookback_minutes || '30' }}
           CEXFOUND_API_URL: https://airdropxi.vercel.app/api/admin-airdrop?type=cex-found
