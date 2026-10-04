@@ -3565,7 +3565,7 @@ function ocMerge(d, limit) {
             const k = `${e.from}|${e.to}|${e.sym}`;
             if (!oc.edges.has(k)) oc.edges.set(k, e);
             const other = e.from === base ? e.to : e.from;
-            if (!oc.nodes.has(other)) oc.nodes.set(other, { col: e.from === base ? baseCol + 1 : baseCol - 1 });
+            if (!oc.nodes.has(other)) oc.nodes.set(other, { par: base, col: e.from === base ? baseCol + 1 : baseCol - 1 });
         });
 
     Object.entries(d.labels || {}).forEach(([a, l]) => { if (!oc.names[a] || oc.names[a].auto) oc.names[a] = l; });
@@ -3665,57 +3665,110 @@ function ocZoom(f, cx, cy) {
     }, { passive: false });
 })();
 
+        // Tata letak radial: wallet utama di tengah, counterparty melingkar (beberapa ring),
+// wallet yang di-klik membuka cabangnya ke arah luar.
+function ocLayout() {
+    const GAP = 110, PAD = 130;
+    const kids = new Map();
+    oc.nodes.forEach((n, a) => {
+        if (a === oc.root) return;
+        const p = n.par && oc.nodes.has(n.par) ? n.par : oc.root;
+        if (!kids.has(p)) kids.set(p, []);
+        kids.get(p).push(a);
+    });
+
+    const pos = new Map([[oc.root, { x: 0, y: 0 }]]);
+
+    // cabang wallet yang sudah di-expand: kipas ke arah menjauhi induknya
+    const fan = (a, dir) => {
+        const list = (kids.get(a) || []).filter(c => !pos.has(c));
+        if (!list.length) return;
+        const m = list.length, p = pos.get(a);
+        const span = Math.min(Math.PI * 1.4, Math.max(0.9, m * 0.4));
+        const rad = Math.max(200, (m * GAP) / span);
+        list.forEach((c, j) => {
+            const ang = m === 1 ? dir : dir - span / 2 + (span * (j + 0.5)) / m;
+            pos.set(c, { x: p.x + Math.cos(ang) * rad, y: p.y + Math.sin(ang) * rad });
+            fan(c, ang);
+        });
+    };
+
+    // counterparty wallet utama: ring ke-k berjari-jari 260 + k*210
+    const first = kids.get(oc.root) || [];
+    const rings = [];
+    for (let i = 0, k = 0; i < first.length; k++) {
+        const r = 260 + k * 210, cap = Math.max(6, Math.floor((2 * Math.PI * r) / GAP));
+        rings.push({ r, items: first.slice(i, i + cap) });
+        i += cap;
+    }
+    rings.forEach((ring, k) => {
+        const n = ring.items.length, off = (k % 2) * (Math.PI / Math.max(n, 1));
+        ring.items.forEach((a, j) => {
+            const ang = -Math.PI / 2 + off + (2 * Math.PI * j) / n;
+            pos.set(a, { x: Math.cos(ang) * ring.r, y: Math.sin(ang) * ring.r });
+        });
+    });
+    first.forEach(a => { const p = pos.get(a); fan(a, Math.atan2(p.y, p.x)); });
+
+    // geser semua koordinat supaya positif
+    let x0 = Infinity, y0 = Infinity, x1 = -Infinity, y1 = -Infinity;
+    pos.forEach(p => { x0 = Math.min(x0, p.x); y0 = Math.min(y0, p.y); x1 = Math.max(x1, p.x); y1 = Math.max(y1, p.y); });
+    const ox = PAD - x0, oy = PAD - y0;
+    pos.forEach(p => { p.x += ox; p.y += oy; });
+    return { pos, W: x1 - x0 + PAD * 2, H: y1 - y0 + PAD * 2, ox, oy };
+}
+
 // ── render ──
 function ocRender(fit) {
     if (!oc.root) return;
-    const COLW = 300, ROW = 100, R = 22, PAD = 90;
-    const byCol = {};
-    oc.nodes.forEach((n, a) => (byCol[n.col] = byCol[n.col] || []).push(a));
-    const cols = Object.keys(byCol).map(Number).sort((a, b) => a - b);
-    const maxRows = Math.max(...Object.values(byCol).map(v => v.length));
-    const W = (cols.length - 1) * COLW + PAD * 2;
-    const H = maxRows * ROW + PAD * 2;
+        const R = 22;
+    const { pos, W, H, ox, oy } = ocLayout();
+    // jaga posisi layar saat expand supaya diagram tidak "loncat"
+    if (!fit && oc.shift) { oc.vp.x -= (ox - oc.shift.x) * oc.vp.k; oc.vp.y -= (oy - oc.shift.y) * oc.vp.k; }
+    oc.shift = { x: ox, y: oy };
+    const rp = pos.get(oc.root);
+    const dist = (p) => Math.hypot(p.x - rp.x, p.y - rp.y);
+    const dense = oc.edges.size > 40;   // garis banyak: baris tanggal di label dibuang
 
-    const pos = new Map();
-    cols.forEach((c, ci) => {
-        const list = byCol[c], top = PAD + (maxRows - list.length) * ROW / 2;
-        list.forEach((a, i) => pos.set(a, { x: PAD + ci * COLW, y: top + i * ROW + ROW / 2 }));
-    });
-
-let animN = 0;
-    
+    let animN = 0;
     const pairIdx = {};
     const edgeSvg = [...oc.edges.values()].map(e => {
         const a = pos.get(e.from), b = pos.get(e.to);
         if (!a || !b) return '';
+        const len = Math.hypot(b.x - a.x, b.y - a.y);
+        if (len < 1) return '';
+        const ux = (b.x - a.x) / len, uy = (b.y - a.y) / len;
+        const x1 = a.x + ux * R, y1 = a.y + uy * R;
+        const x2 = b.x - ux * (R + 5), y2 = b.y - uy * (R + 5);
+
+        // garis ganda antar pasangan yang sama dibengkokkan bergantian biar tidak menumpuk
         const pk = [e.from, e.to].sort().join('|');
-        const off = ((pairIdx[pk] = (pairIdx[pk] || 0) + 1) - 1) * 20;
+        const n = (pairIdx[pk] = (pairIdx[pk] || 0) + 1);
+        const k = Math.ceil((n - 1) / 2) * 32, bend = n === 1 ? 0 : (n % 2 === 0 ? k : -k);
+        const cx = (x1 + x2) / 2 - uy * bend * 2, cy = (y1 + y2) / 2 + ux * bend * 2;
+        const path = `M${x1},${y1} Q${cx},${cy} ${x2},${y2}`;
+
+        // label dekat ujung yang lebih jauh dari wallet utama (biar tidak numpuk di tengah)
+        const t = dist(a) > dist(b) ? 0.3 : 0.7, s = 1 - t;
+        const lx = s * s * x1 + 2 * s * t * cx + t * t * x2;
+        const ly = s * s * y1 + 2 * s * t * cy + t * t * y2 - 8;
+
         const isSwap = e.kind === 'swap';
         const special = oc.nodes.get(e.to)?.type;
         const color = isSwap ? '#FFD23F' : (e.from === oc.root ? 'var(--secondary)' : 'var(--primary)');
-        let path, mx, ly;
-        if (Math.abs(a.x - b.x) < 1) {
-            path = `M${a.x + R},${a.y} Q${a.x + 120 + off},${(a.y + b.y) / 2} ${b.x + R},${b.y}`;
-            mx = a.x + 62 + off / 2; ly = (a.y + b.y) / 2 - 8;
-        } else {
-            const fwd = b.x > a.x;
-            const x1 = a.x + (fwd ? R : -R), x2 = b.x + (fwd ? -R - 5 : R + 5);
-            mx = (x1 + x2) / 2;
-            path = `M${x1},${a.y} C${mx},${a.y + off} ${mx},${b.y + off} ${x2},${b.y}`;
-            ly = (a.y + b.y) / 2 + off * 0.75 - 8;
-        }
         const l1 = isSwap ? `${ocAmt(e.sold.amount)} ${e.sold.sym} → ${ocAmt(e.bought.amount)} ${e.bought.sym}` : `${ocAmt(e.amount)} ${e.sym}`;
         const l2 = (isSwap ? (e.wrap ? 'WRAP ' : 'SWAP ') : '') + `×${e.count} · ${ocDate(e.last_ts)}`;
         return `<path d="${path}" fill="none" stroke="${color}" stroke-opacity=".85" stroke-width="2.2" ${isSwap || special ? 'stroke-dasharray="7 6"' : ''} marker-end="url(#oc-arrow)"/>
-       ${(animN++ < 60) ? `<path class="oc-flow ${isSwap ? 'swap' : ''}" d="${path}" stroke="${color}"/>` : ''}
+        ${(animN++ < 60) ? `<path class="oc-flow ${isSwap ? 'swap' : ''}" d="${path}" stroke="${color}"/>` : ''}
         <a href="${esc(oc.ex.tx + e.hashes[0])}" target="_blank" rel="noopener">
-            <text class="oc-elabel" ${isSwap ? 'style="fill:#FFD23F"' : ''} x="${mx}" y="${ly}" text-anchor="middle">${esc(l1)}</text>
-            <text class="oc-esub" x="${mx}" y="${ly + 13}" text-anchor="middle">${esc(l2)}</text>
+            <text class="oc-elabel" ${isSwap ? 'style="fill:#FFD23F"' : ''} x="${lx}" y="${ly}" text-anchor="middle">${esc(l1)}</text>
+            ${dense ? '' : `<text class="oc-esub" x="${lx}" y="${ly + 13}" text-anchor="middle">${esc(l2)}</text>`}
         </a>`;
     }).join('');
 
     const nodeSvg = [...oc.nodes.entries()].map(([a, n]) => {
         const p = pos.get(a), isRoot = a === oc.root;
+        if (!p) return '';
         const fill = n.type === 'mixer' ? 'var(--danger)' : n.type === 'bridge' ? '#F59E0B' : n.type ? 'var(--success)' : isRoot ? 'var(--secondary)' : 'var(--primary)';
         const hasName = !!n.label;
         return `<g class="oc-node" onclick="ocExpand('${esc(a)}')">
