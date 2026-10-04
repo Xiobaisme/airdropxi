@@ -1,0 +1,29 @@
+name: CEX Found poller
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+
+concurrency:
+  group: cexfound
+  cancel-in-progress: false
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    timeout-minutes: 3
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install telethon requests
+      - run: python scripts/cexfound_poll.py
+        env:
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_SESSION: ${{ secrets.TG_SESSION }}
+          ALERT_SECRET: ${{ secrets.ALERT_SECRET }}
+          SOURCE_CHANNELS: ${{ secrets.SOURCE_CHANNELS }}
+          CEXFOUND_API_URL: https://airdropxi.vercel.app/api/admin-airdrop?type=cex-found
