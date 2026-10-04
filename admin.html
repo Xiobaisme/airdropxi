@@ -918,32 +918,61 @@
 .coin-shard { position: absolute; width: 6px; height: 6px; border-radius: 1px; background: var(--c, var(--danger)); pointer-events: none; }
 @media (prefers-reduced-motion: reduce) { .login-coins { display: none; } }
 
-        /* ═══ ONCHAIN TRACER ═══ */
-.modal-box.oc-box { max-width: 1180px; }
-.oc-form { display: flex; gap: 12px; align-items: flex-end; flex-wrap: wrap; }
-.oc-form .field { min-width: 180px; }
-.oc-form .field.grow { flex: 1; min-width: 260px; }
-.oc-form input { font-family: var(--mono); }
-.oc-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(140px, 1fr)); gap: 10px; }
-.oc-stat { background: var(--card-2); border: 2px solid var(--border); border-radius: var(--r-sm); padding: .9rem 1rem; }
-.oc-stat .n { font-family: var(--display); font-size: 1.6rem; font-weight: 800; }
-.oc-stat .n a { color: var(--success); text-decoration: none; font-family: var(--mono); font-size: .95rem; }
-.oc-stat .l { font-family: var(--label); font-size: .6rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin-top: 4px; }
-.oc-diagram { background-color: #0A0A0A; background-image: radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px); background-size: 22px 22px; border: 2px solid var(--border); border-radius: var(--r-md); overflow: auto; max-height: 70vh; }
-.oc-diagram svg { display: block; }
+       /* ═══ ONCHAIN TRACER (fullscreen) ═══ */
+.oc-screen { position: fixed; inset: 0; z-index: 1500; display: flex; flex-direction: column;
+    background-color: #070707; background-image: radial-gradient(rgba(255,255,255,.06) 1px, transparent 1px); background-size: 22px 22px;
+    animation: modalFade .18s ease; }
+.oc-top { display: flex; align-items: center; gap: 16px; padding: 12px 20px; background: #0A0A0A; border-bottom: 2px solid var(--border-light); flex-wrap: wrap; }
+.oc-title { font-family: var(--display); font-weight: 800; font-size: 1.15rem; white-space: nowrap; }
+.oc-form { flex: 1; min-width: 300px; display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+.oc-form input[type="text"], .oc-form select { background: var(--card-2); border: 2px solid var(--border); border-radius: var(--r-sm); color: var(--text); font-size: .85rem; padding: .65rem 1rem; outline: none; transition: border-color .2s; }
+.oc-form input[type="text"] { flex: 1; min-width: 260px; font-family: var(--mono); }
+.oc-form select { font-family: var(--sans); }
+.oc-form input[type="text"]:focus, .oc-form select:focus { border-color: var(--primary); }
+.oc-check { display: inline-flex; align-items: center; gap: 6px; font-family: var(--label); font-size: .72rem; font-weight: 700; color: var(--text2); cursor: pointer; white-space: nowrap; }
+.oc-check input { accent-color: var(--primary); }
+
+.oc-summary { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; padding: 12px 20px 0; }
+.oc-stat { background: var(--card-2); border: 2px solid var(--border); border-radius: var(--r-sm); padding: .7rem 1rem; }
+.oc-stat .n { font-family: var(--display); font-size: 1.4rem; font-weight: 800; line-height: 1.2; }
+.oc-stat .n a { color: var(--success); text-decoration: none; font-family: var(--mono); font-size: .9rem; }
+.oc-stat .l { font-family: var(--label); font-size: .58rem; font-weight: 800; text-transform: uppercase; letter-spacing: .07em; color: var(--text3); margin-top: 3px; }
+
+.oc-main { flex: 1; min-height: 0; display: grid; grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr); gap: 12px; padding: 12px 20px 16px; }
+.oc-main.has-tx { grid-template-columns: minmax(0, 1fr) 500px; }
+.oc-stage { position: relative; min-height: 0; background: #0A0A0A; border: 2px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+.oc-diagram { position: absolute; inset: 0; }
+.oc-diagram svg { width: 100%; height: 100%; display: block; cursor: grab; touch-action: none; }
+.oc-diagram.grabbing svg { cursor: grabbing; }
+.oc-empty { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-family: var(--label); font-size: .85rem; color: var(--text3); pointer-events: none; }
+.oc-tools { position: absolute; right: 12px; top: 12px; display: flex; flex-direction: column; gap: 6px; z-index: 2; }
+.oc-tools button { width: 36px; height: 36px; border-radius: 10px; border: 2px solid var(--border-strong); background: #111; color: #fff; font-family: var(--label); font-size: .8rem; font-weight: 800; cursor: pointer; transition: border-color .2s; }
+.oc-tools button:hover { border-color: #fff; }
+.oc-note { position: absolute; left: 14px; bottom: 10px; font-family: var(--label); font-size: .68rem; color: var(--text3); pointer-events: none; }
+
 .oc-node { cursor: pointer; }
 .oc-node:hover .main { stroke: #fff; }
+.oc-addr, .oc-nlabel, .oc-elabel, .oc-esub { paint-order: stroke; stroke: #0A0A0A; stroke-width: 5px; stroke-linejoin: round; }
 .oc-addr { font-family: var(--mono); font-size: 11px; font-weight: 700; fill: var(--text); }
 .oc-nlabel { font-family: var(--label); font-size: 11px; fill: var(--text2); }
 .oc-elabel { font-family: var(--label); font-size: 12px; font-weight: 700; fill: var(--text); }
 .oc-esub { font-family: var(--label); font-size: 10px; fill: var(--text3); }
-.oc-tablewrap { overflow: auto; max-height: 340px; border: 2px solid var(--border); border-radius: var(--r-sm); }
-.oc-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .74rem; }
-.oc-table th { position: sticky; top: 0; background: var(--card-2); text-align: left; padding: .6rem .8rem; color: var(--text3); font-family: var(--label); font-size: .6rem; text-transform: uppercase; letter-spacing: .07em; }
-.oc-table td { padding: .55rem .8rem; border-top: 1px solid var(--border); white-space: nowrap; color: var(--text2); }
+
+.oc-side { min-height: 0; display: flex; flex-direction: column; background: #0A0A0A; border: 2px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
+.oc-side-head { padding: .75rem 1rem; border-bottom: 2px solid var(--border); font-family: var(--label); font-size: .64rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); }
+.oc-tablewrap { flex: 1; overflow: auto; }
+.oc-table { width: 100%; border-collapse: collapse; font-family: var(--mono); font-size: .72rem; }
+.oc-table th { position: sticky; top: 0; background: var(--card-2); text-align: left; padding: .55rem .8rem; color: var(--text3); font-family: var(--label); font-size: .58rem; text-transform: uppercase; letter-spacing: .07em; }
+.oc-table td { padding: .5rem .8rem; border-top: 1px solid var(--border); white-space: nowrap; color: var(--text2); }
 .oc-table a { color: var(--success); text-decoration: none; }
 .oc-table a:hover { text-decoration: underline; }
-.oc-note { font-family: var(--label); font-size: .72rem; color: var(--text3); }
+.oc-dir { font-weight: 800; font-size: .62rem; padding: 1px 6px; border-radius: 4px; margin-right: 4px; }
+.oc-dir.in { color: var(--success); background: var(--success-dim); }
+.oc-dir.out { color: var(--secondary); background: var(--secondary-dim); }
+
+@media (max-width: 1100px) {
+    .oc-main.has-tx { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 260px; }
+}
         
         /* ═══════════════════════════════════════════════════════════
            RESPONSIVE
@@ -1468,37 +1497,41 @@
         </div>
     </div>
 </div>
-        <!-- ─── ONCHAIN TRACER ─── -->
-<div id="onchain-modal" class="modal hidden">
-    <div class="modal-box oc-box">
-        <div class="modal-head">
-            <div class="modal-title">Onchain Tracer</div>
-            <button class="modal-close" onclick="closeOnchain()" id="onchain-close-btn"></button>
+       <!-- ─── ONCHAIN TRACER (fullscreen) ─── -->
+<div id="onchain-modal" class="oc-screen hidden">
+    <div class="oc-top">
+        <div class="oc-title">Onchain Tracer</div>
+        <div class="oc-form">
+            <input id="oc-address" type="text" placeholder="0x... atau alamat Solana" autocomplete="off" spellcheck="false" />
+            <select id="oc-chain"></select>
+            <button class="btn-save" id="oc-go" onclick="ocSearch()">Lacak</button>
+            <label class="oc-check"><input type="checkbox" id="oc-dust" checked onchange="ocToggleDust()" /> Sembunyikan dust</label>
         </div>
-        <div class="modal-body">
-            <div class="oc-form">
-                <div class="field grow">
-                    <label>Alamat Wallet</label>
-                    <input id="oc-address" type="text" placeholder="0x... atau alamat Solana" autocomplete="off" spellcheck="false" />
-                </div>
-                <div class="field">
-                    <label>Chain</label>
-                    <select id="oc-chain"></select>
-                </div>
-                <button class="btn-save" id="oc-go" onclick="ocSearch()">Lacak</button>
+        <button class="modal-close" onclick="closeOnchain()" id="onchain-close-btn"></button>
+    </div>
+
+    <div id="oc-summary" class="oc-summary hidden"></div>
+
+    <div class="oc-main" id="oc-main">
+        <div class="oc-stage">
+            <div class="oc-diagram" id="oc-diagram"></div>
+            <div class="oc-empty" id="oc-empty">Masukkan alamat wallet lalu klik Lacak</div>
+            <div class="oc-tools">
+                <button onclick="ocZoom(1.25)" title="Zoom in">+</button>
+                <button onclick="ocZoom(0.8)" title="Zoom out">−</button>
+                <button onclick="ocFit()" title="Pas layar">Fit</button>
             </div>
-            <div id="oc-summary" class="oc-summary hidden"></div>
-            <div id="oc-diagram" class="oc-diagram hidden"></div>
-            <div id="oc-tx" class="hidden">
-                <div class="oc-tablewrap">
-                    <table class="oc-table">
-                        <thead><tr><th>TX Hash</th><th>Waktu</th><th>Dari</th><th>Ke</th><th>Jumlah</th></tr></thead>
-                        <tbody id="oc-tx-body"></tbody>
-                    </table>
-                </div>
-            </div>
-            <div class="oc-note">Klik node untuk telusuri wallet itu lebih jauh. Klik label panah atau hash untuk buka explorer. Menampilkan ±100 aktivitas terbaru.</div>
+            <div class="oc-note">Scroll = zoom · Drag = geser · Klik node = telusuri · Klik label panah = buka TX</div>
         </div>
+        <aside class="oc-side hidden" id="oc-tx">
+            <div class="oc-side-head" id="oc-tx-head">Transaksi</div>
+            <div class="oc-tablewrap">
+                <table class="oc-table">
+                    <thead><tr><th>TX Hash</th><th>Tanggal</th><th>Arah</th><th>Jumlah</th></tr></thead>
+                    <tbody id="oc-tx-body"></tbody>
+                </table>
+            </div>
+        </aside>
     </div>
 </div>
 
@@ -3404,12 +3437,14 @@ function stopFallingCoins() {
             loadProjects();
         };
 
-        // ═══════════════════════════════════════════════════════════
-// ─── ONCHAIN TRACER ───
+       // ═══════════════════════════════════════════════════════════
+// ─── ONCHAIN TRACER (fullscreen, pan/zoom) ───
 // ═══════════════════════════════════════════════════════════
-const oc = { chains: null, chain: null, root: null, ex: null, nodes: new Map(), edges: new Map(), txs: [], expanded: new Set() };
+const OC_DUST = 0.001;
+const oc = { chains: null, chain: null, root: null, ex: null, raw: new Map(), nodes: new Map(), edges: new Map(), txs: [],
+             vp: { x: 0, y: 0, k: 1 }, bounds: null, moved: false, hideDust: true };
 
-const ocShort = (a) => a.length > 12 ? a.slice(0, 6) + '…' + a.slice(-4) : a;
+const ocShort = (a) => a.length > 16 ? a.slice(0, 8) + '…' + a.slice(-6) : a;
 const ocAmt = (n) => n >= 1000 ? n.toLocaleString('en-US', { maximumFractionDigits: 2 })
     : n >= 1 ? n.toLocaleString('en-US', { maximumFractionDigits: 4 })
     : n.toLocaleString('en-US', { maximumSignificantDigits: 4 });
@@ -3417,6 +3452,8 @@ const ocDate = (ts) => new Date(ts).toISOString().slice(0, 10);
 
 async function openOnchain() {
     document.getElementById('onchain-modal').classList.remove('hidden');
+    document.body.style.overflow = 'hidden';
+    document.getElementById('oc-address').focus();
     if (oc.chains) return;
     try {
         const r = await fetch('/api/admin-airdrop?type=onchain&action=chains');
@@ -3430,7 +3467,10 @@ async function openOnchain() {
         ).join('');
     } catch (e) { showToast('Gagal muat daftar chain: ' + e.message, 'error'); }
 }
-function closeOnchain() { document.getElementById('onchain-modal').classList.add('hidden'); }
+function closeOnchain() {
+    document.getElementById('onchain-modal').classList.add('hidden');
+    document.body.style.overflow = '';
+}
 
 async function ocFetch(chain, address) {
     const r = await fetch(`/api/admin-airdrop?type=onchain&chain=${encodeURIComponent(chain)}&address=${encodeURIComponent(address)}`);
@@ -3447,39 +3487,70 @@ async function ocSearch() {
     btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Melacak...';
     try {
         const d = await ocFetch(chain, addr);
-        Object.assign(oc, { chain, root: d.address, ex: d.explorer, nodes: new Map(), edges: new Map(), txs: [], expanded: new Set([d.address]) });
-        oc.nodes.set(d.address, { col: 0 });
-        ocMerge(d, 12);
+        oc.chain = chain; oc.root = d.address; oc.ex = d.explorer;
+        oc.raw = new Map([[d.address, d]]);
+        ocBuild();
         ocSummary(d);
-        ocRender();
+        document.getElementById('oc-empty').classList.add('hidden');
+        document.getElementById('oc-tx').classList.remove('hidden');
+        document.getElementById('oc-main').classList.add('has-tx');
+        ocRender(true);
     } catch (e) { showToast('Gagal: ' + e.message, 'error'); }
     finally { btn.disabled = false; btn.textContent = 'Lacak'; }
 }
 
-function ocMerge(d, limit) {
-    const base = d.address, baseCol = oc.nodes.get(base)?.col ?? 0;
-    d.edges.slice().sort((a, b) => b.count - a.count).slice(0, limit).forEach(e => {
-        const k = `${e.from}|${e.to}|${e.sym}`;
-        if (!oc.edges.has(k)) oc.edges.set(k, e);
-        const other = e.from === base ? e.to : e.from;
-        if (!oc.nodes.has(other)) oc.nodes.set(other, { col: e.from === base ? baseCol + 1 : baseCol - 1 });
-    });
-    Object.entries(d.labels || {}).forEach(([a, l]) => { const n = oc.nodes.get(a); if (n) Object.assign(n, l); });
-    const seen = new Set(oc.txs.map(t => t.key));
-    d.txs.forEach(t => { t.key = t.hash + t.from + t.to + t.sym; if (!seen.has(t.key)) oc.txs.push(t); });
+// Bangun ulang graf dari data mentah (dipakai saat expand & saat toggle dust)
+function ocBuild() {
+    oc.nodes = new Map([[oc.root, { col: 0 }]]);
+    oc.edges = new Map();
+    oc.txs = [];
+    oc.raw.forEach((d, addr) => { if (oc.nodes.has(addr)) ocMerge(d, addr === oc.root ? 20 : 10); });
     oc.txs.sort((a, b) => b.ts - a.ts);
-    if (oc.txs.length > 150) oc.txs.length = 150;
+    if (oc.txs.length > 200) oc.txs.length = 200;
+}
+
+function ocMerge(d, limit) {
+    const base = d.address, baseCol = oc.nodes.get(base).col;
+    const dust = (amount) => oc.hideDust && amount < OC_DUST;
+
+    d.edges.filter(e => !dust(e.amount))
+        .sort((a, b) => b.count - a.count || b.last_ts - a.last_ts)
+        .slice(0, limit)
+        .forEach(e => {
+            const k = `${e.from}|${e.to}|${e.sym}`;
+            if (!oc.edges.has(k)) oc.edges.set(k, e);
+            const other = e.from === base ? e.to : e.from;
+            if (!oc.nodes.has(other)) oc.nodes.set(other, { col: e.from === base ? baseCol + 1 : baseCol - 1 });
+        });
+
+    Object.entries(d.labels || {}).forEach(([a, l]) => { const n = oc.nodes.get(a); if (n) Object.assign(n, l); });
+
+    const seen = new Set(oc.txs.map(t => t.key));
+    d.txs.filter(t => !dust(t.value)).forEach(t => {
+        t.key = t.hash + t.from + t.to + t.sym + t.value;
+        t.me = base;
+        if (!seen.has(t.key)) { seen.add(t.key); oc.txs.push(t); }
+    });
+}
+
+function ocToggleDust() {
+    oc.hideDust = document.getElementById('oc-dust').checked;
+    if (!oc.root) return;
+    ocBuild();
+    ocRender(false);
 }
 
 async function ocExpand(addr) {
-    if (oc.expanded.has(addr)) return;
+    if (oc.moved) return;                       // barusan drag, bukan klik
+    if (oc.raw.has(addr)) return;
     if (oc.nodes.get(addr)?.type) { showToast('Kontrak/layanan dikenal, tidak ditelusuri', 'error'); return; }
-    oc.expanded.add(addr);
     showToast('Memuat ' + ocShort(addr) + '…');
     try {
-        ocMerge(await ocFetch(oc.chain, addr), 8);
-        ocRender();
-    } catch (e) { oc.expanded.delete(addr); showToast('Gagal: ' + e.message, 'error'); }
+        const d = await ocFetch(oc.chain, addr);
+        oc.raw.set(addr, d);
+        ocBuild();
+        ocRender(false);
+    } catch (e) { showToast('Gagal: ' + e.message, 'error'); }
 }
 
 function ocSummary(d) {
@@ -3498,33 +3569,94 @@ function ocSummary(d) {
     el.classList.remove('hidden');
 }
 
-function ocRender() {
-    const COLW = 280, ROW = 110, R = 24, PAD = 80;
+// ── pan / zoom ──
+function ocApply() {
+    const g = document.getElementById('oc-vp');
+    if (g) g.setAttribute('transform', `translate(${oc.vp.x} ${oc.vp.y}) scale(${oc.vp.k})`);
+}
+function ocFit() {
+    if (!oc.bounds) return;
+    const st = document.getElementById('oc-diagram');
+    const { w, h } = oc.bounds, cw = st.clientWidth, ch = st.clientHeight;
+    const k = Math.max(0.4, Math.min(cw / w, ch / h, 1.2));
+    oc.vp = { k, x: w * k <= cw ? (cw - w * k) / 2 : 20, y: h * k <= ch ? (ch - h * k) / 2 : 20 };
+    ocApply();
+}
+function ocZoom(f, cx, cy) {
+    const r = document.getElementById('oc-diagram').getBoundingClientRect();
+    cx = cx ?? r.width / 2; cy = cy ?? r.height / 2;
+    const k = Math.min(3, Math.max(0.2, oc.vp.k * f)), real = k / oc.vp.k;
+    oc.vp.x = cx - (cx - oc.vp.x) * real;
+    oc.vp.y = cy - (cy - oc.vp.y) * real;
+    oc.vp.k = k;
+    ocApply();
+}
+(function ocInitPan() {
+    const st = document.getElementById('oc-diagram');
+    if (!st) return;
+    let drag = null;
+    st.addEventListener('pointerdown', e => {
+        if (e.target.closest('a')) return;
+        drag = { x: e.clientX, y: e.clientY, vx: oc.vp.x, vy: oc.vp.y };
+        oc.moved = false;
+    });
+    window.addEventListener('pointermove', e => {
+        if (!drag) return;
+        const dx = e.clientX - drag.x, dy = e.clientY - drag.y;
+        if (!oc.moved && Math.abs(dx) + Math.abs(dy) > 4) { oc.moved = true; st.classList.add('grabbing'); }
+        if (oc.moved) { oc.vp.x = drag.vx + dx; oc.vp.y = drag.vy + dy; ocApply(); }
+    });
+    window.addEventListener('pointerup', () => {
+        drag = null; st.classList.remove('grabbing');
+        setTimeout(() => { oc.moved = false; }, 0);   // reset setelah event click lewat
+    });
+    st.addEventListener('wheel', e => {
+        e.preventDefault();
+        const r = st.getBoundingClientRect();
+        ocZoom(e.deltaY < 0 ? 1.12 : 0.89, e.clientX - r.left, e.clientY - r.top);
+    }, { passive: false });
+})();
+
+// ── render ──
+function ocRender(fit) {
+    if (!oc.root) return;
+    const COLW = 300, ROW = 96, R = 22, PAD = 90;
     const byCol = {};
     oc.nodes.forEach((n, a) => (byCol[n.col] = byCol[n.col] || []).push(a));
     const cols = Object.keys(byCol).map(Number).sort((a, b) => a - b);
     const maxRows = Math.max(...Object.values(byCol).map(v => v.length));
-    const H = Math.max(280, maxRows * ROW + 40);
-    const W = (cols.length - 1) * COLW + PAD * 2 + 60;
+    const W = (cols.length - 1) * COLW + PAD * 2;
+    const H = maxRows * ROW + PAD * 2;
 
     const pos = new Map();
-    cols.forEach((c, ci) => byCol[c].forEach((a, i) => pos.set(a, { x: PAD + ci * COLW, y: (H / byCol[c].length) * (i + 0.5) })));
+    cols.forEach((c, ci) => {
+        const list = byCol[c], top = PAD + (maxRows - list.length) * ROW / 2;
+        list.forEach((a, i) => pos.set(a, { x: PAD + ci * COLW, y: top + i * ROW + ROW / 2 }));
+    });
 
     const pairIdx = {};
     const edgeSvg = [...oc.edges.values()].map(e => {
         const a = pos.get(e.from), b = pos.get(e.to);
         if (!a || !b) return '';
         const pk = [e.from, e.to].sort().join('|');
-        const off = ((pairIdx[pk] = (pairIdx[pk] || 0) + 1) - 1) * 18;
-        const fwd = b.x >= a.x;
-        const x1 = a.x + (fwd ? R : -R), x2 = b.x + (fwd ? -R - 5 : R + 5), mx = (x1 + x2) / 2;
+        const off = ((pairIdx[pk] = (pairIdx[pk] || 0) + 1) - 1) * 20;
         const special = oc.nodes.get(e.to)?.type;
         const color = e.from === oc.root ? 'var(--secondary)' : 'var(--primary)';
-        const ly = (a.y + b.y) / 2 + off - 10;
-        return `<path d="M${x1},${a.y} C${mx},${a.y + off} ${mx},${b.y + off} ${x2},${b.y}" fill="none" stroke="${color}" stroke-width="2.2" ${special ? 'stroke-dasharray="7 6"' : ''} marker-end="url(#oc-arrow)"/>
+        let path, mx, ly;
+        if (Math.abs(a.x - b.x) < 1) {              // dua node di kolom yang sama -> lengkung ke kanan
+            path = `M${a.x + R},${a.y} Q${a.x + 120 + off},${(a.y + b.y) / 2} ${b.x + R},${b.y}`;
+            mx = a.x + 62 + off / 2; ly = (a.y + b.y) / 2 - 8;
+        } else {
+            const fwd = b.x > a.x;
+            const x1 = a.x + (fwd ? R : -R), x2 = b.x + (fwd ? -R - 5 : R + 5);
+            mx = (x1 + x2) / 2;
+            path = `M${x1},${a.y} C${mx},${a.y + off} ${mx},${b.y + off} ${x2},${b.y}`;
+            ly = (a.y + b.y) / 2 + off * 0.75 - 8;
+        }
+        return `<path d="${path}" fill="none" stroke="${color}" stroke-opacity=".8" stroke-width="2.2" ${special ? 'stroke-dasharray="7 6"' : ''} marker-end="url(#oc-arrow)"/>
         <a href="${esc(oc.ex.tx + e.hashes[0])}" target="_blank" rel="noopener">
-            <text class="oc-elabel" x="${mx}" y="${ly}" text-anchor="middle">${ocAmt(e.amount)} ${esc(e.sym)}${e.count > 1 ? ` (${e.count} transfers)` : ''}</text>
-            <text class="oc-esub" x="${mx}" y="${ly + 14}" text-anchor="middle">${ocDate(e.last_ts)}</text>
+            <text class="oc-elabel" x="${mx}" y="${ly}" text-anchor="middle">${ocAmt(e.amount)} ${esc(e.sym)}</text>
+            <text class="oc-esub" x="${mx}" y="${ly + 13}" text-anchor="middle">×${e.count} · ${ocDate(e.last_ts)}</text>
         </a>`;
     }).join('');
 
@@ -3534,7 +3666,7 @@ function ocRender() {
         return `<g class="oc-node" onclick="ocExpand('${esc(a)}')">
             <title>${esc(a)}</title>
             <circle cx="${p.x}" cy="${p.y}" r="${R + 8}" fill="${fill}" opacity=".12"/>
-            <circle class="main" cx="${p.x}" cy="${p.y}" r="${R}" fill="${fill}" stroke="${oc.expanded.has(a) ? '#fff' : 'transparent'}" stroke-width="2"/>
+            <circle class="main" cx="${p.x}" cy="${p.y}" r="${R}" fill="${fill}" stroke="${oc.raw.has(a) ? '#fff' : 'transparent'}" stroke-width="2"/>
             <text x="${p.x}" y="${p.y + 5}" text-anchor="middle" font-size="14" font-weight="800" fill="#000">${isRoot ? '★' : n.type ? '◆' : '•'}</text>
             <a href="${esc(oc.ex.addr + a)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
                 <text class="oc-addr" x="${p.x}" y="${p.y + R + 18}" text-anchor="middle">${esc(ocShort(a))}</text></a>
@@ -3542,26 +3674,33 @@ function ocRender() {
         </g>`;
     }).join('');
 
-    const dg = document.getElementById('oc-diagram');
-    dg.innerHTML = `<svg width="${W}" height="${H}" viewBox="0 0 ${W} ${H}">
+    oc.bounds = { w: W, h: H };
+    document.getElementById('oc-diagram').innerHTML = `<svg>
         <defs><marker id="oc-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a8a92"/></marker></defs>
-        ${edgeSvg}${nodeSvg}</svg>`;
-    dg.classList.remove('hidden');
+        <g id="oc-vp">${edgeSvg}${nodeSvg}</g></svg>`;
+    fit ? ocFit() : ocApply();
 
-    document.getElementById('oc-tx-body').innerHTML = oc.txs.map(t => `<tr>
-        <td><a href="${esc(oc.ex.tx + t.hash)}" target="_blank" rel="noopener">${esc(t.hash.slice(0, 10))}…${esc(t.hash.slice(-6))}</a></td>
-        <td>${esc(new Date(t.ts).toLocaleString('id-ID', { dateStyle: 'medium', timeStyle: 'short' }))}</td>
-        <td>${esc(ocShort(t.from))}</td><td>${esc(ocShort(t.to))}</td>
-        <td>${ocAmt(t.value)} ${esc(t.sym)}</td></tr>`).join('');
-    document.getElementById('oc-tx').classList.remove('hidden');
+    // tabel samping
+    document.getElementById('oc-tx-head').textContent = `Transaksi (${oc.txs.length})`;
+    document.getElementById('oc-tx-body').innerHTML = oc.txs.map(t => {
+        const out = t.from === t.me, peer = out ? t.to : t.from;
+        return `<tr>
+            <td><a href="${esc(oc.ex.tx + t.hash)}" target="_blank" rel="noopener">${esc(t.hash.slice(0, 10))}…${esc(t.hash.slice(-6))}</a></td>
+            <td>${ocDate(t.ts)}</td>
+            <td><span class="oc-dir ${out ? 'out' : 'in'}">${out ? 'OUT' : 'IN'}</span><a href="${esc(oc.ex.addr + peer)}" target="_blank" rel="noopener" title="${esc(peer)}">${esc(ocShort(peer))}</a></td>
+            <td>${ocAmt(t.value)} ${esc(t.sym)}</td></tr>`;
+    }).join('');
 }
 
+// ── input & shortcut ──
 document.getElementById('oc-address')?.addEventListener('keydown', e => { if (e.key === 'Enter') ocSearch(); });
 document.getElementById('oc-address')?.addEventListener('input', e => {
-    const v = e.target.value.trim();
-    const sel = document.getElementById('oc-chain');
+    const v = e.target.value.trim(), sel = document.getElementById('oc-chain');
     if (v.length > 30 && !/^0x/i.test(v)) sel.value = 'solana';
     else if (/^0x/i.test(v) && sel.value === 'solana') sel.value = 'ethereum';
+});
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && !document.getElementById('onchain-modal').classList.contains('hidden')) closeOnchain();
 });
         
 
