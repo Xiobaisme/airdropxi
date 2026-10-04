@@ -959,6 +959,18 @@
 .oc-elabel { font-family: var(--label); font-size: 12px; font-weight: 700; fill: var(--text); }
 .oc-esub { font-family: var(--label); font-size: 10px; fill: var(--text3); }
 
+/* ── Animasi aliran dana (titik jalan dari pengirim → penerima) ── */
+.oc-flow {
+    fill: none; stroke-linecap: round; stroke-width: 3.6;
+    stroke-dasharray: 0.1 15;          /* titik kecil tiap 15px */
+    animation: ocFlow 1.1s linear infinite;
+    pointer-events: none;
+}
+.oc-flow.swap { animation-duration: 1.7s; }   /* swap lebih pelan */
+@keyframes ocFlow { to { stroke-dashoffset: -15.1; } }
+.oc-diagram.grabbing .oc-flow { animation-play-state: paused; }  /* pause pas di-drag */
+@media (prefers-reduced-motion: reduce) { .oc-flow { animation: none; } }
+
 .oc-side { min-height: 0; display: flex; flex-direction: column; background: #0A0A0A; border: 2px solid var(--border); border-radius: var(--r-md); overflow: hidden; }
 .oc-side-head { padding: .75rem 1rem; border-bottom: 2px solid var(--border); font-family: var(--label); font-size: .64rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); }
 .oc-tablewrap { flex: 1; overflow: auto; }
@@ -3662,6 +3674,8 @@ function ocRender(fit) {
         list.forEach((a, i) => pos.set(a, { x: PAD + ci * COLW, y: top + i * ROW + ROW / 2 }));
     });
 
+    const animAll = oc.edges.size <= 60;   // kalau edge kebanyakan, animasi cuma di edge yang nyambung ke wallet utama
+
     const pairIdx = {};
     const edgeSvg = [...oc.edges.values()].map(e => {
         const a = pos.get(e.from), b = pos.get(e.to);
@@ -3685,6 +3699,7 @@ function ocRender(fit) {
         const l1 = isSwap ? `${ocAmt(e.sold.amount)} ${e.sold.sym} → ${ocAmt(e.bought.amount)} ${e.bought.sym}` : `${ocAmt(e.amount)} ${e.sym}`;
         const l2 = (isSwap ? (e.wrap ? 'WRAP ' : 'SWAP ') : '') + `×${e.count} · ${ocDate(e.last_ts)}`;
         return `<path d="${path}" fill="none" stroke="${color}" stroke-opacity=".85" stroke-width="2.2" ${isSwap || special ? 'stroke-dasharray="7 6"' : ''} marker-end="url(#oc-arrow)"/>
+        ${(animAll || e.from === oc.root || e.to === oc.root) ? `<path class="oc-flow ${isSwap ? 'swap' : ''}" d="${path}" stroke="${color}"/>` : ''}
         <a href="${esc(oc.ex.tx + e.hashes[0])}" target="_blank" rel="noopener">
             <text class="oc-elabel" ${isSwap ? 'style="fill:#FFD23F"' : ''} x="${mx}" y="${ly}" text-anchor="middle">${esc(l1)}</text>
             <text class="oc-esub" x="${mx}" y="${ly + 13}" text-anchor="middle">${esc(l2)}</text>
