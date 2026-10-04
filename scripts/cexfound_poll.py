@@ -46,7 +46,7 @@ INLINE_RE = re.compile(
 HEADER_RE = re.compile(r"^\W*(?:New\s+)?Found in\s+(?P<exchange>.+?)\s*$", re.I)
 # Format A token (di bawah header): "Dolphin ($POD)"
 TOKEN_RE = re.compile(
-    r"^\W*(?P<name>[^()]+?)\s*\(\s*\$?(?P<ticker>[A-Za-z0-9]{1,15})\s*\)\s*$"
+    r"^\W*(?P<name>[^()]+?)\s*\(\s*\$(?P<ticker>[A-Za-z0-9]{1,15})\s*\)\s*$"
 )
 NETWORKS_RE = re.compile(r"^\W*Networks?\s*:\s*(?P<nets>.+?)\s*$", re.I)
 
