@@ -2,10 +2,6 @@
 CEX Found poller — dijalankan GitHub Actions tiap 5 menit.
 Baca pesan terbaru dari grup sumber, parse, kirim ke dashboard AirdropXI.
 
-Format pesan yang dikenali:
-    Concrete ($CT) Found in OKX
-    Networks: CT-ERC20
-
 Dedup 24 jam per ticker+exchange ditangani server (admin-airdrop.js).
 """
 import asyncio
@@ -35,7 +31,7 @@ def _ch(c):
 CHANNELS = [_ch(c) for c in os.environ["SOURCE_CHANNELS"].split(",") if c.strip()]
 # Default 30 menit (> interval cron). Backfill: isi 4320 = 3 hari (lewat Run workflow).
 LOOKBACK_MIN = int(os.environ.get("LOOKBACK_MIN") or "30")
-MSG_LIMIT = 500
+MSG_LIMIT = 2000  # grup ini ramai, 3 hari bisa lebih dari 500 pesan
 
 FOUND_RE = re.compile(
     r"^\s*(?P<name>.+?)\s*\(\$(?P<ticker>[A-Za-z0-9]{1,15})\)\s*Found in\s+(?P<exchange>.+?)\s*$",
@@ -53,7 +49,7 @@ def parse(text: str):
         return None
     nets = NETWORKS_RE.search(text)
     networks = (
-        [n.strip() for n in re.split(r"[,;]", nets.group("nets")) if n.strip()]
+        [n.strip().strip("`*_ ") for n in re.split(r"[,;]", nets.group("nets")) if n.strip().strip("`*_ ")]
         if nets
         else []
     )
