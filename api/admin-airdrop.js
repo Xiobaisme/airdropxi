@@ -50,7 +50,7 @@ module.exports = async function handler(req, res) {
   }
     // ─── BROADCAST NEWS KE DISCORD & TELEGRAM ───
   async function handleBroadcastNews(req, res) {
-    const { title, description, image_base64, url, source, mention_everyone } = req.body || {};
+    const { title, description, image_base64, url, source, mention_everyone, queue_id } = req.body || {};
     if (!title) return res.status(400).json({ error: 'title wajib diisi' });
 
     // Decode gambar dari data URL (hasil paste) jadi Buffer, biar bisa
@@ -204,9 +204,21 @@ async function sendDiscord() {
       telegram: telegramSettled.status === 'fulfilled' ? telegramSettled.value : 'error: ' + telegramSettled.reason.message,
     };
 
-    const anyOk = results.discord === 'ok' || results.telegram === 'ok';
+        const anyOk = results.discord === 'ok' || results.telegram === 'ok';
+
+    // kalau dikirim dari antrian News Terminal, tandai "sent" biar nggak bisa kekirim dobel
+    if (anyOk && queue_id) {
+      try {
+        await fetch(`${BASE}/news_queue?id=eq.${encodeURIComponent(queue_id)}`, {
+          method: 'PATCH', headers: H,
+          body: JSON.stringify({ status: 'sent', sent_at: new Date().toISOString() }),
+        });
+      } catch (e) {
+        console.warn('[news-queue] gagal tandai sent:', e.message);
+      }
+    }
     return res.status(anyOk ? 200 : 500).json(results);
-  }
+      }
   // ─── TERMINAL LOGIN (verifikasi kata sandi custom di halaman login) ───
   // Secret-nya HANYA hidup di env var TERMINAL_LOGIN_SECRET (server-side),
   // gak pernah dikirim/ditulis di HTML/JS yang jalan di browser.
@@ -297,6 +309,26 @@ async function sendDiscord() {
       return res.status(405).json({ error: 'Method tidak diizinkan untuk broadcast-news' });
     }
     return await handleBroadcastNews(req, res);
+  }
+
+  
+  // ─── NEWS QUEUE (antrian post Telegram dari poller Supabase, dibaca News Terminal) ───
+  if (type === 'news-queue') {
+    if (req.method !== 'GET') {
+      return res.status(405).json({ error: 'Method tidak diizinkan untuk news-queue' });
+    }
+    try {
+      const r = await fetch(
+        `${BASE}/news_queue?select=id,source,text,link,posted_at,created_at,status&order=posted_at.desc.nullslast&limit=80`,
+        { headers: H }
+      );
+      const rows = await r.json();
+      if (!r.ok) return res.status(r.status).json({ error: serializeError(rows) });
+      res.setHeader('Cache-Control', 'no-store');
+      return res.status(200).json(rows);
+    } catch (e) {
+      return res.status(500).json({ error: serializeError(e) });
+    }
   }
 
     // ─── NLF HISTORY (riwayat yang kita simpan sendiri) ───
