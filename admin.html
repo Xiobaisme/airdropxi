@@ -952,12 +952,12 @@
 
 .oc-node { cursor: pointer; }
 .oc-node:hover .main { stroke: #fff; }
-.oc-addr, .oc-nlabel, .oc-elabel, .oc-esub { paint-order: stroke; stroke: #0A0A0A; stroke-width: 5px; stroke-linejoin: round; }
-.oc-addr { font-family: var(--mono); font-size: 11px; font-weight: 700; fill: var(--text); }
-.oc-nlabel { font-family: var(--label); font-size: 11.5px; font-weight: 700; fill: #fff; }
+.oc-addr, .oc-nlabel, .oc-elabel, .oc-esub { paint-order: stroke; stroke: #0A0A0A; stroke-width: 6px; stroke-linejoin: round; }
+.oc-addr { font-family: var(--mono); font-size: 14px; font-weight: 700; fill: var(--text); }
+.oc-nlabel { font-family: var(--label); font-size: 14px; font-weight: 700; fill: #fff; }
 .oc-dir.swap { color: #FFD23F; background: rgba(255,210,63,.14); }
-.oc-elabel { font-family: var(--label); font-size: 12px; font-weight: 700; fill: var(--text); }
-.oc-esub { font-family: var(--label); font-size: 10px; fill: var(--text3); }
+.oc-elabel { font-family: var(--label); font-size: 14px; font-weight: 700; fill: var(--text); }
+.oc-esub { font-family: var(--label); font-size: 12px; fill: var(--text3); }
 
 /* ── Animasi aliran dana (titik jalan dari pengirim → penerima) ── */
 .oc-flow {
@@ -3626,7 +3626,7 @@ function ocFit() {
     if (!oc.bounds) return;
     const st = document.getElementById('oc-diagram');
     const { w, h } = oc.bounds, cw = st.clientWidth, ch = st.clientHeight;
-    const k = Math.max(0.1, Math.min(cw / w, ch / h, 1.2));
+    const k = Math.max(0.1, Math.min(cw / w, ch / h, 1.6));
     oc.vp = { k, x: w * k <= cw ? (cw - w * k) / 2 : 20, y: h * k <= ch ? (ch - h * k) / 2 : 20 };
     ocApply();
 }
@@ -3668,7 +3668,7 @@ function ocZoom(f, cx, cy) {
         // Tata letak radial: wallet utama di tengah, counterparty melingkar (beberapa ring),
 // wallet yang di-klik membuka cabangnya ke arah luar.
 function ocLayout() {
-    const GAP = 110, PAD = 130;
+    const GAP = 160, PAD = 100, STRETCH = 1.45;   // STRETCH = seberapa melebar ke samping
     const kids = new Map();
     oc.nodes.forEach((n, a) => {
         if (a === oc.root) return;
@@ -3693,19 +3693,25 @@ function ocLayout() {
         });
     };
 
-    // counterparty wallet utama: ring ke-k berjari-jari 260 + k*210
+        // counterparty wallet utama: cincin oval, tiap cincin kapasitasnya kelipatan cincin pertama
+    // supaya node cincin luar jatuh DI ANTARA node cincin dalam (garis tidak menembus node lain)
     const first = kids.get(oc.root) || [];
+    const R0 = 280;
+    const n1 = Math.max(8, Math.floor((2 * Math.PI * R0 * ((1 + STRETCH) / 2)) / GAP));
     const rings = [];
     for (let i = 0, k = 0; i < first.length; k++) {
-        const r = 260 + k * 210, cap = Math.max(6, Math.floor((2 * Math.PI * r) / GAP));
-        rings.push({ r, items: first.slice(i, i + cap) });
-        i += cap;
+        const slots = n1 * (k + 1);
+        rings.push({ k, slots, r: R0 * (k + 1), items: first.slice(i, i + slots) });
+        i += slots;
     }
-    rings.forEach((ring, k) => {
-        const n = ring.items.length, off = (k % 2) * (Math.PI / Math.max(n, 1));
+    rings.forEach(ring => {
+        const step = (2 * Math.PI) / ring.slots;
+        const off = ring.k === 0 ? 0 : step / 2;          // cincin luar digeser setengah langkah
+        const n = ring.items.length;
         ring.items.forEach((a, j) => {
-            const ang = -Math.PI / 2 + off + (2 * Math.PI * j) / n;
-            pos.set(a, { x: Math.cos(ang) * ring.r, y: Math.sin(ang) * ring.r });
+            const slot = Math.floor((j * ring.slots) / n);  // cincin terakhir yang belum penuh tetap tersebar rata
+            const ang = -Math.PI / 2 + off + step * slot;
+            pos.set(a, { x: Math.cos(ang) * ring.r * STRETCH, y: Math.sin(ang) * ring.r });
         });
     });
     first.forEach(a => { const p = pos.get(a); fan(a, Math.atan2(p.y, p.x)); });
@@ -3721,7 +3727,7 @@ function ocLayout() {
 // ── render ──
 function ocRender(fit) {
     if (!oc.root) return;
-        const R = 22;
+        const R = 28;
     const { pos, W, H, ox, oy } = ocLayout();
     // jaga posisi layar saat expand supaya diagram tidak "loncat"
     if (!fit && oc.shift) { oc.vp.x -= (ox - oc.shift.x) * oc.vp.k; oc.vp.y -= (oy - oc.shift.y) * oc.vp.k; }
@@ -3751,7 +3757,7 @@ function ocRender(fit) {
         // label dekat ujung yang lebih jauh dari wallet utama (biar tidak numpuk di tengah)
         const t = dist(a) > dist(b) ? 0.3 : 0.7, s = 1 - t;
         const lx = s * s * x1 + 2 * s * t * cx + t * t * x2;
-        const ly = s * s * y1 + 2 * s * t * cy + t * t * y2 - 8;
+        const ly = s * s * y1 + 2 * s * t * cy + t * t * y2 - 10;
 
         const isSwap = e.kind === 'swap';
         const special = oc.nodes.get(e.to)?.type;
@@ -3762,7 +3768,7 @@ function ocRender(fit) {
         ${(animN++ < 60) ? `<path class="oc-flow ${isSwap ? 'swap' : ''}" d="${path}" stroke="${color}"/>` : ''}
         <a href="${esc(oc.ex.tx + e.hashes[0])}" target="_blank" rel="noopener">
             <text class="oc-elabel" ${isSwap ? 'style="fill:#FFD23F"' : ''} x="${lx}" y="${ly}" text-anchor="middle">${esc(l1)}</text>
-            ${dense ? '' : `<text class="oc-esub" x="${lx}" y="${ly + 13}" text-anchor="middle">${esc(l2)}</text>`}
+            ${dense ? '' : `<text class="oc-esub" x="${lx}" y="${ly + 16}" text-anchor="middle">${esc(l2)}</text>`}
         </a>`;
     }).join('');
 
@@ -3775,10 +3781,10 @@ function ocRender(fit) {
             <title>${esc((n.label ? n.label + '\n' : '') + a)}</title>
             <circle cx="${p.x}" cy="${p.y}" r="${R + 8}" fill="${fill}" opacity=".12"/>
             <circle class="main" cx="${p.x}" cy="${p.y}" r="${R}" fill="${fill}" stroke="${oc.raw.has(a) ? '#fff' : 'transparent'}" stroke-width="2"/>
-            <text x="${p.x}" y="${p.y + 5}" text-anchor="middle" font-size="14" font-weight="800" fill="#000">${isRoot ? '★' : n.type ? '◆' : '•'}</text>
-            ${hasName ? `<text class="oc-nlabel" x="${p.x}" y="${p.y + R + 18}" text-anchor="middle">${esc(ocName(a))}</text>` : ''}
+            <text x="${p.x}" y="${p.y + 6}" text-anchor="middle" font-size="17" font-weight="800" fill="#000">${isRoot ? '★' : n.type ? '◆' : '•'}</text>
+            ${hasName ? `<text class="oc-nlabel" x="${p.x}" y="${p.y + R + 20}" text-anchor="middle">${esc(ocName(a))}</text>` : ''}
             <a href="${esc(oc.ex.addr + a)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
-                <text class="oc-addr" x="${p.x}" y="${p.y + R + (hasName ? 32 : 18)}" text-anchor="middle">${esc(ocShort(a))}</text></a>
+                <text class="oc-addr" x="${p.x}" y="${p.y + R + (hasName ? 38 : 20)}" text-anchor="middle">${esc(ocShort(a))}</text></a>
         </g>`;
     }).join('');
 
