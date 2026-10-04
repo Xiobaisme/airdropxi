@@ -306,21 +306,30 @@ async function sendDiscord() {
     res.setHeader('Cache-Control', 'no-store');
     try {
       if (req.method === 'POST') {
-        const given = Buffer.from(String(req.headers['x-secret'] || ''));
-        const want = Buffer.from(process.env.ALERT_SECRET || '');
-        if (!want.length || given.length !== want.length || !crypto.timingSafeEqual(given, want))
-          return res.status(401).json({ error: 'Unauthorized' });
+  const given = Buffer.from(String(req.headers['x-secret'] || ''));
+  const want = Buffer.from(process.env.ALERT_SECRET || '');
+  if (!want.length || given.length !== want.length || !crypto.timingSafeEqual(given, want))
+    return res.status(401).json({ error: 'Unauthorized' });
 
-        const { name, ticker, exchange, networks, ts } = req.body || {};
-        if (!ticker || !exchange) return res.status(400).json({ error: 'Payload tidak valid' });
+  const { name, ticker, exchange, networks, ts, msg_id } = req.body || {};
+  const clean = (v, n) => String(v ?? '').replace(/[<>]/g, '').trim().slice(0, n);
+  const tk = clean(ticker, 15).toUpperCase();
+  const ex = clean(exchange, 40);
+  if (!tk || !ex) return res.status(400).json({ error: 'Payload tidak valid' });
+  const nets = Array.isArray(networks) ? networks.slice(0, 10).map(n => clean(n, 40)).filter(Boolean) : [];
+  const evTs = Number(ts) || Date.now();
 
-        const fresh = await redis.set(`cexfound:seen:${ticker}:${exchange}`, 1, { nx: true, ex: 86400 });
-        if (!fresh) return res.status(200).json({ dup: true });
+  // UNKNOWN = ticker ga kebaca, dedup per pesan biar ga saling nimpa
+  const key = tk === 'UNKNOWN'
+    ? `cexfound:seen:UNKNOWN:${ex.toLowerCase()}:${clean(msg_id, 20) || evTs}`
+    : `cexfound:seen:${tk}:${ex.toLowerCase()}`;
+  const fresh = await redis.set(key, 1, { nx: true, ex: 86400 });
+  if (!fresh) return res.status(200).json({ dup: true });
 
-        await redis.lpush('cexfound:events', JSON.stringify({ name, ticker, exchange, networks, ts: Number(ts) || Date.now() }));
-        await redis.ltrim('cexfound:events', 0, 99);
-        return res.status(200).json({ ok: true });
-      }
+  await redis.lpush('cexfound:events', JSON.stringify({ name: clean(name, 80), ticker: tk, exchange: ex, networks: nets, ts: evTs }));
+  await redis.ltrim('cexfound:events', 0, 99);
+  return res.status(200).json({ ok: true });
+}
 
       if (req.method === 'GET') {
         if (!verifyAdminToken(req)) return res.status(401).json({ error: 'Unauthorized' });
