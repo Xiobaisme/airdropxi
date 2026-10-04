@@ -955,6 +955,7 @@
 .oc-addr, .oc-nlabel, .oc-elabel, .oc-esub { paint-order: stroke; stroke: #0A0A0A; stroke-width: 6px; stroke-linejoin: round; }
 .oc-addr { font-family: var(--mono); font-size: 14px; font-weight: 700; fill: var(--text); }
 .oc-nlabel { font-family: var(--label); font-size: 14px; font-weight: 700; fill: #fff; }
+.oc-nlabel { pointer-events: none; }
 .oc-dir.swap { color: #FFD23F; background: rgba(255,210,63,.14); }
 .oc-elabel { font-family: var(--label); font-size: 14px; font-weight: 700; fill: var(--text); }
 .oc-esub { font-family: var(--label); font-size: 12px; fill: var(--text3); }
@@ -3738,6 +3739,7 @@ function ocRender(fit) {
 
     let animN = 0;
     const pairIdx = {};
+    const edgeLabelSvg = [];
     const edgeSvg = [...oc.edges.values()].map(e => {
         const a = pos.get(e.from), b = pos.get(e.to);
         if (!a || !b) return '';
@@ -3764,34 +3766,38 @@ function ocRender(fit) {
         const color = isSwap ? '#FFD23F' : (e.from === oc.root ? 'var(--secondary)' : 'var(--primary)');
         const l1 = isSwap ? `${ocAmt(e.sold.amount)} ${e.sold.sym} → ${ocAmt(e.bought.amount)} ${e.bought.sym}` : `${ocAmt(e.amount)} ${e.sym}`;
         const l2 = (isSwap ? (e.wrap ? 'WRAP ' : 'SWAP ') : '') + `×${e.count} · ${ocDate(e.last_ts)}`;
-        return `<path d="${path}" fill="none" stroke="${color}" stroke-opacity=".85" stroke-width="2.2" ${isSwap || special ? 'stroke-dasharray="7 6"' : ''} marker-end="url(#oc-arrow)"/>
-        ${(animN++ < 60) ? `<path class="oc-flow ${isSwap ? 'swap' : ''}" d="${path}" stroke="${color}"/>` : ''}
-        <a href="${esc(oc.ex.tx + e.hashes[0])}" target="_blank" rel="noopener">
+        edgeLabelSvg.push(`<a href="${esc(oc.ex.tx + e.hashes[0])}" target="_blank" rel="noopener">
             <text class="oc-elabel" ${isSwap ? 'style="fill:#FFD23F"' : ''} x="${lx}" y="${ly}" text-anchor="middle">${esc(l1)}</text>
             ${dense ? '' : `<text class="oc-esub" x="${lx}" y="${ly + 16}" text-anchor="middle">${esc(l2)}</text>`}
-        </a>`;
+        </a>`);
+        return `<path d="${path}" fill="none" stroke="${color}" stroke-opacity=".85" stroke-width="2.2" ${isSwap || special ? 'stroke-dasharray="7 6"' : ''} marker-end="url(#oc-arrow)"/>
+        ${(animN++ < 60) ? `<path class="oc-flow ${isSwap ? 'swap' : ''}" d="${path}" stroke="${color}"/>` : ''}`;
     }).join('');
 
+        const nodeLabelSvg = [];   // label node juga digambar paling atas
     const nodeSvg = [...oc.nodes.entries()].map(([a, n]) => {
         const p = pos.get(a), isRoot = a === oc.root;
         if (!p) return '';
         const fill = n.type === 'mixer' ? 'var(--danger)' : n.type === 'bridge' ? '#F59E0B' : n.type ? 'var(--success)' : isRoot ? 'var(--secondary)' : 'var(--primary)';
         const hasName = !!n.label;
+
+        nodeLabelSvg.push(`
+            ${hasName ? `<text class="oc-nlabel" x="${p.x}" y="${p.y + R + 20}" text-anchor="middle">${esc(ocName(a))}</text>` : ''}
+            <a href="${esc(oc.ex.addr + a)}" target="_blank" rel="noopener">
+                <text class="oc-addr" x="${p.x}" y="${p.y + R + (hasName ? 38 : 20)}" text-anchor="middle">${esc(ocShort(a))}</text></a>`);
+
         return `<g class="oc-node" onclick="ocExpand('${esc(a)}')">
             <title>${esc((n.label ? n.label + '\n' : '') + a)}</title>
             <circle cx="${p.x}" cy="${p.y}" r="${R + 8}" fill="${fill}" opacity=".12"/>
             <circle class="main" cx="${p.x}" cy="${p.y}" r="${R}" fill="${fill}" stroke="${oc.raw.has(a) ? '#fff' : 'transparent'}" stroke-width="2"/>
             <text x="${p.x}" y="${p.y + 6}" text-anchor="middle" font-size="17" font-weight="800" fill="#000">${isRoot ? '★' : n.type ? '◆' : '•'}</text>
-            ${hasName ? `<text class="oc-nlabel" x="${p.x}" y="${p.y + R + 20}" text-anchor="middle">${esc(ocName(a))}</text>` : ''}
-            <a href="${esc(oc.ex.addr + a)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
-                <text class="oc-addr" x="${p.x}" y="${p.y + R + (hasName ? 38 : 20)}" text-anchor="middle">${esc(ocShort(a))}</text></a>
         </g>`;
     }).join('');
 
     oc.bounds = { w: W, h: H };
     document.getElementById('oc-diagram').innerHTML = `<svg>
         <defs><marker id="oc-arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse"><path d="M0,0 L10,5 L0,10 z" fill="#8a8a92"/></marker></defs>
-        <g id="oc-vp">${edgeSvg}${nodeSvg}</g></svg>`;
+        <g id="oc-vp">${edgeSvg}${nodeSvg}${edgeLabelSvg.join('')}${nodeLabelSvg.join('')}</g></svg>`;
     fit ? ocFit() : ocApply();
 
     document.getElementById('oc-tx-head').textContent = `Transaksi (${oc.txs.length})`;
