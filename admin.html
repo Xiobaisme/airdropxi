@@ -1012,7 +1012,16 @@
 .oc-live-new { position: sticky; top: 0; z-index: 2; align-self: center; flex-shrink: 0; font-family: var(--label); font-size: .68rem; font-weight: 800; padding: .4rem 1rem; border-radius: 999px; border: 2px solid var(--primary); background: var(--primary); color: #fff; cursor: pointer; box-shadow: 0 6px 18px rgba(0,0,0,.5); }
 .oc-live-more { flex-shrink: 0; font-family: var(--label); font-size: .72rem; font-weight: 700; padding: .65rem; border-radius: var(--r-sm); border: 2px dashed var(--border-strong); background: transparent; color: var(--text2); cursor: pointer; transition: border-color var(--ease), color var(--ease); }
 .oc-live-more:hover { border-color: var(--primary); color: var(--text); }
-.oc-live-foot { padding: .55rem 1rem; border-top: 2px solid var(--border); font-family: var(--mono); font-size: .62rem; color: var(--text3); }
+.oc-live-foot { display: flex; align-items: center; gap: 8px; padding: .55rem .7rem; border-top: 2px solid var(--border); background: #0A0A0A; }
+.oc-live-btn { display: inline-flex; align-items: center; gap: 6px; flex-shrink: 0; font-family: var(--label); font-size: .68rem; font-weight: 800; padding: .42rem .85rem; border-radius: 999px; cursor: pointer; border: 2px solid var(--border-strong); background: transparent; color: var(--text2); transition: border-color var(--ease), color var(--ease), background var(--ease); }
+.oc-live-btn .news-live-dot { margin-right: 0; }
+.oc-live-btn.on { border-color: var(--success); color: var(--success); background: var(--success-dim); }
+.oc-live-btn:not(.on) .news-live-dot { animation: none; background: var(--text3); box-shadow: none; }
+.oc-live-st { flex: 1; min-width: 0; font-family: var(--mono); font-size: .6rem; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.oc-live-arrows { display: flex; gap: 6px; flex-shrink: 0; }
+.oc-live-arrow { position: relative; width: 34px; height: 34px; border-radius: 10px; border: 2px solid var(--border-strong); background: #111; color: #fff; font-size: 1rem; font-weight: 800; line-height: 1; cursor: pointer; transition: border-color var(--ease); }
+.oc-live-arrow:hover { border-color: #fff; }
+.oc-live-arrow .badge { position: absolute; top: -7px; right: -7px; min-width: 17px; height: 17px; padding: 0 4px; border-radius: 999px; background: var(--primary); color: #fff; font-family: var(--label); font-size: .58rem; font-weight: 800; display: flex; align-items: center; justify-content: center; }
 
 .oc-lv { flex-shrink: 0; background: #0D0D0D; border: 2px solid var(--border); border-left: 3px solid var(--primary); border-radius: 14px; padding: 10px 12px; cursor: pointer; transition: background var(--ease), border-color var(--ease); }
 .oc-lv:hover { background: #111; border-color: var(--border-light); }
@@ -1590,7 +1599,14 @@
         <div class="oc-live-chips" id="oc-live-chips"></div>
     </div>
     <div class="oc-live-list" id="oc-live-list"></div>
-    <div class="oc-live-foot" id="oc-live-status">Memuat…</div>
+        <div class="oc-live-foot">
+        <button class="oc-live-btn on" id="oc-live-btn" type="button" title="Jeda / lanjut live"><span class="news-live-dot"></span><span id="oc-live-btn-t">Live</span></button>
+        <span class="oc-live-st" id="oc-live-status">Memuat…</span>
+        <div class="oc-live-arrows">
+            <button class="oc-live-arrow" data-dir="up" type="button" title="Ke atas (terbaru)">↑<span class="badge hidden" id="oc-live-up-n">0</span></button>
+            <button class="oc-live-arrow" data-dir="down" type="button" title="Ke bawah">↓</button>
+        </div>
+    </div>
 </aside>
         
         <div class="oc-stage">
@@ -3886,7 +3902,7 @@ function ocRender(fit) {
 // ═══════════════════════════════════════════════════════════
 // ─── LIVE TRANSFERS (panel kiri / bottom sheet) ───
 // ═══════════════════════════════════════════════════════════
-const OC_LIVE_CHAINS = ['ethereum'];       // tambah chain lain kalau backend-nya sudah mendukung
+const OC_LIVE_CHAINS = ['ethereum', 'bnb', 'base', 'arbitrum', 'polygon', 'op'];   // kalau status bilang "Sebagian gagal", kurangi chain di sini
 const OC_LIVE_POLL_MS = 20000;             // cek transfer baru tiap 20 detik
 const OC_LIVE_PAGE = 20;                   // jumlah kartu per "Muat lebih banyak"
 const OC_LIVE_MAX = 300;                   // batas kartu di memori
@@ -3896,9 +3912,13 @@ const OC_LIVE_MODES = [['all', 'Semua'], ['whale', 'Whale ≥ $1M'], ['tag', 'Be
 
 const ocLive = { items: [], queue: [], seen: new Set(), names: {}, tried: new Set(),
     prices: { USDT: 1, USDC: 1 }, shown: OC_LIVE_PAGE, minUsd: 250000, mode: 'all', q: '',
-    on: false, busy: false, first: true, timer: null, labelBusy: false };
-
-const ocLiveUsd = (it) => { const p = ocLive.prices[it.sym]; return p ? it.amount * p : null; };
+        on: false, paused: false, busy: false, first: true, done: new Set(), timer: null, labelBusy: false };
+        
+const ocLiveUsd = (it) => {
+    if (it.usd != null && isFinite(it.usd)) return it.usd;   // backend sudah hitung untuk semua token
+    const p = ocLive.prices[it.sym];
+    return p ? it.amount * p : null;
+};
 const ocLiveLabel = (a) => ocLive.names[a]?.label || null;
 const ocLiveShow = (a) => { const l = ocLiveLabel(a); return l ? (l.length > 22 ? l.slice(0, 21) + '…' : l) : ocShort(a); };
 
@@ -3915,7 +3935,9 @@ function ocLiveToggle(force) {
 
 function ocLiveStart() {
     if (ocLive.on) return;
-    ocLive.on = true; ocLive.first = true;
+                ocLive.on = true; ocLive.first = true; ocLive.paused = false; ocLive.done = new Set();
+    document.getElementById('oc-live-btn')?.classList.add('on');
+    const bt = document.getElementById('oc-live-btn-t'); if (bt) bt.textContent = 'Live';
     ocLiveStatus('Memuat…');
     ocLiveTick();
     ocLive.timer = setInterval(ocLiveTick, OC_LIVE_POLL_MS);
@@ -3943,22 +3965,22 @@ async function ocLiveFetch(chain, blocks) {
 }
 
 async function ocLiveTick() {
-    if (!ocLive.on || ocLive.busy) return;
+    if (!ocLive.on || ocLive.paused || ocLive.busy) return;
     ocLive.busy = true;
     try {
         await ocLivePrices();
-        const blocks = ocLive.first ? 20 : 3;   // pertama kali ambil ±4 menit ke belakang, selanjutnya cuma yang baru
-        const res = await Promise.allSettled(OC_LIVE_CHAINS.map(c => ocLiveFetch(c, blocks)));
-        const fresh = []; let failed = 0;
-        res.forEach(r => {
-            if (r.status !== 'fulfilled') { failed++; return; }
+        // chain yang sudah pernah sukses cukup ambil 3 block terakhir; yang belum, ambil ±4 menit ke belakang
+        const res = await Promise.allSettled(OC_LIVE_CHAINS.map(c =>
+            ocLiveFetch(c, ocLive.done.has(c) ? 3 : 20).then(items => { ocLive.done.add(c); return items; })));
+        const fresh = [], failedNames = [];
+        res.forEach((r, i) => {
+            if (r.status !== 'fulfilled') { failedNames.push(OC_LIVE_CHAINS[i]); return; }
             r.value.forEach(it => {
                 const id = it.chain + ':' + (it.id || it.hash);
                 if (ocLive.seen.has(id)) return;
                 ocLive.seen.add(id); it._id = id; fresh.push(it);
             });
         });
-        if (!failed) ocLive.first = false;
         ocLive.queue.push(...fresh);
 
         // kalau user lagi scroll ke bawah, jangan geser list: tampilkan pill "N transaksi baru"
@@ -3966,7 +3988,9 @@ async function ocLiveTick() {
         if (!ocLive.items.length || (list && list.scrollTop <= 40)) ocLiveFlush(); else ocLiveRender();
 
         const t = new Date().toLocaleTimeString('id-ID', { hour12: false, timeZone: 'Asia/Jakarta' });
-        ocLiveStatus(failed ? `Sebagian gagal (${failed}) · ${ocLive.items.length} tx` : `Live · ${OC_LIVE_CHAINS.join(', ')} · ${t} · ${ocLive.items.length} tx`);
+        ocLiveStatus(failedNames.length
+            ? `Gagal: ${failedNames.join(', ')} · ${ocLive.items.length} tx`
+            : `Live · ${OC_LIVE_CHAINS.length} chain · ${t} · ${ocLive.items.length} tx`);
     } catch (e) {
         ocLiveStatus('Gagal: ' + e.message);
     } finally { ocLive.busy = false; }
@@ -3997,14 +4021,14 @@ function ocLiveCard(it) {
     const usd = ocLiveUsd(it), whale = usd !== null && usd >= 1e6;
     const lf = ocLiveLabel(it.from), lt = ocLiveLabel(it.to);
     const tagTxt = [lf, lt].some(l => l && /\.eth$/i.test(l)) ? 'ENS' : 'TAG';
-    const ex = OC_LIVE_EXPLORER[it.chain];
+    const link = it.url || (OC_LIVE_EXPLORER[it.chain] ? OC_LIVE_EXPLORER[it.chain] + it.hash : '');
     const addr = (a) => `<button class="oc-lv-addr ${ocLiveLabel(a) ? 'named' : ''}" data-addr="${esc(a)}" data-chain="${esc(it.chain)}" title="${esc((ocLiveLabel(a) ? ocLiveLabel(a) + '\n' : '') + a)}">${esc(ocLiveShow(a))}</button>`;
     return `<div class="oc-lv ${whale ? 'whale' : ''}" data-addr="${esc(it.from)}" data-chain="${esc(it.chain)}">
         <div class="oc-lv-top">
             <span class="oc-lv-chain">${esc(it.chain)}</span>
             ${whale ? '<span class="oc-lv-badge whale">Whale</span>' : ''}
             ${(lf || lt) ? `<span class="oc-lv-badge tag">${tagTxt}</span>` : ''}
-            <span class="oc-lv-time">${newsTimeAgo(new Date(it.ts).toISOString())}${ex ? `<a href="${esc(ex + it.hash)}" target="_blank" rel="noopener">tx ↗</a>` : ''}</span>
+            <span class="oc-lv-time">${newsTimeAgo(new Date(it.ts).toISOString())}${/^https?:\/\//.test(link) ? `<a href="${esc(link)}" target="_blank" rel="noopener">tx ↗</a>` : ''}</span>
         </div>
         <div class="oc-lv-amt">${ocAmt(it.amount)} ${esc(it.sym)}${usd !== null ? `<small>$${ocAmt(usd)}</small>` : ''}</div>
         <div class="oc-lv-route">${addr(it.from)}<span class="arr">→</span>${addr(it.to)}</div>
@@ -4023,6 +4047,8 @@ function ocLiveRender() {
         ? shown.map(ocLiveCard).join('')
         : `<div class="oc-live-empty">${ocLive.items.length ? 'Tidak ada yang cocok dengan filter.' : 'Menunggu transaksi besar…'}</div>`) + more;
     list.scrollTop = st;
+    const badge = document.getElementById('oc-live-up-n');
+    if (badge) { badge.textContent = ocLive.queue.length; badge.classList.toggle('hidden', !ocLive.queue.length); }
     ocLiveLabels(shown);
 }
 
@@ -4099,6 +4125,27 @@ function ocLiveInit() {
     });
 
     ocLiveRender();
+
+    // tombol Live (jeda / lanjut) + panah atas/bawah di bagian bawah panel
+    const liveBtn = document.getElementById('oc-live-btn');
+    liveBtn.addEventListener('click', () => {
+        ocLive.paused = !ocLive.paused;
+        liveBtn.classList.toggle('on', !ocLive.paused);
+        document.getElementById('oc-live-btn-t').textContent = ocLive.paused ? 'Jeda' : 'Live';
+        if (ocLive.paused) ocLiveStatus('Dijeda · klik Live untuk lanjut');
+        else ocLiveTick();
+    });
+    document.querySelector('.oc-live-arrows').addEventListener('click', e => {
+        const b = e.target.closest('[data-dir]');
+        if (!b) return;
+        const list = document.getElementById('oc-live-list');
+        if (b.dataset.dir === 'up') {
+            if (ocLive.queue.length) ocLiveFlush();
+            list.scrollTo({ top: 0, behavior: 'smooth' });
+        } else {
+            list.scrollTo({ top: list.scrollHeight, behavior: 'smooth' });
+        }
+    });
 }
 ocLiveInit();
         
