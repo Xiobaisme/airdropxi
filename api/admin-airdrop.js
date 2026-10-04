@@ -374,7 +374,7 @@ async function sendDiscord() {
 
     try {
       const addr = String(address || '').trim();
-      const norm = chain === 'solana' ? addr : addr.toLowerCase();
+      const norm = (chain === 'solana' || chain === 'bitcoin') ? addr : addr.toLowerCase();
       const ckey = `onchain:${chain}:${norm}`;
       const hit = await redis.get(ckey);
       if (hit) return res.status(200).json(typeof hit === 'string' ? JSON.parse(hit) : hit);
