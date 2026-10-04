@@ -3547,7 +3547,7 @@ function ocBuild() {
 
 function ocMerge(d, limit) {
     const base = d.address, baseCol = oc.nodes.get(base).col;
-    const dust = (amount) => oc.hideDust && amount < OC_DUST;
+    const dust = (amount) => oc.hideDust && amount < (oc.chain === 'bitcoin' ? 0.00001 : OC_DUST);
     const swapFirst = (a, b) => (b.kind === 'swap') - (a.kind === 'swap');
 
     d.edges.filter(e => e.kind === 'swap' || !dust(e.amount))
@@ -3746,8 +3746,9 @@ function ocRender(fit) {
 document.getElementById('oc-address')?.addEventListener('keydown', e => { if (e.key === 'Enter') ocSearch(); });
 document.getElementById('oc-address')?.addEventListener('input', e => {
     const v = e.target.value.trim(), sel = document.getElementById('oc-chain');
-    if (v.length > 30 && !/^0x/i.test(v)) sel.value = 'solana';
-    else if (/^0x/i.test(v) && sel.value === 'solana') sel.value = 'ethereum';
+    if (/^0x/i.test(v)) { if (sel.value === 'solana' || sel.value === 'bitcoin') sel.value = 'ethereum'; }
+    else if (/^bc1/i.test(v)) sel.value = 'bitcoin';
+    else if (v.length > 30 && sel.value !== 'bitcoin') sel.value = 'solana';
 });
 document.addEventListener('keydown', e => {
     if (e.key === 'Escape' && !document.getElementById('onchain-modal').classList.contains('hidden')) closeOnchain();
