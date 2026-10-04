@@ -372,6 +372,18 @@ async function sendDiscord() {
       } catch { return res.status(200).json({}); }
     }
 
+        if (action === 'live') {
+      try {
+        return res.status(200).json(await onchain.live(String(chain || ''), {
+          gap: Math.min(Math.max(+req.query.gap || 60, 10), 180),
+          min: Math.max(+req.query.min || 250000, 10000),
+          price: +req.query.price || 0,
+        }));
+      } catch (e) {
+        return res.status(502).json({ error: e.message });
+      }
+    }
+
     try {
       const addr = String(address || '').trim();
       const norm = (chain === 'solana' || chain === 'bitcoin') ? addr : addr.toLowerCase();
