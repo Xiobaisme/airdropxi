@@ -954,7 +954,8 @@
 .oc-node:hover .main { stroke: #fff; }
 .oc-addr, .oc-nlabel, .oc-elabel, .oc-esub { paint-order: stroke; stroke: #0A0A0A; stroke-width: 5px; stroke-linejoin: round; }
 .oc-addr { font-family: var(--mono); font-size: 11px; font-weight: 700; fill: var(--text); }
-.oc-nlabel { font-family: var(--label); font-size: 11px; fill: var(--text2); }
+.oc-nlabel { font-family: var(--label); font-size: 11.5px; font-weight: 700; fill: #fff; }
+.oc-dir.swap { color: #FFD23F; background: rgba(255,210,63,.14); }
 .oc-elabel { font-family: var(--label); font-size: 12px; font-weight: 700; fill: var(--text); }
 .oc-esub { font-family: var(--label); font-size: 10px; fill: var(--text3); }
 
@@ -3442,9 +3443,10 @@ function stopFallingCoins() {
 // ═══════════════════════════════════════════════════════════
 const OC_DUST = 0.001;
 const oc = { chains: null, chain: null, root: null, ex: null, raw: new Map(), nodes: new Map(), edges: new Map(), txs: [],
-             vp: { x: 0, y: 0, k: 1 }, bounds: null, moved: false, hideDust: true };
+             names: {}, tried: new Set(), vp: { x: 0, y: 0, k: 1 }, bounds: null, moved: false, hideDust: true };
 
 const ocShort = (a) => a.length > 16 ? a.slice(0, 8) + '…' + a.slice(-6) : a;
+const ocName = (a) => { const l = oc.names[a]?.label; return l ? (l.length > 26 ? l.slice(0, 25) + '…' : l) : ocShort(a); };
 const ocAmt = (n) => n >= 1000 ? n.toLocaleString('en-US', { maximumFractionDigits: 2 })
     : n >= 1 ? n.toLocaleString('en-US', { maximumFractionDigits: 4 })
     : n.toLocaleString('en-US', { maximumSignificantDigits: 4 });
@@ -3489,22 +3491,44 @@ async function ocSearch() {
         const d = await ocFetch(chain, addr);
         oc.chain = chain; oc.root = d.address; oc.ex = d.explorer;
         oc.raw = new Map([[d.address, d]]);
+        oc.names = {}; oc.tried = new Set();
         ocBuild();
         ocSummary(d);
         document.getElementById('oc-empty').classList.add('hidden');
         document.getElementById('oc-tx').classList.remove('hidden');
         document.getElementById('oc-main').classList.add('has-tx');
         ocRender(true);
+        ocLoadLabels();
     } catch (e) { showToast('Gagal: ' + e.message, 'error'); }
     finally { btn.disabled = false; btn.textContent = 'Lacak'; }
 }
 
-// Bangun ulang graf dari data mentah (dipakai saat expand & saat toggle dust)
+// Ambil nama (ENS/tag/kontrak) untuk node yang belum punya, lalu gambar ulang
+async function ocLoadLabels() {
+    if (!/^0x/i.test(oc.root || '')) return;
+    const need = [...oc.nodes.keys()].filter(a => !oc.tried.has(a) && (!oc.names[a] || oc.names[a].auto)).slice(0, 20);
+    if (!need.length) return;
+    need.forEach(a => oc.tried.add(a));
+    const tag = oc.chain + oc.root;
+    try {
+        const r = await fetch(`/api/admin-airdrop?type=onchain&action=labels&chain=${encodeURIComponent(oc.chain)}&addresses=${need.join(',')}`);
+        if (!r.ok || tag !== oc.chain + oc.root) return;
+        const got = await r.json();
+        const keys = Object.keys(got);
+        if (!keys.length) return;
+        keys.forEach(a => { oc.names[a] = { ...(oc.names[a] || {}), ...got[a], auto: false }; });
+        ocBuild();
+        ocRender(false);
+    } catch {}
+}
+
+// Bangun ulang graf dari data mentah (dipakai saat expand & toggle dust)
 function ocBuild() {
     oc.nodes = new Map([[oc.root, { col: 0 }]]);
     oc.edges = new Map();
     oc.txs = [];
     oc.raw.forEach((d, addr) => { if (oc.nodes.has(addr)) ocMerge(d, addr === oc.root ? 20 : 10); });
+    oc.nodes.forEach((n, a) => { const nm = oc.names[a]; if (nm) Object.assign(n, nm); });
     oc.txs.sort((a, b) => b.ts - a.ts);
     if (oc.txs.length > 200) oc.txs.length = 200;
 }
@@ -3512,9 +3536,10 @@ function ocBuild() {
 function ocMerge(d, limit) {
     const base = d.address, baseCol = oc.nodes.get(base).col;
     const dust = (amount) => oc.hideDust && amount < OC_DUST;
+    const swapFirst = (a, b) => (b.kind === 'swap') - (a.kind === 'swap');
 
-    d.edges.filter(e => !dust(e.amount))
-        .sort((a, b) => b.count - a.count || b.last_ts - a.last_ts)
+    d.edges.filter(e => e.kind === 'swap' || !dust(e.amount))
+        .sort((a, b) => swapFirst(a, b) || b.count - a.count || b.last_ts - a.last_ts)
         .slice(0, limit)
         .forEach(e => {
             const k = `${e.from}|${e.to}|${e.sym}`;
@@ -3523,11 +3548,11 @@ function ocMerge(d, limit) {
             if (!oc.nodes.has(other)) oc.nodes.set(other, { col: e.from === base ? baseCol + 1 : baseCol - 1 });
         });
 
-    Object.entries(d.labels || {}).forEach(([a, l]) => { const n = oc.nodes.get(a); if (n) Object.assign(n, l); });
+    Object.entries(d.labels || {}).forEach(([a, l]) => { if (!oc.names[a] || oc.names[a].auto) oc.names[a] = l; });
 
     const seen = new Set(oc.txs.map(t => t.key));
-    d.txs.filter(t => !dust(t.value)).forEach(t => {
-        t.key = t.hash + t.from + t.to + t.sym + t.value;
+    d.txs.filter(t => t.kind === 'swap' || !dust(t.value)).forEach(t => {
+        t.key = t.hash + (t.kind || '') + t.from + t.to + t.sym + t.value;
         t.me = base;
         if (!seen.has(t.key)) { seen.add(t.key); oc.txs.push(t); }
     });
@@ -3538,10 +3563,11 @@ function ocToggleDust() {
     if (!oc.root) return;
     ocBuild();
     ocRender(false);
+    ocLoadLabels();
 }
 
 async function ocExpand(addr) {
-    if (oc.moved) return;                       // barusan drag, bukan klik
+    if (oc.moved) return;
     if (oc.raw.has(addr)) return;
     if (oc.nodes.get(addr)?.type) { showToast('Kontrak/layanan dikenal, tidak ditelusuri', 'error'); return; }
     showToast('Memuat ' + ocShort(addr) + '…');
@@ -3550,13 +3576,14 @@ async function ocExpand(addr) {
         oc.raw.set(addr, d);
         ocBuild();
         ocRender(false);
+        ocLoadLabels();
     } catch (e) { showToast('Gagal: ' + e.message, 'error'); }
 }
 
 function ocSummary(d) {
     const me = d.address;
     const inn = d.edges.filter(e => e.to === me).reduce((s, e) => s + e.count, 0);
-    const out = d.edges.filter(e => e.from === me).reduce((s, e) => s + e.count, 0);
+    const out = d.edges.filter(e => e.from === me && e.kind !== 'swap').reduce((s, e) => s + e.count, 0);
     const peers = new Set(d.edges.map(e => e.from === me ? e.to : e.from)).size;
     const total = d.total_tx != null ? d.total_tx.toLocaleString('en-US') : d.fetched + (d.fetched >= 100 ? '+' : '');
     const el = document.getElementById('oc-summary');
@@ -3565,6 +3592,7 @@ function ocSummary(d) {
         <div class="oc-stat"><div class="n">${esc(total)}</div><div class="l">Total TX</div></div>
         <div class="oc-stat"><div class="n" style="color:var(--success)">${inn}</div><div class="l">Transfer Masuk</div></div>
         <div class="oc-stat"><div class="n" style="color:var(--secondary)">${out}</div><div class="l">Transfer Keluar</div></div>
+        <div class="oc-stat"><div class="n" style="color:#FFD23F">${d.swap_count || 0}</div><div class="l">Swap</div></div>
         <div class="oc-stat"><div class="n">${peers}</div><div class="l">Counterparty</div></div>`;
     el.classList.remove('hidden');
 }
@@ -3608,7 +3636,7 @@ function ocZoom(f, cx, cy) {
     });
     window.addEventListener('pointerup', () => {
         drag = null; st.classList.remove('grabbing');
-        setTimeout(() => { oc.moved = false; }, 0);   // reset setelah event click lewat
+        setTimeout(() => { oc.moved = false; }, 0);
     });
     st.addEventListener('wheel', e => {
         e.preventDefault();
@@ -3620,7 +3648,7 @@ function ocZoom(f, cx, cy) {
 // ── render ──
 function ocRender(fit) {
     if (!oc.root) return;
-    const COLW = 300, ROW = 96, R = 22, PAD = 90;
+    const COLW = 300, ROW = 100, R = 22, PAD = 90;
     const byCol = {};
     oc.nodes.forEach((n, a) => (byCol[n.col] = byCol[n.col] || []).push(a));
     const cols = Object.keys(byCol).map(Number).sort((a, b) => a - b);
@@ -3640,10 +3668,11 @@ function ocRender(fit) {
         if (!a || !b) return '';
         const pk = [e.from, e.to].sort().join('|');
         const off = ((pairIdx[pk] = (pairIdx[pk] || 0) + 1) - 1) * 20;
+        const isSwap = e.kind === 'swap';
         const special = oc.nodes.get(e.to)?.type;
-        const color = e.from === oc.root ? 'var(--secondary)' : 'var(--primary)';
+        const color = isSwap ? '#FFD23F' : (e.from === oc.root ? 'var(--secondary)' : 'var(--primary)');
         let path, mx, ly;
-        if (Math.abs(a.x - b.x) < 1) {              // dua node di kolom yang sama -> lengkung ke kanan
+        if (Math.abs(a.x - b.x) < 1) {
             path = `M${a.x + R},${a.y} Q${a.x + 120 + off},${(a.y + b.y) / 2} ${b.x + R},${b.y}`;
             mx = a.x + 62 + off / 2; ly = (a.y + b.y) / 2 - 8;
         } else {
@@ -3653,24 +3682,27 @@ function ocRender(fit) {
             path = `M${x1},${a.y} C${mx},${a.y + off} ${mx},${b.y + off} ${x2},${b.y}`;
             ly = (a.y + b.y) / 2 + off * 0.75 - 8;
         }
-        return `<path d="${path}" fill="none" stroke="${color}" stroke-opacity=".8" stroke-width="2.2" ${special ? 'stroke-dasharray="7 6"' : ''} marker-end="url(#oc-arrow)"/>
+        const l1 = isSwap ? `${ocAmt(e.sold.amount)} ${e.sold.sym} → ${ocAmt(e.bought.amount)} ${e.bought.sym}` : `${ocAmt(e.amount)} ${e.sym}`;
+        const l2 = (isSwap ? (e.wrap ? 'WRAP ' : 'SWAP ') : '') + `×${e.count} · ${ocDate(e.last_ts)}`;
+        return `<path d="${path}" fill="none" stroke="${color}" stroke-opacity=".85" stroke-width="2.2" ${isSwap || special ? 'stroke-dasharray="7 6"' : ''} marker-end="url(#oc-arrow)"/>
         <a href="${esc(oc.ex.tx + e.hashes[0])}" target="_blank" rel="noopener">
-            <text class="oc-elabel" x="${mx}" y="${ly}" text-anchor="middle">${ocAmt(e.amount)} ${esc(e.sym)}</text>
-            <text class="oc-esub" x="${mx}" y="${ly + 13}" text-anchor="middle">×${e.count} · ${ocDate(e.last_ts)}</text>
+            <text class="oc-elabel" ${isSwap ? 'style="fill:#FFD23F"' : ''} x="${mx}" y="${ly}" text-anchor="middle">${esc(l1)}</text>
+            <text class="oc-esub" x="${mx}" y="${ly + 13}" text-anchor="middle">${esc(l2)}</text>
         </a>`;
     }).join('');
 
     const nodeSvg = [...oc.nodes.entries()].map(([a, n]) => {
         const p = pos.get(a), isRoot = a === oc.root;
-        const fill = n.type === 'mixer' ? 'var(--danger)' : n.type ? 'var(--success)' : isRoot ? 'var(--secondary)' : 'var(--primary)';
+        const fill = n.type === 'mixer' ? 'var(--danger)' : n.type === 'bridge' ? '#F59E0B' : n.type ? 'var(--success)' : isRoot ? 'var(--secondary)' : 'var(--primary)';
+        const hasName = !!n.label;
         return `<g class="oc-node" onclick="ocExpand('${esc(a)}')">
-            <title>${esc(a)}</title>
+            <title>${esc((n.label ? n.label + '\n' : '') + a)}</title>
             <circle cx="${p.x}" cy="${p.y}" r="${R + 8}" fill="${fill}" opacity=".12"/>
             <circle class="main" cx="${p.x}" cy="${p.y}" r="${R}" fill="${fill}" stroke="${oc.raw.has(a) ? '#fff' : 'transparent'}" stroke-width="2"/>
             <text x="${p.x}" y="${p.y + 5}" text-anchor="middle" font-size="14" font-weight="800" fill="#000">${isRoot ? '★' : n.type ? '◆' : '•'}</text>
+            ${hasName ? `<text class="oc-nlabel" x="${p.x}" y="${p.y + R + 18}" text-anchor="middle">${esc(ocName(a))}</text>` : ''}
             <a href="${esc(oc.ex.addr + a)}" target="_blank" rel="noopener" onclick="event.stopPropagation()">
-                <text class="oc-addr" x="${p.x}" y="${p.y + R + 18}" text-anchor="middle">${esc(ocShort(a))}</text></a>
-            ${n.label ? `<text class="oc-nlabel" x="${p.x}" y="${p.y + R + 32}" text-anchor="middle">${esc(n.label)}</text>` : ''}
+                <text class="oc-addr" x="${p.x}" y="${p.y + R + (hasName ? 32 : 18)}" text-anchor="middle">${esc(ocShort(a))}</text></a>
         </g>`;
     }).join('');
 
@@ -3680,14 +3712,17 @@ function ocRender(fit) {
         <g id="oc-vp">${edgeSvg}${nodeSvg}</g></svg>`;
     fit ? ocFit() : ocApply();
 
-    // tabel samping
     document.getElementById('oc-tx-head').textContent = `Transaksi (${oc.txs.length})`;
     document.getElementById('oc-tx-body').innerHTML = oc.txs.map(t => {
+        const hash = `<a href="${esc(oc.ex.tx + t.hash)}" target="_blank" rel="noopener">${esc(t.hash.slice(0, 10))}…${esc(t.hash.slice(-6))}</a>`;
+        if (t.kind === 'swap') {
+            return `<tr><td>${hash}</td><td>${ocDate(t.ts)}</td>
+                <td><span class="oc-dir swap">${t.wrap ? 'WRAP' : 'SWAP'}</span>${esc(ocName(t.to))}</td>
+                <td>${ocAmt(t.sold.amount)} ${esc(t.sold.sym)} → ${ocAmt(t.bought.amount)} ${esc(t.bought.sym)}</td></tr>`;
+        }
         const out = t.from === t.me, peer = out ? t.to : t.from;
-        return `<tr>
-            <td><a href="${esc(oc.ex.tx + t.hash)}" target="_blank" rel="noopener">${esc(t.hash.slice(0, 10))}…${esc(t.hash.slice(-6))}</a></td>
-            <td>${ocDate(t.ts)}</td>
-            <td><span class="oc-dir ${out ? 'out' : 'in'}">${out ? 'OUT' : 'IN'}</span><a href="${esc(oc.ex.addr + peer)}" target="_blank" rel="noopener" title="${esc(peer)}">${esc(ocShort(peer))}</a></td>
+        return `<tr><td>${hash}</td><td>${ocDate(t.ts)}</td>
+            <td><span class="oc-dir ${out ? 'out' : 'in'}">${out ? 'OUT' : 'IN'}</span><a href="${esc(oc.ex.addr + peer)}" target="_blank" rel="noopener" title="${esc(peer)}">${esc(ocName(peer))}</a></td>
             <td>${ocAmt(t.value)} ${esc(t.sym)}</td></tr>`;
     }).join('');
 }
