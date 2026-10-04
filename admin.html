@@ -2365,28 +2365,43 @@ function renderNLF() {
     }).join('');
 }
 
-        // ═══ CEX FOUND (dari userbot Telegram) ═══
-let _cexTimer = null;
+       // ═══ CEX FOUND (dari userbot Telegram) ═══
+let _cexTimer = null, _cexSig = '';
 async function loadCexFound() {
     const list = document.getElementById('cex-list');
-    if (!list) return;
+    if (!list || document.hidden) return;
     try {
         const res = await fetch('/api/admin-airdrop?type=cex-found');
+        if (res.status === 401) {
+            _cexSig = '';
+            list.innerHTML = '<div class="nlf-empty">Sesi habis — login ulang lewat terminal.</div>';
+            return;
+        }
         if (!res.ok) return;
         const rows = await res.json();
+        const sig = Math.floor(Date.now() / 60000) + '|' + rows.map(a => `${a.ticker}${a.exchange}${a.ts}`).join();
+        if (sig === _cexSig) return;   // ga ada perubahan, jangan re-render
+        _cexSig = sig;
         if (!rows.length) { list.innerHTML = '<div class="nlf-empty">Menunggu alert...</div>'; return; }
-        list.innerHTML = rows.map(a => `
+        list.innerHTML = rows.map(a => {
+            const unk = a.ticker === 'UNKNOWN';
+            const text = unk ? esc(a.name || 'Ticker tidak terbaca')
+                             : `$${esc(a.ticker)}${a.name ? ' · ' + esc(a.name) : ''}`;
+            const when = newsTimeAgo(new Date(Number(a.ts) || Date.now()).toISOString());
+            return `
             <div class="nlf-card listing">
-                <div class="nlf-top"><span class="nlf-ex">${esc(a.exchange)}</span><span class="nlf-time">${newsTimeAgo(new Date(a.ts).toISOString())}</span></div>
-                <div class="nlf-text">$${esc(a.ticker)}${a.name ? ' · ' + esc(a.name) : ''}</div>
+                <div class="nlf-top"><span class="nlf-ex">${esc(a.exchange)}</span><span class="nlf-time">${when}</span></div>
+                <div class="nlf-text">${text}</div>
                 <span class="nlf-badge listing">${esc((a.networks || []).join(', ') || 'found')}</span>
-            </div>`).join('');
+            </div>`;
+        }).join('');
     } catch {}
 }
 function startCexFound() {
     if (_cexTimer) return;
     loadCexFound();
-    _cexTimer = setInterval(loadCexFound, 10000);
+    _cexTimer = setInterval(loadCexFound, 20000);
+    document.addEventListener('visibilitychange', () => { if (!document.hidden) loadCexFound(); });
 }
 
         
