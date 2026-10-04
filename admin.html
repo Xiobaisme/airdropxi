@@ -1300,6 +1300,26 @@
     </div>
 </div>
 
+        <!-- ─── NEWS SEND MODAL (kirim 1 item News Terminal ke Discord & Telegram) ─── -->
+<div id="news-send-modal" class="modal hidden">
+    <div class="modal-box">
+        <div class="modal-head">
+            <div class="modal-title">Send sekarang?</div>
+            <button class="modal-close" onclick="closeNewsSend()" id="news-send-close-btn"></button>
+        </div>
+        <div class="modal-body">
+            <div class="field">
+                <label>Caption <span class="hint">— bisa diedit sebelum dikirim</span></label>
+                <textarea id="ns-caption" style="min-height:180px;"></textarea>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeNewsSend()">Batal</button>
+            <button class="btn-save" id="btn-news-send" onclick="sendNewsItem()">Kirim</button>
+        </div>
+    </div>
+</div>
+
               <!-- ─── CONFIRM MODAL (custom, ganti native confirm()) ─── -->
 <div id="confirm-modal" class="modal hidden">
     <div class="modal-box confirm-box">
@@ -1388,7 +1408,7 @@
     <div class="news-filters" id="news-filters"></div>
     <div class="news-feed" id="news-feed"></div>
     <div class="news-foot">
-        <span>Refresh otomatis: <span id="news-countdown">05:00</span></span>
+      <span>Live · cek antrian tiap <span id="news-countdown">00:10</span></span>
         <button class="news-refresh-btn" onclick="loadNews(true)">↻ REFRESH</button>
     </div>
 </div>
@@ -2018,14 +2038,13 @@ function updateMarketSessionBadge(hourUTC) {
             panel.classList.toggle('hidden');
         }
 
-        const NEWS_SOURCES = {
-    cointelegraph: { label: 'Cointelegraph', color: 'var(--primary)' },
-    coindesk:      { label: 'CoinDesk',      color: '#38bdf8' },
-    forexfactory:  { label: 'ForexFactory',  color: '#f59e0b' },
-    coinmarketcap: { label: 'CoinMarketCap', color: 'var(--success)' },
-    lookonchain:   { label: 'Lookonchain',   color: 'var(--secondary)' },
+       const NEWS_SOURCES = {
+    lookonchain:    { label: 'Lookonchain',    color: 'var(--secondary)' },
+    investigations: { label: 'Investigations', color: '#f59e0b' },
+    onchainlens:    { label: 'OnchainLens',    color: '#38bdf8' },
 };
-let newsItems = [], newsFilter = 'all', _newsCountdown = 300, _newsCountdownInt = null, _newsClockInt = null;
+const NEWS_POLL_SEC = 10; // cek antrian tiap 10 detik (poller Telegram jalan tiap menit di Supabase)
+let newsItems = [], newsFilter = 'all', _newsCountdown = NEWS_POLL_SEC, _newsCountdownInt = null, _newsClockInt = null, _newsSig = '';
 
 function toggleNewsPanel() {
     const drawer = document.getElementById('news-drawer');
@@ -2045,16 +2064,25 @@ function tickNewsClock() {
 }
 function tickNewsCountdown() {
     _newsCountdown--;
-    if (_newsCountdown <= 0) { _newsCountdown = 300; loadNews(); }
+    if (_newsCountdown <= 0) { _newsCountdown = NEWS_POLL_SEC; loadNews(); }
     const el = document.getElementById('news-countdown');
     if (el) el.textContent = `${String(Math.floor(_newsCountdown/60)).padStart(2,'0')}:${String(_newsCountdown%60).padStart(2,'0')}`;
 }
 async function loadNews(manual = false) {
     try {
-        const res = await fetch('/api/news-terminal');
-        if (!res.ok) throw new Error('Gagal fetch berita');
-        newsItems = await res.json();
-        _newsCountdown = 300;
+        const res = await fetch('/api/admin-airdrop?type=news-queue');
+        if (!res.ok) throw new Error('Gagal fetch berita (HTTP ' + res.status + ')');
+        const rows = await res.json();
+        _newsCountdown = NEWS_POLL_SEC;
+        const next = rows.map(r => ({
+            id: r.id, source: r.source, status: r.status,
+            title: r.text, url: r.link, published_at: r.posted_at || r.created_at,
+        }));
+        // render ulang hanya kalau ada yang berubah (atau ganti menit, buat label "x menit lalu")
+        const sig = Math.floor(Date.now() / 60000) + JSON.stringify(next.map(n => [n.id, n.status]));
+        if (sig === _newsSig && !manual) return;
+        _newsSig = sig;
+        newsItems = next;
         renderNewsFilters(); renderNewsFeed();
     } catch (e) {
         if (manual) showToast('Gagal muat berita: ' + e.message, 'error');
@@ -2088,14 +2116,71 @@ function renderNewsFeed() {
     if (!items.length) { feed.innerHTML = `<div class="empty-state">${icon('ghost')}Belum ada berita.</div>`; return; }
     feed.innerHTML = items.map(item => {
         const src = NEWS_SOURCES[item.source] || { label: item.source, color: 'var(--primary)' };
-        return `<a class="news-card" href="${esc(item.url)}" target="_blank" rel="noopener" style="--src-color:${src.color}">
-            ${item.is_breaking ? `<div class="news-breaking-flag">● BREAKING</div>` : ''}
+        const sent = item.status === 'sent';
+        return `<div class="news-card" style="--src-color:${src.color}; cursor:default;">
             <div class="news-card-top"><span class="news-src-tag">${esc(src.label)}</span><span class="news-time-tag">${newsTimeAgo(item.published_at)}</span></div>
-            <div class="news-card-title">${esc(item.title)}</div>
-            ${item.excerpt ? `<div class="news-card-excerpt">${esc(item.excerpt)}</div>` : ''}
-        </a>`;
+            <div class="news-card-excerpt" style="color:var(--text); font-size:13px; white-space:pre-wrap; word-break:break-word;">${esc(item.title)}</div>
+            <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
+                <button class="btn-save" data-send="${esc(item.id)}" ${sent ? 'disabled' : ''} style="padding:0.45rem 1rem;">${sent ? 'Terkirim ✓' : icon('send') + 'Kirim'}</button>
+                <a href="${esc(item.url)}" target="_blank" rel="noopener" style="font-family:var(--mono); font-size:11px; color:var(--text3);">buka post ↗</a>
+            </div>
+        </div>`;
     }).join('');
 }
+
+// ─── KIRIM item News Terminal ke Discord & Telegram (lewat endpoint broadcast-news yang sama) ───
+let _newsSending = null;
+function openNewsSend(id) {
+    const item = newsItems.find(n => String(n.id) === String(id));
+    if (!item) return;
+    _newsSending = item;
+    const src = NEWS_SOURCES[item.source] || { label: item.source };
+    document.getElementById('news-send-close-btn').innerHTML = icon('x');
+    document.getElementById('ns-caption').value = item.title + '\n\nSource: ' + src.label;
+    document.getElementById('news-send-modal').classList.remove('hidden');
+}
+function closeNewsSend() {
+    document.getElementById('news-send-modal').classList.add('hidden');
+    _newsSending = null;
+}
+async function sendNewsItem() {
+    const item = _newsSending;
+    if (!item) return;
+    const src = NEWS_SOURCES[item.source] || { label: item.source };
+    const description = document.getElementById('ns-caption').value.trim();
+    if (!description) { showToast('Caption kosong!', 'error'); return; }
+
+    const btn = document.getElementById('btn-news-send');
+    btn.disabled = true;
+    btn.innerHTML = '<span class="spinner"></span> Mengirim...';
+    try {
+        const res = await fetch('/api/admin-airdrop?type=broadcast-news', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ title: '🚨 ' + src.label, description, url: item.url, queue_id: item.id }),
+        });
+        const data = await res.json().catch(() => ({}));
+        if (!res.ok) throw new Error(data.discord || data.telegram || `HTTP ${res.status}`);
+
+        const dOk = data.discord === 'ok', tOk = data.telegram === 'ok';
+        if (dOk && tOk) showToast('Terkirim ke Discord & Telegram!', 'success');
+        else if (dOk || tOk) showToast(`Terkirim sebagian — Discord: ${data.discord}, Telegram: ${data.telegram}`, 'error');
+        else throw new Error(`Discord: ${data.discord} | Telegram: ${data.telegram}`);
+
+        item.status = 'sent';   // langsung ditandai, nggak nunggu cek berikutnya
+        renderNewsFeed();
+        closeNewsSend();
+    } catch (e) {
+        showToast('Gagal kirim: ' + e.message, 'error');
+    } finally {
+        btn.disabled = false;
+        btn.innerHTML = icon('send') + 'Kirim';
+    }
+}
+document.getElementById('news-feed')?.addEventListener('click', e => {
+    const btn = e.target.closest('[data-send]');
+    if (btn && !btn.disabled) openNewsSend(btn.dataset.send);
+});
 document.getElementById('news-overlay')?.addEventListener('click', toggleNewsPanel);
 
         // ═══════════════════════════════════════════════════════════
