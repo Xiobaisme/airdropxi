@@ -362,6 +362,16 @@ async function sendDiscord() {
     if (action === 'chains') return res.status(200).json(onchain.listChains());
     if (action === 'ping')   return res.status(200).json(await onchain.pingAll());
 
+    if (action === 'labels') {
+      try {
+        const out = await onchain.labels(chain, String(req.query.addresses || '').split(','), {
+          get: async (k) => { const v = await redis.get(k); return v == null ? null : (typeof v === 'string' ? JSON.parse(v) : v); },
+          set: (k, v) => redis.set(k, JSON.stringify(v), { ex: 60 * 60 * 24 }),
+        });
+        return res.status(200).json(out);
+      } catch { return res.status(200).json({}); }
+    }
+
     try {
       const addr = String(address || '').trim();
       const norm = chain === 'solana' ? addr : addr.toLowerCase();
