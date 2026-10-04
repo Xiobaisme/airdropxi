@@ -311,13 +311,13 @@ async function sendDiscord() {
         if (!want.length || given.length !== want.length || !crypto.timingSafeEqual(given, want))
           return res.status(401).json({ error: 'Unauthorized' });
 
-        const { name, ticker, exchange, networks } = req.body || {};
+        const { name, ticker, exchange, networks, ts } = req.body || {};
         if (!ticker || !exchange) return res.status(400).json({ error: 'Payload tidak valid' });
 
         const fresh = await redis.set(`cexfound:seen:${ticker}:${exchange}`, 1, { nx: true, ex: 86400 });
         if (!fresh) return res.status(200).json({ dup: true });
 
-        await redis.lpush('cexfound:events', JSON.stringify({ name, ticker, exchange, networks, ts: Date.now() }));
+        await redis.lpush('cexfound:events', JSON.stringify({ name, ticker, exchange, networks, ts: Number(ts) || Date.now() }));
         await redis.ltrim('cexfound:events', 0, 99);
         return res.status(200).json({ ok: true });
       }
