@@ -1515,7 +1515,7 @@
     <div class="oc-top">
         <div class="oc-title">Onchain Tracer</div>
         <div class="oc-form">
-            <input id="oc-address" type="text" placeholder="0x... atau alamat Solana" autocomplete="off" spellcheck="false" />
+            <input id="oc-address" type="text" placeholder="0x... / bc1... / alamat Solana" autocomplete="off" spellcheck="false" />
             <select id="oc-chain"></select>
             <button class="btn-save" id="oc-go" onclick="ocSearch()">Lacak</button>
             <label class="oc-check"><input type="checkbox" id="oc-dust" checked onchange="ocToggleDust()" /> Sembunyikan dust</label>
@@ -3454,14 +3454,21 @@ function stopFallingCoins() {
 // ─── ONCHAIN TRACER (fullscreen, pan/zoom) ───
 // ═══════════════════════════════════════════════════════════
 const OC_DUST = 0.001;
+const OC_ROOT_EDGES = 80;   // maksimal garis dari wallet utama
+const OC_NODE_EDGES = 20;   // maksimal garis tiap wallet yang di-klik
 const oc = { chains: null, chain: null, root: null, ex: null, raw: new Map(), nodes: new Map(), edges: new Map(), txs: [],
              names: {}, tried: new Set(), vp: { x: 0, y: 0, k: 1 }, bounds: null, moved: false, hideDust: true };
 
 const ocShort = (a) => a.length > 16 ? a.slice(0, 8) + '…' + a.slice(-6) : a;
 const ocName = (a) => { const l = oc.names[a]?.label; return l ? (l.length > 26 ? l.slice(0, 25) + '…' : l) : ocShort(a); };
-const ocAmt = (n) => n >= 1000 ? n.toLocaleString('en-US', { maximumFractionDigits: 2 })
-    : n >= 1 ? n.toLocaleString('en-US', { maximumFractionDigits: 4 })
-    : n.toLocaleString('en-US', { maximumSignificantDigits: 4 });
+const ocAmt = (n) => {
+    if (!isFinite(n)) return '0';
+    const a = Math.abs(n);
+    for (const [v, s] of [[1e12, 'T'], [1e9, 'B'], [1e6, 'M'], [1e3, 'K']])
+        if (a >= v) return (n / v).toLocaleString('en-US', { maximumFractionDigits: 2 }) + s;
+    return a >= 1 ? n.toLocaleString('en-US', { maximumFractionDigits: 4 })
+                  : n.toLocaleString('en-US', { maximumSignificantDigits: 4 });
+};
 const ocDate = (ts) => new Date(ts).toISOString().slice(0, 10);
 
 async function openOnchain() {
@@ -3527,10 +3534,11 @@ async function ocLoadLabels() {
         if (!r.ok || tag !== oc.chain + oc.root) return;
         const got = await r.json();
         const keys = Object.keys(got);
-        if (!keys.length) return;
+         if (!keys.length) { ocLoadLabels(); return; }
         keys.forEach(a => { oc.names[a] = { ...(oc.names[a] || {}), ...got[a], auto: false }; });
         ocBuild();
         ocRender(false);
+        ocLoadLabels();
     } catch {}
 }
 
@@ -3539,10 +3547,10 @@ function ocBuild() {
     oc.nodes = new Map([[oc.root, { col: 0 }]]);
     oc.edges = new Map();
     oc.txs = [];
-    oc.raw.forEach((d, addr) => { if (oc.nodes.has(addr)) ocMerge(d, addr === oc.root ? 20 : 10); });
+    oc.raw.forEach((d, addr) => { if (oc.nodes.has(addr)) ocMerge(d, addr === oc.root ? OC_ROOT_EDGES : OC_NODE_EDGES); });
     oc.nodes.forEach((n, a) => { const nm = oc.names[a]; if (nm) Object.assign(n, nm); });
     oc.txs.sort((a, b) => b.ts - a.ts);
-    if (oc.txs.length > 200) oc.txs.length = 200;
+   if (oc.txs.length > 500) oc.txs.length = 500;
 }
 
 function ocMerge(d, limit) {
@@ -3597,7 +3605,7 @@ function ocSummary(d) {
     const inn = d.edges.filter(e => e.to === me).reduce((s, e) => s + e.count, 0);
     const out = d.edges.filter(e => e.from === me && e.kind !== 'swap').reduce((s, e) => s + e.count, 0);
     const peers = new Set(d.edges.map(e => e.from === me ? e.to : e.from)).size;
-    const total = d.total_tx != null ? d.total_tx.toLocaleString('en-US') : d.fetched + (d.fetched >= 100 ? '+' : '');
+    const total = d.total_tx != null ? d.total_tx.toLocaleString('en-US') : d.fetched + (d.fetched >= 500 ? '+' : '');
     const el = document.getElementById('oc-summary');
     el.innerHTML = `
         <div class="oc-stat"><div class="n"><a href="${esc(d.explorer.addr + me)}" target="_blank" rel="noopener">${esc(ocShort(me))}</a></div><div class="l">${esc(d.name)} · Wallet</div></div>
@@ -3618,14 +3626,14 @@ function ocFit() {
     if (!oc.bounds) return;
     const st = document.getElementById('oc-diagram');
     const { w, h } = oc.bounds, cw = st.clientWidth, ch = st.clientHeight;
-    const k = Math.max(0.4, Math.min(cw / w, ch / h, 1.2));
+    const k = Math.max(0.1, Math.min(cw / w, ch / h, 1.2));
     oc.vp = { k, x: w * k <= cw ? (cw - w * k) / 2 : 20, y: h * k <= ch ? (ch - h * k) / 2 : 20 };
     ocApply();
 }
 function ocZoom(f, cx, cy) {
     const r = document.getElementById('oc-diagram').getBoundingClientRect();
     cx = cx ?? r.width / 2; cy = cy ?? r.height / 2;
-    const k = Math.min(3, Math.max(0.2, oc.vp.k * f)), real = k / oc.vp.k;
+    const k = Math.min(3, Math.max(0.08, oc.vp.k * f)), real = k / oc.vp.k;
     oc.vp.x = cx - (cx - oc.vp.x) * real;
     oc.vp.y = cy - (cy - oc.vp.y) * real;
     oc.vp.k = k;
@@ -3674,8 +3682,8 @@ function ocRender(fit) {
         list.forEach((a, i) => pos.set(a, { x: PAD + ci * COLW, y: top + i * ROW + ROW / 2 }));
     });
 
-    const animAll = oc.edges.size <= 60;   // kalau edge kebanyakan, animasi cuma di edge yang nyambung ke wallet utama
-
+let animN = 0;
+    
     const pairIdx = {};
     const edgeSvg = [...oc.edges.values()].map(e => {
         const a = pos.get(e.from), b = pos.get(e.to);
@@ -3699,7 +3707,7 @@ function ocRender(fit) {
         const l1 = isSwap ? `${ocAmt(e.sold.amount)} ${e.sold.sym} → ${ocAmt(e.bought.amount)} ${e.bought.sym}` : `${ocAmt(e.amount)} ${e.sym}`;
         const l2 = (isSwap ? (e.wrap ? 'WRAP ' : 'SWAP ') : '') + `×${e.count} · ${ocDate(e.last_ts)}`;
         return `<path d="${path}" fill="none" stroke="${color}" stroke-opacity=".85" stroke-width="2.2" ${isSwap || special ? 'stroke-dasharray="7 6"' : ''} marker-end="url(#oc-arrow)"/>
-        ${(animAll || e.from === oc.root || e.to === oc.root) ? `<path class="oc-flow ${isSwap ? 'swap' : ''}" d="${path}" stroke="${color}"/>` : ''}
+       ${(animN++ < 60) ? `<path class="oc-flow ${isSwap ? 'swap' : ''}" d="${path}" stroke="${color}"/>` : ''}
         <a href="${esc(oc.ex.tx + e.hashes[0])}" target="_blank" rel="noopener">
             <text class="oc-elabel" ${isSwap ? 'style="fill:#FFD23F"' : ''} x="${mx}" y="${ly}" text-anchor="middle">${esc(l1)}</text>
             <text class="oc-esub" x="${mx}" y="${ly + 13}" text-anchor="middle">${esc(l2)}</text>
