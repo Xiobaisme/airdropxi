@@ -160,6 +160,7 @@ async def main():
                 items = parse_any(text)
                 for p in items:
                     p["ts"] = int(msg.date.timestamp() * 1000)  # waktu asli pesan
+                    p["msg_id"] = msg.id
                     found.append(p)
                 if "found in" in text.lower() and any(i["ticker"] == "UNKNOWN" for i in items):
                     # cuma log pesan yang ga ke-parse rapi (jangan print semua pesan, repo bisa public)
