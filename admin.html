@@ -1059,6 +1059,16 @@
     <div class="nlf-list" id="nlf-list"><div class="nlf-empty">Menunggu listing baru...</div></div>
 </div>
 
+        <!-- ─── CEX FOUND ─── -->
+<div id="cex-section" style="position:relative;z-index:1;max-width:1360px;margin:1.2rem auto 0;padding:0 1.5rem;">
+    <div class="nlf-head">
+        <span class="nlf-dot live"></span>
+        <span class="nlf-title">CEX Found</span>
+        <span class="nlf-status">Live ·</span>
+    </div>
+    <div class="nlf-list" id="cex-list"><div class="nlf-empty">Menunggu alert...</div></div>
+</div>
+
         <!-- HERO -->
         <div class="hero-grid">
             <div id="dash-hero">
@@ -2355,6 +2365,30 @@ function renderNLF() {
     }).join('');
 }
 
+        // ═══ CEX FOUND (dari userbot Telegram) ═══
+let _cexTimer = null;
+async function loadCexFound() {
+    const list = document.getElementById('cex-list');
+    if (!list) return;
+    try {
+        const res = await fetch('/api/admin-airdrop?type=cex-found');
+        if (!res.ok) return;
+        const rows = await res.json();
+        if (!rows.length) { list.innerHTML = '<div class="nlf-empty">Menunggu alert...</div>'; return; }
+        list.innerHTML = rows.map(a => `
+            <div class="nlf-card listing">
+                <div class="nlf-top"><span class="nlf-ex">${esc(a.exchange)}</span><span class="nlf-time">${newsTimeAgo(new Date(a.ts).toISOString())}</span></div>
+                <div class="nlf-text">$${esc(a.ticker)}${a.name ? ' · ' + esc(a.name) : ''}</div>
+                <span class="nlf-badge listing">${esc((a.networks || []).join(', ') || 'found')}</span>
+            </div>`).join('');
+    } catch {}
+}
+function startCexFound() {
+    if (_cexTimer) return;
+    loadCexFound();
+    _cexTimer = setInterval(loadCexFound, 10000);
+}
+
         
 // ═══════════════════════════════════════════════════════════
 // ─── BROADCAST MODAL (compose manual, kirim ke Discord & Telegram) ───
@@ -3173,6 +3207,7 @@ function stopFallingCoins() {
             document.getElementById('login-section').style.display = 'none';
             document.getElementById('admin-content').classList.remove('hidden');
             startNLF();
+            startCexFound();
         } else {
             alert(`Akses ditolak: ${result.message || 'Unauthorized'}`);
             google.accounts.id.disableAutoSelect();
@@ -3222,6 +3257,7 @@ function stopFallingCoins() {
                   document.getElementById('login-section').style.display = 'none';
                  document.getElementById('admin-content').classList.remove('hidden');
               startNLF();
+              startCexFound();
          }, 500);
                 } else {
                     termPrintLine('bash: access denied — gunakan Google Sign-In di bawah.', 'denied');
