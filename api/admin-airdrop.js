@@ -10,6 +10,7 @@ const ratelimit = new Ratelimit({
 });
 
 const crypto = require('crypto');
+const onchain = require('../lib/onchain');
 
 function verifyAdminToken(req) {
   const cookie = req.headers.cookie || '';
@@ -352,6 +353,29 @@ async function sendDiscord() {
     return await handleBroadcastNews(req, res);
   }
 
+    // ─── ONCHAIN TRACER ───
+  if (type === 'onchain') {
+    if (req.method !== 'GET') return res.status(405).json({ error: 'Method tidak diizinkan' });
+    const { action, chain, address } = req.query;
+    res.setHeader('Cache-Control', 'no-store');
+
+    if (action === 'chains') return res.status(200).json(onchain.listChains());
+    if (action === 'ping')   return res.status(200).json(await onchain.pingAll());
+
+    try {
+      const addr = String(address || '').trim();
+      const norm = chain === 'solana' ? addr : addr.toLowerCase();
+      const ckey = `onchain:${chain}:${norm}`;
+      const hit = await redis.get(ckey);
+      if (hit) return res.status(200).json(typeof hit === 'string' ? JSON.parse(hit) : hit);
+
+      const data = await onchain.lookup(chain, addr);
+      await redis.set(ckey, JSON.stringify(data), { ex: 120 }); // cache 2 menit, hemat limit API
+      return res.status(200).json(data);
+    } catch (e) {
+      return res.status(400).json({ error: e.message });
+    }
+  }
   
   // ─── NEWS QUEUE (antrian post Telegram dari poller Supabase, dibaca News Terminal) ───
   if (type === 'news-queue') {
