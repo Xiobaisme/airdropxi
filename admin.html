@@ -11,7 +11,6 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         /* ═══════════════════════════════════════════════════════════
            XIOBAII — Admin Control Center
@@ -1071,6 +1070,34 @@ body.news-resizing { cursor: col-resize; user-select: none; }
     /* di layar kecil panel kiri berubah jadi bottom sheet */
     .oc-live { position: fixed; left: 0; right: 0; bottom: 0; height: 48vh; z-index: 6; border-radius: 18px 18px 0 0; border-bottom: 0; box-shadow: 0 -18px 50px rgba(0,0,0,.65); }
 }
+
+        /* ═══ LONG vs SHORT LIVE ═══ */
+.ls-top{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:14px}
+.ls-status{display:flex;gap:10px;align-items:center;font-family:var(--mono);font-size:.75rem;color:var(--text3)}
+.ls-dot{width:8px;height:8px;border-radius:50%;background:var(--text3)}
+.ls-status.live .ls-dot{background:var(--success);animation:pulseDot 1.4s ease-in-out infinite}
+.ls-status.off .ls-dot{background:var(--danger)}
+.ls-ctl{display:flex;gap:8px}
+.ls-ctl select{background:var(--card-2);color:var(--text);border:2px solid var(--border);border-radius:var(--r-sm);padding:.5rem .8rem;font-family:var(--label);font-weight:700;font-size:.8rem}
+.ls-ctl select:focus-visible{outline:2px solid var(--primary)}
+.ls-head,.ls-row{display:grid;grid-template-columns:110px 1fr 74px 74px 90px;gap:12px;align-items:center}
+.ls-head{color:var(--text3);font-family:var(--label);font-size:.68rem;font-weight:700;padding-bottom:8px}
+.ls-head .ml{display:flex;justify-content:space-between}
+.ls-row{margin-top:7px}
+.ls-nm{font-weight:700}
+.ls-row.avg .ls-nm{color:#fff}
+.ls-bar{position:relative;height:26px;border-radius:6px;overflow:hidden;background:linear-gradient(90deg,#6b2a37,#4a2530)}
+.ls-bar i{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,#1d6b52,#1a4a3b);transition:width .3s linear}
+.ls-bar b{position:absolute;top:0;line-height:26px;font-weight:700;font-size:.75rem}
+.ls-bar .l{left:8px}.ls-bar .s{right:8px}
+.ls-v{text-align:right;font-family:var(--mono);font-size:.74rem}
+.ls-lv{color:var(--success)}.ls-sv{color:var(--danger)}
+.ls-sp{width:90px;height:22px}
+.ls-sp polyline{fill:none;stroke:var(--text3);stroke-width:1.4;vector-effect:non-scaling-stroke}
+.ls-row.err .ls-bar{opacity:.35}
+.ls-row.err .ls-nm::after{content:" !";color:var(--danger)}
+.ls-note{color:var(--text3);font-family:var(--label);font-size:.72rem;margin-top:14px}
+@media(max-width:700px){.ls-head,.ls-row{grid-template-columns:84px 1fr}.ls-v,.ls-sp,.ls-head .hv{display:none}}
         
         /* ═══════════════════════════════════════════════════════════
            RESPONSIVE
@@ -1202,45 +1229,27 @@ body.news-resizing { cursor: col-resize; user-select: none; }
            </div>
         </nav>
 
-        <!-- ═══════════════════════════════════════════════════════════ -->
-<!-- HALAMAN 1: MARKET DASHBOARD (DEFAULT)                     -->
-<!-- ═══════════════════════════════════════════════════════════ -->
+    <!-- HALAMAN 1: MARKET DASHBOARD (DEFAULT) -->
 <div id="halaman-market">
     <div class="hero-grid" style="grid-template-columns: 1fr; padding-top: 2rem; padding-bottom: 1rem;">
         <div>
             <div class="hero-eyebrow">Market Dashboard</div>
-            <h1 style="font-size: clamp(2rem, 4vw, 3.2rem); margin-bottom: 1rem;">Live <span>Long / Short</span> Ratio</h1>
-            <p class="hero-sub">Data real-time dari Binance, Bybit, dan OKX. Auto-refresh tiap 5 menit.</p>
+            <h1 style="font-size: clamp(2rem, 4vw, 3.2rem); margin-bottom: 1rem;">Exchange Trade <span>Long vs Short</span></h1>
+            <p class="hero-sub">Taker buy vs taker sell per bursa, live lewat WebSocket.</p>
         </div>
     </div>
-
-        <div class="market-section" style="padding-top: 0; max-width: 1360px; margin: 0 auto; padding-left: 1.5rem; padding-right: 1.5rem;">
-        <div class="section-card" style="padding: 2rem;">
-            <div class="hero-metrics" style="grid-template-columns: repeat(4, 1fr); transform: none; margin-bottom: 2rem;">
-                <div class="hero-metric">
-                    <div class="n" id="stat-bnb-long" style="color: var(--success); font-size: 2rem;">—</div>
-                    <div class="l">Binance Long</div>
-                </div>
-                <div class="hero-metric">
-                    <div class="n" id="stat-bybit-long" style="color: var(--success); font-size: 2rem;">—</div>
-                    <div class="l">Bybit Long</div>
-                </div>
-                <div class="hero-metric">
-                    <div class="n" id="stat-okx-ratio" style="color: var(--primary); font-size: 2rem;">—</div>
-                    <div class="l">OKX Ratio</div>
-                </div>
-                <div class="hero-metric">
-                    <div class="n" id="stat-updated" style="font-size: 1rem; color: var(--text2); padding-top: 0.8rem;">—</div>
-                    <div class="l">Update Terakhir</div>
+    <div class="market-section" style="max-width: 1360px; margin: 0 auto; padding: 0 1.5rem;">
+        <div class="section-card" style="padding: 1.5rem 2rem;">
+            <div class="ls-top">
+                <div class="ls-status" id="ls-st"><span class="ls-dot"></span><span id="ls-clock">--:--:--</span><span id="ls-info">memuat…</span></div>
+                <div class="ls-ctl">
+                    <select id="ls-coin" aria-label="Koin"><option>BTC</option><option>ETH</option><option>SOL</option><option>XRP</option><option>DOGE</option><option>BNB</option></select>
+                    <select id="ls-tf" aria-label="Jendela waktu"><option value="5m">5m</option><option value="15m">15m</option><option value="30m">30m</option><option value="1h">1h</option><option value="2h">2h</option><option value="4h">4h</option><option value="6h">6h</option><option value="12h">12h</option><option value="1d">1d</option></select>
                 </div>
             </div>
-
-            <div style="background: var(--card-2); border: 2px solid var(--border); border-radius: var(--r-md); padding: 1.5rem;">
-                <h3 style="font-family: var(--display); font-size: 1.2rem; margin-bottom: 1rem; color: var(--text);">📊 Long vs Short Ratio — BTC 5m</h3>
-                <div style="height: 350px;">
-                    <canvas id="chart-longshort"></canvas>
-                </div>
-            </div>
+            <div class="ls-head"><span></span><div class="ml"><span>Longs (Taker Buy)</span><span>Shorts (Taker Sell)</span></div><span class="hv">Longs</span><span class="hv">Shorts</span><span class="hv">Tren</span></div>
+            <div id="ls-rows"></div>
+            <p class="ls-note">Baris All = rata-rata berbobot volume USD (Binance, Aster, OKX). Tanda * = sampel trade terlalu pendek (Bybit), tidak ikut All. Tanda ! = bursa gagal dimuat; arahkan kursor ke bar untuk alasannya.</p>
         </div>
     </div>
 </div>
@@ -3600,6 +3609,7 @@ function stopFallingCoins() {
             document.getElementById('admin-content').classList.remove('hidden');
             startNLF();
             startCexFound();
+            xlStart();
         } else {
             alert(`Akses ditolak: ${result.message || 'Unauthorized'}`);
             google.accounts.id.disableAutoSelect();
@@ -3650,6 +3660,7 @@ function stopFallingCoins() {
                  document.getElementById('admin-content').classList.remove('hidden');
               startNLF();
               startCexFound();
+              xlStart();
          }, 500);
                 } else {
                     termPrintLine('bash: access denied — gunakan Google Sign-In di bawah.', 'denied');
@@ -3719,7 +3730,6 @@ function stopFallingCoins() {
             startGarapWidget();
             startCryptoTicker();
             loadProjects();
-            loadMarketData();
         };
 
        // ═══════════════════════════════════════════════════════════
@@ -4612,87 +4622,168 @@ document.getElementById('weex-send-btn').onclick = async () => {
     }
 };
 
-    // ═══════════════════════════════════════════════════════════
-// ─── MARKET DASHBOARD LOGIC ───
-// ═══════════════════════════════════════════════════════════
-let chartInstance = null;
+  // ═══ MARKET DASHBOARD: Long vs Short live (WebSocket + /api/market) ═══
+(function () {
+    const $ = s => document.querySelector(s);
+    const state = { coin: 'BTC', tf: '5m' };
+    let running = false, hist = {}, lastPush = {}, token = 0, base = null, socks = [], buf = {}, timers = [];
+
+    const fmt = v => v >= 1e9 ? (v/1e9).toFixed(2)+'B' : v >= 1e6 ? (v/1e6).toFixed(2)+'M' : v >= 1e3 ? (v/1e3).toFixed(2)+'K' : v.toFixed(0);
+
+    function tween(el, to, f) {
+        const from = +el.dataset.v || 0; el.dataset.v = to;
+        const t0 = performance.now();
+        (function step(t) {
+            const p = Math.min(1, (t - t0) / 300);
+            el.textContent = f(from + (to - from) * p);
+            if (p < 1) requestAnimationFrame(step);
+        })(t0);
+    }
+
+    /* ---------- WebSocket: trade masuk dikelompokkan per detik ---------- */
+    const add = (ex, usd, buy) => {
+        const b = (buf[ex] = buf[ex] || {}), s = Math.floor(Date.now() / 1000);
+        const e = (b[s] = b[s] || [0, 0]); e[buy ? 0 : 1] += usd;
+        for (const k in b) if (+k < s - 180) delete b[k];
+    };
+
+    function connect(url, onOpen, onMsg, ping) {
+        let ws, timer, closed = false, tries = 0;
+        const open = () => {
+            ws = new WebSocket(url);
+            ws.onopen = () => { tries = 0; onOpen && onOpen(ws); if (ping) timer = setInterval(() => ws.readyState === 1 && ws.send(ping), 20000); };
+            ws.onmessage = e => { try { onMsg(e.data); } catch (_) {} };
+            ws.onclose = () => { clearInterval(timer); if (!closed) setTimeout(open, Math.min(15000, 1000 * ++tries)); };
+        };
+        open();
+        return { close() { closed = true; clearInterval(timer); ws && ws.close(); } };
+    }
+
+    async function startFeeds(coin) {
+        socks.forEach(s => s.close()); socks = []; buf = {};
+        const lc = coin.toLowerCase(), kr = `PF_${coin === 'BTC' ? 'XBT' : coin}USD`;
+        const agg = ex => m => { const d = JSON.parse(m); if (d.e === 'aggTrade') add(ex, +d.p * +d.q, !d.m); };
+        socks.push(connect(`wss://fstream.binance.com/ws/${lc}usdt@aggTrade`, null, agg('Binance')));
+        socks.push(connect(`wss://fstream.asterdex.com/ws/${lc}usdt@aggTrade`, null, agg('Aster')));
+        socks.push(connect('wss://stream.bybit.com/v5/public/linear',
+            ws => ws.send(JSON.stringify({ op: 'subscribe', args: [`publicTrade.${coin}USDT`] })),
+            m => { const d = JSON.parse(m); if (d.topic && d.topic.startsWith('publicTrade')) d.data.forEach(x => add('Bybit', +x.v * +x.p, x.S === 'Buy')); },
+            '{"op":"ping"}'));
+        socks.push(connect('wss://futures.kraken.com/ws/v1',
+            ws => ws.send(JSON.stringify({ event: 'subscribe', feed: 'trade', product_ids: [kr] })),
+            m => { const d = JSON.parse(m); if (d.feed === 'trade' && d.qty) add('Kraken', +d.qty, d.side === 'buy'); }));
+        // OKX melaporkan ukuran dalam kontrak, jadi ambil nilai kontrak dulu
+        let ct = 0;
+        try { const j = await (await fetch(`https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=${coin}-USDT-SWAP`)).json(); ct = +j.data[0].ctVal; } catch (_) {}
+        if (ct && running && coin === state.coin) socks.push(connect('wss://ws.okx.com:8443/ws/v5/public',
+            ws => ws.send(JSON.stringify({ op: 'subscribe', args: [{ channel: 'trades', instId: `${coin}-USDT-SWAP` }] })),
+            m => { const d = JSON.parse(m); (d.data || []).forEach(x => add('OKX', +x.sz * ct * +x.px, x.side === 'buy')); },
+            'ping'));
+    }
+
+    /* ---------- angka dasar (server) + trade live (WebSocket) ---------- */
+    function live(r) {
+        const bk = buf[r.name];
+        if (r.error || !bk) return r;
+        const keep = Math.max(0, 1 - (Date.now() - base.t) / (base.minutes * 60000));
+        let b = r.buy * keep, s = r.sell * keep;
+        const from = Math.floor(base.t / 1000);
+        for (const k in bk) if (+k > from) { b += bk[k][0]; s += bk[k][1]; }
+        return { ...r, buy: b, sell: s, pct: b + s > 0 ? (b / (b + s)) * 100 : r.pct };
+    }
+
+    function view() {
+        if (!base) return;
+        const rows = base.rows.filter(r => !r.avg).map(live);
+        const w = rows.filter(r => !r.error && r.usd && !r.partial);
+        const tot = w.reduce((s, r) => s + r.buy + r.sell, 0);
+        const all = tot ? { name: 'All', avg: true, pct: (w.reduce((s, r) => s + r.buy, 0) / tot) * 100 } : { name: 'All', error: 'Belum ada data' };
+        render([all, ...rows]);
+    }
+
+    function render(rows) {
+        const box = $('#ls-rows');
+        rows.forEach(r => {
+            let row = document.getElementById('ls-r-' + r.name);
+            if (!row) {
+                row = document.createElement('div');
+                row.id = 'ls-r-' + r.name;
+                row.className = 'ls-row' + (r.avg ? ' avg' : '');
+                row.innerHTML = `<span class="ls-nm"></span><div class="ls-bar"><i></i><b class="l"></b><b class="s"></b></div><span class="ls-v ls-lv"></span><span class="ls-v ls-sv"></span><svg class="ls-sp" viewBox="0 0 80 22" preserveAspectRatio="none"><polyline points=""/></svg>`;
+                box.appendChild(row);
+            }
+            const q = s => row.querySelector(s);
+            row.classList.toggle('err', !!r.error);
+            q('.ls-nm').textContent = r.name + (r.partial ? '*' : '');
+            q('.ls-bar').title = r.error || (r.partial ? `Sampel hanya ${r.secs} detik terakhir, tidak ikut rata-rata All` : '');
+            if (r.error) { q('i').style.width = '0%'; q('.l').textContent = q('.s').textContent = '—'; q('.ls-lv').textContent = q('.ls-sv').textContent = '—'; return; }
+
+            q('i').style.width = r.pct + '%';
+            tween(q('.l'), r.pct, v => v.toFixed(2) + '%');
+            tween(q('.s'), 100 - r.pct, v => v.toFixed(2) + '%');
+            if (r.usd) { tween(q('.ls-lv'), r.buy, fmt); tween(q('.ls-sv'), r.sell, fmt); }
+            else { q('.ls-lv').textContent = q('.ls-sv').textContent = '—'; }
+
+            if (Date.now() - (lastPush[r.name] || 0) >= 1000) {
+                lastPush[r.name] = Date.now();
+                const h = (hist[r.name] = hist[r.name] || []);
+                h.push(r.pct); if (h.length > 40) h.shift();
+                const lo = Math.min(...h, 40), hi = Math.max(...h, 60);
+                q('polyline').setAttribute('points', h.map((y, i) => `${(i / Math.max(1, h.length - 1)) * 80},${22 - ((y - lo) / (hi - lo)) * 20 - 1}`).join(' '));
+            }
+        });
+    }
+
+    async function pull() {
+        const my = ++token;
+        try {
+            const r = await fetch(`/api/market?coin=${state.coin}&tf=${state.tf}`);
+            if (!r.ok) throw 0;
+            const d = await r.json();
+            if (my !== token) return;
+            d.t = Date.now() - (Number(r.headers.get('age')) || 4) * 1000;
+            base = d;
+            $('#ls-st').className = 'ls-status live';
+            $('#ls-info').textContent = `${d.coin} · ${d.minutes >= 60 ? d.minutes / 60 + ' jam' : d.minutes + ' menit'} terakhir · live`;
+        } catch (e) {
+            if (my === token) { $('#ls-st').className = 'ls-status off'; $('#ls-info').textContent = 'gagal memuat, mencoba lagi…'; }
+        }
+    }
+
+    function reset() { $('#ls-rows').innerHTML = ''; hist = {}; lastPush = {}; base = null; pull(); }
+
+    function start() {
+        if (running) return;
+        running = true;
+        startFeeds(state.coin); pull();
+        timers = [
+            setInterval(view, 250),
+            setInterval(pull, 30000),
+            setInterval(() => { $('#ls-clock').textContent = new Date().toLocaleTimeString('id-ID', { hour12: false }).replace(/\./g, ':'); }, 1000),
+        ];
+    }
+    function stop() {
+        running = false;
+        timers.forEach(clearInterval); timers = [];
+        socks.forEach(s => s.close()); socks = []; buf = {};
+    }
+
+    $('#ls-coin').onchange = e => { state.coin = e.target.value; startFeeds(state.coin); reset(); };
+    $('#ls-tf').onchange = e => { state.tf = e.target.value; reset(); };
+    document.addEventListener('visibilitychange', () => { if (running && !document.hidden) pull(); });
+    window.xlStart = start; window.xlStop = stop;
+})();
 
 function showMarketDashboard() {
     document.getElementById('halaman-market').style.display = 'block';
     document.getElementById('halaman-airdrop').style.display = 'none';
-    loadMarketData();
+    window.xlStart && xlStart();
 }
-
 function showAirdropDashboard() {
     document.getElementById('halaman-market').style.display = 'none';
     document.getElementById('halaman-airdrop').style.display = 'block';
+    window.xlStop && xlStop();   // tutup WebSocket saat pindah halaman
 }
-
-async function loadMarketData() {
-    try {
-        const res = await fetch('/api/market');
-        const data = await res.json();
-        if (data.error) throw new Error(data.error);
-
-        document.getElementById('stat-bnb-long').textContent   = (data.binance.long * 100).toFixed(2) + '%';
-        document.getElementById('stat-bybit-long').textContent = (data.bybit.long   * 100).toFixed(2) + '%';
-        document.getElementById('stat-okx-ratio').textContent  = data.okx.ratio.toFixed(3);
-        document.getElementById('stat-updated').textContent    = new Date(data.updated_at).toLocaleTimeString('id-ID');
-        document.getElementById('stat-updated').style.color    = 'var(--text2)';
-
-        renderMarketChart(data);
-    } catch (err) {
-        console.error('Gagal load market data:', err);
-        const el = document.getElementById('stat-updated');
-        el.textContent = 'Error';
-        el.style.color = 'var(--danger)';
-    }
-}
-
-function renderMarketChart(data) {
-    const ctx = document.getElementById('chart-longshort').getContext('2d');
-    const labels = ['Binance', 'Bybit', 'OKX'];
-
-    const longs = [
-        data.binance.long * 100,
-        data.bybit.long   * 100,
-        data.okx.ratio > 1 ? (data.okx.ratio / (1 + data.okx.ratio)) * 100 : data.okx.ratio * 100
-    ];
-    const shorts = longs.map(v => 100 - v);
-
-    if (chartInstance) chartInstance.destroy();
-
-    chartInstance = new Chart(ctx, {
-        type: 'bar',
-        data: {
-            labels,
-            datasets: [
-                { label: 'Long %',  data: longs,  backgroundColor: 'rgba(53,224,161,.85)',  borderRadius: 6 },
-                { label: 'Short %', data: shorts, backgroundColor: 'rgba(239,68,68,.85)',   borderRadius: 6 }
-            ]
-        },
-        options: {
-            responsive: true,
-            maintainAspectRatio: false,
-            indexAxis: 'y',
-            scales: {
-                x: { stacked: true, max: 100, ticks: { color: '#A1A1AA' }, grid: { color: '#2A2A2A' } },
-                y: { stacked: true, ticks: { color: '#FFFFFF' }, grid: { display: false } }
-            },
-            plugins: {
-                legend: { labels: { color: '#FFFFFF' } },
-                tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.parsed.x.toFixed(2)}%` } }
-            }
-        }
-    });
-}
-
-// Auto-refresh tiap 5 menit
-setInterval(() => {
-    if (document.getElementById('halaman-market')?.style.display !== 'none') {
-        loadMarketData();
-    }
-}, 5 * 60 * 1000);
 
     </script>
 
