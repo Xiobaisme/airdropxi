@@ -2265,6 +2265,7 @@ function updateMarketSessionBadge(hourUTC) {
 };
 const NEWS_POLL_SEC = 10; // cek antrian tiap 10 detik (poller Telegram jalan tiap menit di Supabase)
 let newsItems = [], newsFilter = 'all', _newsCountdown = NEWS_POLL_SEC, _newsCountdownInt = null, _newsClockInt = null, _newsSig = '';
+let _newsInFlight = false, _newsFails = 0;
 
 function toggleNewsPanel() {
     const drawer = document.getElementById('news-drawer');
@@ -2273,9 +2274,14 @@ function toggleNewsPanel() {
     const opening = !drawer.classList.contains('open');
     drawer.classList.toggle('open'); overlay.classList.toggle('show');
     if (opening) {
-        if (!newsItems.length) loadNews();
+        _newsFails = 0; _newsCountdown = NEWS_POLL_SEC;
+        loadNews();
         if (!_newsClockInt) { tickNewsClock(); _newsClockInt = setInterval(tickNewsClock, 1000); }
         if (!_newsCountdownInt) _newsCountdownInt = setInterval(tickNewsCountdown, 1000);
+    } else {
+        // drawer ditutup: hentikan polling sepenuhnya
+        clearInterval(_newsClockInt); clearInterval(_newsCountdownInt);
+        _newsClockInt = _newsCountdownInt = null;
     }
 }
 function tickNewsClock() {
@@ -2284,30 +2290,43 @@ function tickNewsClock() {
 }
 function tickNewsCountdown() {
     _newsCountdown--;
-    if (_newsCountdown <= 0) { _newsCountdown = NEWS_POLL_SEC; loadNews(); }
+    if (_newsCountdown <= 0) {
+        // backoff: 10s → 20s → 40s → 80s → maks 120s kalau terus gagal
+        _newsCountdown = Math.min(NEWS_POLL_SEC * Math.pow(2, _newsFails), 120);
+        loadNews();
+    }
     const el = document.getElementById('news-countdown');
     if (el) el.textContent = `${String(Math.floor(_newsCountdown/60)).padStart(2,'0')}:${String(_newsCountdown%60).padStart(2,'0')}`;
 }
 async function loadNews(manual = false) {
+    if (_newsInFlight) return;               // jangan numpuk request
+    _newsInFlight = true;
+    const ctrl = new AbortController();
+    const to = setTimeout(() => ctrl.abort(), 10000);   // maks 10 detik per request
     try {
-        const res = await fetch('/api/admin-airdrop?type=news-queue');
+        const res = await fetch('/api/admin-airdrop?type=news-queue', { signal: ctrl.signal });
         if (!res.ok) throw new Error('Gagal fetch berita (HTTP ' + res.status + ')');
         const rows = await res.json();
+        _newsFails = 0;
         _newsCountdown = NEWS_POLL_SEC;
         const next = rows.map(r => ({
             id: r.id, source: r.source, status: r.status,
             title: r.text, url: r.link, published_at: r.posted_at || r.created_at,
         }));
-        // render ulang hanya kalau ada yang berubah (atau ganti menit, buat label "x menit lalu")
         const sig = Math.floor(Date.now() / 60000) + JSON.stringify(next.map(n => [n.id, n.status]));
         if (sig === _newsSig && !manual) return;
         _newsSig = sig;
         newsItems = next;
         renderNewsFilters(); renderNewsFeed();
     } catch (e) {
-        if (manual) showToast('Gagal muat berita: ' + e.message, 'error');
+        _newsFails++;
+        const msg = e.name === 'AbortError' ? 'Timeout, server terlalu lama merespons' : e.message;
+        if (manual) showToast('Gagal muat berita: ' + msg, 'error');
         const feed = document.getElementById('news-feed');
-        if (feed && !newsItems.length) feed.innerHTML = `<div class="empty-state">${icon('alert')}${esc(e.message)}</div>`;
+        if (feed && !newsItems.length) feed.innerHTML = `<div class="empty-state">${icon('alert')}${esc(msg)}</div>`;
+    } finally {
+        clearTimeout(to);
+        _newsInFlight = false;
     }
 }
 function newsTimeAgo(iso) {
