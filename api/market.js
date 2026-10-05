@@ -1,47 +1,74 @@
-// api/market.js
+// api/flow.js  ->  /api/flow?coin=BTC&tf=5m
+const TF = { '5m': 5, '15m': 15, '30m': 30, '1h': 60 };
+const H = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36', Accept: 'application/json' };
+
+const get = url =>
+  fetch(url, { headers: H, signal: AbortSignal.timeout(7000) }).then(async r => {
+    if (r.ok) return r.json();
+    throw new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 80)}`);
+  });
+const sum = (a, f) => a.reduce((s, x) => s + Number(f(x) || 0), 0);
+
+// Binance & Aster: kline 1 menit punya taker-buy volume (live, update tiap trade)
+const klineFlow = base => async (c, n) => {
+  const k = await get(`${base}/fapi/v1/klines?symbol=${c}USDT&interval=1m&limit=${n}`);
+  const buy = sum(k, x => x[10]);          // taker buy quote volume (USDT)
+  const total = sum(k, x => x[7]);         // total quote volume (USDT)
+  return { buy, sell: total - buy, usd: true };
+};
+
+const EX = {
+  Binance: klineFlow('https://fapi.binance.com'),
+  Aster: klineFlow('https://fapi.asterdex.com'),
+
+  // OKX: bucket 5 menit, format [ts, sellVol, buyVol], terbaru di atas
+  OKX: async (c, n) => {
+    const j = await get(`https://www.okx.com/api/v5/rubik/stat/taker-volume?ccy=${c}&instType=CONTRACTS&period=5m`);
+    const rows = (j.data || []).slice(0, Math.ceil(n / 5));
+    return { sell: sum(rows, r => r[1]), buy: sum(rows, r => r[2]) };
+  },
+
+  // Bybit: dari 1000 trade terakhir yang masuk jendela waktu
+  Bybit: async (c, n) => {
+    const j = await get(`https://api.bybit.com/v5/market/recent-trade?category=linear&symbol=${c}USDT&limit=1000`);
+    const from = Date.now() - n * 60000;
+    const t = (j.result?.list || []).filter(x => Number(x.time) >= from);
+    return { buy: sum(t.filter(x => x.side === 'Buy'), x => x.size), sell: sum(t.filter(x => x.side === 'Sell'), x => x.size) };
+  },
+
+  // Kraken Futures: analytics cvd per 1 menit (buyVolume / sellVolume)
+  Kraken: async (c, n) => {
+    const sym = `PF_${c === 'BTC' ? 'XBT' : c}USD`;
+    const since = Math.floor(Date.now() / 1000) - (n + 1) * 60;
+    const j = await get(`https://futures.kraken.com/api/charts/v1/analytics/${sym}/cvd?since=${since}&interval=60`);
+    const d = j.result?.data || {};
+    return { buy: sum(d.buyVolume || [], x => x), sell: sum(d.sellVolume || [], x => x) };
+  }
+};
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET');
-  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
+  res.setHeader('Cache-Control', 's-maxage=4, stale-while-revalidate=8');
 
-  const headers = {
-    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
-    'Accept': 'application/json',
-    'Accept-Language': 'en-US,en;q=0.9',
-    'Referer': 'https://www.google.com/'
-  };
+  const coin = String(req.query.coin || 'BTC').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
+  const tf = TF[req.query.tf] ? req.query.tf : '5m';
+  const n = TF[tf];
 
-  const [binanceRes, bybitRes, okxRes, bitgetRes, gateRes] = await Promise.allSettled([
-    // Binance
-    fetch('https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=BTCUSDT&period=5m&limit=1', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
-    // Bybit
-    fetch('https://api.bybit.com/v5/market/account-ratio?category=linear&symbol=BTCUSDT&period=5min&limit=1', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
-    // OKX
-    fetch('https://www.okx.com/api/v5/rubik/stat/contracts/long-short-account-ratio?ccy=BTC&period=5m', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
-    // Bitget
-    fetch('https://api.bitget.com/api/v2/mix/market/long-short?symbol=BTCUSDT', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
-    // Gate.io
-    fetch('https://api.gateio.ws/api/v4/futures/usdt/contract_stats?contract=BTC_USDT', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
-  ]);
+  const names = Object.keys(EX);
+  const out = await Promise.allSettled(names.map(k => EX[k](coin, n)));
 
-  const result = {
-    binance: binanceRes.status === 'fulfilled'
-      ? { long: Number(binanceRes.value?.[0]?.longAccount || 0), short: Number(binanceRes.value?.[0]?.shortAccount || 0), ratio: Number(binanceRes.value?.[0]?.longShortRatio || 0) }
-      : { error: binanceRes.reason?.toString() || 'Gagal' },
-    bybit: bybitRes.status === 'fulfilled'
-      ? { long: Number(bybitRes.value?.result?.list?.[0]?.buyRatio || 0), short: Number(bybitRes.value?.result?.list?.[0]?.sellRatio || 0) }
-      : { error: bybitRes.reason?.toString() || 'Gagal' },
-    okx: okxRes.status === 'fulfilled'
-      ? { ratio: Number(okxRes.value?.data?.[0]?.[1] || 0) }
-      : { error: okxRes.reason?.toString() || 'Gagal' },
-    bitget: bitgetRes.status === 'fulfilled'
-      ? { long: Number(bitgetRes.value?.data?.[0]?.longRatio || 0), short: Number(bitgetRes.value?.data?.[0]?.shortRatio || 0), ratio: Number(bitgetRes.value?.data?.[0]?.longShortRatio || 0) }
-      : { error: bitgetRes.reason?.toString() || 'Gagal' },
-    gate: gateRes.status === 'fulfilled' && Array.isArray(gateRes.value) && gateRes.value.length > 0
-      ? { lsr_taker: Number(gateRes.value[0]?.lsr_taker || 0), lsr_account: Number(gateRes.value[0]?.lsr_account || 0) }
-      : { error: gateRes.reason?.toString() || 'Gagal' },
-    updated_at: new Date().toISOString()
-  };
+  const rows = out.map((o, i) => {
+    if (o.status !== 'fulfilled') return { name: names[i], error: String(o.reason?.message || o.reason).slice(0, 100) };
+    const { buy, sell, usd } = o.value;
+    const total = buy + sell;
+    return total > 0
+      ? { name: names[i], buy, sell, pct: (buy / total) * 100, usd: !!usd }
+      : { name: names[i], error: 'Belum ada trade di jendela ini' };
+  });
 
-  res.status(200).json(result);
+  const ok = rows.filter(r => !r.error);
+  const avg = ok.length ? ok.reduce((s, r) => s + r.pct, 0) / ok.length : null;
+  const all = avg === null ? { name: 'Rata-rata', error: 'Semua bursa gagal' } : { name: 'Rata-rata', pct: avg, avg: true };
+
+  res.status(200).json({ coin, tf, minutes: n, rows: [all, ...rows], updated_at: new Date().toISOString() });
 }
