@@ -1,0 +1,28 @@
+name: News poll
+
+on:
+  schedule:
+    - cron: "*/5 * * * *"
+  workflow_dispatch:
+    inputs:
+      lookback_min:
+        description: "Backfill dalam menit (4320 = 3 hari)"
+        default: "30"
+
+jobs:
+  poll:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.12"
+      - run: pip install telethon requests
+      - run: python scripts/news_poll.py
+        env:
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_SESSION: ${{ secrets.TG_SESSION }}
+          ALERT_SECRET: ${{ secrets.ALERT_SECRET }}
+          NEWS_CHANNELS: "lookonchain=lookonchainchannel,investigations=investigations,onchainlens=OnchainLens"
+          LOOKBACK_MIN: ${{ inputs.lookback_min }}
