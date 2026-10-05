@@ -401,11 +401,12 @@ async function sendDiscord() {
         return res.status(200).json(out);
       } catch { return res.status(200).json({}); }
     }
-       if (action === 'balances') {
+        if (action === 'balances') {
   try {
     const addrs = String(req.query.addresses || '').split(',').filter(Boolean);
     return res.status(200).json(await onchain.balances(chain, addrs, req.query.full === '1'));
   } catch (e) {
+    console.error('[onchain] balances error:', e);   // ← BARU: kelihatan di Vercel logs
     return res.status(200).json({});
   }
 }
