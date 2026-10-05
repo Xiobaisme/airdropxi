@@ -1,39 +1,35 @@
 // api/market.js
 export default async function handler(req, res) {
-  // Set CORS biar bisa diakses dari frontend lu
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET');
+  res.setHeader('Cache-Control', 's-maxage=60, stale-while-revalidate=120');
 
-  try {
-    // Fetch data dari ketiga exchange secara paralel
-    const [binance, bybit, okx] = await Promise.all([
-      fetch('https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=BTCUSDT&period=5m&limit=1').then(r => r.json()),
-      fetch('https://api.bybit.com/v5/market/account-ratio?category=linear&symbol=BTCUSDT&period=5min&limit=1').then(r => r.json()),
-      fetch('https://www.okx.com/api/v5/rubik/stat/contracts/long-short-account-ratio?ccy=BTC&period=5m').then(r => r.json())
-    ]);
+  const headers = {
+    'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/120.0.0.0 Safari/537.36',
+    'Accept': 'application/json',
+    'Accept-Language': 'en-US,en;q=0.9',
+    'Referer': 'https://www.google.com/'
+  };
 
-    // Gabungin datanya jadi satu format yang rapi
-    const result = {
-      binance: {
-        long: binance[0]?.longAccount || '0',
-        short: binance[0]?.shortAccount || '0',
-        ratio: binance[0]?.longShortRatio || '0'
-      },
-      bybit: {
-        long: bybit.result?.list[0]?.buyRatio || '0',
-        short: bybit.result?.list[0]?.sellRatio || '0'
-      },
-      okx: {
-        ratio: okx.data?.[0]?.[1] || '0'
-      },
-      updated_at: new Date().toISOString()
-    };
+  // Pake allSettled biar satu gagal, yang lain tetep dapet
+  const [binanceRes, bybitRes, okxRes] = await Promise.allSettled([
+    fetch('https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=BTCUSDT&period=5m&limit=1', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
+    fetch('https://api.bybit.com/v5/market/account-ratio?category=linear&symbol=BTCUSDT&period=5min&limit=1', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
+    fetch('https://www.okx.com/api/v5/rubik/stat/contracts/long-short-account-ratio?ccy=BTC&period=5m', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
+  ]);
 
-    // Kirim response JSON ke frontend
-    res.status(200).json(result);
+  const result = {
+    binance: binanceRes.status === 'fulfilled'
+      ? { long: Number(binanceRes.value?.[0]?.longAccount || 0), short: Number(binanceRes.value?.[0]?.shortAccount || 0), ratio: Number(binanceRes.value?.[0]?.longShortRatio || 0) }
+      : { error: binanceRes.reason?.toString() || 'Gagal' },
+    bybit: bybitRes.status === 'fulfilled'
+      ? { long: Number(bybitRes.value?.result?.list?.[0]?.buyRatio || 0), short: Number(bybitRes.value?.result?.list?.[0]?.sellRatio || 0) }
+      : { error: bybitRes.reason?.toString() || 'Gagal' },
+    okx: okxRes.status === 'fulfilled'
+      ? { ratio: Number(okxRes.value?.data?.[0]?.[1] || 0) }
+      : { error: okxRes.reason?.toString() || 'Gagal' },
+    updated_at: new Date().toISOString()
+  };
 
-  } catch (error) {
-    console.error('Error fetching market data:', error);
-    res.status(500).json({ error: 'Gagal mengambil data dari exchange' });
-  }
+  res.status(200).json(result);
 }
