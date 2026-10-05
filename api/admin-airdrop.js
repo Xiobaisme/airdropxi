@@ -408,6 +408,7 @@ async function sendDiscord() {
   
   // ─── NEWS QUEUE (antrian post Telegram dari poller Supabase, dibaca News Terminal) ───
   if (type === 'news-queue') {
+    return res.status(200).json([]);
     if (req.method !== 'GET') {
       return res.status(405).json({ error: 'Method tidak diizinkan untuk news-queue' });
     }
