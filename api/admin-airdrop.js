@@ -374,12 +374,11 @@ async function sendDiscord() {
        if (action === 'balances') {
   try {
     const addrs = String(req.query.addresses || '').split(',').filter(Boolean);
-    return res.status(200).json(await onchain.balances(chain, addrs));
+    return res.status(200).json(await onchain.balances(chain, addrs, req.query.full === '1'));
   } catch (e) {
     return res.status(200).json({});
   }
 }
-
         if (action === 'live') {
       try {
         return res.status(200).json(await onchain.live(String(chain || ''), {
