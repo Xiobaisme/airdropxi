@@ -11,6 +11,8 @@ const ratelimit = new Ratelimit({
 
 const crypto = require('crypto');
 const onchain = require('../lib/onchain');
+// SEMENTARA: putus semua akses ke Supabase sampai DB sehat
+const MAINTENANCE = true;
 
 function verifyAdminToken(req) {
   const cookie = req.headers.cookie || '';
@@ -31,11 +33,11 @@ module.exports = async function handler(req, res) {
   const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-  if (!SUPA_URL || !SUPA_KEY) {
-    return res.status(500).json({ error: 'Missing env vars' });
-  }
+  if (!MAINTENANCE && (!SUPA_URL || !SUPA_KEY)) {
+  return res.status(500).json({ error: 'Missing env vars' });
+}
 
-  const BASE = `${SUPA_URL}/rest/v1`;
+const BASE = `${SUPA_URL}/rest/v1`;
   const H = {
     'apikey': SUPA_KEY,
     'Authorization': `Bearer ${SUPA_KEY}`,
@@ -208,8 +210,8 @@ async function sendDiscord() {
         const anyOk = results.discord === 'ok' || results.telegram === 'ok';
 
     // kalau dikirim dari antrian News Terminal, tandai "sent" biar nggak bisa kekirim dobel
-    if (anyOk && queue_id) {
-      try {
+   if (!MAINTENANCE && anyOk && queue_id) {
+  try {
         await fetch(`${BASE}/news_queue?id=eq.${encodeURIComponent(queue_id)}`, {
           method: 'PATCH', headers: H,
           body: JSON.stringify({ status: 'sent', sent_at: new Date().toISOString() }),
@@ -408,8 +410,8 @@ async function sendDiscord() {
   
   // ─── NEWS QUEUE (antrian post Telegram dari poller Supabase, dibaca News Terminal) ───
   if (type === 'news-queue') {
-    return res.status(200).json([]);
-    if (req.method !== 'GET') {
+  if (MAINTENANCE) return res.status(200).json([]);
+  if (req.method !== 'GET') {
       return res.status(405).json({ error: 'Method tidak diizinkan untuk news-queue' });
     }
     try {
@@ -508,7 +510,6 @@ async function sendDiscord() {
     });
   }
     // SEMENTARA: putus semua akses ke Supabase sampai DB sehat
-  const MAINTENANCE = true;
   if (MAINTENANCE) {
     return res.status(503).json({ error: 'Maintenance: database sedang dipulihkan' });
   }
@@ -631,27 +632,6 @@ async function sendDiscord() {
           method: 'DELETE', headers: H,
         });
         return res.status(500).json({ error: serializeError(err2) });
-      }
-
-      try {
-        await fetch(`https://airdropxi.vercel.app/api/notify-subscribers`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'x-admin-key': process.env.ADMIN_SECRET_KEY,
-          },
-          body: JSON.stringify({
-            projectName: req.body.name,
-            projectUrl:  `https://airdropxi.vercel.app/guide/${newId}`,
-            description: req.body.descriptionEN || req.body.descriptionID || '',
-            raised:      req.body.RaisedEN      || req.body.RaisedID      || null,
-            tags:        req.body.tags          || null,
-            network:     req.body.network       || null,
-            status:      req.body.status        || null,
-          }),
-        });
-      } catch(e) {
-        console.warn('Notify gagal:', e.message);
       }
 
       return res.status(201).json(Array.isArray(result1) ? result1 : [result1]);
