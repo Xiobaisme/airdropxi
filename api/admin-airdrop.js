@@ -507,6 +507,11 @@ async function sendDiscord() {
       req.on('close', end);
     });
   }
+    // SEMENTARA: putus semua akses ke Supabase sampai DB sehat
+  const MAINTENANCE = true;
+  if (MAINTENANCE) {
+    return res.status(503).json({ error: 'Maintenance: database sedang dipulihkan' });
+  }
   
   function buildAirdropsPayload(p) {
     return {
