@@ -25,7 +25,7 @@ function verifyAdminToken(req) {
     const expectedSig = crypto.createHmac('sha256', process.env.ADMIN_SECRET_KEY).update(payload).digest('hex');
     const sigBuf = Buffer.from(sig), expBuf = Buffer.from(expectedSig);
     if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) return false;
-    return Date.now() < Number(payload);
+    return Date.now() < Number(payload.split(':')[0]);
   } catch { return false; }
 }
 
@@ -244,39 +244,37 @@ async function sendDiscord() {
   // ─── TERMINAL LOGIN (verifikasi kata sandi custom di halaman login) ───
   // Secret-nya HANYA hidup di env var TERMINAL_LOGIN_SECRET (server-side),
   // gak pernah dikirim/ditulis di HTML/JS yang jalan di browser.
-    async function handleTerminalLogin(req, res) {
-    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-    const { success } = await ratelimit.limit(`login:${ip}`);
-    if (!success) {
-      return res.status(429).json({ success: false, error: 'Terlalu banyak percobaan, coba lagi nanti' });
-    }
-    const { input } = req.body || {};
-    const secret = process.env.TERMINAL_LOGIN_SECRET;
-
-      if (!secret || !process.env.ADMIN_SECRET_KEY) {
-      return res.status(500).json({ success: false, error: 'Konfigurasi server belum lengkap' });
-    }
-        const inputBuf = Buffer.from(typeof input === 'string' ? input : '');
-    const secretBuf = Buffer.from(secret);
-    const valid = inputBuf.length === secretBuf.length && crypto.timingSafeEqual(inputBuf, secretBuf);
-    if (!valid) {
-      return res.status(401).json({ success: false });
-    }
-
-    const expiry = Date.now() + 1000 * 60 * 60 * 4;
-    const payload = `${expiry}`;
-    const sig = crypto.createHmac('sha256', process.env.ADMIN_SECRET_KEY).update(payload).digest('hex');
-    const token = Buffer.from(`${payload}.${sig}`).toString('base64');
-    res.setHeader('Set-Cookie', `admin_token=${encodeURIComponent(token)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=14400`);
-    return res.status(200).json({ success: true });
+  async function handleTerminalLogin(req, res) {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
+  const { success } = await ratelimit.limit(`login:${ip}`);
+  if (!success) {
+    return res.status(429).json({ success: false, error: 'Terlalu banyak percobaan, coba lagi nanti' });
   }
 
-  if (type === 'terminal-login') {
-    if (req.method !== 'POST') {
-      return res.status(405).json({ error: 'Method tidak diizinkan untuk terminal-login' });
-    }
-    return await handleTerminalLogin(req, res);
+  const { input } = req.body || {};
+
+  let users = {};
+  try { users = JSON.parse(process.env.TERMINAL_LOGIN_SECRETS || '{}'); } catch {}
+
+  if (!Object.keys(users).length || !process.env.ADMIN_SECRET_KEY) {
+    return res.status(500).json({ success: false, error: 'Konfigurasi server belum lengkap' });
   }
+
+  const h = (s) => crypto.createHash('sha256').update(String(s)).digest();
+  const given = h(typeof input === 'string' ? input : '');
+  let matchedUser = null;
+  for (const [name, pw] of Object.entries(users)) {
+    if (crypto.timingSafeEqual(given, h(pw))) matchedUser = name;
+  }
+  if (!matchedUser) return res.status(401).json({ success: false });
+
+  const expiry = Date.now() + 1000 * 60 * 60 * 4;
+  const payload = `${expiry}:${matchedUser}`;
+  const sig = crypto.createHmac('sha256', process.env.ADMIN_SECRET_KEY).update(payload).digest('hex');
+  const token = Buffer.from(`${payload}.${sig}`).toString('base64');
+  res.setHeader('Set-Cookie', `admin_token=${encodeURIComponent(token)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=14400`);
+  return res.status(200).json({ success: true });
+}
     // ─── MARKETS (publik: ranking CoinGecko, cache Redis 1 jam) ───
   // Dipakai ticker bawah + koin jatuh di halaman login, jadi harus di atas cek admin.
   if (type === 'markets') {
