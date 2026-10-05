@@ -956,6 +956,11 @@
 .oc-addr { font-family: var(--mono); font-size: 14px; font-weight: 700; fill: var(--text); }
 .oc-nlabel { font-family: var(--label); font-size: 14px; font-weight: 700; fill: #fff; }
 .oc-nlabel { pointer-events: none; }
+.oc-bal .oc-bal-dot { fill: #FFD23F; stroke: #0A0A0A; stroke-width: 2; }
+.oc-bal.loading .oc-bal-dot { fill: #3a3a42; }
+.oc-bal-g { font-family: var(--label); font-size: 11px; font-weight: 800; fill: #000; pointer-events: none; }
+.oc-bal-txt { font-family: var(--mono); font-size: 12px; font-weight: 700; fill: #FFD23F;
+ paint-order: stroke; stroke: #0A0A0A; stroke-width: 5px; stroke-linejoin: round; }
 .oc-dir.swap { color: #FFD23F; background: rgba(255,210,63,.14); }
 .oc-elabel { font-family: var(--label); font-size: 14px; font-weight: 700; fill: var(--text); }
 .oc-esub { font-family: var(--label); font-size: 12px; fill: var(--text3); }
@@ -3540,7 +3545,8 @@ const OC_DUST = 0.001;
 const OC_ROOT_EDGES = 80;   // maksimal garis dari wallet utama
 const OC_NODE_EDGES = 20;   // maksimal garis tiap wallet yang di-klik
 const oc = { chains: null, chain: null, root: null, ex: null, raw: new Map(), nodes: new Map(), edges: new Map(), txs: [],
-             names: {}, tried: new Set(), vp: { x: 0, y: 0, k: 1 }, bounds: null, moved: false, hideDust: true };
+             names: {}, tried: new Set(), vp: { x: 0, y: 0, k: 1 }, bounds: null, moved: false, hideDust: true,
+             bal: new Map(), pos: null };
 
 const ocShort = (a) => a.length > 16 ? a.slice(0, 8) + '…' + a.slice(-6) : a;
 const ocName = (a) => { const l = oc.names[a]?.label; return l ? (l.length > 26 ? l.slice(0, 25) + '…' : l) : ocShort(a); };
@@ -3706,7 +3712,9 @@ function ocSummary(d) {
 function ocApply() {
     const g = document.getElementById('oc-vp');
     if (g) g.setAttribute('transform', `translate(${oc.vp.x} ${oc.vp.y}) scale(${oc.vp.k})`);
+    ocBalSchedule();
 }
+
 function ocFit() {
     if (!oc.bounds) return;
     const st = document.getElementById('oc-diagram');
@@ -3814,6 +3822,7 @@ function ocRender(fit) {
     if (!oc.root) return;
         const R = 28;
     const { pos, W, H, ox, oy } = ocLayout();
+        oc.pos = pos;
     // jaga posisi layar saat expand supaya diagram tidak "loncat"
     if (!fit && oc.shift) { oc.vp.x -= (ox - oc.shift.x) * oc.vp.k; oc.vp.y -= (oy - oc.shift.y) * oc.vp.k; }
     oc.shift = { x: ox, y: oy };
@@ -3875,6 +3884,7 @@ function ocRender(fit) {
             <circle cx="${p.x}" cy="${p.y}" r="${R + 8}" fill="${fill}" opacity=".12"/>
             <circle class="main" cx="${p.x}" cy="${p.y}" r="${R}" fill="${fill}" stroke="${oc.raw.has(a) ? '#fff' : 'transparent'}" stroke-width="2"/>
             <text x="${p.x}" y="${p.y + 6}" text-anchor="middle" font-size="17" font-weight="800" fill="#000">${isRoot ? '★' : n.type ? '◆' : '•'}</text>
+            ${ocBalBadge(a, p, R)}
         </g>`;
     }).join('');
 
@@ -3897,6 +3907,99 @@ function ocRender(fit) {
             <td><span class="oc-dir ${out ? 'out' : 'in'}">${out ? 'OUT' : 'IN'}</span><a href="${esc(oc.ex.addr + peer)}" target="_blank" rel="noopener" title="${esc(peer)}">${esc(ocName(peer))}</a></td>
             <td>${ocAmt(t.value)} ${esc(t.sym)}</td></tr>`;
     }).join('');
+}
+
+// ═══ SALDO PER ALAMAT (ikon kiri-bawah node) ═══
+const OC_BAL_BATCH = 10;         // alamat per request
+const OC_BAL_PER_RUN = 150;      // maks alamat per proses (naikkan kalau API kuat, turunkan kalau kena limit)
+const OC_BAL_FRESH = 5 * 60e3, OC_BAL_RETRY = 60e3;
+let _ocBalRun = false, _ocBalAgain = false, _ocBalTimer = null;
+
+const ocBalText = (b) => (b.partial ? '~' : '') + (b.usd == null
+    ? `${ocAmt(b.native.amount)} ${b.native.sym}`
+    : (b.usd > 0 && b.usd < 1 ? '<$1' : '$' + ocAmt(b.usd)));
+
+function ocBalTip(b) {
+    const L = [b.usd != null ? 'Total ≈ $' + ocAmt(b.usd) : 'Total USD tidak diketahui'];
+    L.push(`${ocAmt(b.native.amount)} ${b.native.sym}`);
+    (b.tokens || []).forEach(t => L.push(`${ocAmt(t.amount)} ${t.sym} ($${ocAmt(t.usd)})`));
+    if (b.n > (b.tokens || []).length) L.push(`+${b.n - b.tokens.length} token lain`);
+    if (b.partial) L.push('(sebagian: token tidak ikut dihitung di chain ini)');
+    return L.join('\n');
+}
+
+function ocBalInner(cx, cy, b) {
+    const ok = b && !b.err;
+    const tip = ok ? ocBalTip(b) : (b && b.err ? 'Saldo gagal dimuat' : 'Memuat saldo…');
+    return `<title>${esc(tip)}</title>
+        <circle class="oc-bal-dot" cx="${cx}" cy="${cy}" r="10"/>
+        <text class="oc-bal-g" x="${cx}" y="${cy + 4}" text-anchor="middle">$</text>
+        ${ok ? `<text class="oc-bal-txt" x="${cx - 14}" y="${cy + 4}" text-anchor="end">${esc(ocBalText(b))}</text>` : ''}`;
+}
+
+function ocBalBadge(a, p, R) {
+    const b = oc.bal.get(oc.chain + ':' + a), cx = p.x - R * 0.72, cy = p.y + R * 0.72;
+    return `<g class="oc-bal ${b && !b.err ? '' : 'loading'}" id="ocb-${esc(a)}" data-cx="${cx}" data-cy="${cy}">${ocBalInner(cx, cy, b)}</g>`;
+}
+
+// update satu badge tanpa render ulang seluruh diagram
+function ocBalPaint(a, chain) {
+    const g = document.getElementById('ocb-' + a);
+    if (!g) return;
+    const b = oc.bal.get(chain + ':' + a);
+    g.innerHTML = ocBalInner(+g.dataset.cx, +g.dataset.cy, b);
+    g.classList.toggle('loading', !b || !!b.err);
+}
+
+// alamat yang kelihatan di layar & belum punya saldo segar, urut dari yang paling dekat tengah
+function ocBalVisible() {
+    const st = document.getElementById('oc-diagram');
+    if (!st || !oc.pos) return [];
+    const cw = st.clientWidth, ch = st.clientHeight, { x, y, k } = oc.vp, m = 40, now = Date.now(), out = [];
+    oc.pos.forEach((p, a) => {
+        const sx = p.x * k + x, sy = p.y * k + y;
+        if (sx < -m || sy < -m || sx > cw + m || sy > ch + m) return;
+        const hit = oc.bal.get(oc.chain + ':' + a);
+        if (hit && now - hit.t < (hit.err ? OC_BAL_RETRY : OC_BAL_FRESH)) return;
+        out.push([a, a === oc.root ? -1 : Math.hypot(sx - cw / 2, sy - ch / 2)]);
+    });
+    return out.sort((a, b) => a[1] - b[1]).map(v => v[0]);
+}
+
+function ocBalSchedule() {
+    clearTimeout(_ocBalTimer);
+    _ocBalTimer = setTimeout(ocLoadBalances, 350);   // tunggu geser/zoom berhenti dulu
+}
+
+async function ocLoadBalances() {
+    if (!oc.root) return;
+    if (_ocBalRun) { _ocBalAgain = true; return; }
+    _ocBalRun = true;
+    const chain = oc.chain, tag = chain + oc.root;
+    try {
+        let done = 0;
+        while (done < OC_BAL_PER_RUN) {
+            if (tag !== oc.chain + oc.root) break;                 // user ganti wallet/chain
+            const batch = ocBalVisible().slice(0, OC_BAL_BATCH);
+            if (!batch.length) break;
+            done += batch.length;
+            let got = {};
+            try {
+                const r = await fetch(`/api/admin-airdrop?type=onchain&action=balances&chain=${encodeURIComponent(chain)}&addresses=${batch.join(',')}`);
+                if (r.ok) got = await r.json();
+            } catch {}
+            if (tag !== oc.chain + oc.root) break;
+            batch.forEach(a => {
+                const v = got[a.toLowerCase()] || got[a];
+                oc.bal.set(chain + ':' + a, v && !v.err ? { ...v, t: Date.now() } : { err: true, t: Date.now() });
+                ocBalPaint(a, chain);
+            });
+            await new Promise(r => setTimeout(r, 250));
+        }
+    } finally {
+        _ocBalRun = false;
+        if (_ocBalAgain) { _ocBalAgain = false; ocBalSchedule(); }
+    }
 }
 
 // ═══════════════════════════════════════════════════════════
