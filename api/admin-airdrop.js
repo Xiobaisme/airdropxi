@@ -29,6 +29,27 @@ function verifyAdminToken(req) {
   } catch { return false; }
 }
 
+// PIN wajib tiap kirim ke Discord/Telegram. Salah 5x = kunci 10 menit per IP.
+async function checkSendPin(req) {
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
+  const failKey = `pinfail:${ip}`;
+  const want = process.env.SEND_PIN;
+  if (!want) return { ok: false, status: 500, error: 'SEND_PIN belum di-set' };
+
+  const fails = Number(await redis.get(failKey)) || 0;
+  if (fails >= 5) return { ok: false, status: 429, error: 'Terlalu banyak PIN salah, coba lagi 10 menit lagi' };
+
+  const h = (s) => crypto.createHash('sha256').update(String(s)).digest();
+  const given = String(req.headers['x-send-pin'] || '');
+  if (!given || !crypto.timingSafeEqual(h(given), h(want))) {
+    await redis.incr(failKey);
+    await redis.expire(failKey, 600);
+    return { ok: false, status: 401, error: 'PIN salah' };
+  }
+  await redis.del(failKey);
+  return { ok: true };
+}
+
 module.exports = async function handler(req, res) {
   const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
@@ -346,10 +367,12 @@ async function sendDiscord() {
     return res.status(401).json({ error: 'Unauthorized' });
   }
 
-  if (type === 'broadcast-news') {
+    if (type === 'broadcast-news') {
     if (req.method !== 'POST') {
       return res.status(405).json({ error: 'Method tidak diizinkan untuk broadcast-news' });
     }
+    const pin = await checkSendPin(req);
+    if (!pin.ok) return res.status(pin.status).json({ error: pin.error });
     return await handleBroadcastNews(req, res);
   }
 
