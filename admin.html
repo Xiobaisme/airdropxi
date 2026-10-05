@@ -2263,7 +2263,7 @@ function updateMarketSessionBadge(hourUTC) {
     investigations: { label: 'Investigations', color: '#f59e0b' },
     onchainlens:    { label: 'OnchainLens',    color: '#38bdf8' },
 };
-const NEWS_POLL_SEC = 10; // cek antrian tiap 10 detik (poller Telegram jalan tiap menit di Supabase)
+const NEWS_POLL_SEC = 30; // cek antrian tiap 10 detik (poller Telegram jalan tiap menit di Supabase)
 let newsItems = [], newsFilter = 'all', _newsCountdown = NEWS_POLL_SEC, _newsCountdownInt = null, _newsClockInt = null, _newsSig = '';
 let _newsInFlight = false, _newsFails = 0;
 
@@ -2304,7 +2304,7 @@ async function loadNews(manual = false) {
     const ctrl = new AbortController();
     const to = setTimeout(() => ctrl.abort(), 10000);   // maks 10 detik per request
     try {
-        const res = await fetch('/api/admin-airdrop?type=news-queue', { signal: ctrl.signal });
+       const res = await fetch('/api/news-queue', { signal: ctrl.signal });
         if (!res.ok) throw new Error('Gagal fetch berita (HTTP ' + res.status + ')');
         const rows = await res.json();
         _newsFails = 0;
