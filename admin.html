@@ -4501,7 +4501,7 @@ document.getElementById('weex-send-btn').onclick = async () => {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Mengirim...';
     try {
-        const img = await urlToDataUrl('/weex-event.png');
+        const img = await urlToDataUrl('/ourbit-promo.png');
           const res = await fetch('/api/admin-airdrop?type=broadcast-news', {
           method: 'POST',
           headers: { 'Content-Type': 'application/json' },
