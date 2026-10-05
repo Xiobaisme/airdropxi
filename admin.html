@@ -688,7 +688,7 @@
        @keyframes newsPulse { 0%{box-shadow:0 0 0 0 rgba(34,197,94,.55);} 70%{box-shadow:0 0 0 6px rgba(34,197,94,0);} 100%{box-shadow:0 0 0 0 rgba(34,197,94,0);} }
       .news-overlay { position:fixed; inset:0; background:rgba(0,0,0,.6); opacity:0; pointer-events:none; transition:opacity .25s ease; z-index:1450; }
       .news-overlay.show { opacity:1; pointer-events:auto; }
-      .news-drawer { position:fixed; top:0; right:0; bottom:0; width:440px; max-width:92vw; background:var(--card); border-left:2px solid var(--border); transform:translateX(100%); transition:transform .3s cubic-bezier(.16,1,.3,1); z-index:1500; display:flex; flex-direction:column; box-shadow:-24px 0 60px rgba(0,0,0,.5); }
+      .news-drawer { position:fixed; top:0; right:0; bottom:0; width:var(--news-w, 440px); max-width:92vw; background:var(--card); border-left:2px solid var(--border); transform:translateX(100%); transition:transform .3s cubic-bezier(.16,1,.3,1); z-index:1500; display:flex; flex-direction:column; box-shadow:-24px 0 60px rgba(0,0,0,.5); }
       .news-drawer.open { transform:translateX(0); }
       .news-head { padding:20px 22px 14px; border-bottom:2px solid var(--border); flex-shrink:0; }
       .news-head-top { display:flex; align-items:center; justify-content:space-between; margin-bottom:12px; }
@@ -843,6 +843,16 @@
 .news-card:hover { background: #111; border-color: var(--border-light); }
 .news-card-title { font-weight: 700; }
 
+/* ── News Terminal: lebar bisa digeser ── */
+.news-resizer { position: absolute; left: 0; top: 0; bottom: 0; width: 12px; cursor: col-resize; z-index: 5; touch-action: none; }
+.news-resizer::after {
+    content: ''; position: absolute; left: 3px; top: 50%; width: 4px; height: 56px; margin-top: -28px;
+    border-radius: 4px; background: var(--border-strong); transition: background .2s, height .2s, margin-top .2s;
+}
+.news-resizer:hover::after, body.news-resizing .news-resizer::after { background: var(--primary); height: 84px; margin-top: -42px; }
+body.news-resizing { cursor: col-resize; user-select: none; }
+@media (max-width: 640px) { .news-resizer { display: none; } }
+        
 /* ── Kalkulator ── */
 #calc-panel { background: #0D0D0D; border: 2px solid var(--border-light); border-radius: 20px; }
 .calc-key { border-radius: 12px; }
@@ -1551,6 +1561,7 @@
         <!-- ─── NEWS TERMINAL ─── -->
 <div class="news-overlay" id="news-overlay"></div>
 <div class="news-drawer" id="news-drawer">
+  <div class="news-resizer" id="news-resizer" title="Geser untuk ubah lebar · klik 2x untuk reset"></div>
     <div class="news-head">
         <div class="news-head-top">
             <div class="hero-eyebrow" style="margin-bottom:0;">News Terminal</div>
@@ -2262,6 +2273,9 @@ function updateMarketSessionBadge(hourUTC) {
     lookonchain:    { label: 'Lookonchain',    color: 'var(--secondary)' },
     investigations: { label: 'Investigations', color: '#f59e0b' },
     onchainlens:    { label: 'OnchainLens',    color: '#38bdf8' },
+    wublockchain:   { label: 'Wu Blockchain',  color: '#22c55e' },
+    whalealert:     { label: 'Whale Alert',    color: '#FFD23F' },
+    treenews:       { label: 'Tree News',      color: '#84cc16' },
 };
 const NEWS_POLL_SEC = 30; // cek antrian tiap 10 detik (poller Telegram jalan tiap menit di Supabase)
 let newsItems = [], newsFilter = 'all', _newsCountdown = NEWS_POLL_SEC, _newsCountdownInt = null, _newsClockInt = null, _newsSig = '';
@@ -2421,6 +2435,47 @@ document.getElementById('news-feed')?.addEventListener('click', e => {
     if (btn && !btn.disabled) openNewsSend(btn.dataset.send);
 });
 document.getElementById('news-overlay')?.addEventListener('click', toggleNewsPanel);
+// ─── News Terminal: tarik tepi kiri untuk ubah lebar ───
+(function initNewsResize() {
+    const drawer = document.getElementById('news-drawer');
+    const handle = document.getElementById('news-resizer');
+    if (!drawer || !handle) return;
+    const KEY = 'newsDrawerW', MIN = 320, DEF = 440;
+    const maxW = () => Math.round(window.innerWidth * 0.94);
+    const apply = (w) => drawer.style.setProperty('--news-w', Math.min(maxW(), Math.max(MIN, Math.round(w))) + 'px');
+    try { const saved = +localStorage.getItem(KEY); if (saved) apply(saved); } catch {}
+
+    let dragging = false, moved = false, startX = 0, startW = 0;
+    handle.addEventListener('pointerdown', (e) => {
+        if (e.button !== undefined && e.button !== 0) return;
+        dragging = true; moved = false;
+        startX = e.clientX; startW = drawer.getBoundingClientRect().width;
+        handle.setPointerCapture(e.pointerId);
+        document.body.classList.add('news-resizing');
+        e.preventDefault();
+    });
+    handle.addEventListener('pointermove', (e) => {
+        if (!dragging) return;
+        if (Math.abs(e.clientX - startX) > 3) moved = true;
+        apply(startW + (startX - e.clientX));   // drawer nempel kanan: geser kiri = melebar
+    });
+    const end = (e) => {
+        if (!dragging) return;
+        dragging = false;
+        document.body.classList.remove('news-resizing');
+        try { handle.releasePointerCapture(e.pointerId); } catch {}
+        try { localStorage.setItem(KEY, String(Math.round(drawer.getBoundingClientRect().width))); } catch {}
+        if (moved) {   // cegah klik susulan menutup drawer lewat overlay
+            const eat = (ev) => ev.stopPropagation();
+            window.addEventListener('click', eat, true);
+            setTimeout(() => window.removeEventListener('click', eat, true), 0);
+        }
+    };
+    handle.addEventListener('pointerup', end);
+    handle.addEventListener('pointercancel', end);
+    handle.addEventListener('dblclick', () => { apply(DEF); try { localStorage.removeItem(KEY); } catch {} });
+    window.addEventListener('resize', () => { if (drawer.getBoundingClientRect().width > maxW()) apply(maxW()); });
+})();
 
         // ═══════════════════════════════════════════════════════════
 // ─── CRYPTO TICKER — Ranking dari CoinGecko (via /api/markets, cache 1 jam),
