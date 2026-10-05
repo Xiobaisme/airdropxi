@@ -18,7 +18,7 @@ function verifyAdminToken(req) {
     const expected = crypto.createHmac('sha256', process.env.ADMIN_SECRET_KEY).update(payload).digest('hex');
     const a = Buffer.from(sig), b = Buffer.from(expected);
     if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return false;
-    return Date.now() < Number(payload);
+    return Date.now() < Number(payload.split(':')[0]);
   } catch { return false; }
 }
 
