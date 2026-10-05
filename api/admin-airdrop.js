@@ -210,12 +210,10 @@ async function sendDiscord() {
         const anyOk = results.discord === 'ok' || results.telegram === 'ok';
 
     // kalau dikirim dari antrian News Terminal, tandai "sent" biar nggak bisa kekirim dobel
-   if (!MAINTENANCE && anyOk && queue_id) {
-  try {
-        await fetch(`${BASE}/news_queue?id=eq.${encodeURIComponent(queue_id)}`, {
-          method: 'PATCH', headers: H,
-          body: JSON.stringify({ status: 'sent', sent_at: new Date().toISOString() }),
-        });
+       if (anyOk && queue_id) {
+      try {
+        await redis.sadd('news:sent', String(queue_id));
+        await redis.expire('news:sent', 60 * 60 * 24 * 6);
       } catch (e) {
         console.warn('[news-queue] gagal tandai sent:', e.message);
       }
@@ -409,24 +407,6 @@ async function sendDiscord() {
   }
   
   // ─── NEWS QUEUE (antrian post Telegram dari poller Supabase, dibaca News Terminal) ───
-  if (type === 'news-queue') {
-  if (MAINTENANCE) return res.status(200).json([]);
-  if (req.method !== 'GET') {
-      return res.status(405).json({ error: 'Method tidak diizinkan untuk news-queue' });
-    }
-    try {
-      const r = await fetch(
-        `${BASE}/news_queue?select=id,source,text,link,posted_at,created_at,status&order=posted_at.desc.nullslast&limit=80`,
-        { headers: H }
-      );
-      const rows = await r.json();
-      if (!r.ok) return res.status(r.status).json({ error: serializeError(rows) });
-      res.setHeader('Cache-Control', 'no-store');
-      return res.status(200).json(rows);
-    } catch (e) {
-      return res.status(500).json({ error: serializeError(e) });
-    }
-  }
 
     // ─── NLF HISTORY (riwayat yang kita simpan sendiri) ───
   if (type === 'nlf-history') {
