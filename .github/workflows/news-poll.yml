@@ -1,13 +1,17 @@
 name: News poll
 
+# Dipicu cron-job.org lewat workflow_dispatch (bukan jadwal GitHub)
 on:
-  schedule:
-    - cron: "*/5 * * * *"
   workflow_dispatch:
     inputs:
       lookback_min:
         description: "Backfill dalam menit (4320 = 3 hari)"
         default: "30"
+
+# Jangan jalan bareng workflow lain yang pakai TG_SESSION yang sama
+concurrency:
+  group: telegram-session
+  cancel-in-progress: false
 
 jobs:
   poll:
@@ -24,5 +28,6 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_SESSION: ${{ secrets.TG_SESSION }}
           ALERT_SECRET: ${{ secrets.ALERT_SECRET }}
-          NEWS_CHANNELS: "lookonchain=lookonchainchannel,investigations=investigations,onchainlens=OnchainLens"
+          NEWS_CHANNELS: "lookonchain=lookonchainchannel,investigations=investigations,onchainlens=OnchainLens,wublockchain=wublockchainenglish,whalealert=whale_alert_io"
+          TREE_NEWS: "1"
           LOOKBACK_MIN: ${{ inputs.lookback_min }}
