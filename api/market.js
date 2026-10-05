@@ -45,9 +45,11 @@ const EX = {
     const sym = `PF_${c === 'BTC' ? 'XBT' : c}USD`;
     const since = Math.floor(Date.now() / 1000) - (n + 10) * 60;
     const j = await get(`https://futures.kraken.com/api/charts/v1/analytics/${sym}/cvd?since=${since}&interval=60`);
-    const d = j.result?.data || {};
-    const b = (d.buyVolume || []).slice(-n), s = (d.sellVolume || []).slice(-n);
-    if (!b.length && !s.length) throw new Error('Kraken kosong: ' + JSON.stringify(j).slice(0, 160));
+    const d = j.result?.data;
+    const keys = d && !Array.isArray(d) ? Object.keys(d) : [];
+    const pick = re => { const k = keys.find(k => re.test(k)); return k && Array.isArray(d[k]) ? d[k] : []; };
+    const b = pick(/buy/i).slice(-n), s = pick(/sell/i).slice(-n);
+    if (!b.length && !s.length) throw new Error('Kraken data: ' + JSON.stringify(d ?? null).slice(0, 200));
     return { buy: sum(b, x => x), sell: sum(s, x => x) };
   }
 };
