@@ -1663,6 +1663,23 @@ body.news-resizing { cursor: col-resize; user-select: none; }
     </div>
 </div>
 
+        <!-- ─── PIN MODAL (wajib tiap kirim) ─── -->
+<div id="pin-modal" class="modal hidden" style="z-index:1800">
+    <div class="modal-box confirm-box">
+        <div class="confirm-title">Masukkan PIN</div>
+        <div class="confirm-msg">Verifikasi dulu sebelum kirim ke Discord &amp; Telegram.</div>
+        <div class="field">
+            <input id="pin-input" type="password" inputmode="numeric" autocomplete="off"
+                   placeholder="••••••" style="text-align:center;letter-spacing:.4em;" />
+        </div>
+        <div class="confirm-actions" style="margin-top:1.2rem;">
+            <button class="btn-cancel" id="pin-cancel-btn">Batal</button>
+            <button class="btn-save" id="pin-ok-btn">Verifikasi</button>
+        </div>
+    </div>
+</div>
+        
+
         <!-- ─── TOAST ─── -->
         <div class="toast" id="toast"></div>
     </div>
@@ -1749,6 +1766,43 @@ function closeConfirmModal(result) {
 }
 document.getElementById('confirm-cancel-btn').onclick = () => closeConfirmModal(false);
 document.getElementById('confirm-ok-btn').onclick = () => closeConfirmModal(true);
+
+        // ─── PIN GATE: dipakai semua pengiriman ke Discord/Telegram ───
+let _pinResolve = null;
+function askSendPin() {
+    return new Promise(resolve => {
+        _pinResolve = resolve;
+        const inp = document.getElementById('pin-input');
+        inp.value = '';
+        document.getElementById('pin-modal').classList.remove('hidden');
+        setTimeout(() => inp.focus(), 50);
+    });
+}
+function closePinModal(val) {
+    document.getElementById('pin-modal').classList.add('hidden');
+    document.getElementById('pin-input').value = '';
+    if (_pinResolve) { _pinResolve(val); _pinResolve = null; }
+}
+document.getElementById('pin-cancel-btn').onclick = () => closePinModal(null);
+document.getElementById('pin-ok-btn').onclick = () =>
+    closePinModal(document.getElementById('pin-input').value.trim() || null);
+document.getElementById('pin-input').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') document.getElementById('pin-ok-btn').click();
+    if (e.key === 'Escape') closePinModal(null);
+});
+
+async function postBroadcast(payload) {
+    const pin = await askSendPin();
+    if (!pin) throw new Error('Dibatalkan, PIN tidak diisi');
+    const res = await fetch('/api/admin-airdrop?type=broadcast-news', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json', 'x-send-pin': pin },
+        body: JSON.stringify(payload),
+    });
+    const data = await res.json().catch(() => ({}));
+    if (!res.ok) throw new Error(data.error || data.discord || data.telegram || `HTTP ${res.status}`);
+    return data;
+}
 
         // Count-up animation helper (GSAP kalau ada, fallback manual)
         function animateCount(el, target) {
@@ -2406,14 +2460,8 @@ async function sendNewsItem() {
     const btn = document.getElementById('btn-news-send');
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Mengirim...';
-    try {
-        const res = await fetch('/api/admin-airdrop?type=broadcast-news', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title: '🚨 ' + src.label, description, url: item.url, queue_id: item.id }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.discord || data.telegram || `HTTP ${res.status}`);
+       try {
+        const data = await postBroadcast({ title: '🚨 ' + src.label, description, url: item.url, queue_id: item.id });
 
         const dOk = data.discord === 'ok', tOk = data.telegram === 'ok';
         if (dOk && tOk) showToast('Terkirim ke Discord & Telegram!', 'success');
@@ -2804,14 +2852,8 @@ async function sendBroadcast() {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Mengirim...';
 
-    try {
-            const res = await fetch('/api/admin-airdrop?type=broadcast-news', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ title, description, image_base64: _broadcastImageBase64 }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.discord || data.telegram || `HTTP ${res.status}`);
+        try {
+        const data = await postBroadcast({ title, description, image_base64: _broadcastImageBase64 });
 
         const dOk = data.discord === 'ok', tOk = data.telegram === 'ok';
         if (dOk && tOk) showToast('Terkirim ke Discord & Telegram!', 'success');
@@ -4501,14 +4543,8 @@ document.getElementById('weex-send-btn').onclick = async () => {
     btn.disabled = true;
     btn.innerHTML = '<span class="spinner"></span> Mengirim...';
     try {
-        const img = await urlToDataUrl('/ourbit-promo.png');
-          const res = await fetch('/api/admin-airdrop?type=broadcast-news', {
-          method: 'POST',
-          headers: { 'Content-Type': 'application/json' },
-          body: JSON.stringify({ title: WEEX_TITLE, description: WEEX_BODY, image_base64: img, mention_everyone: true }),
-        });
-        const data = await res.json().catch(() => ({}));
-        if (!res.ok) throw new Error(data.discord || data.telegram || `HTTP ${res.status}`);
+               const img = await urlToDataUrl('/ourbit-promo.png');
+        const data = await postBroadcast({ title: WEEX_TITLE, description: WEEX_BODY, image_base64: img, mention_everyone: true });
 
         const dOk = data.discord === 'ok', tOk = data.telegram === 'ok';
         if (dOk && tOk) showToast('Terkirim ke Discord & Telegram!', 'success');
