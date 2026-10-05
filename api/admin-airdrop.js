@@ -371,6 +371,14 @@ async function sendDiscord() {
         return res.status(200).json(out);
       } catch { return res.status(200).json({}); }
     }
+       if (action === 'balances') {
+  try {
+    const addrs = String(req.query.addresses || '').split(',').filter(Boolean);
+    return res.status(200).json(await onchain.balances(chain, addrs));
+  } catch (e) {
+    return res.status(200).json({});
+  }
+}
 
         if (action === 'live') {
       try {
