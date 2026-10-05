@@ -1194,7 +1194,7 @@ body.news-resizing { cursor: col-resize; user-select: none; }
     <span class="news-live-dot"></span>News Terminal
 </button>
 <button class="nav-btn" onclick="openOnchain()" id="onchain-toggle-btn">Onchain</button>
-<button class="nav-btn" id="btnWeexPromo" type="button">WEEX Promo</button>
+<button class="nav-btn" id="btnWeexPromo" type="button">OURBIT</button>
         <button class="nav-btn" onclick="openBroadcastModal()" id="broadcast-toggle-btn">Broadcast</button>
       <button class="nav-btn" onclick="toggleAgentPanel()" id="agent-toggle-btn">AI Agent</button>
    <button class="nav-btn pink" onclick="toggleCalc()" id="calc-toggle-btn">Calc</button>
@@ -1586,7 +1586,7 @@ body.news-resizing { cursor: col-resize; user-select: none; }
             <button class="modal-close" id="weex-close-btn"></button>
         </div>
         <div class="modal-body">
-            <div class="confirm-msg" style="margin:0;text-align:left;">Pesan WEEX Welcome Event akan dikirim ke Discord &amp; Telegram Crypto Monkey.</div>
+            <div class="confirm-msg" style="margin:0;text-align:left;">Pesan OURBIT × CMIC akan dikirim ke Discord &amp; Telegram Crypto Monkey.</div>
             <pre id="weex-preview" style="max-height:260px;overflow:auto;white-space:pre-wrap;background:var(--card-2);border:2px solid var(--border);border-radius:var(--r-sm);padding:12px;color:var(--text2);font-family:var(--sans);font-size:0.8rem;line-height:1.5;"></pre>
         </div>
         <div class="modal-actions">
@@ -4447,24 +4447,34 @@ document.addEventListener('keydown', e => {
 });
         
 
-        // ─── WEEX PROMO (quick send ke Discord & Telegram) ───
-const WEEX_TITLE = '🚀 WEEX WELCOME EVENT IS LIVE!';
-const WEEX_BODY = `New user bisa unlock berbagai reward hingga 10,000 USDT 🎁
+        // ─── OURBIT PROMO (quick send ke Discord & Telegram) ───
+const WEEX_TITLE = '🚨 CMIC × OURBIT | TRADE SMARTER, PAY LESS';
+const WEEX_BODY = `Masih cari platform trading dengan fee kompetitif + minimum deposit rendah?
+Mungkin ini bisa jadi salah satu opsi yang kamu cek.
 
-🔥 Yang bisa kamu claim:
-- Daily Futures Check-In → Daily Reward
-- Deposit 100 USDT + hold 3 hari → 10 USDT Trial Fund
-- AI Wars II → 500 USDT Position Airdrop
-- TOKEN2049 AI Trading → Event Pack
-- First Futures Trade → 0–30 USDT Trial Fund
-- Deposit + Trade → 100 USDT Position Airdrop (20×)
-- Trading volume 1M USDT → 120 USDT Trial Fund
+🔥 OURBIT FEATURES
 
-🔗 JOIN WEEX:
-https://www.weex.com/register?vipCode=jxpw
-🎟️ Referral Code: \`jxpw\`
+💰 Deposit mulai $1
 
-⚠️ Reward & eligibility mengikuti campaign yang tersedia di akun WEEX. Cek S&K sebelum ikut.`;
+💸 Withdrawal mulai $1
+
+📊 Fee mulai 0,02% Maker | 0,04% Taker
+
+🌎 Akses global & likuiditas tinggi
+
+⚡ Proses trading cepat & praktis
+
+🎧 Support 24/7
+
+Buat yang sering trading, biaya transaksi juga bagian dari strategi.
+Semakin efisien biaya, semakin banyak ruang untuk mengatur posisi.
+🎯 Ready to trade smarter?
+
+🔗 REGISTER OURBIT
+https://www.ourbit.com/register?inviteCode=ourbitCMIC
+
+OURBIT × CMIC
+Trade smart. Manage risk. DYOR.`;
 
 const weexModal = document.getElementById('weex-modal');
 document.getElementById('weex-close-btn').innerHTML = icon('x');
