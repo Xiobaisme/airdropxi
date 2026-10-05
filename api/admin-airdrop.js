@@ -274,7 +274,16 @@ async function sendDiscord() {
   const token = Buffer.from(`${payload}.${sig}`).toString('base64');
   res.setHeader('Set-Cookie', `admin_token=${encodeURIComponent(token)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=14400`);
   return res.status(200).json({ success: true });
-}
+  }
+
+  if (type === 'terminal-login') {
+    if (req.method !== 'POST') {
+      return res.status(405).json({ error: 'Method tidak diizinkan untuk terminal-login' });
+    }
+    return await handleTerminalLogin(req, res);
+  }
+
+    // ─── MARKETS (publik: ranking CoinGecko, cache Redis 1 jam) ───
     // ─── MARKETS (publik: ranking CoinGecko, cache Redis 1 jam) ───
   // Dipakai ticker bawah + koin jatuh di halaman login, jadi harus di atas cek admin.
   if (type === 'markets') {
