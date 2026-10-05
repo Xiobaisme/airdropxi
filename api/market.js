@@ -1,5 +1,5 @@
 // api/flow.js  ->  /api/flow?coin=BTC&tf=5m
-const TF = { '5m': 5, '15m': 15, '30m': 30, '1h': 60 };
+const TF = { '5m': 5, '15m': 15, '30m': 30, '1h': 60, '2h': 120, '4h': 240, '6h': 360, '12h': 720, '1d': 1440 };
 const H = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36', Accept: 'application/json' };
 
 const get = url =>
@@ -11,7 +11,8 @@ const sum = (a, f) => a.reduce((s, x) => s + Number(f(x) || 0), 0);
 
 // Binance & Aster: kline 1 menit punya taker-buy volume (live, update tiap trade)
 const klineFlow = base => async (c, n) => {
-  const k = await get(`${base}/fapi/v1/klines?symbol=${c}USDT&interval=1m&limit=${n}`);
+  const iv = n <= 60 ? 1 : 5; // jendela panjang pakai kline 5 menit
+  const k = await get(`${base}/fapi/v1/klines?symbol=${c}USDT&interval=${iv}m&limit=${n / iv}`);
   const buy = sum(k, x => x[10]);          // taker buy quote volume (USDT)
   const total = sum(k, x => x[7]);         // total quote volume (USDT)
   return { buy, sell: total - buy, usd: true };
@@ -23,8 +24,9 @@ const EX = {
 
   // OKX: bucket 5 menit, format [ts, sellVol, buyVol], terbaru di atas
   OKX: async (c, n) => {
-    const j = await get(`https://www.okx.com/api/v5/rubik/stat/taker-volume?ccy=${c}&instType=CONTRACTS&period=5m`);
-    const rows = (j.data || []).slice(0, Math.ceil(n / 5));
+    const hourly = n >= 120; // 2 jam ke atas pakai bucket per jam
+    const j = await get(`https://www.okx.com/api/v5/rubik/stat/taker-volume?ccy=${c}&instType=CONTRACTS&period=${hourly ? '1H' : '5m'}`);
+    const rows = (j.data || []).slice(0, Math.ceil(n / (hourly ? 60 : 5)));
     return { sell: sum(rows, r => r[1]), buy: sum(rows, r => r[2]), usd: true };
   },
 
@@ -44,11 +46,13 @@ const EX = {
   Kraken: async (c, n) => {
     const sym = `PF_${c === 'BTC' ? 'XBT' : c}USD`;
     const since = Math.floor(Date.now() / 1000) - (n + 10) * 60;
-    const j = await get(`https://futures.kraken.com/api/charts/v1/analytics/${sym}/cvd?since=${since}&interval=60`);
+    const iv = n <= 60 ? 60 : 300; // detik per bucket
+    const cnt = (n * 60) / iv;
+    const j = await get(`https://futures.kraken.com/api/charts/v1/analytics/${sym}/cvd?since=${since}&interval=${iv}`);
     const d = j.result?.data;
     const keys = d && !Array.isArray(d) ? Object.keys(d) : [];
     const pick = re => { const k = keys.find(k => re.test(k)); return k && Array.isArray(d[k]) ? d[k] : []; };
-    const b = pick(/buy/i).slice(-n), s = pick(/sell/i).slice(-n);
+    const b = pick(/buy/i).slice(-cnt), s = pick(/sell/i).slice(-cnt);
     if (!b.length && !s.length) throw new Error('Kraken data: ' + JSON.stringify(d ?? null).slice(0, 200));
     return { buy: sum(b, x => x), sell: sum(s, x => x) };
   }
@@ -56,7 +60,7 @@ const EX = {
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=4, stale-while-revalidate=8');
+  res.setHeader('Cache-Control', 's-maxage=8, stale-while-revalidate=15');
 
   const coin = String(req.query.coin || 'BTC').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
   const tf = TF[req.query.tf] ? req.query.tf : '5m';
