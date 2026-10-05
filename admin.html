@@ -988,6 +988,11 @@
 .oc-dir { font-weight: 800; font-size: .62rem; padding: 1px 6px; border-radius: 4px; margin-right: 4px; }
 .oc-dir.in { color: var(--success); background: var(--success-dim); }
 .oc-dir.out { color: var(--secondary); background: var(--secondary-dim); }
+.oc-assets { flex-shrink: 0; max-height: 40%; display: flex; flex-direction: column; border-bottom: 2px solid var(--border); }
+.oc-assets-wrap { overflow: auto; }
+.oc-table td.r, .oc-table th.r { text-align: right; }
+.oc-table td.usd { color: #FFD23F; font-weight: 700; }
+.oc-table td.mut { color: var(--text3); }
 
 @media (max-width: 1100px) {
     .oc-main.has-tx { grid-template-columns: minmax(0, 1fr); grid-template-rows: minmax(0, 1fr) 260px; }
@@ -1036,6 +1041,8 @@
 .oc-lv-badge { font-weight: 800; font-size: 9px; padding: 1px 6px; border-radius: 4px; text-transform: uppercase; }
 .oc-lv-badge.whale { color: #FFD23F; background: rgba(255,210,63,.14); }
 .oc-lv-badge.tag { color: var(--success); background: var(--success-dim); }
+.oc-lv-badge.swap { color: #FFD23F; background: rgba(255,210,63,.14); }
+.oc-lv-amt .sw { color: #FFD23F; margin: 0 6px; }
 .oc-lv-time { margin-left: auto; color: var(--text3); }
 .oc-lv-time a { color: var(--text3); text-decoration: none; margin-left: 8px; }
 .oc-lv-time a:hover { color: var(--text); }
@@ -1625,6 +1632,15 @@
             <div class="oc-note">Scroll = zoom · Drag = geser · Klik node = telusuri · Klik label panah = buka TX</div>
         </div>
         <aside class="oc-side hidden" id="oc-tx">
+            <div class="oc-assets">
+    <div class="oc-side-head" id="oc-assets-head">Aset Wallet</div>
+    <div class="oc-assets-wrap">
+        <table class="oc-table">
+            <thead><tr><th>Aset</th><th class="r">Jumlah</th><th class="r">Nilai</th><th class="r">%</th></tr></thead>
+            <tbody id="oc-assets-body"></tbody>
+        </table>
+    </div>
+</div>
             <div class="oc-side-head" id="oc-tx-head">Transaksi</div>
             <div class="oc-tablewrap">
                 <table class="oc-table">
@@ -3609,6 +3625,7 @@ async function ocSearch() {
         document.getElementById('oc-main').classList.add('has-tx');
         ocRender(true);
         ocLoadLabels();
+        ocLoadAssets();
     } catch (e) { showToast('Gagal: ' + e.message, 'error'); }
     finally { btn.disabled = false; btn.textContent = 'Lacak'; }
 }
@@ -4002,6 +4019,44 @@ async function ocLoadBalances() {
     }
 }
 
+    // ═══ TABEL ASET WALLET UTAMA ═══
+async function ocLoadAssets() {
+    const head = document.getElementById('oc-assets-head'), body = document.getElementById('oc-assets-body');
+    if (!head || !body || !oc.root) return;
+    const chain = oc.chain, root = oc.root, tag = chain + root;
+    head.textContent = 'Aset Wallet · memuat…';
+    body.innerHTML = '';
+    try {
+        const r = await fetch(`/api/admin-airdrop?type=onchain&action=balances&chain=${encodeURIComponent(chain)}&addresses=${encodeURIComponent(root)}&full=1`);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const got = await r.json();
+        if (tag !== oc.chain + oc.root) return;                    // user sudah ganti wallet
+        const b = got[root] || got[root.toLowerCase()];
+        if (!b || b.err) throw new Error(b?.err || 'tidak ada data');
+
+        const total = b.usd > 0 ? b.usd : 0;
+        const pct = (u) => (total && u > 0 ? (u / total * 100).toFixed(u / total >= 0.1 ? 1 : 2) + '%' : '—');
+        const usdTxt = (u) => (u > 0 ? '$' + ocAmt(u) : '—');
+        const rows = [];
+        if (b.native.amount > 0) rows.push({ sym: b.native.sym, amount: b.native.amount, usd: b.native.usd || 0 });
+        (b.all || b.tokens || []).forEach(t => rows.push(t));
+        rows.sort((a, c) => (c.usd || 0) - (a.usd || 0));
+
+        const more = b.n - (b.all || b.tokens || []).length;
+        body.innerHTML = rows.map(t => `<tr>
+            <td>${esc(t.sym)}</td><td class="r">${ocAmt(t.amount)}</td>
+            <td class="r usd">${usdTxt(t.usd)}</td><td class="r mut">${pct(t.usd)}</td></tr>`).join('')
+            + (more > 0 ? `<tr><td class="mut" colspan="4">+${more} token lain</td></tr>` : '')
+            + (b.partial ? `<tr><td class="mut" colspan="4">Sebagian: chain ini hanya menghitung koin native, token tidak ikut.</td></tr>` : '')
+            || `<tr><td class="mut" colspan="4">Tidak ada aset yang terdeteksi.</td></tr>`;
+        head.textContent = `Aset Wallet · ${total ? '≈ $' + ocAmt(total) : 'nilai USD tidak diketahui'}${b.partial ? ' (sebagian)' : ''}`;
+    } catch (e) {
+        if (tag !== oc.chain + oc.root) return;
+        head.textContent = 'Aset Wallet · gagal dimuat';
+        body.innerHTML = `<tr><td class="mut" colspan="4">${esc(e.message)}</td></tr>`;
+    }
+}
+
 // ═══════════════════════════════════════════════════════════
 // ─── LIVE TRANSFERS (panel kiri / bottom sheet) ───
 // ═══════════════════════════════════════════════════════════
@@ -4009,7 +4064,11 @@ const OC_LIVE_CHAINS = ['ethereum', 'bnb', 'base', 'arbitrum', 'polygon', 'op'];
 const OC_LIVE_POLL_MS = 20000;             // cek transfer baru tiap 20 detik
 const OC_LIVE_PAGE = 20;                   // jumlah kartu per "Muat lebih banyak"
 const OC_LIVE_MAX = 300;                   // batas kartu di memori
-const OC_LIVE_PAIRS = { ETH: 'ETHUSDT' };  // simbol native -> pair Binance (buat hitung USD)
+const OC_LIVE_PAIRS = { ETH: 'ETHUSDT', BNB: 'BNBUSDT', POL: 'POLUSDT' };
+const OC_LIVE_NATIVE = { ethereum: 'ETH', bnb: 'BNB', base: 'ETH', arbitrum: 'ETH', op: 'ETH', polygon: 'POL' };
+const OC_LIVE_GAP_FIRST = 150;   // detik ke belakang saat pertama kali (maks 180 di backend)
+const OC_LIVE_GAP = 45;          // detik ke belakang tiap polling
+const OC_LIVE_SRC_MIN = 100000;  // batas minimal di server; filter di UI dilakukan di client
 const OC_LIVE_EXPLORER = { ethereum: 'https://etherscan.io/tx/' };
 const OC_LIVE_MODES = [['all', 'Semua'], ['whale', 'Whale ≥ $1M'], ['tag', 'Bertag']];
 
@@ -4060,8 +4119,9 @@ async function ocLivePrices() {
     }
 }
 
-async function ocLiveFetch(chain, blocks) {
-    const r = await fetch(`/api/admin-airdrop?type=onchain&action=live&chain=${encodeURIComponent(chain)}&blocks=${blocks}`);
+async function ocLiveFetch(chain, gap) {
+    const price = ocLive.prices[OC_LIVE_NATIVE[chain]] || 0;   // 0 = transfer native dilewati
+    const r = await fetch(`/api/admin-airdrop?type=onchain&action=live&chain=${encodeURIComponent(chain)}&gap=${gap}&min=${OC_LIVE_SRC_MIN}&price=${price}`);
     if (!r.ok) throw new Error('HTTP ' + r.status);
     const d = await r.json();
     return d.items || [];
@@ -4074,8 +4134,8 @@ async function ocLiveTick() {
         await ocLivePrices();
         // chain yang sudah pernah sukses cukup ambil 3 block terakhir; yang belum, ambil ±4 menit ke belakang
         const res = await Promise.allSettled(OC_LIVE_CHAINS.map(c =>
-            ocLiveFetch(c, ocLive.done.has(c) ? 3 : 20).then(items => { ocLive.done.add(c); return items; })));
-        const fresh = [], failedNames = [];
+    ocLiveFetch(c, ocLive.done.has(c) ? OC_LIVE_GAP : OC_LIVE_GAP_FIRST).then(items => { ocLive.done.add(c); return items; })));
+     const fresh = [], failedNames = [];
         res.forEach((r, i) => {
             if (r.status !== 'fulfilled') { failedNames.push(OC_LIVE_CHAINS[i]); return; }
             r.value.forEach(it => {
@@ -4106,9 +4166,53 @@ function ocLiveFlush() {
     ocLiveRender();
 }
 
+ // Gabungkan leg swap (1 tx, 1 wallet kirim token A & terima token B) jadi 1 kartu
+function ocLiveGroup(items) {
+    const byHash = new Map();
+    items.forEach(it => {
+        if (!it.hash) return;
+        const k = it.chain + ':' + it.hash;
+        if (!byHash.has(k)) byHash.set(k, []);
+        byHash.get(k).push(it);
+    });
+
+    const drop = new Set(), merged = [];
+    byHash.forEach((list, key) => {
+        if (list.length < 2) return;
+        let best = null;
+        new Set(list.map(i => i.to)).forEach(w => {
+            const outs = list.filter(x => x.from === w), ins = list.filter(x => x.to === w);
+            if (!outs.length || !ins.length) return;
+            const usdOf = (x) => ocLiveUsd(x) || 0;
+            const sold = outs.reduce((a, b) => (usdOf(b) > usdOf(a) ? b : a));
+            const gotList = ins.filter(x => x.sym !== sold.sym);
+            if (!gotList.length) return;                       // token sama = deposit/withdraw, bukan swap
+            const bought = gotList.reduce((a, b) => (usdOf(b) > usdOf(a) ? b : a));
+            // wallet yang punya label (router/pool) kalah dari wallet tanpa label (si penukar)
+            const score = usdOf(sold) - (ocLive.names[w] ? 1e12 : 0);
+            if (!best || score > best.score) best = { w, sold, bought, score };
+        });
+        if (!best) return;
+
+        list.forEach(i => drop.add(i));
+        const wrap = ('W' + best.sold.sym === best.bought.sym) || ('W' + best.bought.sym === best.sold.sym);
+        merged.push({
+            ...best.sold, kind: 'swap', wrap,
+            from: best.w, to: best.sold.to,
+            sold: { sym: best.sold.sym, amount: best.sold.amount },
+            bought: { sym: best.bought.sym, amount: best.bought.amount },
+            usd: ocLiveUsd(best.sold),
+            ts: Math.max(...list.map(i => i.ts)),
+            _id: key + ':swap',
+        });
+    });
+
+    return items.filter(i => !drop.has(i)).concat(merged).sort((a, b) => b.ts - a.ts);
+}
+
 function ocLiveFiltered() {
     const q = ocLive.q.trim().toLowerCase();
-    return ocLive.items.filter(it => {
+    return ocLiveGroup(ocLive.items).filter(it => {
         const usd = ocLiveUsd(it);
         if (usd === null) return false;
         if (!q && usd < ocLive.minUsd) return false;      // pas mencari, batas minimal diabaikan
@@ -4116,24 +4220,28 @@ function ocLiveFiltered() {
         const lf = ocLiveLabel(it.from), lt = ocLiveLabel(it.to);
         if (ocLive.mode === 'tag' && !lf && !lt) return false;
         if (!q) return true;
-        return [it.hash, it.from, it.to, lf, lt, it.sym, it.chain].some(v => v && String(v).toLowerCase().includes(q));
+        return [it.hash, it.from, it.to, lf, lt, it.sym, it.bought?.sym, it.chain].some(v => v && String(v).toLowerCase().includes(q));
     });
 }
 
 function ocLiveCard(it) {
-    const usd = ocLiveUsd(it), whale = usd !== null && usd >= 1e6;
+    const usd = ocLiveUsd(it), whale = usd !== null && usd >= 1e6, swap = it.kind === 'swap';
     const lf = ocLiveLabel(it.from), lt = ocLiveLabel(it.to);
     const tagTxt = [lf, lt].some(l => l && /\.eth$/i.test(l)) ? 'ENS' : 'TAG';
     const link = it.url || (OC_LIVE_EXPLORER[it.chain] ? OC_LIVE_EXPLORER[it.chain] + it.hash : '');
     const addr = (a) => `<button class="oc-lv-addr ${ocLiveLabel(a) ? 'named' : ''}" data-addr="${esc(a)}" data-chain="${esc(it.chain)}" title="${esc((ocLiveLabel(a) ? ocLiveLabel(a) + '\n' : '') + a)}">${esc(ocLiveShow(a))}</button>`;
+    const amt = swap
+        ? `${ocAmt(it.sold.amount)} $${esc(it.sold.sym)}<span class="sw">→</span>${ocAmt(it.bought.amount)} $${esc(it.bought.sym)}`
+        : `${ocAmt(it.amount)} $${esc(it.sym)}`;
     return `<div class="oc-lv ${whale ? 'whale' : ''}" data-addr="${esc(it.from)}" data-chain="${esc(it.chain)}">
         <div class="oc-lv-top">
             <span class="oc-lv-chain">${esc(it.chain)}</span>
+            ${swap ? `<span class="oc-lv-badge swap">${it.wrap ? 'Wrap' : 'Swap'}</span>` : ''}
             ${whale ? '<span class="oc-lv-badge whale">Whale</span>' : ''}
             ${(lf || lt) ? `<span class="oc-lv-badge tag">${tagTxt}</span>` : ''}
             <span class="oc-lv-time">${newsTimeAgo(new Date(it.ts).toISOString())}${/^https?:\/\//.test(link) ? `<a href="${esc(link)}" target="_blank" rel="noopener">tx ↗</a>` : ''}</span>
         </div>
-        <div class="oc-lv-amt">${ocAmt(it.amount)} ${esc(it.sym)}${usd !== null ? `<small>$${ocAmt(usd)}</small>` : ''}</div>
+        <div class="oc-lv-amt">${amt}${usd !== null ? `<small>$${ocAmt(usd)}</small>` : ''}</div>
         <div class="oc-lv-route">${addr(it.from)}<span class="arr">→</span>${addr(it.to)}</div>
     </div>`;
 }
