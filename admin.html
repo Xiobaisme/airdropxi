@@ -11,6 +11,7 @@
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.0/dist/chart.umd.min.js"></script>
     <style>
         /* ═══════════════════════════════════════════════════════════
            XIOBAII — Admin Control Center
@@ -1185,12 +1186,12 @@ body.news-resizing { cursor: col-resize; user-select: none; }
                 <span class="nav-badge">ADMIN</span>
             </div>
             <div class="nav-center">
-                <a href="#nlf-section">Listings</a>
-                <a href="#garap-widget">Garap</a>
-                <a href="#proj-links-section">Proyek</a>
+             <a href="#" onclick="showMarketDashboard(); return false;">Market</a>
+               <a href="#" onclick="showAirdropDashboard(); return false;">Airdrop</a>
             </div>
            <div class="nav-actions">
-          <button class="nav-btn" onclick="toggleNewsPanel()" id="news-toggle-btn">
+<button class="nav-btn" onclick="showMarketDashboard()" style="background: var(--primary); color:#fff;">Market</button>
+<button class="nav-btn" onclick="toggleNewsPanel()" id="news-toggle-btn">
     <span class="news-live-dot"></span>News Terminal
 </button>
 <button class="nav-btn" onclick="openOnchain()" id="onchain-toggle-btn">Onchain</button>
@@ -1200,6 +1201,54 @@ body.news-resizing { cursor: col-resize; user-select: none; }
    <button class="nav-btn pink" onclick="toggleCalc()" id="calc-toggle-btn">Calc</button>
            </div>
         </nav>
+
+        <!-- ═══════════════════════════════════════════════════════════ -->
+<!-- HALAMAN 1: MARKET DASHBOARD (DEFAULT)                     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="halaman-market">
+    <div class="hero-grid" style="grid-template-columns: 1fr; padding-top: 2rem; padding-bottom: 1rem;">
+        <div>
+            <div class="hero-eyebrow">Market Dashboard</div>
+            <h1 style="font-size: clamp(2rem, 4vw, 3.2rem); margin-bottom: 1rem;">Live <span>Long / Short</span> Ratio</h1>
+            <p class="hero-sub">Data real-time dari Binance, Bybit, dan OKX. Auto-refresh tiap 5 menit.</p>
+        </div>
+    </div>
+
+        <div class="market-section" style="padding-top: 0; max-width: 1360px; margin: 0 auto; padding-left: 1.5rem; padding-right: 1.5rem;">
+        <div class="section-card" style="padding: 2rem;">
+            <div class="hero-metrics" style="grid-template-columns: repeat(4, 1fr); transform: none; margin-bottom: 2rem;">
+                <div class="hero-metric">
+                    <div class="n" id="stat-bnb-long" style="color: var(--success); font-size: 2rem;">—</div>
+                    <div class="l">Binance Long</div>
+                </div>
+                <div class="hero-metric">
+                    <div class="n" id="stat-bybit-long" style="color: var(--success); font-size: 2rem;">—</div>
+                    <div class="l">Bybit Long</div>
+                </div>
+                <div class="hero-metric">
+                    <div class="n" id="stat-okx-ratio" style="color: var(--primary); font-size: 2rem;">—</div>
+                    <div class="l">OKX Ratio</div>
+                </div>
+                <div class="hero-metric">
+                    <div class="n" id="stat-updated" style="font-size: 1rem; color: var(--text2); padding-top: 0.8rem;">—</div>
+                    <div class="l">Update Terakhir</div>
+                </div>
+            </div>
+
+            <div style="background: var(--card-2); border: 2px solid var(--border); border-radius: var(--r-md); padding: 1.5rem;">
+                <h3 style="font-family: var(--display); font-size: 1.2rem; margin-bottom: 1rem; color: var(--text);">📊 Long vs Short Ratio — BTC 5m</h3>
+                <div style="height: 350px;">
+                    <canvas id="chart-longshort"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════════════════ -->
+<!-- HALAMAN 2: AIRDROP DASHBOARD (LAMA, DISEMBUNYIIN DULU)     -->
+<!-- ═══════════════════════════════════════════════════════════ -->
+<div id="halaman-airdrop" style="display: none;">
 
     <!-- ─── NEW LISTINGS FEED ─── -->
 <div id="nlf-section">
@@ -1310,7 +1359,7 @@ body.news-resizing { cursor: col-resize; user-select: none; }
                     <button class="ftab nolink" data-filter="nolink" onclick="setPLFilter('nolink')" id="ftab-nolink">No Link</button>
                 </div>
 
-                <!-- Grid -->
+                 <!-- Grid -->
                 <div id="proj-links-list">
                     <div class="empty-state" id="initial-loading-state">
                         Loading projects...
@@ -1318,6 +1367,8 @@ body.news-resizing { cursor: col-resize; user-select: none; }
                 </div>
             </div>
         </div>
+
+</div>  <!-- ⬅️ TUTUP HALAMAN AIRDROP DI SINI -->
 
                 <!-- ─── CRYPTO TICKER (Top 10 Marketcap) ─── -->
         <div id="crypto-ticker">
@@ -3668,6 +3719,7 @@ function stopFallingCoins() {
             startGarapWidget();
             startCryptoTicker();
             loadProjects();
+            loadMarketData();
         };
 
        // ═══════════════════════════════════════════════════════════
@@ -4559,7 +4611,89 @@ document.getElementById('weex-send-btn').onclick = async () => {
         btn.innerHTML = icon('send') + 'Kirim';
     }
 };
-        
+
+    // ═══════════════════════════════════════════════════════════
+// ─── MARKET DASHBOARD LOGIC ───
+// ═══════════════════════════════════════════════════════════
+let chartInstance = null;
+
+function showMarketDashboard() {
+    document.getElementById('halaman-market').style.display = 'block';
+    document.getElementById('halaman-airdrop').style.display = 'none';
+    loadMarketData();
+}
+
+function showAirdropDashboard() {
+    document.getElementById('halaman-market').style.display = 'none';
+    document.getElementById('halaman-airdrop').style.display = 'block';
+}
+
+async function loadMarketData() {
+    try {
+        const res = await fetch('/api/market');
+        const data = await res.json();
+        if (data.error) throw new Error(data.error);
+
+        document.getElementById('stat-bnb-long').textContent   = (data.binance.long * 100).toFixed(2) + '%';
+        document.getElementById('stat-bybit-long').textContent = (data.bybit.long   * 100).toFixed(2) + '%';
+        document.getElementById('stat-okx-ratio').textContent  = data.okx.ratio.toFixed(3);
+        document.getElementById('stat-updated').textContent    = new Date(data.updated_at).toLocaleTimeString('id-ID');
+        document.getElementById('stat-updated').style.color    = 'var(--text2)';
+
+        renderMarketChart(data);
+    } catch (err) {
+        console.error('Gagal load market data:', err);
+        const el = document.getElementById('stat-updated');
+        el.textContent = 'Error';
+        el.style.color = 'var(--danger)';
+    }
+}
+
+function renderMarketChart(data) {
+    const ctx = document.getElementById('chart-longshort').getContext('2d');
+    const labels = ['Binance', 'Bybit', 'OKX'];
+
+    const longs = [
+        data.binance.long * 100,
+        data.bybit.long   * 100,
+        data.okx.ratio > 1 ? (data.okx.ratio / (1 + data.okx.ratio)) * 100 : data.okx.ratio * 100
+    ];
+    const shorts = longs.map(v => 100 - v);
+
+    if (chartInstance) chartInstance.destroy();
+
+    chartInstance = new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels,
+            datasets: [
+                { label: 'Long %',  data: longs,  backgroundColor: 'rgba(53,224,161,.85)',  borderRadius: 6 },
+                { label: 'Short %', data: shorts, backgroundColor: 'rgba(239,68,68,.85)',   borderRadius: 6 }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            indexAxis: 'y',
+            scales: {
+                x: { stacked: true, max: 100, ticks: { color: '#A1A1AA' }, grid: { color: '#2A2A2A' } },
+                y: { stacked: true, ticks: { color: '#FFFFFF' }, grid: { display: false } }
+            },
+            plugins: {
+                legend: { labels: { color: '#FFFFFF' } },
+                tooltip: { callbacks: { label: c => `${c.dataset.label}: ${c.parsed.x.toFixed(2)}%` } }
+            }
+        }
+    });
+}
+
+// Auto-refresh tiap 5 menit
+setInterval(() => {
+    if (document.getElementById('halaman-market')?.style.display !== 'none') {
+        loadMarketData();
+    }
+}, 5 * 60 * 1000);
+
     </script>
 
 </body>
