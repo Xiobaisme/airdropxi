@@ -25,24 +25,30 @@ const EX = {
   OKX: async (c, n) => {
     const j = await get(`https://www.okx.com/api/v5/rubik/stat/taker-volume?ccy=${c}&instType=CONTRACTS&period=5m`);
     const rows = (j.data || []).slice(0, Math.ceil(n / 5));
-    return { sell: sum(rows, r => r[1]), buy: sum(rows, r => r[2]) };
+    return { sell: sum(rows, r => r[1]), buy: sum(rows, r => r[2]), usd: true };
   },
 
   // Bybit: dari 1000 trade terakhir yang masuk jendela waktu
   Bybit: async (c, n) => {
     const j = await get(`https://api.bybit.com/v5/market/recent-trade?category=linear&symbol=${c}USDT&limit=1000`);
+    const all = j.result?.list || [];
     const from = Date.now() - n * 60000;
-    const t = (j.result?.list || []).filter(x => Number(x.time) >= from);
-    return { buy: sum(t.filter(x => x.side === 'Buy'), x => x.size), sell: sum(t.filter(x => x.side === 'Sell'), x => x.size) };
+    const t = all.filter(x => Number(x.time) >= from);
+    const oldest = Math.min(...all.map(x => Number(x.time)));
+    const partial = all.length >= 1000 && oldest > from; // batas 1000 trade tercapai sebelum jendela penuh
+    const usdOf = side => sum(t.filter(x => x.side === side), x => Number(x.size) * Number(x.price));
+    return { buy: usdOf('Buy'), sell: usdOf('Sell'), usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000) };
   },
 
   // Kraken Futures: analytics cvd per 1 menit (buyVolume / sellVolume)
   Kraken: async (c, n) => {
     const sym = `PF_${c === 'BTC' ? 'XBT' : c}USD`;
-    const since = Math.floor(Date.now() / 1000) - (n + 1) * 60;
+    const since = Math.floor(Date.now() / 1000) - (n + 10) * 60;
     const j = await get(`https://futures.kraken.com/api/charts/v1/analytics/${sym}/cvd?since=${since}&interval=60`);
     const d = j.result?.data || {};
-    return { buy: sum(d.buyVolume || [], x => x), sell: sum(d.sellVolume || [], x => x) };
+    const b = (d.buyVolume || []).slice(-n), s = (d.sellVolume || []).slice(-n);
+    if (!b.length && !s.length) throw new Error('Kraken kosong: ' + JSON.stringify(j).slice(0, 160));
+    return { buy: sum(b, x => x), sell: sum(s, x => x) };
   }
 };
 
@@ -59,16 +65,19 @@ export default async function handler(req, res) {
 
   const rows = out.map((o, i) => {
     if (o.status !== 'fulfilled') return { name: names[i], error: String(o.reason?.message || o.reason).slice(0, 100) };
-    const { buy, sell, usd } = o.value;
+    const { buy, sell, usd, partial, secs } = o.value;
     const total = buy + sell;
     return total > 0
-      ? { name: names[i], buy, sell, pct: (buy / total) * 100, usd: !!usd }
+      ? { name: names[i], buy, sell, pct: (buy / total) * 100, usd: !!usd, partial: !!partial, secs }
       : { name: names[i], error: 'Belum ada trade di jendela ini' };
   });
 
   const ok = rows.filter(r => !r.error);
-  const avg = ok.length ? ok.reduce((s, r) => s + r.pct, 0) / ok.length : null;
-  const all = avg === null ? { name: 'Rata-rata', error: 'Semua bursa gagal' } : { name: 'Rata-rata', pct: avg, avg: true };
+  const w = ok.filter(r => r.usd && !r.partial);
+  const avg = w.length
+    ? (sum(w, r => r.buy) / sum(w, r => r.buy + r.sell)) * 100
+    : ok.length ? ok.reduce((s, r) => s + r.pct, 0) / ok.length : null;
+  const all = avg === null ? { name: 'All', error: 'Semua bursa gagal' } : { name: 'All', pct: avg, avg: true };
 
   res.status(200).json({ coin, tf, minutes: n, rows: [all, ...rows], updated_at: new Date().toISOString() });
 }
