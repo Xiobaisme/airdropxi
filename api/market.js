@@ -11,11 +11,11 @@ export default async function handler(req, res) {
     'Referer': 'https://www.google.com/'
   };
 
-  // Pake allSettled biar satu gagal, yang lain tetep dapet
-  const [binanceRes, bybitRes, okxRes] = await Promise.allSettled([
+  const [binanceRes, bybitRes, okxRes, gateRes] = await Promise.allSettled([
     fetch('https://fapi.binance.com/futures/data/globalLongShortAccountRatio?symbol=BTCUSDT&period=5m&limit=1', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
     fetch('https://api.bybit.com/v5/market/account-ratio?category=linear&symbol=BTCUSDT&period=5min&limit=1', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
-    fetch('https://www.okx.com/api/v5/rubik/stat/contracts/long-short-account-ratio?ccy=BTC&period=5m', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
+    fetch('https://www.okx.com/api/v5/rubik/stat/contracts/long-short-account-ratio?ccy=BTC&period=5m', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`)),
+    fetch('https://api.gateio.ws/api/v4/futures/usdt/contract_stats?contract=BTC_USDT', { headers }).then(r => r.ok ? r.json() : Promise.reject(`HTTP ${r.status}`))
   ]);
 
   const result = {
@@ -28,6 +28,12 @@ export default async function handler(req, res) {
     okx: okxRes.status === 'fulfilled'
       ? { ratio: Number(okxRes.value?.data?.[0]?.[1] || 0) }
       : { error: okxRes.reason?.toString() || 'Gagal' },
+    gate: gateRes.status === 'fulfilled' && Array.isArray(gateRes.value) && gateRes.value.length > 0
+      ? { 
+          lsr_taker: Number(gateRes.value[0]?.lsr_taker || 0), 
+          lsr_account: Number(gateRes.value[0]?.lsr_account || 0) 
+        }
+      : { error: gateRes.reason?.toString() || 'Gagal' },
     updated_at: new Date().toISOString()
   };
 
