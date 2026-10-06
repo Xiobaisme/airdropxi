@@ -461,7 +461,7 @@ async function sendDiscord() {
         const ev = [];
         for (let i = 1; i < pts.length; i++) {
           const delta = (pts[i].unlocked || 0) - (pts[i - 1].unlocked || 0);
-          if (delta > 0 && pts[i].timestamp >= today) ev.push([pts[i].timestamp, delta]);
+          if (delta > 0 && pts[i].timestamp >= now) ev.push([pts[i].timestamp, delta]);
         }
         return { label: c.label || 'Lainnya', last: pts.length ? (pts[pts.length - 1].unlocked || 0) : 0, ev };
       });
