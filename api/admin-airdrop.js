@@ -436,6 +436,90 @@ async function sendDiscord() {
       return res.status(400).json({ error: e.message });
     }
   }
+
+    // ─── TOKEN UNLOCKS (dataset emissions DefiLlama, cache Redis) ───
+  if (type === 'token-unlocks') {
+    if (req.method !== 'GET') return res.status(405).json({ error: 'Method tidak diizinkan' });
+    res.setHeader('Cache-Control', 'no-store');   // route di belakang cookie admin, jangan di-cache CDN
+
+    const DEFAULT_WATCH = ['aptos', 'arbitrum-foundation', 'optimism-foundation', 'sui-foundation', 'celestia',
+      'layerzero', 'hyperliquid', 'berachain', 'monad', 'ethena', 'jupiter', 'pyth', 'sei', 'zksync-era',
+      'pendle', 'eigencloud', 'jito', 'movement', 'grass', 'aster', 'kaito', 'walrus-protocol', 'initia', 'ondo-finance'];
+    const picked = String(req.query.slugs || '').split(',').map(s => s.trim().toLowerCase())
+      .filter(s => /^[a-z0-9.\-]{1,60}$/.test(s)).slice(0, 40);
+    const watch = picked.length ? picked : DEFAULT_WATCH;
+    const days = Math.min(Math.max(parseInt(req.query.days, 10) || 30, 1), 180);
+
+    const DAY = 86400, now = Math.floor(Date.now() / 1000), today = now - (now % DAY);
+    const cget = async (k) => { try { const v = await redis.get(k); return v == null ? null : (typeof v === 'string' ? JSON.parse(v) : v); } catch { return null; } };
+    const cset = async (k, v, ex) => { try { await redis.set(k, JSON.stringify(v), { ex }); } catch {} };
+
+    // payload asli besar (data harian sejak 2022): ringkas jadi kenaikan "unlocked" ke depan saja
+    const compact = (d) => {
+      const all = (d?.documentedData?.data || []).map(c => {
+        const pts = (c.data || []).slice().sort((a, b) => a.timestamp - b.timestamp);
+        const ev = [];
+        for (let i = 1; i < pts.length; i++) {
+          const delta = (pts[i].unlocked || 0) - (pts[i - 1].unlocked || 0);
+          if (delta > 0 && pts[i].timestamp >= today) ev.push([pts[i].timestamp, delta]);
+        }
+        return { label: c.label || 'Lainnya', last: pts.length ? (pts[pts.length - 1].unlocked || 0) : 0, ev };
+      });
+      return { grand: all.reduce((s, c) => s + c.last, 0), cats: all.filter(c => c.ev.length).map(c => ({ label: c.label, ev: c.ev })) };
+    };
+
+    const loadSlug = async (slug, budget) => {
+      const key = `unlocks:v1:${slug}`;
+      const hit = await cget(key);
+      if (hit) return hit;
+      try {
+        if (budget < 800) throw new Error('waktu habis');
+        const ctrl = new AbortController();
+        const timer = setTimeout(() => ctrl.abort(), Math.min(budget, 8000));
+        const r = await fetch(`https://defillama-datasets.llama.fi/emissions/${encodeURIComponent(slug)}`, { signal: ctrl.signal });
+        if (!r.ok) { clearTimeout(timer); throw new Error('llama ' + r.status); }
+        const out = compact(await r.json());
+        clearTimeout(timer);
+        out.slug = slug;
+        await cset(key, out, 3 * 3600);               // segar 3 jam
+        await cset(key + ':stale', out, 7 * 86400);   // cadangan kalau sumber mati
+        return out;
+      } catch (e) {
+        const stale = await cget(key + ':stale');
+        if (stale) return stale;
+        throw e;
+      }
+    };
+
+    // 5 request paralel, berhenti nunggu setelah ~7 detik (batas function Vercel); sisanya dimuat di panggilan berikutnya
+    const deadline = Date.now() + 7000;
+    const queue = watch.slice(), loaded = [], missing = [];
+    const worker = async () => {
+      while (queue.length) {
+        const slug = queue.shift();
+        try { loaded.push(await loadSlug(slug, deadline - Date.now())); } catch { missing.push(slug); }
+      }
+    };
+    await Promise.all(Array.from({ length: 5 }, worker));
+
+    const end = now + days * DAY, items = [];
+    for (const s of loaded) {
+      const grand = s.grand || 1;
+      for (const c of s.cats) {
+        const win = c.ev.filter(([t]) => t >= today && t <= end);
+        if (!win.length) continue;
+        const linear = win.length >= 3 && win[1][0] - win[0][0] === DAY && win[2][0] - win[1][0] === DAY;
+        if (linear) {   // unlock harian: ringkas jadi 1 baris
+          const amount = win.reduce((a, [, v]) => a + v, 0);
+          items.push({ slug: s.slug, cat: c.label, ts: win[0][0], amount, pct: (amount / grand) * 100, kind: 'linear', span: win.length });
+        } else {
+          win.forEach(([t, v]) => items.push({ slug: s.slug, cat: c.label, ts: t, amount: v, pct: (v / grand) * 100, kind: 'cliff', span: 1 }));
+        }
+      }
+    }
+    items.sort((a, b) => a.ts - b.ts || b.pct - a.pct);
+    return res.status(200).json({ items: items.slice(0, 500), missing, loaded: loaded.length, total: watch.length });
+  }
   
   // ─── NEWS QUEUE (antrian post Telegram dari poller Supabase, dibaca News Terminal) ───
 
