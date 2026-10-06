@@ -12,7 +12,7 @@ const ALLOWED_EMAILS = (process.env.ALLOWED_ADMIN_EMAILS
 
 const client = new OAuth2Client(CLIENT_ID);
 
-export default async function handler(req, res) {
+module.exports = async function handler(req, res) {
   if (req.method !== 'POST') {
     return res.status(405).json({ success: false, message: 'Method not allowed' });
   }
