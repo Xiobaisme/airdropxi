@@ -107,19 +107,24 @@ const EX = {
     } catch (_) { return gateTrades(c, n); }
   },
 
-  // Kraken Futures: analytics cvd per 1 menit (buyVolume / sellVolume)
+    // Kraken Futures: analytics cvd (buy_volume / sell_volume dalam BTC) x harga terakhir = USD
   Kraken: async (c, n) => {
     const sym = `PF_${c === 'BTC' ? 'XBT' : c}USD`;
     const since = Math.floor(Date.now() / 1000) - (n + 10) * 60;
     const iv = n <= 60 ? 60 : 300; // detik per bucket
     const cnt = (n * 60) / iv;
-    const j = await get(`https://futures.kraken.com/api/charts/v1/analytics/${sym}/cvd?since=${since}&interval=${iv}`);
+    const [j, tk] = await Promise.all([
+      get(`https://futures.kraken.com/api/charts/v1/analytics/${sym}/cvd?since=${since}&interval=${iv}`),
+      get(`https://futures.kraken.com/derivatives/api/v3/tickers/${sym}`),
+    ]);
+    const px = Number(tk.ticker?.last);
     const d = j.result?.data;
     const keys = d && !Array.isArray(d) ? Object.keys(d) : [];
     const pick = re => { const k = keys.find(k => re.test(k)); return k && Array.isArray(d[k]) ? d[k] : []; };
     const b = pick(/buy/i).slice(-cnt), s = pick(/sell/i).slice(-cnt);
     if (!b.length && !s.length) throw new Error('Kraken data: ' + JSON.stringify(d ?? null).slice(0, 200));
-    return { buy: sum(b, x => x), sell: sum(s, x => x) };
+    if (!px) throw new Error('Kraken harga tidak ada');
+    return { buy: sum(b, x => x) * px, sell: sum(s, x => x) * px, usd: true };
   }
 };
 
@@ -144,7 +149,7 @@ export default async function handler(req, res) {
   });
 
   const ok = rows.filter(r => !r.error);
-  const w = ok.filter(r => r.usd && !r.partial);
+  const w = ok.filter(r => r.usd);
   const avg = w.length
     ? (sum(w, r => r.buy) / sum(w, r => r.buy + r.sell)) * 100
     : ok.length ? ok.reduce((s, r) => s + r.pct, 0) / ok.length : null;
