@@ -1,21 +1,22 @@
 // api/admin-airdrop.js
-const { Ratelimit } = require('@upstash/ratelimit');
-const { Redis } = require('@upstash/redis');
-const WebSocket = require('ws');
-const redis = Redis.fromEnv();
-
-const ratelimit = new Ratelimit({
-  redis: Redis.fromEnv(),
-  limiter: Ratelimit.slidingWindow(5, '1 m'),
-});
-
 const crypto = require('crypto');
-const onchain = require('../lib/onchain');
-const AIRDROPS = require('../data/airdrops.json');
+const { verifyAdminToken, issueSession, clearSession, addCookie } = require('../lib/auth');
+
+// ── lazy load: modul berisiko baru di-require saat dipakai ──
+let _redis, _ratelimit;
+const getRedis = () => (_redis ||= require('@upstash/redis').Redis.fromEnv());
+const getRatelimit = () => (_ratelimit ||= new (require('@upstash/ratelimit').Ratelimit)({
+  redis: getRedis(),
+  limiter: require('@upstash/ratelimit').Ratelimit.slidingWindow(5, '1 m'),
+}));
+
+const redis = new Proxy({}, { get: (_, k) => (...a) => getRedis()[k](...a) });
+const ratelimit = { limit: (k) => getRatelimit().limit(k) };
+const onchain = new Proxy({}, { get: (_, k) => (...a) => require('../lib/onchain')[k](...a) });
+const getAirdrops = () => require('../data/airdrops.json');
+
 // SEMENTARA: putus semua akses ke Supabase sampai DB sehat
 const MAINTENANCE = true;
-
-const { verifyAdminToken, issueSession, clearSession, addCookie } = require('../lib/auth');
 
 const SESSION_MS_DISCORD = 12 * 60 * 60 * 1000; // member Discord: 12 jam, role dicek ulang tiap login
 
@@ -684,6 +685,7 @@ async function sendDiscord() {
 
   // ─── NEW LISTINGS FEED (SSE relay ke NLF WebSocket) ───
   if (type === 'nlf-stream') {
+    const WebSocket = require('ws'); 
     if (req.method !== 'GET') {
       return res.status(405).json({ error: 'Method tidak diizinkan untuk nlf-stream' });
     }
@@ -736,17 +738,17 @@ async function sendDiscord() {
     });
   }
 
-    // ─── AIRDROPS: baca dari file JSON (tanpa Supabase) ───
+       // ─── AIRDROPS: baca dari file JSON (tanpa Supabase) ───
   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'no-store');
 
     if (!id) {
-      const list = [...AIRDROPS].sort((a, b) =>
+      const list = [...getAirdrops()].sort((a, b) =>
         String(b.created_at).localeCompare(String(a.created_at)));
       return res.status(200).json(list);
     }
 
-    const row = AIRDROPS.find(a => String(a.id) === String(id));
+    const row = getAirdrops().find(a => String(a.id) === String(id));
     if (!row) return res.status(404).json({ error: 'Project tidak ditemukan' });
     return res.status(200).json({ ...row, view_count: row.view_count || 0 });
   }
