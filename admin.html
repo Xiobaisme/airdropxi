@@ -5003,7 +5003,7 @@ document.getElementById('weex-send-btn').onclick = async () => {
     async function loadBtc() {
         const my = ++st.token;
         try {
-            const r = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=${st.tf}&limit=500`);
+            const r = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=${st.tf}&limit=1000`);
             if (!r.ok) throw new Error('HTTP ' + r.status);
             const k = await r.json();
             if (my !== st.token) return;
@@ -5013,7 +5013,7 @@ document.getElementById('weex-send-btn').onclick = async () => {
 
     async function loadDom() {
     try {
-        const r = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=BTCDOMUSDT&interval=${st.tf}&limit=500`);
+        const r = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=BTCDOMUSDT&interval=${st.tf}&limit=1000`);
         if (!r.ok) throw new Error('HTTP ' + r.status);
         const k = await r.json();
         st.dom = k.map(x => [Math.floor(x[0] / 1000), +x[4]]);
