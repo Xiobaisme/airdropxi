@@ -1180,6 +1180,40 @@ body.news-resizing { cursor: col-resize; user-select: none; }
             .agent-msg { max-width: 90%; }
            .news-drawer { width: 94vw; }
         }
+
+        /* ═══ NEWS TERMINAL — gaya terminal ═══ */
+.news-drawer { width: var(--news-w, 760px); background: #070707; font-family: var(--mono); }
+.news-head { padding: 14px 18px 10px; }
+.news-title { font-family: var(--mono); font-size: 1rem; font-weight: 700; letter-spacing: 0; }
+.news-title::before { content: '> '; color: var(--success); }
+.news-sub { font-family: var(--mono); }
+
+.news-filters { flex-wrap: wrap; overflow-x: visible; gap: 6px; padding: 10px 18px; }
+.news-chip { border-radius: 6px; font-size: 11px; padding: 4px 10px; background: #0D0D0D; }
+.news-chip.zero { opacity: .35; }
+
+.news-feed { padding: 0; }
+.nt-row {
+    display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 12px;
+    padding: 11px 18px 11px 15px; border-bottom: 1px solid #1a1a1a;
+    border-left: 3px solid var(--src-color, var(--primary));
+}
+.nt-row:hover { background: #0e0e0e; }
+.nt-meta { display: flex; flex-direction: column; gap: 3px; font-size: 10px; line-height: 1.3; }
+.nt-time { color: var(--text2); font-weight: 600; }
+.nt-ago { color: var(--text3); }
+.nt-src { color: var(--src-color, var(--primary)); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; word-break: break-word; }
+.nt-text { font-family: var(--mono); font-size: 13px; line-height: 1.65; color: #e8e8ea; white-space: pre-wrap; word-break: break-word; }
+.nt-text a { color: #38bdf8; text-decoration: none; }
+.nt-text a:hover { text-decoration: underline; }
+.nt-actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
+.nt-actions .btn-save { padding: .32rem .85rem; font-size: .68rem; }
+.nt-actions a { font-family: var(--mono); font-size: 11px; color: var(--text3); text-decoration: none; }
+.nt-actions a:hover { color: var(--text); }
+@media (max-width: 640px) {
+    .nt-row { grid-template-columns: 1fr; gap: 4px; }
+    .nt-meta { flex-direction: row; gap: 10px; align-items: center; }
+}
     </style>
 </head>
 <body>
@@ -1726,7 +1760,7 @@ body.news-resizing { cursor: col-resize; user-select: none; }
     <div class="news-filters" id="news-filters"></div>
     <div class="news-feed" id="news-feed"></div>
     <div class="news-foot">
-      <span>Live · cek antrian tiap <span id="news-countdown">00:10</span></span>
+      <span>Live · cek antrian tiap <span id="news-countdown">00:30</span></span>
         <button class="news-refresh-btn" onclick="loadNews(true)">↻ REFRESH</button>
     </div>
 </div>
@@ -2476,13 +2510,21 @@ function updateMarketSessionBadge(hourUTC) {
             panel.classList.toggle('hidden');
         }
 
-       const NEWS_SOURCES = {
+      const NEWS_SOURCES = {
     lookonchain:    { label: 'Lookonchain',    color: 'var(--secondary)' },
     investigations: { label: 'Investigations', color: '#f59e0b' },
     onchainlens:    { label: 'OnchainLens',    color: '#38bdf8' },
     wublockchain:   { label: 'Wu Blockchain',  color: '#22c55e' },
     whalealert:     { label: 'Whale Alert',    color: '#FFD23F' },
     treenews:       { label: 'Tree News',      color: '#84cc16' },
+    nansen:         { label: 'Nansen',         color: '#818cf8' },
+    cryptomedia:    { label: 'Crypto Media',   color: '#fb923c' },
+    smnews:         { label: 'SM News',        color: '#f472b6' },
+    watcherguru:    { label: 'WatcherGuru',    color: '#2dd4bf' },
+    rekt:           { label: 'REKT',           color: '#ef4444' },
+    cointelegraph:  { label: 'Cointelegraph',  color: '#fbbf24' },
+    brics:          { label: 'BRICS News',     color: '#e879f9' },
+    cryptorank:     { label: 'CryptoRank',     color: '#94a3b8' },
 };
 const NEWS_POLL_SEC = 30; // cek antrian tiap 10 detik (poller Telegram jalan tiap menit di Supabase)
 let newsItems = [], newsFilter = 'all', _newsCountdown = NEWS_POLL_SEC, _newsCountdownInt = null, _newsClockInt = null, _newsSig = '';
@@ -2558,15 +2600,24 @@ function newsTimeAgo(iso) {
     if (h < 24) return h + 'j lalu';
     return Math.floor(h / 24) + 'h lalu';
 }
+function ntLinkify(s) {
+    return esc(s).replace(/(https?:\/\/[^\s<]+)/g, (u) =>
+        `<a href="${u}" target="_blank" rel="noopener">${u.length > 56 ? u.slice(0, 55) + '…' : u}</a>`);
+}
+function ntClock(iso) {
+    return new Date(iso).toLocaleTimeString('id-ID', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }).replace('.', ':');
+}
+
 function renderNewsFilters() {
     const row = document.getElementById('news-filters');
     if (!row) return;
     const counts = { all: newsItems.length };
     Object.keys(NEWS_SOURCES).forEach(k => counts[k] = newsItems.filter(n => n.source === k).length);
     const chips = [{ key: 'all', label: 'All' }, ...Object.entries(NEWS_SOURCES).map(([key, v]) => ({ key, label: v.label }))];
-    row.innerHTML = chips.map(c => `<div class="news-chip ${c.key === newsFilter ? 'active' : ''}" data-key="${c.key}">${esc(c.label)} <span class="n">${counts[c.key] || 0}</span></div>`).join('');
+    row.innerHTML = chips.map(c => `<div class="news-chip ${c.key === newsFilter ? 'active' : ''} ${counts[c.key] ? '' : 'zero'}" data-key="${c.key}">${esc(c.label)} <span class="n">${counts[c.key] || 0}</span></div>`).join('');
     row.querySelectorAll('.news-chip').forEach(el => { el.onclick = () => { newsFilter = el.dataset.key; renderNewsFilters(); renderNewsFeed(); }; });
 }
+
 function renderNewsFeed() {
     const feed = document.getElementById('news-feed');
     const countEl = document.getElementById('news-count');
@@ -2577,12 +2628,18 @@ function renderNewsFeed() {
     feed.innerHTML = items.map(item => {
         const src = NEWS_SOURCES[item.source] || { label: item.source, color: 'var(--primary)' };
         const sent = item.status === 'sent';
-        return `<div class="news-card" style="--src-color:${src.color}; cursor:default;">
-            <div class="news-card-top"><span class="news-src-tag">${esc(src.label)}</span><span class="news-time-tag">${newsTimeAgo(item.published_at)}</span></div>
-            <div class="news-card-excerpt" style="color:var(--text); font-size:13px; white-space:pre-wrap; word-break:break-word;">${esc(item.title)}</div>
-            <div style="display:flex; gap:10px; align-items:center; margin-top:10px;">
-                <button class="btn-save" data-send="${esc(item.id)}" ${sent ? 'disabled' : ''} style="padding:0.45rem 1rem;">${sent ? 'Terkirim ✓' : icon('send') + 'Kirim'}</button>
-                <a href="${esc(item.url)}" target="_blank" rel="noopener" style="font-family:var(--mono); font-size:11px; color:var(--text3);">buka post ↗</a>
+        return `<div class="nt-row" style="--src-color:${src.color}">
+            <div class="nt-meta">
+                <span class="nt-time">${ntClock(item.published_at)}</span>
+                <span class="nt-ago">${newsTimeAgo(item.published_at)}</span>
+                <span class="nt-src">${esc(src.label)}</span>
+            </div>
+            <div class="nt-body">
+                <div class="nt-text">${ntLinkify(item.title)}</div>
+                <div class="nt-actions">
+                    <button class="btn-save" data-send="${esc(item.id)}" ${sent ? 'disabled' : ''}>${sent ? 'Terkirim ✓' : icon('send') + 'Kirim'}</button>
+                    ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">buka post ↗</a>` : ''}
+                </div>
             </div>
         </div>`;
     }).join('');
@@ -2641,7 +2698,7 @@ document.getElementById('news-overlay')?.addEventListener('click', toggleNewsPan
     const drawer = document.getElementById('news-drawer');
     const handle = document.getElementById('news-resizer');
     if (!drawer || !handle) return;
-    const KEY = 'newsDrawerW', MIN = 320, DEF = 440;
+    const KEY = 'newsDrawerW', MIN = 320, DEF = 760;
     const maxW = () => Math.round(window.innerWidth * 0.94);
     const apply = (w) => drawer.style.setProperty('--news-w', Math.min(maxW(), Math.max(MIN, Math.round(w))) + 'px');
     try { const saved = +localStorage.getItem(KEY); if (saved) apply(saved); } catch {}
