@@ -1,0 +1,793 @@
+[
+  {
+    "id": 10,
+    "created_at": "2026-03-15 19:05:08.772303+00",
+    "name": "dTelecom",
+    "status": "Active",
+    "RaisedID": "$1.2 M",
+    "RaisedEN": "'$1.2 M",
+    "tasksID": "Anda bisa mendapatkan poin dengan menyelesaikan tugas sosial sederhana, melapor masuk setiap hari, dan mengundang pengguna lain.\nhubungkan dompet Solana Anda dan kerjakan semua tugas\n\nLakukan Panggilan saat Meet Visit, lakukan rapat atau lakukan panggilan langsung. Kegiatan ini memberikan poin terbanyak Anda dapat memerikasa point pada tab Rewards\nyang dapat dikonversi menjadi token $DTEL selama TGE",
+    "tasksEN": "You can earn points by completing simple social tasks, checking in daily, and inviting other users.\nconnect your Solana wallet and do all the tasks\n\nMake a Call during a Meet Visit, hold a meeting or make a direct call. This activity gives you the most points. You can check the points on the Rewards tab\nwhich can be converted into $DTEL tokens during TGE",
+    "link": "https://rewards.dtelecom.org/reward?referral_code=7T7EHN1T",
+    "tags": "Infrastructure",
+    "testnet_links": [
+      {
+        "label": "Start Activate",
+        "url": "https://rewards.dtelecom.org/reward?referral_code=7T7EHN1T"
+      },
+      {
+        "label": "Start Activate",
+        "url": "https://dmeet.org/?invite=sDZlTq27A"
+      }
+    ],
+    "published": true,
+    "confirmation_status": "confirmed",
+    "view_count": 26,
+    "sort_order": 54,
+    "website_url": "https://rewards.dtelecom.org/reward?",
+    "backers": []
+  },
+  {
+    "id": 11,
+    "created_at": "2026-03-15 19:06:21.387087+00",
+    "name": "Mahojin",
+    "status": "Active",
+    "RaisedID": "$5.50M",
+    "RaisedEN": "$5.50M",
+    "tasksID": "Anda bisa mendapatkan poin dengan cara berikut:\nCheck-in harian dan bagikan tautan ke pekerjaan Anda di X\nJadikan konten Anda digunakan untuk menghasilkan uang\nsambungkan dompet Anda\nBuka tab \"Kreator\" dan buat Alur Kerja. Setelah dibuat, bagikan di X\n\nBuka tab \"MAHO Points\". Tempel tautan ke postingan dengan alur kerja Anda yang dipublikasikan di X dan klik check-in harian.\nTweet dengan link ke alur kerja Anda harus menyebutkan @MahojinAI. Tweet harus dibuat setiap hari.",
+    "tasksEN": "You can earn points in the following ways:\nDaily check-in and share links to your work on X\nMake your content used to earn\nconnect your wallet\nOpen the \"Creators\" tab  (https://app.mahojin.ai/creators)and create a Workflow. Once created, share it on X\n\nGo to the \"MAHO Points\" tab. Paste the link to the post with your workflow published in X and click the daily check-in.\nTweets with links to your workflow must mention @MahojinAI. Tweets must be created every day.",
+    "link": "https://app.mahojin.ai/maho-point",
+    "tags": "Blockchain Service",
+    "testnet_links": [
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": "https://app.mahojin.ai/maho-point"
+      }
+    ],
+    "published": true,
+    "confirmation_status": "potential",
+    "view_count": 24,
+    "sort_order": 53,
+    "website_url": "https://app.mahojin.ai/maho-point",
+    "backers": [
+      {
+        "name": "a16z CSX",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-a16z-csx-1782720355703.png"
+      },
+      {
+        "name": "Maelstrom",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-maelstrom-1782720392220.png"
+      },
+      {
+        "name": "WAGMI Ventures",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-wagmi-ventures-1782720411987.png"
+      }
+    ]
+  },
+  {
+    "id": 17,
+    "created_at": "2026-03-15 19:20:31.248793+00",
+    "name": "Blockchain.com (AskJune)",
+    "status": "Active",
+    "RaisedID": "$600.00M",
+    "RaisedEN": "$600.00M",
+    "tasksID": "Buka situs webnya dan login menggunakan alamat email Anda.\n\nMasukan Code akses ini jika masih tersedia \nMFMUP1NKPELMGVUL\nL5C8QESCZ7MZBZFT\nDVK9E14TSXLQAN4J\n\nLakukan Chat Pertama Kirim ke AI June untuk mengaktifkan akun dan   mulai mengumpulkan point\n\nbuka tab Poin, dan selesaikan tugas",
+    "tasksEN": "Go to the website and log in using your email address.\n\nEnter this access code if it is still available\nMFMUP1NKPELMGVUL\nL5C8QESCZ7MZBZFT\nDVK9E14TSXLQAN4J\n\nMake the First Chat Send to AI June to activate the account and start collecting points\n\nopen the Points tab, and complete the tasks",
+    "link": "https://askjune.ai/app/chat",
+    "tags": "CeFi",
+    "testnet_links": [
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": "https://askjune.ai/app/chat"
+      }
+    ],
+    "published": true,
+    "confirmation_status": "potential",
+    "view_count": 25,
+    "sort_order": 47,
+    "website_url": "https://askjune.ai/app/chat",
+    "backers": [
+      {
+        "name": "Coinbase Ventures",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-coinbase-ventures-1782718454111.png"
+      },
+      {
+        "name": "Lightspeed",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-lightspeed-1782718498939.png"
+      },
+      {
+        "name": "GV Google Ventures",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-gv-google-ventures-1782718553221.png"
+      },
+      {
+        "name": "Digital Currency Group",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-digital-currency-group-1782718637668.png"
+      },
+      {
+        "name": "Kingsway Capital",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-kingsway-capital-1782718681630.png"
+      },
+      {
+        "name": "Eldridge",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-eldridge-1782718722609.png"
+      },
+      {
+        "name": "DST Global",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-dst-global-1782718818720.png"
+      },
+      {
+        "name": "Vy Capital",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-vy-capital-1782718883024.png"
+      },
+      {
+        "name": "Lakestar",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-lakestar-1782718958588.png"
+      }
+    ]
+  },
+  {
+    "id": 23,
+    "created_at": "2026-04-17 18:28:57.225781+00",
+    "name": "Unicity",
+    "status": "Active",
+    "RaisedID": "$3.00M",
+    "RaisedEN": "$3.00M",
+    "tasksID": "Buka halaman Quest Kunjungi Quest Platform dan login dengan wallet atau email\n\nSelesaikan quest harian Kerjakan semua quest yang tersedia di dashboard untuk kumpulkan poin\nHubungkan akun sosial Connect akun X dan Discord kamu di halaman profil",
+    "tasksEN": "Open Quest page Visit Quest Platform and login with wallet or email\n\nComplete daily quests Complete all quests available on the dashboard to collect points\nConnect your Connect X and Discord social accounts on the profile page3. Link social accounts | Connect your X and Discord accounts on the profile page",
+    "link": "https://quest.unicity.network/?ref=QUEWXA1W",
+    "tags": "AI",
+    "testnet_links": [
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": "https://quest.unicity.network/?ref=QUEWXA1W"
+      }
+    ],
+    "published": true,
+    "confirmation_status": "confirmed",
+    "view_count": 29,
+    "sort_order": 43,
+    "website_url": "https://quest.unicity.network/?",
+    "backers": [
+      {
+        "name": "Blockchange Ventures",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-blockchange-ventures-1782716546950.png"
+      },
+      {
+        "name": "Outlier Ventures",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-outlier-ventures-1782716597148.png"
+      },
+      {
+        "name": "Tawasal",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-tawasal-1782716637655.png"
+      }
+    ]
+  },
+  {
+    "id": 25,
+    "created_at": "2026-04-17 18:44:51.287167+00",
+    "name": "KieDex",
+    "status": "Active",
+    "RaisedID": "$3.5M",
+    "RaisedEN": "$3.5M",
+    "tasksID": "Akses dan Daftar\n\nHubungkan Dompet (Wallet): Hubungkan dompet EVM seperti MetaMask.\n\nKlaim Kredit Uji Coba: Buka halaman Tasks dan klaim saldo 100 USDT untuk modal transaksi uji coba (testnet).\n\nLengkapi Misi (Quests): Di halaman Tasks yang sama, selesaikan berbagai misi, seperti mengikuti media sosial atau melakukan trading pertama Anda. Misi-misi ini memberikan tambahan poin.\n\nMulai Trading di Testnet: Mulai trading futures perpetual dengan leverage hingga 50x. Gunakan aset uji coba (testnet USDT) untuk membuka posisi long (beli) atau short (jual).\n\n(Opsional) Isi Ulang OIL: OIL adalah \"bahan bakar\" untuk transaksi di testnet. Jika habis, Anda bisa mengisinya ulang melalui halaman Wallet dengan mentransfer $ETH asli di jaringan Base Base dalam jumlah sangat kecil (sekitar 0.00001 ETH untuk 15.000 OIL).\n\nLakukan Check-in Harian: Rutin lakukan Check-in setiap hari untuk mengumpulkan poin konsisten dari total harian 100.000 $KDX .\n\nPantau Poin Reward: Anda bisa melihat volume trading dan perkiraan reward $KDX Anda di halaman Rewards",
+    "tasksEN": "Access and Register\n\nConnect Wallet: Connect an EVM wallet such as MetaMask.\n\nClaim Trial Credit: Go to the Tasks page and claim a balance of 100 USDT for trial transaction capital (testnet).\n\nComplete Missions (Quests): On the same Tasks page, complete various missions, such as following social media or making your first trade. These missions provide additional points.\n\nStart Trading on Testnet: Start trading perpetual futures with up to 50x leverage. Use the test asset (testnet USDT) to open a long (buy) or short (sell) position.\n\n(Optional) OIL Refill: OIL is the “fuel” for transactions on the testnet. If it runs out, you can top it up via the Wallet page by transferring real $ETH on the Base Base network in very small amounts (around 0.00001 ETH for 15,000 OIL).\n\nDo Daily Check-ins: Routinely check-in every day to collect consistent points from a daily total of 100,000 $KDX .\n\nMonitor Reward Points: You can view your trading volume and estimated $KDX rewards on the Rewards page",
+    "link": "https://www.kiedex.app/tasks",
+    "tags": "Seed Round",
+    "testnet_links": [
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": "https://kiedex.app?ref=0OI22J7J"
+      }
+    ],
+    "published": true,
+    "confirmation_status": "potential",
+    "view_count": 24,
+    "sort_order": 41,
+    "website_url": "https://kiedex.app?",
+    "backers": [
+      {
+        "name": "CSP DAO",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-csp-dao-1782715986354.png"
+      },
+      {
+        "name": "TPC Ventures",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-tpc-ventures-1782716056411.png"
+      },
+      {
+        "name": "Devmons",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-devmons-1782716132747.jpg"
+      },
+      {
+        "name": "Hidden Street Capital",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-hidden-street-capital-1782716174639.jpg"
+      }
+    ]
+  },
+  {
+    "id": 27,
+    "created_at": "2026-04-19 12:54:38.9976+00",
+    "name": "DAC | Quantum Chain",
+    "status": "Active",
+    "RaisedID": "N/A",
+    "RaisedEN": "N/A",
+    "tasksID": "Siapkan Dompet: Proyek ini kompatibel dengan EVM, jadi Anda bisa pakai dompet seperti MetaMask.\n\nAkun Media Sosial: Siapkan akun X (Twitter), Discord, dan Telegram karena semua akan terhubung\n\nPergi ke Faucet dan Mengklaimnya\n\nKlaim Lencana \"Golden Badge\" dan mulai mengumpulkan badge yang tersedia\n\nkamu bisa mengumpulkan QE di Quantum Crates dengan membuka peti setiap 5 peti / 24 jam\n\npergi ke QE-POOL anda dapat membakar DACC untuk mendapatkan QE",
+    "tasksEN": "Set Up a Wallet: This project is EVM compatible, so you can use a wallet like MetaMask.\n\nSocial Media Accounts: Set up X (Twitter), Discord, and Telegram accounts as they will all be connected\n\nGo to the Faucet and Claim it\n\nClaim the \"Golden Badge\" and start collecting available badges\n\nyou can collect QE in Quantum Crates by opening crates every 5 crates / 24h\n\ngo to QE-POOL you can burn DACC to get QE",
+    "link": "https://interstellar.dachain.io/crate",
+    "tags": "Layer 1",
+    "testnet_links": [
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": "https://inception.dachain.io/?ref=DAC895789"
+      }
+    ],
+    "published": true,
+    "confirmation_status": "potential",
+    "view_count": 25,
+    "sort_order": 40,
+    "website_url": "https://inception.dachain.io/",
+    "backers": []
+  },
+  {
+    "id": 28,
+    "created_at": "2026-04-20 13:50:01.979501+00",
+    "name": "RAX Finance",
+    "status": "Active",
+    "RaisedID": "$4.00M",
+    "RaisedEN": "$4.00M",
+    "tasksID": "Buka Portal: Kunjungi situs waitlist\nHubungkan Dompet: Sambungkan dompet kripto Anda (misal: MetaMask).\n\nSelesaikan Misi: Ikuti akun RAX Finance dan kerjakan misi-misi yang tersedia.\n\nRax AI akses awal\nBuka formulir, isi, dan kirimkan permohonan Anda",
+    "tasksEN": "Open Portal: Visit the waitlist site\nConnect Wallet: Connect your crypto wallet (ex: MetaMask).\n\nComplete Missions: Follow the RAX Finance account and complete the available missions.\n\nRax AI early access\nGo to the form, fill it out, and submit your application",
+    "link": "https://app.rax.finance/waitlist/dashboard",
+    "tags": "Potential",
+    "testnet_links": [
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": "https://app.rax.finance/waitlist/?ref=wrrw67wv"
+      },
+      {
+        "label": "Start Activate",
+        "url": "https://docs.google.com/forms/d/e/1FAIpQLSfsQ0oy7TvrYCQlXlDnZBfGKulXqKAdKlsRbkikEZRTHXo3Pg/alreadyresponded"
+      }
+    ],
+    "published": true,
+    "confirmation_status": "potential",
+    "view_count": 25,
+    "sort_order": 39,
+    "website_url": "https://app.rax.finance/waitlist/",
+    "backers": [
+      {
+        "name": "HashKey Capital",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-hashkey-capital-1782715735195.png"
+      },
+      {
+        "name": "FBG Capital",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-fbg-capital-1782715778580.png"
+      },
+      {
+        "name": "DePIN X",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-depin-x-1782715848274.png"
+      },
+      {
+        "name": "Hailstone Labs",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-hailstone-labs-1782715869336.png"
+      }
+    ]
+  },
+  {
+    "id": 53,
+    "created_at": "2026-05-29 10:13:58.613918+00",
+    "name": "Watt2Trade",
+    "status": "Active",
+    "RaisedID": "$1.55M",
+    "RaisedEN": "$1.55M",
+    "tasksID": "Hubungkan Google Untuk Membuat Dompet\n\nKlik Social Quests kerjakan tugas yang tersedia seperti follow,like,komen sosial media\n\nBuka tab \"Misi Komunitas\".\nDi bagian Token Bonus WXP, Anda bisa mendapatkan poin tambahan dengan memiliki aset yang memenuhi syarat: POL, ASTER, ETH, dan USDC\n• Agar sistem mulai memberikan poin kepada Anda, saldo dompet Anda masing-masing harus minimal 1.000 POL, 1.000 ASTER, 0,3 ETH, atau 1.000 USDC\n• Konten ditinjau secara manual, dan poin diberikan setelah verifikasi berhasil\nDi bagian \"Sistem Referensi\", Anda akan menemukan tautan rujukan\n\nBuka situs webnya dan masuk. Mulai berdagang Tonton video tutorial resmi tentang cara melakukan pemesanan",
+    "tasksEN": "Connect Google To Create Wallet\n\nClick Social Quests to complete the available tasks such as follow, like, comment on social media\n\nGo to the \"Community Missions\" tab.\nIn the WXP Bonus Tokens section, you can earn additional points by owning eligible assets: POL, ASTER, ETH and USDC\n\n• For the system to start awarding you points, your wallet balance must be at least 1,000 POL, 1,000 ASTER, 0.3 ETH, or 1,000 USDC respectively\n• Content is reviewed manually, and points are awarded upon successful verification\nIn the \"Referral System\" section, you will find the referral link\n\nGo to the website and log in. Start trading Watch the official video tutorial on how to place an order",
+    "link": "https://rewards.watt2trade.com?ref=EMBSPG",
+    "tags": "DeFi",
+    "testnet_links": [
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": "https://rewards.watt2trade.com?ref=EMBSPG"
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      }
+    ],
+    "published": true,
+    "confirmation_status": "confirmed",
+    "view_count": 27,
+    "sort_order": 18,
+    "website_url": "https://rewards.watt2trade.com?",
+    "backers": [
+      {
+        "name": "Volta Capital",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-volta-capital-1782711291421.png"
+      }
+    ]
+  },
+  {
+    "id": 61,
+    "created_at": "2026-06-12 10:20:00.81001+00",
+    "name": "ArcNova",
+    "status": "Active",
+    "RaisedID": "$15M",
+    "RaisedEN": "$15M",
+    "tasksID": "Program Loyalitas ArcNova\nDapatkan poin dengan menyelesaikan misi, menonton konten, dan berpartisipasi dalam ekosistem ArcNova. Setiap tindakan membantu membentuk masa depan penyampaian cerita berbasis AI\nmasuk menggunakan email Anda, atau sambungkan dompet Anda\nMulailah mengerjakan tugas\n\nKampanye Peran ArcNova OG FCFS 5.000\nArcNova memberi penghargaan kepada anggota komunitas awal dengan Peran OG eksklusif\nUnduh dan instal aplikasi ArcNova\nBuat akun Anda\nDi Discord Buka #og-verifikasi\nKirimkan ID Pengguna ArcNova Anda\nPeriksa apakah Peran OG Anda telah ditetapkan",
+    "tasksEN": "ArcNova Loyalty Program\nEarn points by completing missions, watching content, and participating in the ArcNova ecosystem. Every action helps shape the future of AI-based storytelling\nlog in using your email, or connect your wallet\nGet started on the tasks\n\nArcNova OG Role Campaign  FCFS 5,000\nArcNova is rewarding early community members with an exclusive OG Role\nDownload and install the ArcNova app\nCreate your account\nDi Discord Go to #og-verify\nSubmit your ArcNova User ID\nCheck if your OG Role has been assigned",
+    "link": "https://arcnova.tv/en/tasks?inviter=5DD4RYVPX8A3",
+    "tags": "AI",
+    "testnet_links": [
+      {
+        "label": "Start Activate",
+        "url": "https://arcnova.tv/en/tasks?inviter=5DD4RYVPX8A3"
+      },
+      {
+        "label": "Start Activate",
+        "url": ""
+      }
+    ],
+    "published": true,
+    "confirmation_status": "confirmed",
+    "view_count": 14,
+    "sort_order": 10,
+    "website_url": "https://arcnova.tv/en/tasks?",
+    "backers": [
+      {
+        "name": "Animoca Brands",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-animoca-brands-1782707614922.png"
+      },
+      {
+        "name": "LD Capital",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-ld-capital-1782707680356.png"
+      },
+      {
+        "name": "Waterdrip Capital",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-waterdrip-capital-1782707711627.png"
+      },
+      {
+        "name": "Adaverse",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-adaverse-1782707721148.png"
+      },
+      {
+        "name": "Redline Labs",
+        "type": "VC",
+        "logo": "https://raw.githubusercontent.com/Xiobaisme/airdropxi/main/assets/logos/backer-redline-labs-1782707737731.png"
+      }
+    ]
+  },
+  {
+    "id": 72,
+    "created_at": "2026-07-06 06:29:12.794766+00",
+    "name": "YOM",
+    "status": "Active",
+    "RaisedID": "$3.10M",
+    "RaisedEN": "$3.10M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://app.yom.net/quests",
+    "tags": "GameFi",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 73,
+    "created_at": "2026-07-06 06:41:06.026108+00",
+    "name": "Concrete",
+    "status": "Active",
+    "RaisedID": "$17.00M",
+    "RaisedEN": "$17.00M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://points.concrete.xyz/",
+    "tags": "DeFI",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 74,
+    "created_at": "2026-07-06 06:43:02.943096+00",
+    "name": "Psy Protocol",
+    "status": "Active",
+    "RaisedID": "$9.00M",
+    "RaisedEN": "$9.00M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://psy.xyz/psychonaut/activity",
+    "tags": "Blockchain",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 75,
+    "created_at": "2026-07-06 06:45:19.313147+00",
+    "name": "Konnex",
+    "status": "Active",
+    "RaisedID": "$15.00M",
+    "RaisedEN": "$15.00M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://hub.konnex.world/points?",
+    "tags": "AI",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 78,
+    "created_at": "2026-07-15 08:17:06.778002+00",
+    "name": "Monaco",
+    "status": "Active",
+    "RaisedID": "$0M",
+    "RaisedEN": "$0M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://trade.0xmonaco.com/futures/BTC",
+    "tags": "DeFi",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 79,
+    "created_at": "2026-07-18 06:23:32.131694+00",
+    "name": "Orbinum",
+    "status": "Active",
+    "RaisedID": "$0M",
+    "RaisedEN": "$0M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://app.orbinum.network/community#quests",
+    "tags": "blockchain",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 81,
+    "created_at": "2026-07-24 08:08:16.684925+00",
+    "name": "SwarmBase",
+    "status": "Active",
+    "RaisedID": "$7M",
+    "RaisedEN": "$7M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://point.swarmbase.io/?",
+    "tags": null,
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 82,
+    "created_at": "2026-07-25 02:56:53.271017+00",
+    "name": "StripChain",
+    "status": "Active",
+    "RaisedID": "$10.00M",
+    "RaisedEN": "$10.00M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://home.stripchain.xyz/",
+    "tags": "Infrastructure",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 83,
+    "created_at": "2026-07-29 08:50:03.560124+00",
+    "name": "NeoSoul",
+    "status": "Active",
+    "RaisedID": "$11M",
+    "RaisedEN": "$11M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://event.neosoul.ai/?",
+    "tags": "Ai",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 84,
+    "created_at": "2026-08-01 06:44:19.702134+00",
+    "name": "Pond",
+    "status": "Active",
+    "RaisedID": "$7.50M",
+    "RaisedEN": "$7.50M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://joinpond.ai/points",
+    "tags": "AI",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 86,
+    "created_at": "2026-08-30 21:24:53.072809+00",
+    "name": "Sweep",
+    "status": "Active",
+    "RaisedID": "$0M",
+    "RaisedEN": "$0M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://sweep.finance/airdrop",
+    "tags": "Blockchain",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 87,
+    "created_at": "2026-09-01 12:31:21.855112+00",
+    "name": "MemeBitcoin",
+    "status": "Active",
+    "RaisedID": "$8M",
+    "RaisedEN": "$8M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://www.memebitcoin.org/register",
+    "tags": "meme",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 88,
+    "created_at": "2026-09-15 03:43:13.072729+00",
+    "name": "Morfi Markets",
+    "status": "Active",
+    "RaisedID": "$0M",
+    "RaisedEN": "$0M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://morfi.markets/rewards",
+    "tags": "Prediction Markets",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 89,
+    "created_at": "2026-09-18 16:01:32.570174+00",
+    "name": "ARCTION",
+    "status": "Active",
+    "RaisedID": "$0M",
+    "RaisedEN": "$0M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://arction.app/dashboard",
+    "tags": "prediction market",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 92,
+    "created_at": "2026-10-01 12:54:05.655272+00",
+    "name": "ryfinite",
+    "status": "Active",
+    "RaisedID": "$0M",
+    "RaisedEN": "$0M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://ryfinite.com/app",
+    "tags": "DeFi",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 93,
+    "created_at": "2026-10-03 03:36:57.675727+00",
+    "name": "zulti",
+    "status": "Active",
+    "RaisedID": "$0M",
+    "RaisedEN": "$0M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://zulti.com/#navbar-section",
+    "tags": "N/A",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  },
+  {
+    "id": 94,
+    "created_at": "2026-10-03 04:22:25.056847+00",
+    "name": "Titan (Canton)",
+    "status": "Active",
+    "RaisedID": "$0M",
+    "RaisedEN": "$0M",
+    "tasksID": null,
+    "tasksEN": null,
+    "link": "https://testnet.titanx.cc/trade/btc-usdcx",
+    "tags": "Exchange",
+    "testnet_links": null,
+    "published": false,
+    "confirmation_status": null,
+    "view_count": 0,
+    "sort_order": null,
+    "website_url": null,
+    "backers": null
+  }
+]
