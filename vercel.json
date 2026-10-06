@@ -1,10 +1,5 @@
 {
   "rewrites": [
     { "source": "/", "destination": "/admin.html" }
-  ],
-  "functions": {
-    "api/admin-aidrop.js": {
-      "includeFiles": "{lib,data}/**"
-    }
-  }
+  ]
 }
