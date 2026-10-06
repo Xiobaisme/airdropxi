@@ -8,6 +8,8 @@ const get = url =>
     throw new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 80)}`);
   });
 const sum = (a, f) => a.reduce((s, x) => s + Number(f(x) || 0), 0);
+const mult = {};
+const gateMult = async c => (mult[c] ??= Number((await get(`https://api.gateio.ws/api/v4/futures/usdt/contracts/${c}_USDT`)).quanto_multiplier));
 
 // Binance & Aster: kline 1 menit punya taker-buy volume (live, update tiap trade)
 const klineFlow = base => async (c, n) => {
@@ -40,6 +42,33 @@ const EX = {
     const partial = all.length >= 1000 && oldest > from; // batas 1000 trade tercapai sebelum jendela penuh
     const usdOf = side => sum(t.filter(x => x.side === side), x => Number(x.size) * Number(x.price));
     return { buy: usdOf('Buy'), sell: usdOf('Sell'), usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000) };
+  },
+
+    // Bitget: 100 trade terakhir (batas API)
+  Bitget: async (c, n) => {
+    const j = await get(`https://api.bitget.com/api/v2/mix/market/fills?symbol=${c}USDT&productType=USDT-FUTURES&limit=100`);
+    const all = j.data || [];
+    const from = Date.now() - n * 60000;
+    const t = all.filter(x => Number(x.ts) >= from);
+    const oldest = Math.min(...all.map(x => Number(x.ts)));
+    const partial = all.length >= 100 && oldest > from;
+    const usdOf = side => sum(t.filter(x => x.side === side), x => Number(x.size) * Number(x.price));
+    return { buy: usdOf('buy'), sell: usdOf('sell'), usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000) };
+  },
+
+  // Gate.io: 1000 trade terakhir; size + = taker buy, − = taker sell (satuan kontrak)
+  Gate: async (c, n) => {
+    const [t, m] = await Promise.all([
+      get(`https://api.gateio.ws/api/v4/futures/usdt/trades?contract=${c}_USDT&limit=1000`),
+      gateMult(c),
+    ]);
+    const ms = x => { const v = Number(x.create_time_ms || x.create_time); return v < 1e11 ? v * 1000 : v; };
+    const from = Date.now() - n * 60000;
+    const w = t.filter(x => ms(x) >= from);
+    const oldest = Math.min(...t.map(ms));
+    const partial = t.length >= 1000 && oldest > from;
+    const usd = x => Math.abs(x.size) * m * Number(x.price);
+    return { buy: sum(w.filter(x => x.size > 0), usd), sell: sum(w.filter(x => x.size < 0), usd), usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000) };
   },
 
   // Kraken Futures: analytics cvd per 1 menit (buyVolume / sellVolume)
