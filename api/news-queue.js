@@ -137,6 +137,61 @@ async function pullTelegram() {
   if (added || Object.keys(upd).length) await p.exec();
 }
 
+// ─── Upbit: hanya listing / delisting / suspend / warning ───
+const UPBIT_URL = 'https://api-manager.upbit.com/api/v1/announcements?os=web&page=1&per_page=20&category=all';
+const UPBIT_EVERY_SEC = 30;
+const UPBIT_RULES = [
+  ['NEW LISTING', ['신규 거래지원']],
+  ['DELISTING',   ['거래지원 종료']],
+  ['SUSPENSION',  ['입출금 일시 중단', '거래 일시 중단', '거래지원 일시 중단']],
+  ['WARNING',     ['유의 종목 지정', '투자유의']],
+];
+const upbitLabel = (t) => {
+  for (const [label, keys] of UPBIT_RULES) if (keys.some((k) => t.includes(k))) return label;
+  return null;
+};
+
+async function pullUpbit() {
+  const got = await redis.set('news:upbit:lock', 1, { nx: true, ex: UPBIT_EVERY_SEC });
+  if (!got) return;
+
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 5000);
+  let list;
+  try {
+    const r = await fetch(UPBIT_URL, { signal: ctrl.signal, headers: { 'user-agent': 'Mozilla/5.0', accept: 'application/json' } });
+    if (!r.ok) throw new Error('upbit HTTP ' + r.status);
+    list = (await r.json())?.data?.notices || [];
+  } finally { clearTimeout(timer); }
+
+  const seen = Number(await redis.get('news:upbit:last')) || 0;
+  const all = list.map((n) => ({
+    id: Number(n.id), title: String(n.title || ''),
+    ms: Date.parse(n.listed_at || n.first_listed_at),
+  })).filter((n) => n.id && isFinite(n.ms));
+
+  let fresh = all
+    .map((n) => ({ ...n, label: upbitLabel(n.title) }))
+    .filter((n) => n.label && n.id > seen && n.ms > Date.now() - NEWS_TTL * 1000)
+    .sort((a, b) => a.id - b.id);
+  if (!seen) fresh = fresh.slice(-5);
+
+  const maxId = Math.max(seen, ...all.map((n) => n.id));
+  const p = redis.pipeline();
+  fresh.forEach((n) => p.zadd('news:queue', {
+    score: n.ms,
+    member: JSON.stringify({
+      id: `upbit:${n.id}`,
+      source: 'upbit',
+      text: `[${n.label}] ${n.title}`,
+      link: `https://upbit.com/service_center/notice?id=${n.id}`,
+      posted_at: new Date(n.ms).toISOString(),
+    }),
+  }));
+  if (maxId > seen) p.set('news:upbit:last', maxId);
+  await p.exec();
+}
+
 module.exports = async function handler(req, res) {
   res.setHeader('Cache-Control', 'no-store');
 
@@ -178,8 +233,9 @@ module.exports = async function handler(req, res) {
       if (!verifyAdminToken(req)) return res.status(401).json({ error: 'Unauthorized' });
 
       // tarik Telegram dulu; kalau gagal, dashboard tetap dapat berita yang sudah ada
-      try { await pullTelegram(); } catch (e) { console.warn('[news-queue] pullTelegram:', e.message); }
-
+      const pulls = await Promise.allSettled([pullTelegram(), pullUpbit()]);
+      pulls.forEach((r) => { if (r.status === 'rejected') console.warn('[news-queue] pull:', r.reason?.message); });
+      
       const p = redis.pipeline();
       p.zrange('news:queue', 0, NEWS_LIMIT - 1, { rev: true });
       p.smembers('news:sent');
