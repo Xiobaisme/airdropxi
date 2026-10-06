@@ -40,7 +40,18 @@ async function checkSendPin(req) {
   return { ok: true };
 }
 
-module.exports = async function handler(req, res) {
+  module.exports = async function handler(req, res) {
+  try {
+    return await _handler(req, res);
+  } catch (e) {
+    console.error('[admin-airdrop] FATAL:', e);
+    if (!res.headersSent) {
+      return res.status(500).json({ error: 'Internal error', detail: e.message });
+    }
+  }
+};
+
+async function _handler(req, res) {
   const SUPA_URL = process.env.NEXT_PUBLIC_SUPABASE_URL;
   const SUPA_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY;
 
@@ -244,10 +255,15 @@ async function sendDiscord() {
     if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_GUILD_ID || !DISCORD_ROLE_IDS) return back('config');
 
     // 1) arahkan ke Discord
-    if (step === 'discord-login') {
+        if (step === 'discord-login') {
       const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-      const { success } = await ratelimit.limit(`discord:${ip}`);
-      if (!success) return back('ratelimit');
+      let blocked = false;
+      try {
+        ({ success: blocked } = await ratelimit.limit(`discord:${ip}`));
+      } catch (e) {
+        console.error('[ratelimit] redis error, skip limiter:', e.message);
+      }
+      if (blocked) return back('ratelimit');
 
       const state = crypto.randomBytes(16).toString('hex');
       addCookie(res, `discord_state=${state}; ${STATE_COOKIE}; Max-Age=600`);
