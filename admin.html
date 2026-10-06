@@ -10,7 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightweight-charts/4.1.3/lightweight-charts.standalone.production.js"></script>
+    <script src="https://cdn.jsdelivr.net/npm/lightweight-charts@4.1.3/dist/lightweight-charts.standalone.production.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         /* ═══════════════════════════════════════════════════════════
@@ -4963,10 +4963,14 @@ document.getElementById('weex-send-btn').onclick = async () => {
     };
 
     function build() {
-        if (st.chart) return;
-        const box = $('#btc-chart');
-        if (!box || typeof LightweightCharts === 'undefined') return;
-        st.chart = LightweightCharts.createChart(box, {
+    if (st.chart) return;
+    const box = $('#btc-chart');
+    if (!box) return;
+    if (typeof LightweightCharts === 'undefined') {
+        setNote('Library chart gagal dimuat (cek koneksi/CDN).');
+        return;
+    }
+    st.chart = LightweightCharts.createChart(box, {
             autoSize: true,
             layout: { background: { type: 'solid', color: '#0A0A0A' }, textColor: '#A1A1AA', fontFamily: 'JetBrains Mono, monospace', fontSize: 11 },
             grid: { vertLines: { color: 'rgba(255,255,255,0.04)' }, horzLines: { color: 'rgba(255,255,255,0.04)' } },
