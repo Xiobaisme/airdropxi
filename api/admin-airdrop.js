@@ -438,6 +438,34 @@ async function sendDiscord() {
     }
   }
 
+      // ─── BTC.D RECORDER (CoinGecko /global gratis cuma nilai sekarang, riwayatnya direkam sendiri) ───
+  if (type === 'btcd') {
+    if (req.method !== 'GET') return res.status(405).json({ error: 'Method tidak diizinkan' });
+    res.setHeader('Cache-Control', 'no-store');
+    try {
+      const now = Date.now();
+      const last = Number(await redis.get('btcd:last')) || 0;
+      if (now - last >= 5 * 60 * 1000) {                       // rekam maks 1 titik / 5 menit
+        await redis.set('btcd:last', now, { ex: 3600 });
+        try {
+          const r = await fetch('https://api.coingecko.com/api/v3/global', { headers: { accept: 'application/json' } });
+          if (r.ok) {
+            const dom = (await r.json())?.data?.market_cap_percentage?.btc;
+            if (typeof dom === 'number') {
+              await redis.rpush('btcd:hist', JSON.stringify([Math.floor(now / 1000), +dom.toFixed(4)]));
+              await redis.ltrim('btcd:hist', -20000, -1);      // simpan ±2 bulan
+            }
+          }
+        } catch (e) { console.warn('[btcd] gagal ambil CoinGecko:', e.message); }
+      }
+      const rows = await redis.lrange('btcd:hist', 0, -1);
+      const pts = rows.map(r => (typeof r === 'string' ? JSON.parse(r) : r)).filter(Array.isArray);
+      return res.status(200).json(pts);
+    } catch (e) {
+      return res.status(500).json({ error: serializeError(e) });
+    }
+  }
+
     // ─── TOKEN UNLOCKS (dataset emissions DefiLlama, cache Redis) ───
   if (type === 'token-unlocks') {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method tidak diizinkan' });
