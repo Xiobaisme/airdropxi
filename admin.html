@@ -4995,7 +4995,7 @@ document.getElementById('weex-send-btn').onclick = async () => {
             if (!b || b.dataset.tf === st.tf) return;
             st.tf = b.dataset.tf;
             $('#btc-tf').querySelectorAll('.nlf-btn').forEach(x => x.classList.toggle('active', x === b));
-            loadBtc().then(() => render(true));
+            Promise.all([loadBtc(), loadDom()]).then(() => render(true));
             connectWs();
         });
     }
@@ -5012,11 +5012,19 @@ document.getElementById('weex-send-btn').onclick = async () => {
     }
 
     async function loadDom() {
-        try {
-            const r = await fetch('/api/admin-airdrop?type=btcd');
-            if (r.ok) st.dom = await r.json();
-        } catch {}
-    }
+    try {
+        const r = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=BTCDOMUSDT&interval=${st.tf}&limit=500`);
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const k = await r.json();
+        st.dom = k.map(x => [Math.floor(x[0] / 1000), +x[4]]);
+        st.domSrc = 'binance';
+        return;
+    } catch {}
+    try {   // cadangan: rekaman sendiri
+        const r = await fetch('/api/admin-airdrop?type=btcd');
+        if (r.ok) { st.dom = await r.json(); st.domSrc = 'rec'; }
+    } catch {}
+}
 
     function render(fit) {
         if (!st.sB || !st.btc.length) return;
@@ -5038,7 +5046,9 @@ document.getElementById('weex-send-btn').onclick = async () => {
             st.sD.setData(dData);
             dLast = dData[dData.length - 1].value;
             const since = new Date(st.dom[0][0] * 1000).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
-            setNote(`BTC.D direkam sejak ${since} WIB (1 titik / 5 menit selama dashboard terbuka). Kedua garis dimulai dari 0% di titik itu.`);
+           setNote(st.domSrc === 'binance'
+           ? 'BTC.D memakai index BTCDOMUSDT (Binance Futures), proxy dominance BTC. Kedua garis dimulai dari 0% di awal rentang.'
+          : `BTC.D direkam sejak ${since} WIB (1 titik / 5 menit selama dashboard terbuka). Kedua garis dimulai dari 0% di titik itu.`);
         } else {
             st.sD.setData([]);
             setNote('BTC.D baru mulai direkam. Garis hijau muncul setelah ada minimal 2 titik (1 titik / 5 menit selama dashboard terbuka).');
