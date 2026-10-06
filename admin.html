@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/lightweight-charts/4.1.3/lightweight-charts.standalone.production.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         /* ═══════════════════════════════════════════════════════════
@@ -1122,11 +1123,15 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 .tu-empty{text-align:center;color:var(--text3);font-family:var(--label);padding:2rem 0!important}
 /* ═══ CHART BTCUSDT.P + BTC.D ═══ */
 .btc-chart-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.btc-ctl{display:flex;flex-wrap:wrap;gap:16px;align-items:center}
 .btc-legend{display:flex;gap:16px;font-family:var(--mono);font-size:.75rem;color:var(--text2)}
 .btc-legend span{display:inline-flex;align-items:center;gap:7px}
 .btc-legend i{width:18px;height:3px;border-radius:2px;display:inline-block}
-#btc-chart{height:600px;border:2px solid var(--border);border-radius:var(--r-md);overflow:hidden;background:#0A0A0A}
-@media (max-width:640px){#btc-chart{height:480px}}
+.btc-legend b{font-weight:700;min-width:58px;text-align:right}
+#btc-b{color:#EF4444}#btc-d{color:#35E0A1}
+.btc-tf{display:flex;gap:6px}
+#btc-chart{position:relative;height:460px;border:2px solid var(--border);border-radius:var(--r-md);overflow:hidden;background:#0A0A0A}
+@media (max-width:640px){#btc-chart{height:340px}}
         
         /* ═══════════════════════════════════════════════════════════
            RESPONSIVE
@@ -1261,7 +1266,7 @@ body.news-resizing { cursor: col-resize; user-select: none; }
     <!-- HALAMAN 1: MARKET DASHBOARD (DEFAULT) -->
 <div id="halaman-market">
 
-    <!-- ─── CHART BTCUSDT.P + BTC.D ─── -->
+       <!-- ─── CHART BTCUSDT.P + BTC.D ─── -->
     <div class="market-section" style="max-width: 1360px; margin: 0 auto; padding: 2rem 1.5rem 0;">
         <div class="section-card" style="padding: 1.5rem 2rem;">
             <div class="btc-chart-head">
@@ -1269,12 +1274,16 @@ body.news-resizing { cursor: col-resize; user-select: none; }
                     <div class="hero-eyebrow" style="margin-bottom:.4rem;">Live Chart</div>
                     <div class="tu-title">BTCUSDT.P vs BTC.D</div>
                 </div>
-                <div class="btc-legend">
-                    <span><i style="background:#EF4444"></i>BTCUSDT.P</span>
-                    <span><i style="background:#35E0A1"></i>BTC.D</span>
+                <div class="btc-ctl">
+                    <div class="btc-legend">
+                        <span><i style="background:#EF4444"></i>BTCUSDT.P <b id="btc-b">--</b></span>
+                        <span><i style="background:#35E0A1"></i>BTC.D <b id="btc-d">--</b></span>
+                    </div>
+                    <div class="btc-tf" id="btc-tf"></div>
                 </div>
             </div>
             <div id="btc-chart"></div>
+            <p class="ls-note" id="btc-note"></p>
         </div>
     </div>
 
@@ -4939,55 +4948,136 @@ document.getElementById('weex-send-btn').onclick = async () => {
     window.xlStop  = function () { baseStop && baseStop(); stopTimers(); };
 })();
 
-// ═══ CHART BTCUSDT.P + BTC.D (TradingView embed, skala persen) ═══
+// ═══ CHART BTCUSDT.P vs BTC.D (lightweight-charts, skala persen) ═══
 (function () {
-    let built = false;
+    const OFF = 7 * 3600;                                   // tampil dalam WIB
+    const TFS = [['5m', '5m'], ['15m', '15m'], ['1h', '1H'], ['4h', '4H'], ['1d', '1D']];
+    const st = { tf: '1h', chart: null, sB: null, sD: null, btc: [], dom: [], ws: null, timer: null, run: false, token: 0, bB: 0 };
+    const $ = s => document.querySelector(s);
+    const pct = (v, b) => (v / b - 1) * 100;
+    const fmtP = v => (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
+    const setNote = t => { const el = $('#btc-note'); if (el) el.textContent = t; };
+    const setLegend = (b, d) => {
+        $('#btc-b').textContent = b == null ? '--' : fmtP(b);
+        $('#btc-d').textContent = d == null ? '--' : fmtP(d);
+    };
 
     function build() {
-        if (built) return;
-        const box = document.getElementById('btc-chart');
-       if (!box) return;
-       if (!box.offsetWidth) { setTimeout(build, 300); return; }   // coba lagi sampai container kelihatan
-        built = true;
-
-        box.innerHTML = '<div class="tradingview-widget-container" style="height:100%;width:100%">' +
-                        '<div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div></div>';
-
-        const s = document.createElement('script');
-        s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
-        s.async = true;
-        s.innerHTML = JSON.stringify({
-            autosize: true,
-            symbol: 'BINANCE:BTCUSDT.P',
-            interval: 'D',
-            range: '12M',
-            timezone: 'Asia/Jakarta',
-            theme: 'dark',
-            style: '2',
-            locale: 'id',
-            backgroundColor: '#0A0A0A',
-            gridColor: 'rgba(255,255,255,0.04)',
-            hide_side_toolbar: true,
-            hide_volume: false,
-            allow_symbol_change: false,
-            save_image: false,
-            compareSymbols: [
-                { symbol: 'CRYPTOCAP:BTC.D', position: 'SameScale' }
-            ],
-            studies: ['STD;Stochastic_RSI'],
-            overrides: {
-                'mainSeriesProperties.lineStyle.color': '#EF4444',
-                'mainSeriesProperties.lineStyle.linewidth': 2
-            },
-            support_host: 'https://www.tradingview.com'
+        if (st.chart) return;
+        const box = $('#btc-chart');
+        if (!box || typeof LightweightCharts === 'undefined') return;
+        st.chart = LightweightCharts.createChart(box, {
+            autoSize: true,
+            layout: { background: { type: 'solid', color: '#0A0A0A' }, textColor: '#A1A1AA', fontFamily: 'JetBrains Mono, monospace', fontSize: 11 },
+            grid: { vertLines: { color: 'rgba(255,255,255,0.04)' }, horzLines: { color: 'rgba(255,255,255,0.04)' } },
+            rightPriceScale: { borderColor: '#2A2A2A' },
+            timeScale: { borderColor: '#2A2A2A', timeVisible: true, secondsVisible: false },
+            crosshair: { mode: 1, vertLine: { color: '#444', labelBackgroundColor: '#1B1B1B' }, horzLine: { color: '#444', labelBackgroundColor: '#1B1B1B' } },
+            localization: { priceFormatter: fmtP },
         });
-        box.firstChild.appendChild(s);
+        const opt = color => ({ color, lineWidth: 2, priceFormat: { type: 'custom', formatter: fmtP, minMove: 0.01 } });
+        st.sD = st.chart.addLineSeries(opt('#35E0A1'));
+        st.sB = st.chart.addLineSeries(opt('#EF4444'));
+        st.sB.createPriceLine({ price: 0, color: '#444', lineWidth: 1, lineStyle: 2, axisLabelVisible: false });
+
+        st.chart.subscribeCrosshairMove(p => {
+            if (!p.time || !p.seriesData) return;
+            setLegend(p.seriesData.get(st.sB)?.value, p.seriesData.get(st.sD)?.value);
+        });
+
+        $('#btc-tf').innerHTML = TFS.map(([k, l]) => `<button class="nlf-btn ${k === st.tf ? 'active' : ''}" data-tf="${k}" type="button">${l}</button>`).join('');
+        $('#btc-tf').addEventListener('click', e => {
+            const b = e.target.closest('[data-tf]');
+            if (!b || b.dataset.tf === st.tf) return;
+            st.tf = b.dataset.tf;
+            $('#btc-tf').querySelectorAll('.nlf-btn').forEach(x => x.classList.toggle('active', x === b));
+            loadBtc().then(() => render(true));
+            connectWs();
+        });
     }
 
-    const prevStart = window.xlStart;
-    window.xlStart = function () { prevStart && prevStart(); setTimeout(build, 100); };
+    async function loadBtc() {
+        const my = ++st.token;
+        try {
+            const r = await fetch(`https://fapi.binance.com/fapi/v1/klines?symbol=BTCUSDT&interval=${st.tf}&limit=500`);
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const k = await r.json();
+            if (my !== st.token) return;
+            st.btc = k.map(x => [Math.floor(x[0] / 1000), +x[4]]);
+        } catch (e) { setNote('Gagal memuat harga BTCUSDT.P dari Binance: ' + e.message); }
+    }
+
+    async function loadDom() {
+        try {
+            const r = await fetch('/api/admin-airdrop?type=btcd');
+            if (r.ok) st.dom = await r.json();
+        } catch {}
+    }
+
+    function render(fit) {
+        if (!st.sB || !st.btc.length) return;
+        const hasDom = st.dom.length >= 2;
+        let t0 = st.btc[0][0];
+        if (hasDom) t0 = Math.max(t0, st.dom[0][0]);          // kedua garis mulai dari 0% di titik BTC.D pertama
+        let i = 0;
+        for (let j = st.btc.length - 1; j >= 0; j--) if (st.btc[j][0] <= t0) { i = j; break; }
+        const b = st.btc.slice(i);
+        st.bB = b[0][1];
+        const bData = b.map(p => ({ time: p[0] + OFF, value: pct(p[1], st.bB) }));
+        st.sB.setData(bData);
+
+        let dLast = null;
+        if (hasDom) {
+            const d = st.dom.filter(p => p[0] >= t0), seen = new Set(), dData = [];
+            const bD = d[0][1];
+            d.forEach(p => { if (!seen.has(p[0])) { seen.add(p[0]); dData.push({ time: p[0] + OFF, value: pct(p[1], bD) }); } });
+            st.sD.setData(dData);
+            dLast = dData[dData.length - 1].value;
+            const since = new Date(st.dom[0][0] * 1000).toLocaleString('id-ID', { timeZone: 'Asia/Jakarta', day: '2-digit', month: 'short', hour: '2-digit', minute: '2-digit', hour12: false });
+            setNote(`BTC.D direkam sejak ${since} WIB (1 titik / 5 menit selama dashboard terbuka). Kedua garis dimulai dari 0% di titik itu.`);
+        } else {
+            st.sD.setData([]);
+            setNote('BTC.D baru mulai direkam. Garis hijau muncul setelah ada minimal 2 titik (1 titik / 5 menit selama dashboard terbuka).');
+        }
+        setLegend(bData[bData.length - 1].value, dLast);
+        if (fit) st.chart.timeScale().fitContent();
+    }
+
+    function connectWs() {
+        if (st.ws) { st.ws.onclose = null; st.ws.close(); st.ws = null; }
+        if (!st.run) return;
+        const tf = st.tf, w = new WebSocket(`wss://fstream.binance.com/ws/btcusdt@kline_${tf}`);
+        st.ws = w;
+        w.onmessage = e => {
+            const k = JSON.parse(e.data).k;
+            if (!k || tf !== st.tf || !st.bB) return;
+            const t = Math.floor(k.t / 1000), c = +k.c, last = st.btc[st.btc.length - 1];
+            if (last && last[0] === t) last[1] = c; else st.btc.push([t, c]);
+            const v = pct(c, st.bB);
+            st.sB.update({ time: t + OFF, value: v });
+            $('#btc-b').textContent = fmtP(v);
+        };
+        w.onclose = () => { if (st.run && st.ws === w) setTimeout(connectWs, 3000); };
+    }
+
+    function start() {
+        if (st.run) return;
+        st.run = true;
+        build();
+        Promise.all([loadBtc(), loadDom()]).then(() => render(true));
+        connectWs();
+        st.timer = setInterval(async () => { await loadDom(); render(false); }, 60000);
+    }
+    function stop() {
+        st.run = false;
+        clearInterval(st.timer); st.timer = null;
+        if (st.ws) { st.ws.onclose = null; st.ws.close(); st.ws = null; }
+    }
+
+    const prevStart = window.xlStart, prevStop = window.xlStop;
+    window.xlStart = function () { prevStart && prevStart(); start(); };
+    window.xlStop  = function () { prevStop && prevStop(); stop(); };
 })();
-        
 function showMarketDashboard() {
     document.getElementById('halaman-market').style.display = 'block';
     document.getElementById('halaman-airdrop').style.display = 'none';
