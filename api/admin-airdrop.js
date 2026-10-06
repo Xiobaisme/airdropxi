@@ -255,15 +255,16 @@ async function sendDiscord() {
 
     if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_GUILD_ID || !DISCORD_ROLE_IDS) return back('config');
 
-    // 1) arahkan ke Discord
-        const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-let allowed = true;
-try {
-  ({ success: allowed } = await ratelimit.limit(`discord:${ip}`));
-} catch (e) {
-  console.error('[ratelimit] redis error, skip limiter:', e.message);
-}
-if (!allowed) return back('ratelimit');
+      // 1) arahkan ke Discord
+    if (step === 'discord-login') {
+      const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
+      let allowed = true;
+      try {
+        ({ success: allowed } = await ratelimit.limit(`discord:${ip}`));
+      } catch (e) {
+        console.error('[ratelimit] redis error, skip limiter:', e.message);
+      }
+      if (!allowed) return back('ratelimit');
 
       const state = crypto.randomBytes(16).toString('hex');
       addCookie(res, `discord_state=${state}; ${STATE_COOKIE}; Max-Age=600`);
