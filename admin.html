@@ -1098,6 +1098,28 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 .ls-row.err .ls-nm::after{content:" !";color:var(--danger)}
 .ls-note{color:var(--text3);font-family:var(--label);font-size:.72rem;margin-top:14px}
 @media(max-width:700px){.ls-head,.ls-row{grid-template-columns:84px 1fr}.ls-v,.ls-sp,.ls-head .hv{display:none}}
+
+/* ═══ TOKEN UNLOCKS ═══ */
+.tu-top{display:flex;flex-wrap:wrap;gap:12px;align-items:flex-end;justify-content:space-between;margin-bottom:10px}
+.tu-title{font-family:var(--display);font-weight:800;font-size:1.5rem;letter-spacing:-.01em}
+.tu-status{font-family:var(--mono);font-size:.72rem;color:var(--text3);margin-bottom:12px}
+.tu-wrap{overflow-x:auto}
+.tu-table{width:100%;border-collapse:collapse;font-size:.82rem;min-width:680px}
+.tu-table th{text-align:left;padding:.55rem .8rem;color:var(--text3);font-family:var(--label);font-size:.64rem;font-weight:800;text-transform:uppercase;letter-spacing:.07em;border-bottom:2px solid var(--border)}
+.tu-table td{padding:.65rem .8rem;border-bottom:1px solid var(--border);white-space:nowrap}
+.tu-table .r{text-align:right}
+.tu-tok{font-weight:700}
+.tu-cat{color:var(--text2)}
+.tu-amt,.tu-pct,.tu-cd{font-family:var(--mono)}
+.tu-amt small{color:var(--text3)}
+.tu-pct{font-weight:700}
+.tu-cd{color:var(--text2)}
+.tu-row.big{background:var(--danger-dim)}
+.tu-row.big .tu-pct{color:var(--danger)}
+.tu-badge{font-family:var(--label);font-size:.6rem;font-weight:800;padding:.22rem .65rem;border-radius:999px;text-transform:uppercase;letter-spacing:.04em}
+.tu-badge.cliff{color:var(--secondary);background:var(--secondary-dim)}
+.tu-badge.linear{color:var(--primary);background:var(--primary-dim)}
+.tu-empty{text-align:center;color:var(--text3);font-family:var(--label);padding:2rem 0!important}
         
         /* ═══════════════════════════════════════════════════════════
            RESPONSIVE
@@ -1250,6 +1272,43 @@ body.news-resizing { cursor: col-resize; user-select: none; }
             <div class="ls-head"><span></span><div class="ml"><span>Longs (Taker Buy)</span><span>Shorts (Taker Sell)</span></div><span class="hv">Longs</span><span class="hv">Shorts</span><span class="hv">Tren</span></div>
             <div id="ls-rows"></div>
             <p class="ls-note">Baris All = rata-rata berbobot volume USD (Binance, Aster, OKX). Tanda * = sampel trade terlalu pendek (Bybit), tidak ikut All. Tanda ! = bursa gagal dimuat; arahkan kursor ke bar untuk alasannya.</p>
+        </div>
+    </div>
+
+
+    <div class="market-section" style="max-width: 1360px; margin: 1.4rem auto 0; padding: 0 1.5rem;">
+        <div class="section-card" style="padding: 1.5rem 2rem;">
+            <div class="tu-top">
+                <div>
+                    <div class="hero-eyebrow" style="margin-bottom:.4rem;">Token Unlocks</div>
+                    <div class="tu-title">Jadwal Unlock Token</div>
+                </div>
+                <div class="ls-ctl">
+                    <select id="tu-days" aria-label="Rentang hari">
+                        <option value="7">7 hari</option>
+                        <option value="14">14 hari</option>
+                        <option value="30" selected>30 hari</option>
+                        <option value="90">90 hari</option>
+                    </select>
+                    <select id="tu-kind" aria-label="Tipe unlock">
+                        <option value="all">Semua tipe</option>
+                        <option value="cliff">Cliff</option>
+                        <option value="linear">Linear</option>
+                    </select>
+                    <button class="nlf-btn" id="tu-refresh" type="button">↻ Refresh</button>
+                </div>
+            </div>
+            <div class="tu-status" id="tu-status">Menunggu…</div>
+            <div class="tu-wrap">
+                <table class="tu-table">
+                    <thead><tr>
+                        <th>Tanggal</th><th>Token</th><th>Kategori</th>
+                        <th class="r">Jumlah</th><th class="r">% Alokasi</th><th>Tipe</th><th class="r">Countdown</th>
+                    </tr></thead>
+                    <tbody id="tu-body"></tbody>
+                </table>
+            </div>
+            <p class="ls-note">Sumber: dataset emissions DefiLlama (tidak resmi). % Alokasi = jumlah unlock dibanding total alokasi terjadwal di dataset, bukan % circulating supply. Tanggal harian (00:00 UTC). Baris merah = unlock ≥1% alokasi. Cek ulang ke sumber resmi proyek sebelum ambil keputusan.</p>
         </div>
     </div>
 </div>
@@ -4774,6 +4833,87 @@ document.getElementById('weex-send-btn').onclick = async () => {
     window.xlStart = start; window.xlStop = stop;
 })();
 
+// ═══ TOKEN UNLOCKS (DefiLlama via /api/admin-airdrop?type=token-unlocks) ═══
+(function () {
+    const $ = s => document.querySelector(s);
+    const st = { days: 30, kind: 'all', items: [], t: 0, busy: false, tries: 0 };
+    const pretty = s => s.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
+    const dateTxt = ts => new Date(ts * 1000).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' });
+    const cdTxt = ts => {
+        const ms = ts * 1000 - Date.now();
+        if (ms <= 0) return 'sudah rilis';
+        const mins = Math.floor(ms / 60000);
+        if (mins < 48 * 60) return `${Math.floor(mins / 60)} jam ${mins % 60} mnt`;
+        return Math.ceil(ms / 86400000) + ' hari';
+    };
+    const setStatus = t => { const el = $('#tu-status'); if (el) el.textContent = t; };
+
+    function render() {
+        const body = $('#tu-body');
+        if (!body) return;
+        const rows = st.items.filter(i => st.kind === 'all' || i.kind === st.kind);
+        if (!rows.length) {
+            body.innerHTML = '<tr><td colspan="7" class="tu-empty">Tidak ada unlock di rentang ini.</td></tr>';
+            return;
+        }
+        body.innerHTML = rows.map(i => `<tr class="tu-row ${i.pct >= 1 ? 'big' : ''}">
+            <td>${dateTxt(i.ts)}</td>
+            <td class="tu-tok">${esc(pretty(i.slug))}</td>
+            <td class="tu-cat">${esc(i.cat)}</td>
+            <td class="r tu-amt">${ocAmt(i.amount)}${i.kind === 'linear' ? ` <small>/ ${i.span} hari</small>` : ''}</td>
+            <td class="r tu-pct">${i.pct.toFixed(2)}%</td>
+            <td><span class="tu-badge ${i.kind}">${i.kind === 'linear' ? 'Linear' : 'Cliff'}</span></td>
+            <td class="r tu-cd" data-ts="${i.ts}">${cdTxt(i.ts)}</td></tr>`).join('');
+    }
+
+    async function load(force, isRetry) {
+        if (st.busy) return;
+        if (!force && st.items.length && Date.now() - st.t < 10 * 60e3) return;
+        if (!isRetry) st.tries = 0;
+        st.busy = true;
+        setStatus('Memuat…');
+        let again = false;
+        try {
+            const r = await fetch(`/api/admin-airdrop?type=token-unlocks&days=${st.days}`);
+            if (r.status === 401) throw new Error('sesi habis, login ulang');
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const d = await r.json();
+            st.items = d.items || [];
+            st.t = Date.now();
+            render();
+            const miss = d.missing || [];
+            const hhmm = new Date().toLocaleTimeString('id-ID', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }).replace('.', ':');
+            setStatus(`${st.items.length} event · ${d.loaded}/${d.total} protokol · ${hhmm} WIB`
+                + (miss.length ? ` · ${miss.length} belum termuat (${miss.slice(0, 3).join(', ')}${miss.length > 3 ? '…' : ''})` : ''));
+            again = miss.length > 0 && st.tries < 3;   // sisanya dimuat di putaran berikutnya (sudah ke-cache)
+        } catch (e) {
+            setStatus('Gagal: ' + e.message);
+        } finally {
+            st.busy = false;
+        }
+        if (again) { st.tries++; setTimeout(() => load(true, true), 2500); }
+    }
+
+    $('#tu-days').onchange = e => { st.days = +e.target.value; load(true); };
+    $('#tu-kind').onchange = e => { st.kind = e.target.value; render(); };
+    $('#tu-refresh').onclick = () => load(true);
+
+    let tRefresh = null, tTick = null;
+    const tick = () => document.querySelectorAll('#tu-body .tu-cd[data-ts]')
+        .forEach(el => { el.textContent = cdTxt(+el.dataset.ts); });
+    const startTimers = () => {
+        if (tRefresh) return;
+        tRefresh = setInterval(() => { if (!document.hidden) load(true); }, 10 * 60e3);   // ambil ulang tiap 10 menit
+        tTick = setInterval(() => { if (!document.hidden) tick(); }, 30e3);              // countdown jalan tiap 30 detik
+    };
+    const stopTimers = () => { clearInterval(tRefresh); clearInterval(tTick); tRefresh = tTick = null; };
+    document.addEventListener('visibilitychange', () => { if (!document.hidden && tRefresh) { tick(); load(); } });
+
+    const baseStart = window.xlStart, baseStop = window.xlStop;
+    window.xlStart = function () { baseStart && baseStart(); load(); startTimers(); };
+    window.xlStop  = function () { baseStop && baseStop(); stopTimers(); };
+})();
+        
 function showMarketDashboard() {
     document.getElementById('halaman-market').style.display = 'block';
     document.getElementById('halaman-airdrop').style.display = 'none';
