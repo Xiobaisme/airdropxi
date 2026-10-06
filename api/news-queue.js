@@ -141,12 +141,13 @@ async function pullTelegram() {
 const UPBIT_URL = 'https://api-manager.upbit.com/api/v1/announcements?os=web&page=1&per_page=20&category=all';
 const UPBIT_EVERY_SEC = 30;
 const UPBIT_RULES = [
-  ['NEW LISTING', ['신규 거래지원']],
-  ['DELISTING',   ['거래지원 종료']],
-  ['SUSPENSION',  ['입출금 일시 중단', '거래 일시 중단', '거래지원 일시 중단']],
-  ['WARNING',     ['유의 종목 지정', '투자유의']],
+  ['DELISTING',   ['거래지원 종료', 'Termination of Market Support', 'Delisting']],
+  ['NEW LISTING', ['신규 거래지원', 'Market Support for']],
+  ['SUSPENSION',  ['입출금 일시 중단', '거래 일시 중단', '거래지원 일시 중단', 'Temporary Suspension']],
+  ['WARNING',     ['유의 종목 지정', '투자유의', 'Investment Warning']],
 ];
 const upbitLabel = (t) => {
+  if (/completed|완료|resum|재개/i.test(t)) return null;   // buang pengumuman "selesai/dibuka lagi"
   for (const [label, keys] of UPBIT_RULES) if (keys.some((k) => t.includes(k))) return label;
   return null;
 };
@@ -164,7 +165,7 @@ async function pullUpbit() {
     list = (await r.json())?.data?.notices || [];
   } finally { clearTimeout(timer); }
 
-  const seen = Number(await redis.get('news:upbit:last')) || 0;
+  const seen = Number(await redis.get('news:upbit:last2')) || 0;
   const all = list.map((n) => ({
     id: Number(n.id), title: String(n.title || ''),
     ms: Date.parse(n.listed_at || n.first_listed_at),
@@ -188,7 +189,7 @@ async function pullUpbit() {
       posted_at: new Date(n.ms).toISOString(),
     }),
   }));
-  if (maxId > seen) p.set('news:upbit:last', maxId);
+ if (maxId > seen) p.set('news:upbit:last2', maxId);
   await p.exec();
 }
 
