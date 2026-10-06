@@ -11,6 +11,7 @@ const ratelimit = new Ratelimit({
 
 const crypto = require('crypto');
 const onchain = require('../lib/onchain');
+const AIRDROPS = require('../data/airdrops.json');
 // SEMENTARA: putus semua akses ke Supabase sampai DB sehat
 const MAINTENANCE = true;
 
@@ -604,6 +605,22 @@ async function sendDiscord() {
       req.on('close', end);
     });
   }
+
+    // ─── AIRDROPS: baca dari file JSON (tanpa Supabase) ───
+  if (req.method === 'GET') {
+    res.setHeader('Cache-Control', 'no-store');
+
+    if (!id) {
+      const list = [...AIRDROPS].sort((a, b) =>
+        String(b.created_at).localeCompare(String(a.created_at)));
+      return res.status(200).json(list);
+    }
+
+    const row = AIRDROPS.find(a => String(a.id) === String(id));
+    if (!row) return res.status(404).json({ error: 'Project tidak ditemukan' });
+    return res.status(200).json({ ...row, view_count: row.view_count || 0 });
+  }
+
     // SEMENTARA: putus semua akses ke Supabase sampai DB sehat
   if (MAINTENANCE) {
     return res.status(503).json({ error: 'Maintenance: database sedang dipulihkan' });
