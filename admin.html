@@ -1279,6 +1279,14 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 }
 .nt-col .nt-card:hover { border-top-color: #3a3a3a; }
 .nt-col .nt-card > * { flex-shrink: 0; }   /* teks/tombol nggak boleh mengecil dan saling tindih */
+/* ═══ NEW STRIP (di dalam News Terminal) ═══ */
+.new-strip { flex-shrink: 0; padding: 12px 24px 6px; background: #0A0A0A; border-bottom: 1px solid #1a1a1a; font-family: var(--sans); }
+.new-strip .nlf-head { margin-bottom: 8px; }
+.new-strip .nlf-list { padding-bottom: 8px; }
+.nlf-card.channel { border-left-color: #38bdf8; }
+.nlf-card.channel .nlf-ex { color: #38bdf8; }
+.nlf-badge.channel { color: #38bdf8; background: rgba(56,189,248,.12); }
+@media (max-width: 640px) { .new-strip { padding-left: 14px; padding-right: 14px; } }
         
     </style>
 </head>
@@ -1452,27 +1460,6 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 <!-- ═══════════════════════════════════════════════════════════ -->
 <div id="halaman-airdrop" style="display: none;">
 
-    <!-- ─── NEW LISTINGS FEED ─── -->
-<div id="nlf-section">
-    <div class="nlf-head">
-        <span class="nlf-dot" id="nlf-dot"></span>
-        <span class="nlf-title">New Listings</span>
-        <span class="nlf-status" id="nlf-status">Menghubungkan...</span>
-        <a class="nlf-btn" href="https://newlistings.pro" target="_blank" rel="noopener" style="text-decoration:none;">Riwayat lengkap ↗</a>
-        <button class="nlf-btn" id="nlf-toggle" onclick="toggleNLFAll()">Semua event</button>
-    </div>
-    <div class="nlf-list" id="nlf-list"><div class="nlf-empty">Menunggu listing baru...</div></div>
-</div>
-
-        <!-- ─── CEX FOUND ─── -->
-<div id="cex-section" style="position:relative;z-index:1;max-width:1360px;margin:1.2rem auto 0;padding:0 1.5rem;">
-    <div class="nlf-head">
-        <span class="nlf-dot live"></span>
-        <span class="nlf-title">CEX Found</span>
-        <span class="nlf-status">Live ·</span>
-    </div>
-    <div class="nlf-list" id="cex-list"><div class="nlf-empty">Menunggu alert...</div></div>
-</div>
 
         <!-- HERO -->
         <div class="hero-grid">
@@ -1823,8 +1810,21 @@ body.news-resizing { cursor: col-resize; user-select: none; }
         <div class="news-title">Market &amp; Onchain Feed</div>
         <div class="news-sub"><span class="news-clock" id="news-clock">--:--:--</span> WIB · <span id="news-count">0</span> berita</div>
     </div>
-    <div class="news-filters" id="news-filters"></div>
-    <div class="news-feed" id="news-feed"></div>
+   <div class="news-filters" id="news-filters"></div>
+
+<!-- NEW = New Listings + CEX Found + channel Telegram -->
+<div class="new-strip" id="new-strip">
+    <div class="nlf-head">
+        <span class="nlf-dot" id="nlf-dot"></span>
+        <span class="nlf-title">NEW</span>
+        <span class="nlf-status" id="nlf-status">Menghubungkan...</span>
+        <a class="nlf-btn" href="https://newlistings.pro" target="_blank" rel="noopener" style="text-decoration:none;">Riwayat lengkap ↗</a>
+        <button class="nlf-btn" id="nlf-toggle" onclick="toggleNLFAll()">Semua event</button>
+    </div>
+    <div class="nlf-list" id="new-list"><div class="nlf-empty">Menunggu listing baru...</div></div>
+</div>
+
+<div class="news-feed" id="news-feed"></div>
     <div class="news-foot">
       <span>Live · cek antrian tiap <span id="news-countdown">00:30</span></span>
         <button class="news-refresh-btn" onclick="loadNews(true)">↻ REFRESH</button>
@@ -2591,6 +2591,7 @@ function updateMarketSessionBadge(hourUTC) {
     cointelegraph:  { label: 'Cointelegraph',  color: '#fbbf24' },
     brics:          { label: 'BRICS News',     color: '#e879f9' },
     cryptorank:     { label: 'CryptoRank',     color: '#94a3b8' },
+    upbit:          { label: 'Upbit',          color: '#38bdf8' }, 
 };
 const NEWS_POLL_SEC = 30; // cek antrian tiap 10 detik (poller Telegram jalan tiap menit di Supabase)
 let newsItems = [], newsFilter = 'all', _newsCountdown = NEWS_POLL_SEC, _newsCountdownInt = null, _newsClockInt = null, _newsSig = '';
@@ -2980,58 +2981,74 @@ function toggleNLFAll() {
     renderNLF();
 }
 
+let _cexItems = [];
+
 function renderNLF() {
-    const list = document.getElementById('nlf-list');
+    const list = document.getElementById('new-list');
     if (!list) return;
-    const items = _nlfItems.filter(m => _nlfShowAll || /upbit/i.test(JSON.stringify(m)) || (m.parser?.classification?.event && m.parser.classification.event !== 'none'));
-    if (!items.length) { list.innerHTML = '<div class="nlf-empty">Menunggu listing baru...</div>'; return; }
-    list.innerHTML = items.map(m => {
-        const c = m.parser?.classification || {};
-        const ev = c.event || 'none';
-        const text = m.parser?.display || m.content?.title || m.content?.text || '(tanpa teks)';
-        const ex = m.parser?.exchange || m.username || '';
-        const href = /^https?:\/\//.test(m.url || '') ? m.url : '#';
-        const t = newsTimeAgo(new Date(m.sent_time_us / 1000).toISOString());
-        return `<a class="nlf-card ${esc(ev)}" href="${esc(href)}" target="_blank" rel="noopener">
-            <div class="nlf-top"><span class="nlf-ex">${esc(ex)}</span><span class="nlf-time">${t}</span></div>
-            <div class="nlf-text">${esc(text)}</div>
-            ${ev !== 'none' ? `<span class="nlf-badge ${esc(ev)}">${esc(ev)}${c.type ? ' · ' + esc(c.type) : ''}</span>` : ''}
-        </a>`;
-    }).join('');
+
+    // kartu channel Telegram, selalu paling kiri
+    const channelCard = `<a class="nlf-card channel" href="https://t.me/NewListingsFeed" target="_blank" rel="noopener">
+        <div class="nlf-top"><span class="nlf-ex">Telegram</span><span class="nlf-time">channel</span></div>
+        <div class="nlf-text">New Listings Feed — alert listing &amp; delisting semua exchange</div>
+        <span class="nlf-badge channel">@NewListingsFeed ↗</span>
+    </a>`;
+
+    // 1) new listings
+    const listings = _nlfItems
+        .filter(m => _nlfShowAll || /upbit/i.test(JSON.stringify(m)) || (m.parser?.classification?.event && m.parser.classification.event !== 'none'))
+        .map(m => {
+            const c = m.parser?.classification || {};
+            const ev = c.event || 'none';
+            const text = m.parser?.display || m.content?.title || m.content?.text || '(tanpa teks)';
+            const ex = m.parser?.exchange || m.username || '';
+            const href = /^https?:\/\//.test(m.url || '') ? m.url : '#';
+            const ts = m.sent_time_us / 1000;
+            return { ts, html: `<a class="nlf-card ${esc(ev)}" href="${esc(href)}" target="_blank" rel="noopener">
+                <div class="nlf-top"><span class="nlf-ex">${esc(ex)}</span><span class="nlf-time">${newsTimeAgo(new Date(ts).toISOString())}</span></div>
+                <div class="nlf-text">${esc(text)}</div>
+                ${ev !== 'none' ? `<span class="nlf-badge ${esc(ev)}">${esc(ev)}${c.type ? ' · ' + esc(c.type) : ''}</span>` : ''}
+            </a>` };
+        });
+
+    // 2) cex found
+    const founds = _cexItems.map(a => {
+        const unk = a.ticker === 'UNKNOWN';
+        const text = unk ? esc(a.name || 'Ticker tidak terbaca')
+                         : `$${esc(a.ticker)}${a.name ? ' · ' + esc(a.name) : ''}`;
+        const ts = Number(a.ts) || Date.now();
+        const nets = (a.networks || []).join(', ');
+        return { ts, html: `<div class="nlf-card listing">
+            <div class="nlf-top"><span class="nlf-ex">${esc(a.exchange)}</span><span class="nlf-time">${newsTimeAgo(new Date(ts).toISOString())}</span></div>
+            <div class="nlf-text">${text}</div>
+            <span class="nlf-badge listing">found${nets ? ' · ' + esc(nets) : ''}</span>
+        </div>` };
+    });
+
+    // gabung, urut terbaru di kiri
+    const all = [...listings, ...founds].sort((a, b) => b.ts - a.ts);
+    list.innerHTML = channelCard + (all.length
+        ? all.map(x => x.html).join('')
+        : '<div class="nlf-empty">Menunggu listing baru...</div>');
 }
 
        // ═══ CEX FOUND (dari userbot Telegram) ═══
 let _cexTimer = null, _cexSig = '';
 async function loadCexFound() {
-    const list = document.getElementById('cex-list');
-    if (!list || document.hidden) return;
+    if (document.hidden) return;
     try {
         const res = await fetch('/api/admin-airdrop?type=cex-found');
-        if (res.status === 401) {
-            _cexSig = '';
-            list.innerHTML = '<div class="nlf-empty">Sesi habis — login ulang lewat terminal.</div>';
-            return;
-        }
+        if (res.status === 401) { _cexItems = []; _cexSig = ''; renderNLF(); return; }
         if (!res.ok) return;
         const rows = await res.json();
-        const sig = Math.floor(Date.now() / 60000) + '|' + rows.map(a => `${a.ticker}${a.exchange}${a.ts}`).join();
-        if (sig === _cexSig) return;   // ga ada perubahan, jangan re-render
+        const sig = rows.map(a => `${a.ticker}${a.exchange}${a.ts}`).join();
+        if (sig === _cexSig) return;   // tidak ada perubahan
         _cexSig = sig;
-        if (!rows.length) { list.innerHTML = '<div class="nlf-empty">Menunggu alert...</div>'; return; }
-        list.innerHTML = rows.map(a => {
-            const unk = a.ticker === 'UNKNOWN';
-            const text = unk ? esc(a.name || 'Ticker tidak terbaca')
-                             : `$${esc(a.ticker)}${a.name ? ' · ' + esc(a.name) : ''}`;
-            const when = newsTimeAgo(new Date(Number(a.ts) || Date.now()).toISOString());
-            return `
-            <div class="nlf-card listing">
-                <div class="nlf-top"><span class="nlf-ex">${esc(a.exchange)}</span><span class="nlf-time">${when}</span></div>
-                <div class="nlf-text">${text}</div>
-                <span class="nlf-badge listing">${esc((a.networks || []).join(', ') || 'found')}</span>
-            </div>`;
-        }).join('');
+        _cexItems = rows;
+        renderNLF();
     } catch {}
 }
+
 function startCexFound() {
     if (_cexTimer) return;
     loadCexFound();
