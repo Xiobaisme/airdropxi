@@ -1405,7 +1405,7 @@ body.news-resizing { cursor: col-resize; user-select: none; }
             </div>
             <div class="ls-head"><span></span><div class="ml"><span>Longs (Taker Buy)</span><span>Shorts (Taker Sell)</span></div><span class="hv">Longs</span><span class="hv">Shorts</span><span class="hv">Tren</span></div>
             <div id="ls-rows"></div>
-            <p class="ls-note">Baris All = rata-rata berbobot volume USD (Binance, Aster, OKX). Tanda * = sampel trade terlalu pendek (Bybit), tidak ikut All. Tanda ! = bursa gagal dimuat; arahkan kursor ke bar untuk alasannya.</p>
+           <p class="ls-note">Baris All = rata-rata berbobot volume USD (Binance, Aster, OKX, Bitget, Gate). Tanda * = sampel trade terlalu pendek (Bybit), tidak ikut All. Tanda ! = bursa gagal dimuat; arahkan kursor ke bar untuk alasannya.</p>
         </div>
     </div>
 
@@ -4915,6 +4915,19 @@ document.getElementById('weex-send-btn').onclick = async () => {
         socks.push(connect('wss://futures.kraken.com/ws/v1',
             ws => ws.send(JSON.stringify({ event: 'subscribe', feed: 'trade', product_ids: [kr] })),
             m => { const d = JSON.parse(m); if (d.feed === 'trade' && d.qty) add('Kraken', +d.qty, d.side === 'buy'); }));
+                // Bitget
+        socks.push(connect('wss://ws.bitget.com/v2/ws/public',
+            ws => ws.send(JSON.stringify({ op: 'subscribe', args: [{ instType: 'USDT-FUTURES', channel: 'trade', instId: `${coin}USDT` }] })),
+            m => { const d = JSON.parse(m); if (d.action === 'update') (d.data || []).forEach(x => add('Bitget', +x.size * +x.price, x.side === 'buy')); },
+            'ping'));
+        // Gate.io (size dalam kontrak, dikali quanto_multiplier)
+        let gm = 0;
+        try { gm = +(await (await fetch(`https://api.gateio.ws/api/v4/futures/usdt/contracts/${coin}_USDT`)).json()).quanto_multiplier; } catch (_) {}
+        if (gm && running && coin === state.coin) socks.push(connect('wss://fx-ws.gateio.ws/v4/ws/usdt',
+            ws => ws.send(JSON.stringify({ time: Math.floor(Date.now() / 1000), channel: 'futures.trades', event: 'subscribe', payload: [`${coin}_USDT`] })),
+            m => { const d = JSON.parse(m); if (d.channel === 'futures.trades' && d.event === 'update') (d.result || []).forEach(x => add('Gate', Math.abs(x.size) * gm * +x.price, x.size > 0)); },
+            '{"channel":"futures.ping"}'));
+        
         // OKX melaporkan ukuran dalam kontrak, jadi ambil nilai kontrak dulu
         let ct = 0;
         try { const j = await (await fetch(`https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=${coin}-USDT-SWAP`)).json(); ct = +j.data[0].ctVal; } catch (_) {}
