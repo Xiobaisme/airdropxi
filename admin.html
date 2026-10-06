@@ -10,6 +10,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://s3.tradingview.com/tv.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         /* ═══════════════════════════════════════════════════════════
@@ -1120,6 +1121,13 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 .tu-badge.cliff{color:var(--secondary);background:var(--secondary-dim)}
 .tu-badge.linear{color:var(--primary);background:var(--primary-dim)}
 .tu-empty{text-align:center;color:var(--text3);font-family:var(--label);padding:2rem 0!important}
+/* ═══ CHART BTCUSDT.P + BTC.D ═══ */
+.btc-chart-head{display:flex;flex-wrap:wrap;gap:12px;align-items:center;justify-content:space-between;margin-bottom:12px}
+.btc-legend{display:flex;gap:16px;font-family:var(--mono);font-size:.75rem;color:var(--text2)}
+.btc-legend span{display:inline-flex;align-items:center;gap:7px}
+.btc-legend i{width:18px;height:3px;border-radius:2px;display:inline-block}
+#btc-chart{height:460px;border:2px solid var(--border);border-radius:var(--r-md);overflow:hidden;background:#0A0A0A}
+@media (max-width:640px){#btc-chart{height:360px}}
         
         /* ═══════════════════════════════════════════════════════════
            RESPONSIVE
@@ -1253,6 +1261,24 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 
     <!-- HALAMAN 1: MARKET DASHBOARD (DEFAULT) -->
 <div id="halaman-market">
+
+    <!-- ─── CHART BTCUSDT.P + BTC.D ─── -->
+    <div class="market-section" style="max-width: 1360px; margin: 0 auto; padding: 2rem 1.5rem 0;">
+        <div class="section-card" style="padding: 1.5rem 2rem;">
+            <div class="btc-chart-head">
+                <div>
+                    <div class="hero-eyebrow" style="margin-bottom:.4rem;">Live Chart</div>
+                    <div class="tu-title">BTCUSDT.P vs BTC.D</div>
+                </div>
+                <div class="btc-legend">
+                    <span><i style="background:#EF4444"></i>BTCUSDT.P</span>
+                    <span><i style="background:#35E0A1"></i>BTC.D</span>
+                </div>
+            </div>
+            <div id="btc-chart"></div>
+        </div>
+    </div>
+
     <div class="hero-grid" style="grid-template-columns: 1fr; padding-top: 2rem; padding-bottom: 1rem;">
         <div>
             <div class="hero-eyebrow">Market Dashboard</div>
@@ -4912,6 +4938,51 @@ document.getElementById('weex-send-btn').onclick = async () => {
     const baseStart = window.xlStart, baseStop = window.xlStop;
     window.xlStart = function () { baseStart && baseStart(); load(); startTimers(); };
     window.xlStop  = function () { baseStop && baseStop(); stopTimers(); };
+})();
+
+// ═══ CHART BTCUSDT.P + BTC.D (TradingView) ═══
+(function () {
+    let built = false, tries = 0;
+
+    function build() {
+        if (built) return;
+        if (typeof TradingView === 'undefined') {            // tv.js belum selesai load
+            if (tries++ < 20) setTimeout(build, 500);
+            return;
+        }
+        built = true;
+        new TradingView.widget({
+            container_id: 'btc-chart',
+            autosize: true,
+            symbol: 'BINANCE:BTCUSDT.P',
+            interval: '15',
+            timezone: 'Asia/Jakarta',
+            theme: 'dark',
+            style: '2',                          // 2 = Line
+            locale: 'id',
+            backgroundColor: '#0A0A0A',
+            toolbar_bg: '#0A0A0A',
+            hide_side_toolbar: true,
+            allow_symbol_change: false,
+            enable_publishing: false,
+            save_image: false,
+            // BTC.D dipasang di skala harga sendiri (kanan), jadi nggak ketimpa harga BTC
+            compare_symbols: [{ symbol: 'CRYPTOCAP:BTC.D', position: 'NewPriceScale' }],
+            overrides: {
+                'mainSeriesProperties.lineStyle.color': '#EF4444',   // BTCUSDT.P merah
+                'mainSeriesProperties.lineStyle.linewidth': 2,
+                'paneProperties.background': '#0A0A0A',
+                'paneProperties.backgroundType': 'solid',
+            },
+            studies_overrides: {
+                'compare.plot.color': '#35E0A1',                     // BTC.D hijau
+            },
+        });
+    }
+
+    // bangun chart pas halaman Market tampil (container harus visible biar ukurannya benar)
+    const prevStart = window.xlStart;
+    window.xlStart = function () { prevStart && prevStart(); build(); };
 })();
         
 function showMarketDashboard() {
