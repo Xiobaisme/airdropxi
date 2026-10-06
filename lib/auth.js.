@@ -5,6 +5,7 @@ const sign = (payload) =>
 
 // payload = "<expiryMs>" (lama) atau "<expiryMs>:<provider>:<id>"
 // return false kalau tidak valid, kalau valid return { exp, provider, id } (truthy)
+
 function verifyAdminToken(req) {
   const match = (req.headers.cookie || '').match(/admin_token=([^;]+)/);
   if (!match) return false;
