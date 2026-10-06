@@ -19,12 +19,32 @@ const TG_CHANNELS = {
   cointelegraph: 'cointelegraph',
   brics:         'bricsnews',
   cryptorank:    'cryptorank_fundraising',
+  upbittg:       'upbit_news',
 };
 const TG_EVERY_SEC = 60;   // jeda minimal antar penarikan (semua tab berbagi kunci ini)
 const TG_PER_PAGE = 20;    // post terakhir yang dilihat per channel
 const TG_FIRST_RUN = 10;   // pertama kali jalan: ambil 10 post terbaru saja per channel
 const TG_TEXT_MAX = 1200;  // batas karakter per berita Telegram (hemat bandwidth Upstash)
 const TG_TIMEOUT = 5000;   // ms per channel
+
+const TG_TRANSLATE = new Set(['upbittg']);   // channel yang diterjemahkan Korea -> Indonesia
+
+async function koToId(text) {
+  if (!/[\uac00-\ud7af]/.test(text)) return text;        // nggak ada huruf Korea, biarkan
+  const ctrl = new AbortController();
+  const timer = setTimeout(() => ctrl.abort(), 4000);
+  try {
+    const r = await fetch(
+      'https://translate.googleapis.com/translate_a/single?client=gtx&sl=ko&tl=id&dt=t&q=' + encodeURIComponent(text.slice(0, 1500)),
+      { signal: ctrl.signal }
+    );
+    if (!r.ok) return text;
+    const j = await r.json();
+    const out = (j[0] || []).map((s) => s[0]).join('');
+    return out ? `${out}\n\n— Asli (KR) —\n${text}` : text;
+  } catch { return text; }
+  finally { clearTimeout(timer); }
+}
 
 const parse = (r) => (typeof r === 'string' ? JSON.parse(r) : r);
 const clean = (v, n) => String(v ?? '').trim().slice(0, n);
@@ -107,6 +127,7 @@ async function pullTelegram() {
       const seen = Number(last[src]) || 0;
       let fresh = posts.filter((p) => p.id > seen && p.ms > Date.now() - NEWS_TTL * 1000);
       if (!seen) fresh = fresh.slice(-TG_FIRST_RUN);
+     if (TG_TRANSLATE.has(src)) fresh = await Promise.all(fresh.map(async (x) => ({ ...x, text: await koToId(x.text) })));
       return { src, fresh, max: posts.length ? posts[posts.length - 1].id : 0, seen };
     } finally { clearTimeout(timer); }
   }));
