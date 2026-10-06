@@ -10,7 +10,6 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/styles/atom-one-dark.min.css">
     <script src="https://accounts.google.com/gsi/client" async defer></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
-    <script src="https://s3.tradingview.com/tv.js"></script>
     <script src="https://cdnjs.cloudflare.com/ajax/libs/highlight.js/11.9.0/highlight.min.js"></script>
     <style>
         /* ═══════════════════════════════════════════════════════════
@@ -1126,8 +1125,8 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 .btc-legend{display:flex;gap:16px;font-family:var(--mono);font-size:.75rem;color:var(--text2)}
 .btc-legend span{display:inline-flex;align-items:center;gap:7px}
 .btc-legend i{width:18px;height:3px;border-radius:2px;display:inline-block}
-#btc-chart{height:460px;border:2px solid var(--border);border-radius:var(--r-md);overflow:hidden;background:#0A0A0A}
-@media (max-width:640px){#btc-chart{height:360px}}
+#btc-chart{height:600px;border:2px solid var(--border);border-radius:var(--r-md);overflow:hidden;background:#0A0A0A}
+@media (max-width:640px){#btc-chart{height:480px}}
         
         /* ═══════════════════════════════════════════════════════════
            RESPONSIVE
@@ -4940,49 +4939,53 @@ document.getElementById('weex-send-btn').onclick = async () => {
     window.xlStop  = function () { baseStop && baseStop(); stopTimers(); };
 })();
 
-// ═══ CHART BTCUSDT.P + BTC.D (TradingView) ═══
+// ═══ CHART BTCUSDT.P + BTC.D (TradingView embed, skala persen) ═══
 (function () {
-    let built = false, tries = 0;
+    let built = false;
 
     function build() {
         if (built) return;
-        if (typeof TradingView === 'undefined') {            // tv.js belum selesai load
-            if (tries++ < 20) setTimeout(build, 500);
-            return;
-        }
+        const box = document.getElementById('btc-chart');
+       if (!box) return;
+       if (!box.offsetWidth) { setTimeout(build, 300); return; }   // coba lagi sampai container kelihatan
         built = true;
-        new TradingView.widget({
-            container_id: 'btc-chart',
+
+        box.innerHTML = '<div class="tradingview-widget-container" style="height:100%;width:100%">' +
+                        '<div class="tradingview-widget-container__widget" style="height:100%;width:100%"></div></div>';
+
+        const s = document.createElement('script');
+        s.src = 'https://s3.tradingview.com/external-embedding/embed-widget-advanced-chart.js';
+        s.async = true;
+        s.innerHTML = JSON.stringify({
             autosize: true,
             symbol: 'BINANCE:BTCUSDT.P',
-            interval: '15',
+            interval: 'D',
+            range: '12M',
             timezone: 'Asia/Jakarta',
             theme: 'dark',
-            style: '2',                          // 2 = Line
+            style: '2',
             locale: 'id',
             backgroundColor: '#0A0A0A',
-            toolbar_bg: '#0A0A0A',
+            gridColor: 'rgba(255,255,255,0.04)',
             hide_side_toolbar: true,
+            hide_volume: false,
             allow_symbol_change: false,
-            enable_publishing: false,
             save_image: false,
-            // BTC.D dipasang di skala harga sendiri (kanan), jadi nggak ketimpa harga BTC
-            compare_symbols: [{ symbol: 'CRYPTOCAP:BTC.D', position: 'NewPriceScale' }],
+            compareSymbols: [
+                { symbol: 'CRYPTOCAP:BTC.D', position: 'SameScale' }
+            ],
+            studies: ['STD;Stochastic_RSI'],
             overrides: {
-                'mainSeriesProperties.lineStyle.color': '#EF4444',   // BTCUSDT.P merah
-                'mainSeriesProperties.lineStyle.linewidth': 2,
-                'paneProperties.background': '#0A0A0A',
-                'paneProperties.backgroundType': 'solid',
+                'mainSeriesProperties.lineStyle.color': '#EF4444',
+                'mainSeriesProperties.lineStyle.linewidth': 2
             },
-            studies_overrides: {
-                'compare.plot.color': '#35E0A1',                     // BTC.D hijau
-            },
+            support_host: 'https://www.tradingview.com'
         });
+        box.firstChild.appendChild(s);
     }
 
-    // bangun chart pas halaman Market tampil (container harus visible biar ukurannya benar)
     const prevStart = window.xlStart;
-    window.xlStart = function () { prevStart && prevStart(); build(); };
+    window.xlStart = function () { prevStart && prevStart(); setTimeout(build, 100); };
 })();
         
 function showMarketDashboard() {
