@@ -1405,7 +1405,7 @@ body.news-resizing { cursor: col-resize; user-select: none; }
             </div>
             <div class="ls-head"><span></span><div class="ml"><span>Longs (Taker Buy)</span><span>Shorts (Taker Sell)</span></div><span class="hv">Longs</span><span class="hv">Shorts</span><span class="hv">Tren</span></div>
             <div id="ls-rows"></div>
-           <p class="ls-note">Baris All = rata-rata berbobot volume USD (Binance, Aster, OKX, Bitget, Gate). Tanda * = sampel trade terlalu pendek (Bybit), tidak ikut All. Tanda ! = bursa gagal dimuat; arahkan kursor ke bar untuk alasannya.</p>
+             <p class="ls-note">Baris All = rata-rata berbobot volume USD (Binance, Aster, OKX, Bitget, Gate, Kraken, Bybit). Tanda * = sampel trade pendek (Bybit), ikut All tapi bobotnya kecil. Tanda ! = bursa gagal dimuat; arahkan kursor ke bar untuk alasannya.</p>
         </div>
     </div>
 
@@ -4914,7 +4914,7 @@ document.getElementById('weex-send-btn').onclick = async () => {
             '{"op":"ping"}'));
         socks.push(connect('wss://futures.kraken.com/ws/v1',
             ws => ws.send(JSON.stringify({ event: 'subscribe', feed: 'trade', product_ids: [kr] })),
-            m => { const d = JSON.parse(m); if (d.feed === 'trade' && d.qty) add('Kraken', +d.qty, d.side === 'buy'); }));
+            m => { const d = JSON.parse(m); if (d.feed === 'trade' && d.qty) add('Kraken', +d.qty * +d.price, d.side === 'buy'); }));
                 // Bitget
         socks.push(connect('wss://ws.bitget.com/v2/ws/public',
             ws => ws.send(JSON.stringify({ op: 'subscribe', args: [{ instType: 'USDT-FUTURES', channel: 'trade', instId: `${coin}USDT` }] })),
@@ -4951,9 +4951,11 @@ document.getElementById('weex-send-btn').onclick = async () => {
     function view() {
         if (!base) return;
         const rows = base.rows.filter(r => !r.avg).map(live);
-        const w = rows.filter(r => !r.error && r.usd && !r.partial);
+        const w = rows.filter(r => !r.error && r.usd);
         const tot = w.reduce((s, r) => s + r.buy + r.sell, 0);
-        const all = tot ? { name: 'All', avg: true, pct: (w.reduce((s, r) => s + r.buy, 0) / tot) * 100 } : { name: 'All', error: 'Belum ada data' };
+        const all = tot
+    ? { name: 'All', avg: true, usd: true, buy: w.reduce((s, r) => s + r.buy, 0), sell: w.reduce((s, r) => s + r.sell, 0), pct: (w.reduce((s, r) => s + r.buy, 0) / tot) * 100 }
+    : { name: 'All', error: 'Belum ada data' };
         render([all, ...rows]);
     }
 
@@ -4971,7 +4973,7 @@ document.getElementById('weex-send-btn').onclick = async () => {
             const q = s => row.querySelector(s);
             row.classList.toggle('err', !!r.error);
             q('.ls-nm').textContent = r.name + (r.partial ? '*' : '');
-            q('.ls-bar').title = r.error || (r.partial ? `Sampel hanya ${r.secs} detik terakhir, tidak ikut rata-rata All` : '');
+            q('.ls-bar').title = r.error || (r.partial ?  `Sampel hanya ${r.secs} detik terakhir; ikut rata-rata All tapi bobotnya kecil` : '');
             if (r.error) { q('i').style.width = '0%'; q('.l').textContent = q('.s').textContent = '—'; q('.ls-lv').textContent = q('.ls-sv').textContent = '—'; return; }
 
             q('i').style.width = r.pct + '%';
