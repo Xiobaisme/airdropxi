@@ -550,8 +550,69 @@ async function sendDiscord() {
     return res.status(200).json({ items: items.slice(0, 500), missing, loaded: loaded.length, total: watch.length });
   }
   
-  // ─── NEWS QUEUE (antrian post Telegram dari poller Supabase, dibaca News Terminal) ───
+  // ─── RSS FEED (kolom berita publik untuk News Terminal) ───
+  if (type === 'feed') {
+    if (req.method !== 'GET') return res.status(405).json({ error: 'Method tidak diizinkan' });
+    res.setHeader('Cache-Control', 'no-store');
 
+    const FEEDS = {
+      id: {
+        antara: 'https://www.antaranews.com/rss/ekonomi.xml',
+        cnbcid: 'https://www.cnbcindonesia.com/market/rss',
+        detik:  'https://finance.detik.com/rss',
+        kontan: 'https://www.kontan.co.id/rss',
+      },
+      crypto: {
+        coindesk: 'https://www.coindesk.com/arc/outboundfeeds/rss/',
+        decrypt:  'https://decrypt.co/feed',
+        theblock: 'https://www.theblock.co/rss.xml',
+      },
+    };
+    const group = FEEDS[String(req.query.src || '')];
+    if (!group) return res.status(400).json({ error: 'src harus id atau crypto' });
+
+    const ckey = `feed:v1:${req.query.src}`;
+    try {
+      const hit = await redis.get(ckey);
+      if (hit) return res.status(200).json(typeof hit === 'string' ? JSON.parse(hit) : hit);
+    } catch {}
+
+    const strip = (s) => String(s || '')
+      .replace(/<!\[CDATA\[([\s\S]*?)\]\]>/g, '$1')
+      .replace(/<[^>]+>/g, '')
+      .replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"')
+      .replace(/&#0?39;|&apos;/g, "'").replace(/&amp;/g, '&')
+      .trim();
+
+    const pull = async (src, url) => {
+      const ctrl = new AbortController();
+      const t = setTimeout(() => ctrl.abort(), 6000);
+      try {
+        const r = await fetch(url, {
+          signal: ctrl.signal,
+          headers: { 'user-agent': 'Mozilla/5.0 (compatible; XiobaiiBot/1.0)', accept: 'application/rss+xml, application/xml, text/xml' },
+        });
+        if (!r.ok) return [];
+        const xml = await r.text();
+        const out = [];
+        for (const m of xml.matchAll(/<item[\s>][\s\S]*?<\/item>/g)) {
+          const b = m[0];
+          const tag = (n) => (b.match(new RegExp(`<${n}[^>]*>([\\s\\S]*?)</${n}>`)) || [])[1];
+          const title = strip(tag('title')), link = strip(tag('link')), ts = Date.parse(strip(tag('pubDate')));
+          if (!title || !/^https?:\/\//.test(link) || !ts) continue;
+          out.push({ src, title, link, ts });
+          if (out.length >= 25) break;
+        }
+        return out;
+      } catch { return []; } finally { clearTimeout(t); }
+    };
+
+    const lists = await Promise.all(Object.entries(group).map(([s, u]) => pull(s, u)));
+    const items = lists.flat().sort((a, b) => b.ts - a.ts);
+    if (items.length) { try { await redis.set(ckey, JSON.stringify(items), { ex: 300 }); } catch {} }
+    return res.status(200).json(items);
+  }
+  
     // ─── NLF HISTORY (riwayat yang kita simpan sendiri) ───
   if (type === 'nlf-history') {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method tidak diizinkan' });
