@@ -1181,39 +1181,71 @@ body.news-resizing { cursor: col-resize; user-select: none; }
            .news-drawer { width: 94vw; }
         }
 
-        /* ═══ NEWS TERMINAL — gaya terminal ═══ */
-.news-drawer { width: var(--news-w, 760px); background: #070707; font-family: var(--mono); }
-.news-head { padding: 14px 18px 10px; }
-.news-title { font-family: var(--mono); font-size: 1rem; font-weight: 700; letter-spacing: 0; }
+/* ═══ NEWS TERMINAL — FULLSCREEN + KARTU PER BERITA ═══ */
+.news-overlay, .news-resizer { display: none !important; }
+#news-send-modal { z-index: 1700; }   /* modal Kirim harus di atas layar penuh */
+
+.news-drawer {
+    top: 0; right: 0; bottom: 0; left: 0; width: 100%; max-width: 100%;
+    border-left: 0; box-shadow: none; font-family: var(--mono);
+    background-color: #050505;
+    background-image: radial-gradient(rgba(255,255,255,.05) 1px, transparent 1px); background-size: 22px 22px;
+    transform: scale(.985); opacity: 0; visibility: hidden; pointer-events: none;
+    transition: transform .22s ease, opacity .22s ease, visibility 0s linear .22s;
+}
+.news-drawer.open {
+    transform: none; opacity: 1; visibility: visible; pointer-events: auto;
+    transition: transform .22s ease, opacity .22s ease;
+}
+
+/* header satu baris */
+.news-head { display: flex; align-items: center; flex-wrap: wrap; gap: 6px 20px; padding: 14px 24px; background: #0A0A0A; }
+.news-head-top { order: 3; margin: 0 0 0 auto; }
+.news-head-top .hero-eyebrow { display: none; }
+.news-title { font-family: var(--mono); font-size: 1.05rem; font-weight: 700; margin: 0; letter-spacing: 0; }
 .news-title::before { content: '> '; color: var(--success); }
 .news-sub { font-family: var(--mono); }
 
-.news-filters { flex-wrap: wrap; overflow-x: visible; gap: 6px; padding: 10px 18px; }
+.news-filters { flex-wrap: wrap; overflow-x: visible; gap: 6px; padding: 10px 24px; background: #0A0A0A; }
 .news-chip { border-radius: 6px; font-size: 11px; padding: 4px 10px; background: #0D0D0D; }
 .news-chip.zero { opacity: .35; }
+.news-foot { padding: 10px 24px; background: #0A0A0A; }
 
-.news-feed { padding: 0; }
-.nt-row {
-    display: grid; grid-template-columns: 78px minmax(0, 1fr); gap: 12px;
-    padding: 11px 18px 11px 15px; border-bottom: 1px solid #1a1a1a;
-    border-left: 3px solid var(--src-color, var(--primary));
+/* grid kartu */
+.news-feed {
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(360px, 1fr));
+    gap: 14px; align-items: start; align-content: start; padding: 18px 24px 28px;
 }
-.nt-row:hover { background: #0e0e0e; }
-.nt-meta { display: flex; flex-direction: column; gap: 3px; font-size: 10px; line-height: 1.3; }
-.nt-time { color: var(--text2); font-weight: 600; }
-.nt-ago { color: var(--text3); }
-.nt-src { color: var(--src-color, var(--primary)); font-weight: 700; text-transform: uppercase; letter-spacing: .04em; word-break: break-word; }
-.nt-text { font-family: var(--mono); font-size: 13px; line-height: 1.65; color: #e8e8ea; white-space: pre-wrap; word-break: break-word; }
+.nt-card {
+    display: flex; flex-direction: column; gap: 10px; padding: 12px 14px;
+    background: #0b0b0b; border: 1px solid #1f1f1f; border-top: 2px solid var(--src-color, var(--primary));
+    border-radius: 12px; transition: border-color .2s, transform .2s;
+}
+.nt-card:hover { border-color: #3a3a3a; border-top-color: var(--src-color, var(--primary)); transform: translateY(-2px); }
+.nt-head { display: flex; align-items: center; justify-content: space-between; gap: 10px; font-size: 10px; }
+.nt-src { display: inline-flex; align-items: center; gap: 7px; color: var(--src-color, var(--primary)); font-weight: 700; text-transform: uppercase; letter-spacing: .05em; }
+.nt-src::before { content: ''; width: 7px; height: 7px; border-radius: 50%; background: var(--src-color, var(--primary)); }
+.nt-time { color: var(--text3); white-space: nowrap; }
+.nt-time b { color: var(--text2); font-weight: 600; margin-right: 6px; }
+
+.nt-text { position: relative; max-height: 14.5em; overflow: hidden; font-family: var(--mono); font-size: 13px; line-height: 1.6; color: #e8e8ea; white-space: pre-wrap; word-break: break-word; }
 .nt-text a { color: #38bdf8; text-decoration: none; }
 .nt-text a:hover { text-decoration: underline; }
-.nt-actions { display: flex; align-items: center; gap: 12px; margin-top: 8px; }
-.nt-actions .btn-save { padding: .32rem .85rem; font-size: .68rem; }
-.nt-actions a { font-family: var(--mono); font-size: 11px; color: var(--text3); text-decoration: none; }
-.nt-actions a:hover { color: var(--text); }
+.nt-card.has-more:not(.open) .nt-text::after { content: ''; position: absolute; left: 0; right: 0; bottom: 0; height: 3em; background: linear-gradient(to bottom, transparent, #0b0b0b); pointer-events: none; }
+.nt-card.open .nt-text { max-height: none; }
+.nt-more { display: none; align-self: flex-start; background: none; border: 0; padding: 0; color: var(--primary); font-family: var(--mono); font-size: 11px; font-weight: 700; cursor: pointer; }
+.nt-card.has-more .nt-more { display: block; }
+
+.nt-foot { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; padding-top: 10px; border-top: 1px solid #1a1a1a; }
+.nt-foot .btn-save { padding: .32rem .85rem; font-size: .68rem; }
+.nt-foot a { font-family: var(--mono); font-size: 11px; color: var(--text3); text-decoration: none; }
+.nt-foot a:hover { color: var(--text); }
+
 @media (max-width: 640px) {
-    .nt-row { grid-template-columns: 1fr; gap: 4px; }
-    .nt-meta { flex-direction: row; gap: 10px; align-items: center; }
+    .news-head, .news-filters, .news-foot { padding-left: 14px; padding-right: 14px; }
+    .news-feed { grid-template-columns: minmax(0, 1fr); padding: 12px 14px 24px; }
 }
+        
     </style>
 </head>
 <body>
@@ -2618,6 +2650,8 @@ function renderNewsFilters() {
     row.querySelectorAll('.news-chip').forEach(el => { el.onclick = () => { newsFilter = el.dataset.key; renderNewsFilters(); renderNewsFeed(); }; });
 }
 
+const newsOpen = new Set();   // id kartu yang sedang dibuka penuh (tahan saat auto-refresh)
+
 function renderNewsFeed() {
     const feed = document.getElementById('news-feed');
     const countEl = document.getElementById('news-count');
@@ -2625,26 +2659,51 @@ function renderNewsFeed() {
     const items = newsItems.filter(n => newsFilter === 'all' || n.source === newsFilter).sort((a, b) => new Date(b.published_at) - new Date(a.published_at));
     if (countEl) countEl.textContent = items.length;
     if (!items.length) { feed.innerHTML = `<div class="empty-state">${icon('ghost')}Belum ada berita.</div>`; return; }
+
+    const keep = feed.scrollTop;
     feed.innerHTML = items.map(item => {
         const src = NEWS_SOURCES[item.source] || { label: item.source, color: 'var(--primary)' };
         const sent = item.status === 'sent';
-        return `<div class="nt-row" style="--src-color:${src.color}">
-            <div class="nt-meta">
-                <span class="nt-time">${ntClock(item.published_at)}</span>
-                <span class="nt-ago">${newsTimeAgo(item.published_at)}</span>
+        const open = newsOpen.has(item.id);
+        return `<div class="nt-card${open ? ' open' : ''}" style="--src-color:${src.color}">
+            <div class="nt-head">
                 <span class="nt-src">${esc(src.label)}</span>
+                <span class="nt-time"><b>${ntClock(item.published_at)}</b>${newsTimeAgo(item.published_at)}</span>
             </div>
-            <div class="nt-body">
-                <div class="nt-text">${ntLinkify(item.title)}</div>
-                <div class="nt-actions">
-                    <button class="btn-save" data-send="${esc(item.id)}" ${sent ? 'disabled' : ''}>${sent ? 'Terkirim ✓' : icon('send') + 'Kirim'}</button>
-                    ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">buka post ↗</a>` : ''}
-                </div>
+            <div class="nt-text">${ntLinkify(item.title)}</div>
+            <button class="nt-more" type="button" data-more="${esc(item.id)}">${open ? 'Tutup ▲' : 'Lihat semua ▼'}</button>
+            <div class="nt-foot">
+                <button class="btn-save" data-send="${esc(item.id)}" ${sent ? 'disabled' : ''}>${sent ? 'Terkirim ✓' : icon('send') + 'Kirim'}</button>
+                ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">buka post ↗</a>` : ''}
             </div>
         </div>`;
     }).join('');
+
+    // tombol "Lihat semua" hanya muncul di kartu yang teksnya terpotong
+    feed.querySelectorAll('.nt-card').forEach(c => {
+        const t = c.querySelector('.nt-text');
+        if (c.classList.contains('open') || t.scrollHeight > t.clientHeight + 4) c.classList.add('has-more');
+    });
+    feed.scrollTop = keep;
 }
 
+document.getElementById('news-feed')?.addEventListener('click', e => {
+    const b = e.target.closest('[data-more]');
+    if (!b) return;
+    const card = b.closest('.nt-card'), id = b.dataset.more;
+    const open = card.classList.toggle('open');
+    open ? newsOpen.add(id) : newsOpen.delete(id);
+    b.textContent = open ? 'Tutup ▲' : 'Lihat semua ▼';
+});
+
+// Esc menutup News Terminal (kecuali modal Kirim sedang terbuka)
+document.addEventListener('keydown', e => {
+    if (e.key !== 'Escape') return;
+    const dr = document.getElementById('news-drawer');
+    const sendOpen = !document.getElementById('news-send-modal').classList.contains('hidden');
+    if (dr && dr.classList.contains('open') && !sendOpen) toggleNewsPanel();
+});
+        
 // ─── KIRIM item News Terminal ke Discord & Telegram (lewat endpoint broadcast-news yang sama) ───
 let _newsSending = null;
 function openNewsSend(id) {
