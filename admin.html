@@ -1250,12 +1250,13 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 .news-filters { display: none !important; }
 
 .news-drawer .news-feed {
-    display: flex; flex-direction: row; align-items: stretch;
-    gap: 12px; padding: 14px 20px; min-height: 0;
-    overflow-x: auto; overflow-y: hidden;
+    display: grid; grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
+    gap: 12px; padding: 14px 20px 24px; min-height: 0;
+    align-content: start; align-items: start;
+    overflow-x: hidden; overflow-y: auto;   /* scroll ke bawah saja, nggak ada geser kanan-kiri */
 }
 .nt-col {
-    flex: 0 0 340px; min-height: 0; display: flex; flex-direction: column;
+    min-width: 0; max-height: 78vh; display: flex; flex-direction: column;
     background: #0A0A0A; border: 1px solid rgba(53,224,161,.22);
     border-top: 2px solid var(--src-color, var(--primary)); border-radius: 10px; overflow: hidden;
 }
