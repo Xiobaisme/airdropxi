@@ -20,6 +20,37 @@ const klineFlow = base => async (c, n) => {
   return { buy, sell: total - buy, usd: true };
 };
 
+// ── helper Bitget & Gate ──
+const ivOf  = n => (n <= 120 ? 5 : n <= 360 ? 15 : 60);            // menit per bucket
+const ivStr = iv => (iv >= 60 ? '1h' : iv + 'm');
+// bucket yang mulai sebelum awal jendela dihitung sebagian; bucket yang sedang berjalan dihitung penuh
+const frac = (t0ms, ivMs, n) => Math.min(1, Math.max(0, (t0ms + ivMs - (Date.now() - n * 60000)) / ivMs));
+
+// cadangan kalau endpoint statistik gagal: daftar trade terakhir (bisa partial)
+const bitgetTrades = async (c, n) => {
+  const j = await get(`https://api.bitget.com/api/v2/mix/market/fills?symbol=${c}USDT&productType=USDT-FUTURES&limit=100`);
+  const all = j.data || [];
+  const from = Date.now() - n * 60000;
+  const t = all.filter(x => Number(x.ts) >= from);
+  const oldest = Math.min(...all.map(x => Number(x.ts)));
+  const partial = all.length >= 100 && oldest > from;
+  const usdOf = side => sum(t.filter(x => String(x.side).toLowerCase() === side), x => Number(x.size) * Number(x.price));
+  return { buy: usdOf('buy'), sell: usdOf('sell'), usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000) };
+};
+const gateTrades = async (c, n) => {
+  const [t, m] = await Promise.all([
+    get(`https://api.gateio.ws/api/v4/futures/usdt/trades?contract=${c}_USDT&limit=1000`),
+    gateMult(c),
+  ]);
+  const ms = x => { const v = Number(x.create_time_ms || x.create_time); return v < 1e11 ? v * 1000 : v; };
+  const from = Date.now() - n * 60000;
+  const w = t.filter(x => ms(x) >= from);
+  const oldest = Math.min(...t.map(ms));
+  const partial = t.length >= 1000 && oldest > from;
+  const usd = x => Math.abs(x.size) * m * Number(x.price);
+  return { buy: sum(w.filter(x => x.size > 0), usd), sell: sum(w.filter(x => x.size < 0), usd), usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000) };
+};
+
 const EX = {
   Binance: klineFlow('https://fapi.binance.com'),
   Aster: klineFlow('https://fapi.asterdex.com'),
@@ -44,31 +75,36 @@ const EX = {
     return { buy: usdOf('Buy'), sell: usdOf('Sell'), usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000) };
   },
 
-    // Bitget: 100 trade terakhir (batas API)
+      // Bitget: statistik taker buy/sell per bucket (jendela penuh); cadangan: daftar trade
   Bitget: async (c, n) => {
-    const j = await get(`https://api.bitget.com/api/v2/mix/market/fills?symbol=${c}USDT&productType=USDT-FUTURES&limit=100`);
-    const all = j.data || [];
-    const from = Date.now() - n * 60000;
-    const t = all.filter(x => Number(x.ts) >= from);
-    const oldest = Math.min(...all.map(x => Number(x.ts)));
-    const partial = all.length >= 100 && oldest > from;
-    const usdOf = side => sum(t.filter(x => x.side === side), x => Number(x.size) * Number(x.price));
-    return { buy: usdOf('buy'), sell: usdOf('sell'), usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000) };
+    const iv = ivOf(n), ivMs = iv * 60000, cnt = Math.ceil(n / iv) + 1;
+    try {
+      const [j, f] = await Promise.all([
+        get(`https://api.bitget.com/api/v2/mix/market/taker-buy-sell?symbol=${c}USDT&period=${ivStr(iv)}`),
+        get(`https://api.bitget.com/api/v2/mix/market/fills?symbol=${c}USDT&productType=USDT-FUTURES&limit=1`),
+      ]);
+      const px = Number(f.data?.[0]?.price);
+      const b = (j.data || []).map(x => ({ t: Number(x.ts), buy: Number(x.buyVolume), sell: Number(x.sellVolume) }))
+        .sort((x, y) => x.t - y.t).slice(-cnt);
+      if (!px || b.length < cnt - 1) throw new Error('data kurang');
+      return { buy: sum(b, x => x.buy * px * frac(x.t, ivMs, n)), sell: sum(b, x => x.sell * px * frac(x.t, ivMs, n)), usd: true };
+    } catch (_) { return bitgetTrades(c, n); }
   },
 
-  // Gate.io: 1000 trade terakhir; size + = taker buy, − = taker sell (satuan kontrak)
+  // Gate.io: statistik taker per bucket (jendela penuh); cadangan: daftar trade
   Gate: async (c, n) => {
-    const [t, m] = await Promise.all([
-      get(`https://api.gateio.ws/api/v4/futures/usdt/trades?contract=${c}_USDT&limit=1000`),
-      gateMult(c),
-    ]);
-    const ms = x => { const v = Number(x.create_time_ms || x.create_time); return v < 1e11 ? v * 1000 : v; };
-    const from = Date.now() - n * 60000;
-    const w = t.filter(x => ms(x) >= from);
-    const oldest = Math.min(...t.map(ms));
-    const partial = t.length >= 1000 && oldest > from;
-    const usd = x => Math.abs(x.size) * m * Number(x.price);
-    return { buy: sum(w.filter(x => x.size > 0), usd), sell: sum(w.filter(x => x.size < 0), usd), usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000) };
+    const iv = ivOf(n), ivS = iv * 60, cnt = Math.ceil(n / iv) + 1;
+    try {
+      const from = Math.floor(Date.now() / 1000 / ivS) * ivS - (cnt - 1) * ivS;
+      const [rows, m] = await Promise.all([
+        get(`https://api.gateio.ws/api/v4/futures/usdt/contract_stats?contract=${c}_USDT&interval=${ivStr(iv)}&from=${from}&limit=${cnt}`),
+        gateMult(c),
+      ]);
+      const b = (Array.isArray(rows) ? rows : []).sort((x, y) => x.time - y.time).slice(-cnt);
+      if (b.length < cnt - 1) throw new Error('data kurang');
+      const usd = (size, x) => Number(size || 0) * m * Number(x.mark_price) * frac(x.time * 1000, ivS * 1000, n);
+      return { buy: sum(b, x => usd(x.long_taker_size, x)), sell: sum(b, x => usd(x.short_taker_size, x)), usd: true };
+    } catch (_) { return gateTrades(c, n); }
   },
 
   // Kraken Futures: analytics cvd per 1 menit (buyVolume / sellVolume)
