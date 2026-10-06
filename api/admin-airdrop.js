@@ -15,20 +15,9 @@ const AIRDROPS = require('../data/airdrops.json');
 // SEMENTARA: putus semua akses ke Supabase sampai DB sehat
 const MAINTENANCE = true;
 
-function verifyAdminToken(req) {
-  const cookie = req.headers.cookie || '';
-  const match = cookie.match(/admin_token=([^;]+)/);
-  if (!match) return false;
-  try {
-    const decoded = Buffer.from(decodeURIComponent(match[1]), 'base64').toString();
-    const [payload, sig] = decoded.split('.');
-    if (!payload || !sig) return false;
-    const expectedSig = crypto.createHmac('sha256', process.env.ADMIN_SECRET_KEY).update(payload).digest('hex');
-    const sigBuf = Buffer.from(sig), expBuf = Buffer.from(expectedSig);
-    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) return false;
-    return Date.now() < Number(payload.split(':')[0]);
-  } catch { return false; }
-}
+const { verifyAdminToken, issueSession, clearSession, addCookie } = require('../lib/auth');
+
+const SESSION_MS_DISCORD = 12 * 60 * 60 * 1000; // member Discord: 12 jam, role dicek ulang tiap login
 
 // PIN wajib tiap kirim ke Discord/Telegram. Salah 5x = kunci 10 menit per IP.
 async function checkSendPin(req) {
@@ -242,49 +231,85 @@ async function sendDiscord() {
     }
     return res.status(anyOk ? 200 : 500).json(results);
       }
-  // ─── TERMINAL LOGIN (verifikasi kata sandi custom di halaman login) ───
-  // Secret-nya HANYA hidup di env var TERMINAL_LOGIN_SECRET (server-side),
-  // gak pernah dikirim/ditulis di HTML/JS yang jalan di browser.
-  async function handleTerminalLogin(req, res) {
-  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
-  const { success } = await ratelimit.limit(`login:${ip}`);
-  if (!success) {
-    return res.status(429).json({ success: false, error: 'Terlalu banyak percobaan, coba lagi nanti' });
-  }
+  // ─── DISCORD OAUTH (hanya member server + role tertentu) ───
+  async function handleDiscordAuth(req, res, step) {
+    if (req.method !== 'GET') return res.status(405).json({ error: 'Method tidak diizinkan' });
 
-  const { input } = req.body || {};
+    const { DISCORD_CLIENT_ID, DISCORD_CLIENT_SECRET, DISCORD_GUILD_ID, DISCORD_ROLE_IDS } = process.env;
+    const SITE = (process.env.SITE_URL || 'https://airdropxi.vercel.app').replace(/\/$/, '');
+    const REDIRECT = `${SITE}/api/admin-airdrop?type=discord-callback`;
+    const STATE_COOKIE = 'Path=/api/admin-airdrop; HttpOnly; Secure; SameSite=Lax';
+    const back = (code) => res.redirect(302, `/?login_error=${code}`);
 
-  let users = {};
-  try { users = JSON.parse(process.env.TERMINAL_LOGIN_SECRETS || '{}'); } catch {}
+    if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_GUILD_ID || !DISCORD_ROLE_IDS) return back('config');
 
-  if (!Object.keys(users).length || !process.env.ADMIN_SECRET_KEY) {
-    return res.status(500).json({ success: false, error: 'Konfigurasi server belum lengkap' });
-  }
+    // 1) arahkan ke Discord
+    if (step === 'discord-login') {
+      const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
+      const { success } = await ratelimit.limit(`discord:${ip}`);
+      if (!success) return back('ratelimit');
 
-  const h = (s) => crypto.createHash('sha256').update(String(s)).digest();
-  const given = h(typeof input === 'string' ? input : '');
-  let matchedUser = null;
-  for (const [name, pw] of Object.entries(users)) {
-    if (crypto.timingSafeEqual(given, h(pw))) matchedUser = name;
-  }
-  if (!matchedUser) return res.status(401).json({ success: false });
-
-  const expiry = Date.now() + 1000 * 60 * 60 * 4;
-  const payload = `${expiry}:${matchedUser}`;
-  const sig = crypto.createHmac('sha256', process.env.ADMIN_SECRET_KEY).update(payload).digest('hex');
-  const token = Buffer.from(`${payload}.${sig}`).toString('base64');
-  res.setHeader('Set-Cookie', `admin_token=${encodeURIComponent(token)}; HttpOnly; Secure; SameSite=Strict; Path=/; Max-Age=14400`);
-  return res.status(200).json({ success: true });
-  }
-
-  if (type === 'terminal-login') {
-    if (req.method !== 'POST') {
-      return res.status(405).json({ error: 'Method tidak diizinkan untuk terminal-login' });
+      const state = crypto.randomBytes(16).toString('hex');
+      addCookie(res, `discord_state=${state}; ${STATE_COOKIE}; Max-Age=600`);
+      const qs = new URLSearchParams({
+        client_id: DISCORD_CLIENT_ID, response_type: 'code', redirect_uri: REDIRECT,
+        scope: 'identify guilds.members.read', state, prompt: 'none',
+      });
+      return res.redirect(302, `https://discord.com/oauth2/authorize?${qs}`);
     }
-    return await handleTerminalLogin(req, res);
+
+    // 2) callback dari Discord
+    const { code, state, error } = req.query;
+    const saved = (req.headers.cookie || '').match(/discord_state=([^;]+)/)?.[1];
+    addCookie(res, `discord_state=; ${STATE_COOKIE}; Max-Age=0`);
+    if (error) return back('cancelled');
+    if (!code || !state || !saved || state !== saved) return back('state');
+
+    try {
+      const tk = await fetch('https://discord.com/api/oauth2/token', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: new URLSearchParams({
+          client_id: DISCORD_CLIENT_ID, client_secret: DISCORD_CLIENT_SECRET,
+          grant_type: 'authorization_code', code: String(code), redirect_uri: REDIRECT,
+        }),
+      });
+      const tok = await tk.json().catch(() => ({}));
+      if (!tk.ok || !tok.access_token) return back('token');
+
+      // data member di server kita (butuh scope guilds.members.read, bot tidak perlu ada di server)
+      const mr = await fetch(`https://discord.com/api/users/@me/guilds/${encodeURIComponent(DISCORD_GUILD_ID)}/member`, {
+        headers: { Authorization: `Bearer ${tok.access_token}` },
+      });
+      if (mr.status === 404) return back('not_member');
+      if (!mr.ok) return back('discord');
+      const member = await mr.json();
+
+      const allowed = DISCORD_ROLE_IDS.split(',').map(s => s.trim()).filter(Boolean);
+      if (!member.user?.id || !(member.roles || []).some(r => allowed.includes(r))) return back('no_role');
+
+      issueSession(res, { provider: 'discord', id: member.user.id }, SESSION_MS_DISCORD);
+      return res.redirect(302, '/');
+    } catch (e) {
+      console.error('[discord-auth]', e.message);
+      return back('error');
+    }
   }
 
-    // ─── MARKETS (publik: ranking CoinGecko, cache Redis 1 jam) ───
+  // ─── SESSION / LOGOUT / DISCORD (publik, di atas cek admin) ───
+  if (type === 'session') {
+    res.setHeader('Cache-Control', 'no-store');
+    return res.status(200).json({ authenticated: !!verifyAdminToken(req) });
+  }
+  if (type === 'logout') {
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method tidak diizinkan' });
+    clearSession(res);
+    return res.status(200).json({ success: true });
+  }
+  if (type === 'discord-login' || type === 'discord-callback') {
+    return await handleDiscordAuth(req, res, type);
+  }
+
     // ─── MARKETS (publik: ranking CoinGecko, cache Redis 1 jam) ───
   // Dipakai ticker bawah + koin jatuh di halaman login, jadi harus di atas cek admin.
   if (type === 'markets') {
