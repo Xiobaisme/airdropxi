@@ -1,6 +1,8 @@
 // api/admin-airdrop.js
 const crypto = require('crypto');
 const { verifyAdminToken, issueSession, clearSession, addCookie } = require('../lib/auth');
+const MEMBER_TYPES = ['onchain', 'btcd', 'token-unlocks', 'feed', 'nlf-history', 'nlf-stream'];
+const roleOf = (s) => (!s ? null : s.provider === 'google' ? 'admin' : 'member');
 
 // ── lazy load: modul berisiko baru di-require saat dipakai ──
 let _redis, _ratelimit;
@@ -315,9 +317,10 @@ async function sendDiscord() {
 
   // ─── SESSION / LOGOUT / DISCORD (publik, di atas cek admin) ───
   if (type === 'session') {
-    res.setHeader('Cache-Control', 'no-store');
-    return res.status(200).json({ authenticated: !!verifyAdminToken(req) });
-  }
+  res.setHeader('Cache-Control', 'no-store');
+  const s = verifyAdminToken(req);
+  return res.status(200).json({ authenticated: !!s, role: roleOf(s) });
+}
   if (type === 'logout') {
     if (req.method !== 'POST') return res.status(405).json({ error: 'Method tidak diizinkan' });
     clearSession(res);
@@ -413,9 +416,13 @@ async function sendDiscord() {
       return res.status(500).json({ error: serializeError(e) });
     }
   }
-    if (!verifyAdminToken(req)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  
+const session = verifyAdminToken(req);
+if (!session) return res.status(401).json({ error: 'Unauthorized' });
+
+if (roleOf(session) === 'member' && !MEMBER_TYPES.includes(type)) {
+  return res.status(403).json({ error: 'Khusus admin' });
+}
 
     if (type === 'broadcast-news') {
     if (req.method !== 'POST') {
