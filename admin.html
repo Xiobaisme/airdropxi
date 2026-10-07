@@ -5701,6 +5701,8 @@ function showAirdropDashboard() {
     });
     scan(); capCols();
 })();
+
+</script>
                 
 <script>
 // ═══ LAB MATERI: reader ringan (WebP per halaman, dimuat satu-satu) ═══
@@ -5711,7 +5713,7 @@ function showAirdropDashboard() {
     async function loadLab() {
         if (labLoaded) return true;
         try {
-            const r = await fetch('ebook/index.json', { cache: 'no-cache' });
+           const r = await fetch('ebook/hasil/index.json', { cache: 'no-cache' });
             if (!r.ok) throw new Error('HTTP ' + r.status);
             LAB_EBOOKS = await r.json();
             labLoaded = true;
