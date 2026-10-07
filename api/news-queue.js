@@ -2,6 +2,7 @@
 //   POST  -> dipanggil poller lama (auth: header x-secret = ALERT_SECRET)
 //   GET   -> dibaca dashboard admin (auth: cookie admin_token)
 //            + sekalian narik 8 channel Telegram publik lewat t.me/s/<channel> (maks 1x / 60 detik)
+const { verifyAdminToken } = require('../lib/auth');
 const crypto = require('crypto');
 const { Redis } = require('@upstash/redis');
 const redis = Redis.fromEnv();
