@@ -1366,6 +1366,75 @@ body.is-member [data-send] { display: none !important; }
 .member-only { display: none; }
 body.is-member .member-only { display: inline-flex; }
 
+/* ═══ LAB MATERI (ebook) ═══ */
+.lab-fab{position:fixed;left:16px;bottom:160px;z-index:900;width:112px;padding:14px 10px 12px;display:flex;flex-direction:column;align-items:center;gap:7px;
+    background:#0A0A0A;border:2px solid var(--border-light);border-radius:18px;box-shadow:4px 4px 0 var(--secondary);color:var(--text);cursor:pointer;
+    transform:rotate(-3deg);transition:transform var(--ease),box-shadow var(--ease);font-family:var(--label)}
+.lab-fab:hover{transform:rotate(0) translateY(-4px);box-shadow:6px 6px 0 var(--primary)}
+.lab-fab-ico{width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;background:var(--primary);color:#fff}
+.lab-fab-ico svg{width:24px;height:24px}
+.lab-fab b{font-size:.62rem;font-weight:800;letter-spacing:.1em;text-transform:uppercase}
+.lab-fab small{font-size:.58rem;color:var(--text3);font-weight:700}
+
+.lab-screen{position:fixed;inset:0;z-index:1500;display:flex;flex-direction:column;overflow:hidden;
+    background-color:#070707;background-image:radial-gradient(rgba(255,255,255,.06) 1px,transparent 1px);background-size:22px 22px;animation:modalFade .18s ease}
+.lab-screen::before{content:'';position:absolute;inset:0;pointer-events:none;
+    background:radial-gradient(60% 50% at 88% 0%,rgba(255,79,154,.18),transparent 70%),radial-gradient(55% 55% at 0% 100%,rgba(139,92,246,.24),transparent 70%)}
+.lab-top,.lab-body,.lab-reader{position:relative;z-index:1}
+
+.lab-top{display:flex;align-items:center;gap:16px;padding:14px 24px;background:#0A0A0A;border-bottom:2px solid var(--border-light);flex-shrink:0}
+.lab-title{font-family:var(--display);font-weight:800;font-size:clamp(1.4rem,3vw,2rem);letter-spacing:-.03em;text-shadow:3px 3px 0 var(--secondary)}
+.lab-title span{color:var(--primary)}
+.lab-sub{font-family:var(--label);font-size:.74rem;color:var(--text3)}
+.lab-top .modal-close{margin-left:auto}
+
+.lab-body{flex:1;min-height:0;overflow-y:auto;padding:28px 24px 48px}
+.lab-grid{max-width:1200px;margin:0 auto;display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:22px}
+.lab-card{display:flex;flex-direction:column;gap:12px;padding:14px;border-radius:24px;cursor:pointer;
+    background:linear-gradient(160deg,rgba(139,92,246,.22),rgba(255,79,154,.08) 60%,rgba(255,255,255,.03));
+    border:1px solid rgba(255,255,255,.14);backdrop-filter:blur(6px);transition:transform var(--ease),border-color var(--ease),box-shadow var(--ease)}
+.lab-card:hover{transform:translateY(-5px);border-color:var(--border-light);box-shadow:5px 5px 0 var(--secondary)}
+.lab-cover{aspect-ratio:3/4;border-radius:16px;overflow:hidden;background:#111;border:2px solid var(--border-strong)}
+.lab-cover img{width:100%;height:100%;object-fit:cover;display:block}
+.lab-meta{display:flex;gap:6px;flex-wrap:wrap}
+.lab-chip{font-family:var(--label);font-size:.58rem;font-weight:800;padding:.2rem .6rem;border-radius:999px;border:1.5px solid var(--primary-line);background:var(--primary-dim);color:var(--text);text-transform:uppercase;letter-spacing:.04em}
+.lab-card h3{font-family:var(--display);font-size:1.02rem;font-weight:700;line-height:1.25}
+.lab-card p{font-size:.78rem;line-height:1.5;color:var(--text2);display:-webkit-box;-webkit-line-clamp:3;-webkit-box-orient:vertical;overflow:hidden}
+.lab-read{margin-top:auto;padding:.65rem;border-radius:999px;border:2px solid var(--primary);background:transparent;color:var(--text);font-family:var(--label);font-size:.78rem;font-weight:800;cursor:pointer;transition:background var(--ease)}
+.lab-card:hover .lab-read{background:var(--primary)}
+
+/* reader */
+.lab-reader{flex:1;min-height:0;display:flex;flex-direction:column}
+.lab-rbar{display:flex;align-items:center;gap:12px;padding:10px 24px;background:#0A0A0A;border-bottom:1px solid var(--border);flex-shrink:0}
+.lab-rtitle{flex:1;min-width:0;font-weight:700;font-size:.9rem;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.lab-count{font-family:var(--mono);font-size:.78rem;color:var(--text2);white-space:nowrap}
+.lab-jump{background:var(--card-2);color:var(--text);border:2px solid var(--border);border-radius:var(--r-sm);padding:.35rem .6rem;font-family:var(--label);font-size:.72rem;font-weight:700}
+.lab-prog{height:3px;background:var(--border);flex-shrink:0}
+.lab-prog i{display:block;height:100%;width:0;background:var(--grad);transition:width .25s}
+.lab-stage{flex:1;min-height:0;position:relative;display:flex;align-items:center;justify-content:center;padding:16px;touch-action:pan-y}
+.lab-page{max-width:100%;max-height:calc(100vh - 190px);max-height:calc(100dvh - 190px);object-fit:contain;border-radius:14px;
+    border:2px solid var(--border-strong);box-shadow:0 20px 60px rgba(0,0,0,.6),6px 6px 0 var(--secondary);opacity:0;transition:opacity .2s;background:#0b0b0b}
+.lab-page.ready{opacity:1}
+.lab-err{position:absolute;font-family:var(--mono);font-size:.78rem;color:var(--danger);background:var(--danger-dim);border:2px solid var(--danger-line);border-radius:var(--r-sm);padding:.8rem 1rem}
+.lab-arrow{position:absolute;top:50%;margin-top:-24px;width:48px;height:48px;border-radius:14px;border:2px solid var(--border-strong);background:#111;color:#fff;font-size:1.5rem;font-weight:800;line-height:1;cursor:pointer;z-index:2;transition:border-color var(--ease),opacity var(--ease)}
+.lab-arrow:hover:not(:disabled){border-color:#fff}
+.lab-arrow:disabled{opacity:.3;cursor:default}
+.lab-arrow.prev{left:20px}.lab-arrow.next{right:20px}
+
+@media (max-width:640px){
+    .lab-fab{width:88px;left:10px;bottom:96px;padding:10px 8px}
+    .lab-fab-ico{width:38px;height:38px}
+    .lab-sub{display:none}
+    .lab-top,.lab-rbar{padding-left:14px;padding-right:14px}
+    .lab-body{padding:18px 14px 40px}
+    .lab-grid{grid-template-columns:repeat(2,1fr);gap:12px}
+    .lab-card{padding:10px;border-radius:18px}
+    .lab-card p{display:none}
+    .lab-arrow{width:40px;height:40px;margin-top:-20px;background:rgba(0,0,0,.7)}
+    .lab-arrow.prev{left:8px}.lab-arrow.next{right:8px}
+    .lab-jump{display:none}
+}
+
         
     </style>
 </head>
@@ -1697,6 +1766,7 @@ body.is-member .member-only { display: inline-flex; }
                 <a onclick="openOnchain()">Onchain Tracer</a>
                 <a class="cf-hide-member" onclick="openBroadcastModal()">Broadcast</a>
                 <a onclick="toggleCalc()">Kalkulator</a>
+                <a onclick="openLab()">Lab Materi</a>
             </div>
 
                         <div class="cf-col">
@@ -2098,7 +2168,43 @@ body.is-member .member-only { display: inline-flex; }
         </div>
     </div>
 </div>
-        
+
+<!-- ─── LAB MATERI: tombol melayang (kotak biru) ─── -->
+<button class="lab-fab" type="button" onclick="openLab()" aria-label="Buka Lab Materi">
+    <span class="lab-fab-ico"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg></span>
+    <b>Lab Materi</b>
+    <small id="lab-fab-n">Ebook</small>
+</button>
+
+<!-- ─── LAB MATERI: popup fullscreen ─── -->
+<div id="lab-modal" class="lab-screen hidden" role="dialog" aria-modal="true" aria-label="Lab Materi">
+    <div class="lab-top">
+        <div class="lab-title">LAB <span>MATERI</span></div>
+        <div class="lab-sub">Ebook &amp; materi edukasi CMIC</div>
+        <button class="modal-close" type="button" onclick="closeLab()" id="lab-close-btn"></button>
+    </div>
+
+    <!-- tampilan 1: daftar card ebook -->
+    <div class="lab-body" id="lab-library"><div class="lab-grid" id="lab-grid"></div></div>
+
+    <!-- tampilan 2: baca ebook -->
+    <div class="lab-reader hidden" id="lab-reader">
+        <div class="lab-rbar">
+            <button class="nlf-btn" type="button" id="lab-back">← Lab Materi</button>
+            <div class="lab-rtitle" id="lab-rtitle"></div>
+            <select class="lab-jump" id="lab-jump" aria-label="Loncat ke halaman"></select>
+            <span class="lab-count" id="lab-count">1 / 1</span>
+            <a class="nlf-btn" id="lab-open" href="#" target="_blank" rel="noopener" style="text-decoration:none;">Buka ↗</a>
+        </div>
+        <div class="lab-prog"><i id="lab-prog"></i></div>
+        <div class="lab-stage" id="lab-stage">
+            <button class="lab-arrow prev" id="lab-prev" type="button" aria-label="Sebelumnya">‹</button>
+            <img class="lab-page" id="lab-img" alt="" decoding="async">
+            <div class="lab-err hidden" id="lab-err"></div>
+            <button class="lab-arrow next" id="lab-next" type="button" aria-label="Berikutnya">›</button>
+        </div>
+    </div>
+</div>
 
         <!-- ─── TOAST ─── -->
         <div class="toast" id="toast"></div>
@@ -5596,6 +5702,122 @@ function showAirdropDashboard() {
     scan(); capCols();
 })();
                 
+<script>
+// ═══ LAB MATERI: reader ringan (WebP per halaman, dimuat satu-satu) ═══
+(function () {
+    
+        let LAB_EBOOKS = [];
+    let labLoaded = false;
+    async function loadLab() {
+        if (labLoaded) return true;
+        try {
+            const r = await fetch('ebook/index.json', { cache: 'no-cache' });
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            LAB_EBOOKS = await r.json();
+            labLoaded = true;
+            return true;
+        } catch (e) {
+            $('lab-grid').innerHTML = `<div class="lab-err" style="position:static">Gagal memuat daftar ebook: ${esc(e.message)}</div>`;
+            return false;
+        }
+    }
+
+    const $ = (id) => document.getElementById(id);
+    const store = {
+        get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+        set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+    };
+    let cur = null, page = 1, touchX = null;
+    const pageUrl = (b, n) => b.dir + String(n).padStart(2, '0') + '.webp';
+
+    function renderGrid() {
+        $('lab-grid').innerHTML = LAB_EBOOKS.map(b => {
+            const last = +store.get('labPage:' + b.id) || 0;
+            return `<article class="lab-card" data-id="${esc(b.id)}">
+                <div class="lab-cover"><img src="${esc(b.dir + 'cover.webp')}" alt="" loading="lazy" decoding="async"></div>
+                <div class="lab-meta"><span class="lab-chip">${b.pages} hal</span><span class="lab-chip">${esc(b.level)}</span>${(b.tags || []).map(t => `<span class="lab-chip">${esc(t)}</span>`).join('')}</div>
+                <h3>${esc(b.title)}</h3>
+                <p>${esc(b.desc)}</p>
+                <button class="lab-read" type="button">${last > 1 ? 'Lanjut hal. ' + last : 'Baca'}</button>
+            </article>`;
+        }).join('');
+        $('lab-fab-n').textContent = LAB_EBOOKS.length + ' ebook';
+    }
+
+    function show(n) {
+        if (!cur) return;
+        page = Math.min(cur.pages, Math.max(1, n));
+        const img = $('lab-img'), err = $('lab-err'), url = pageUrl(cur, page);
+        img.classList.remove('ready'); err.classList.add('hidden');
+        img.onload = () => img.classList.add('ready');
+        img.onerror = () => { err.textContent = 'Halaman tidak ditemukan: ' + url; err.classList.remove('hidden'); };
+        img.src = url;
+        img.alt = cur.title + ' — halaman ' + page;
+        $('lab-open').href = url;
+        $('lab-count').textContent = page + ' / ' + cur.pages;
+        $('lab-prog').style.width = (page / cur.pages * 100) + '%';
+        $('lab-jump').value = page;
+        $('lab-prev').disabled = page === 1;
+        $('lab-next').disabled = page === cur.pages;
+        store.set('labPage:' + cur.id, page);
+        [page + 1, page - 1].forEach(p => { if (p >= 1 && p <= cur.pages) new Image().src = pageUrl(cur, p); });   // preload
+    }
+    const go = (d) => show(page + d);
+
+    function openBook(id) {
+        cur = LAB_EBOOKS.find(b => b.id === id);
+        if (!cur) return;
+        $('lab-rtitle').textContent = cur.title;
+        $('lab-jump').innerHTML = Array.from({ length: cur.pages }, (_, i) => `<option value="${i + 1}">Hal. ${i + 1}</option>`).join('');
+        $('lab-library').classList.add('hidden');
+        $('lab-reader').classList.remove('hidden');
+        show(+store.get('labPage:' + cur.id) || 1);
+    }
+    function backToLibrary() {
+        cur = null;
+        $('lab-img').removeAttribute('src');
+        $('lab-reader').classList.add('hidden');
+        $('lab-library').classList.remove('hidden');
+        renderGrid();
+    }
+
+       window.openLab = async function () {
+        $('lab-reader').classList.add('hidden');
+        $('lab-library').classList.remove('hidden');
+        $('lab-modal').classList.remove('hidden');
+        document.body.style.overflow = 'hidden';
+        if (await loadLab()) renderGrid();
+    };
+    window.closeLab = function () {
+        $('lab-modal').classList.add('hidden');
+        document.body.style.overflow = '';
+        cur = null;
+    };
+
+    $('lab-close-btn').innerHTML = icon('x');
+    $('lab-grid').addEventListener('click', e => { const c = e.target.closest('.lab-card'); if (c) openBook(c.dataset.id); });
+    $('lab-back').onclick = backToLibrary;
+    $('lab-prev').onclick = () => go(-1);
+    $('lab-next').onclick = () => go(1);
+    $('lab-jump').onchange = (e) => show(+e.target.value);
+
+    // swipe di HP
+    const stage = $('lab-stage');
+    stage.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+    stage.addEventListener('touchend', e => {
+        if (touchX === null) return;
+        const dx = e.changedTouches[0].clientX - touchX; touchX = null;
+        if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
+    });
+
+    // keyboard: Esc (tutup/kembali), panah kiri/kanan
+    document.addEventListener('keydown', e => {
+        if ($('lab-modal').classList.contains('hidden') || e.target.matches('select,input,textarea')) return;
+        if (e.key === 'Escape') cur ? backToLibrary() : closeLab();
+        else if (cur && (e.key === 'ArrowRight' || e.key === 'PageDown')) go(1);
+        else if (cur && (e.key === 'ArrowLeft' || e.key === 'PageUp')) go(-1);
+    });
+})();
 </script>
 
 </body>
