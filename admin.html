@@ -1241,20 +1241,25 @@ body.news-resizing { cursor: col-resize; user-select: none; }
     .news-feed { grid-template-columns: minmax(0, 1fr); padding: 12px 14px 24px; }
 }
 
-    /* news-columns.css — News Terminal fullscreen: 1 kolom per sumber, chip filter atas dihilangkan */
+   /* news-columns.css — tabel per sumber, tinggi penuh, masonry tanpa celah */
 .news-filters { display: none !important; }
 
+/* scroll pindah ke seluruh layar News Terminal, bukan per tabel */
+.news-drawer { overflow-y: auto; overflow-x: hidden; }
+.news-head, .new-strip, .news-foot { flex-shrink: 0; }
+.news-head { position: sticky; top: 0; z-index: 5; }
+.news-foot { position: sticky; bottom: 0; z-index: 5; margin-top: auto; }
+
+/* kolom otomatis: tabel di bawah naik/geser sendiri, tidak ada celah kosong */
 .news-drawer .news-feed {
-    display: grid;
-    grid-template-columns: repeat(auto-fill, minmax(340px, 1fr));
-    grid-auto-rows: max-content;          /* tinggi baris = tinggi kolom, nggak ditebak browser */
-    gap: 18px;
-    align-content: start; align-items: start;
-    padding: 16px 20px 40px; min-height: 0;
-    overflow-x: hidden; overflow-y: auto;
+    flex: none; overflow: visible; min-height: 0;
+    display: block;
+    columns: 340px; column-gap: 18px;
+    padding: 16px 20px 40px;
 }
 .nt-col {
-    display: block; min-width: 0; height: auto;
+    display: inline-block; width: 100%; margin: 0 0 18px;
+    break-inside: avoid; page-break-inside: avoid;
     background: #0A0A0A; border: 1px solid rgba(53,224,161,.22);
     border-top: 2px solid var(--src-color, var(--primary));
     border-radius: 10px; overflow: hidden;
@@ -1264,16 +1269,16 @@ body.news-resizing { cursor: col-resize; user-select: none; }
     padding: 10px 12px; border-bottom: 1px solid #1a1a1a; font-size: 11px; letter-spacing: .06em;
 }
 .nt-col-head .n { color: var(--text3); font-size: 10px; }
-.nt-col-list {
-    max-height: 68vh; overflow-y: auto; padding: 10px;
-    display: flex; flex-direction: column; gap: 12px;   /* jarak antar kartu */
-}
-.nt-col .nt-card {
-    flex-shrink: 0; padding: 12px 14px;
-    border-top: 1px solid #1f1f1f; border-left: 2px solid var(--src-color, var(--primary));
-}
+.nt-col-list { max-height: none; overflow: visible; padding: 10px; display: flex; flex-direction: column; gap: 12px; }
+.nt-col .nt-card { flex-shrink: 0; padding: 12px 14px; border-top: 1px solid #1f1f1f; border-left: 2px solid var(--src-color, var(--primary)); }
 .nt-col .nt-card:hover { border-top-color: #3a3a3a; }
-.nt-col .nt-card > * { flex-shrink: 0; }   /* teks/tombol nggak boleh mengecil dan saling tindih */
+.nt-col .nt-card > * { flex-shrink: 0; }
+.nt-card[hidden] { display: none; }
+.nt-col-more { display: block; width: 100%; padding: 10px; background: #0D0D0D; border: 0; border-top: 1px solid #1a1a1a; color: var(--primary); font-family: var(--mono); font-size: 11px; font-weight: 700; cursor: pointer; }
+.nt-col-more:hover { background: #111; }
+.nt-tr-btn.off { opacity: .5; }
+
+        
 /* ═══ NEW STRIP (di dalam News Terminal) ═══ */
 .new-strip { flex-shrink: 0; padding: 12px 24px 6px; background: #0A0A0A; border-bottom: 1px solid #1a1a1a; font-family: var(--sans); }
 .new-strip .nlf-head { margin-bottom: 8px; }
@@ -5420,10 +5425,151 @@ function showAirdropDashboard() {
     document.getElementById('halaman-airdrop').style.display = 'block';
     window.xlStop && xlStop();   // tutup WebSocket saat pindah halaman
 }
-
-    </script>
+ </script>
 
 <script src="news-columns.js"></script>
+
+  <script>
+// ═══ NEWS TERMINAL: terjemahan otomatis ke Bahasa Indonesia + batas kartu per tabel ═══
+(function () {
+    const NT_CAP = 20;   // kartu per tabel sebelum "Tampilkan semua". Ganti ke Infinity kalau mau full tanpa batas
+    const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+                    set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
+
+    // cache terjemahan (disimpan di browser biar nggak translate ulang)
+    const cache = new Map();
+    try { Object.entries(JSON.parse(store.get('ntTrCache') || '{}')).forEach(([k, v]) => cache.set(k, v)); } catch {}
+    let saveT = null;
+    const saveCache = () => { clearTimeout(saveT); saveT = setTimeout(() => {
+        const arr = [...cache.entries()].slice(-400);
+        store.set('ntTrCache', JSON.stringify(Object.fromEntries(arr)));
+    }, 1500); };
+
+    let on = store.get('ntTranslate') !== '0';
+
+    // ── terjemah via Google (endpoint gratis, tidak resmi) ──
+    function chunks(s, max = 1500) {
+        const out = []; let cur = '';
+        for (const line of s.split('\n')) {
+            if (cur && (cur + '\n' + line).length > max) { out.push(cur); cur = line; }
+            else cur = cur ? cur + '\n' + line : line;
+        }
+        if (cur) out.push(cur);
+        return out;
+    }
+    async function gt(str) {
+        const [, lead, core, trail] = str.match(/^(\s*)([\s\S]*?)(\s*)$/);
+        if (!core || !/\p{L}/u.test(core)) return str;
+        if (cache.has(str)) return cache.get(str);
+        const parts = [];
+        for (const c of chunks(core)) {
+            const r = await fetch('https://translate.googleapis.com/translate_a/single?client=gtx&sl=auto&tl=id&dt=t&q=' + encodeURIComponent(c));
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const d = await r.json();
+            parts.push(d[0].map(s => s[0]).join(''));
+        }
+        const res = lead + parts.join('\n') + trail;
+        cache.set(str, res); saveCache();
+        return res;
+    }
+
+    // antrian: maks 3 request bersamaan
+    const queue = []; let active = 0;
+    function enqueue(job) { queue.push(job); pump(); }
+    function pump() {
+        while (active < 3 && queue.length) {
+            const job = queue.shift(); active++;
+            job().catch(() => {}).finally(() => { active--; pump(); });
+        }
+    }
+
+    const recheck = (el) => {
+        const c = el.closest('.nt-card');
+        if (c) c.classList.toggle('has-more', c.classList.contains('open') || el.scrollHeight > el.clientHeight + 4);
+    };
+    const textNodes = (el) => [...el.childNodes].filter(n => n.nodeType === 3 && n.nodeValue.trim());
+
+    function applyCached(el) {
+        // return true kalau semua node sudah ada di cache (langsung terpasang tanpa kedip)
+        const nodes = textNodes(el);
+        if (!nodes.every(n => !/\p{L}/u.test(n.nodeValue) || cache.has(n.nodeValue))) return false;
+        nodes.forEach(n => { if (cache.has(n.nodeValue)) { n.__o = n.nodeValue; n.nodeValue = cache.get(n.nodeValue); } });
+        el.dataset.tr = '1'; recheck(el);
+        return true;
+    }
+
+    const io = new IntersectionObserver((entries) => {
+        entries.forEach(en => {
+            if (!en.isIntersecting) return;
+            const el = en.target; io.unobserve(el);
+            if (!on || el.dataset.tr) return;
+            el.dataset.tr = '1';
+            textNodes(el).forEach(n => enqueue(async () => {
+                const orig = n.nodeValue;
+                const tr = await gt(orig);
+                if (on && n.isConnected && n.nodeValue === orig) { n.__o = orig; n.nodeValue = tr; recheck(el); }
+            }));
+        });
+    }, { rootMargin: '400px' });
+
+    function scan() {
+        if (!on) return;
+        document.querySelectorAll('#news-feed .nt-text:not([data-tr]), #new-list .nlf-card:not(.channel) .nlf-text:not([data-tr])')
+            .forEach(el => { if (!applyCached(el)) io.observe(el); });
+    }
+
+    function restoreAll() {
+        document.querySelectorAll('[data-tr]').forEach(el => {
+            textNodes(el).forEach(n => { if (n.__o != null) { n.nodeValue = n.__o; n.__o = null; } });
+            delete el.dataset.tr; recheck(el);
+        });
+    }
+
+    // ── batas kartu per tabel + tombol "Tampilkan semua" ──
+    const openCols = new Set();
+    function capCols() {
+        document.querySelectorAll('#news-feed .nt-col').forEach(col => {
+            const list = col.querySelector('.nt-col-list'); if (!list) return;
+            const cards = [...list.children].filter(c => c.classList.contains('nt-card'));
+            const head = col.querySelector('.nt-col-head');
+            const key = (head ? head.textContent : '').replace(/\d+/g, '').trim();
+            let btn = col.querySelector('.nt-col-more');
+            if (cards.length <= NT_CAP) { if (btn) btn.remove(); return; }
+            const open = openCols.has(key);
+            cards.forEach((c, i) => { const h = !open && i >= NT_CAP; if (c.hidden !== h) c.hidden = h; });
+            if (!btn) {
+                btn = document.createElement('button');
+                btn.className = 'nt-col-more'; btn.type = 'button';
+                btn.onclick = () => { openCols.has(key) ? openCols.delete(key) : openCols.add(key); capCols(); };
+                col.appendChild(btn);
+            }
+            const txt = open ? 'Tampilkan lebih sedikit ▲' : `Tampilkan semua (${cards.length}) ▼`;
+            if (btn.textContent !== txt) btn.textContent = txt;
+        });
+    }
+
+    // ── tombol ON/OFF terjemahan di header News Terminal ──
+    const btn = document.createElement('button');
+    btn.type = 'button'; btn.className = 'nlf-btn nt-tr-btn' + (on ? ' active' : ' off');
+    const label = () => { btn.textContent = on ? '🌐 Terjemah: ID' : '🌐 Terjemah: Asli'; };
+    label();
+    btn.onclick = () => {
+        on = !on; store.set('ntTranslate', on ? '1' : '0');
+        btn.classList.toggle('active', on); btn.classList.toggle('off', !on); label();
+        on ? scan() : restoreAll();
+    };
+    document.querySelector('.news-head-top')?.prepend(btn);
+
+    // pantau render ulang (auto-refresh berita & strip NEW)
+    const mo = new MutationObserver(() => { scan(); capCols(); });
+    ['news-feed', 'new-list'].forEach(id => {
+        const el = document.getElementById(id);
+        if (el) mo.observe(el, { childList: true, subtree: true });
+    });
+    scan(); capCols();
+})();
+                
+</script>
 
 </body>
 </html>
