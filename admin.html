@@ -2988,10 +2988,15 @@ function renderNLF() {
     const listings = _nlfItems
         .filter(m => _nlfShowAll || /upbit/i.test(JSON.stringify(m)) || (m.parser?.classification?.event && m.parser.classification.event !== 'none'))
         .map(m => {
-            const c = m.parser?.classification || {};
+           const c = m.parser?.classification || {};
             const ev = c.event || 'none';
-            const text = m.parser?.display || m.content?.title || m.content?.text || '(tanpa teks)';
-            const ex = m.parser?.exchange || m.username || '';
+            const isUpbit = /upbit/i.test(m.exchange || m.parser?.exchange || m.username || '');
+            const assets = (m.parser?.assets || []).map(a => '$' + a.symbol).join(', ');
+            const mk = (c.markets || []).map(x => String(x).toUpperCase()).join(', ');
+            const text = isUpbit && assets
+                ? `${assets} · Upbit spot${mk ? ' (' + mk + ')' : ''}`
+                : (m.parser?.display || m.content?.title || m.content?.text || '(tanpa teks)');
+            const ex = isUpbit ? 'Upbit' : (m.parser?.exchange || m.username || '');
             const href = /^https?:\/\//.test(m.url || '') ? m.url : '#';
             const ts = m.sent_time_us / 1000;
             return { ts, html: `<a class="nlf-card ${esc(ev)}" href="${esc(href)}" target="_blank" rel="noopener">
