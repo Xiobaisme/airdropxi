@@ -1,7 +1,7 @@
 // api/admin-airdrop.js
 const crypto = require('crypto');
 const { verifyAdminToken, issueSession, clearSession, addCookie } = require('../lib/auth');
-const MEMBER_TYPES = ['onchain', 'btcd', 'token-unlocks', 'feed', 'nlf-history', 'nlf-stream'];
+const MEMBER_TYPES = ['onchain', 'btcd', 'token-unlocks', 'feed', 'nlf-history', 'nlf-stream', 'broadcast-news'];
 const roleOf = (s) => (!s ? null : s.provider === 'google' ? 'admin' : 'member');
 
 // ── lazy load: modul berisiko baru di-require saat dipakai ──
@@ -79,7 +79,12 @@ const BASE = `${SUPA_URL}/rest/v1`;
     // ─── BROADCAST NEWS KE DISCORD & TELEGRAM ───
   async function handleBroadcastNews(req, res) {
     const { title, description, image_base64, url, source, mention_everyone, queue_id } = req.body || {};
-    if (!title) return res.status(400).json({ error: 'title wajib diisi' });
+       if (!title) return res.status(400).json({ error: 'title wajib diisi' });
+    const everyone = Boolean(mention_everyone) && roleOf(session) === 'admin';
+
+     if (roleOf(session) === 'member' && url && !/^https:\/\/(x\.com|twitter\.com|t\.me)\//i.test(String(url))) {
+      return res.status(400).json({ error: 'URL tidak diizinkan' });
+    }
 
     // Decode gambar dari data URL (hasil paste) jadi Buffer, biar bisa
     // di-attach sebagai FILE langsung — bukan link URL.
@@ -132,7 +137,7 @@ async function sendDiscord() {
       body: JSON.stringify({ embeds: [embed] }),
     });
   }
-    if (dRes.ok && mention_everyone) {
+     if (dRes.ok && everyone) {
     await fetch(webhookUrl, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
