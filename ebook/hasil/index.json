@@ -1,0 +1,47 @@
+[
+  {
+    "id": "cara-membaca-news-untuk-beginer",
+    "title": "Cara membaca NEWS untuk beginer",
+    "desc": "",
+    "level": "Materi",
+    "tags": [],
+    "pages": 8,
+    "dir": "ebook/cara-membaca-news-untuk-beginer/"
+  },
+  {
+    "id": "cara-menemukan-candle-konfirmasi",
+    "title": "Cara menemukan candle konfirmasi",
+    "desc": "",
+    "level": "Materi",
+    "tags": [],
+    "pages": 10,
+    "dir": "ebook/cara-menemukan-candle-konfirmasi/"
+  },
+  {
+    "id": "memahami-fundamental-crypto",
+    "title": "Memahami_fundamental_crypto",
+    "desc": "",
+    "level": "Materi",
+    "tags": [],
+    "pages": 66,
+    "dir": "ebook/memahami-fundamental-crypto/"
+  },
+  {
+    "id": "on-chain-analysis",
+    "title": "On-Chain-Analysis",
+    "desc": "",
+    "level": "Materi",
+    "tags": [],
+    "pages": 18,
+    "dir": "ebook/on-chain-analysis/"
+  },
+  {
+    "id": "strategi-trading-new-listing-binance-alp",
+    "title": "Strategi_Trading_New_Listing_Binance_Alpha_vs_Upbit",
+    "desc": "",
+    "level": "Materi",
+    "tags": [],
+    "pages": 8,
+    "dir": "ebook/strategi-trading-new-listing-binance-alp/"
+  }
+]
