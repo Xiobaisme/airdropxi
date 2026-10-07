@@ -1421,6 +1421,16 @@ body.is-member .member-only { display: inline-flex; }
 .lab-arrow:disabled{opacity:.3;cursor:default}
 .lab-arrow.prev{left:20px}.lab-arrow.next{right:20px}
 
+.lab-stage{overflow:hidden;touch-action:none}
+.lab-book{display:flex;align-items:center;justify-content:center;max-width:100%;max-height:100%;touch-action:none}
+.lab-zoom{position:relative;perspective:2400px;transform-origin:center center;will-change:transform;touch-action:none;cursor:zoom-in;user-select:none}
+.lab-zoom.zoomed{cursor:grab}
+.lab-zoom.dragging{cursor:grabbing}
+.lab-flip{position:absolute;inset:0;width:100%;height:100%;z-index:3;pointer-events:none;transform-origin:left center;backface-visibility:hidden;-webkit-backface-visibility:hidden;opacity:1!important}
+.lab-ztools{position:absolute;right:20px;bottom:20px;z-index:5;display:flex;gap:6px}
+.lab-ztools button{min-width:38px;height:38px;padding:0 10px;border-radius:10px;border:2px solid var(--border-strong);background:#111;color:#fff;font-family:var(--label);font-weight:800;cursor:pointer;transition:border-color var(--ease)}
+.lab-ztools button:hover{border-color:#fff}
+
 @media (max-width:640px){
     .lab-fab{width:88px;left:10px;bottom:96px;padding:10px 8px}
     .lab-fab-ico{width:38px;height:38px}
@@ -1435,6 +1445,32 @@ body.is-member .member-only { display: inline-flex; }
     .lab-jump{display:none}
 }
 
+        @media (max-width: 640px) {
+    /* tombol melayang: di atas ticker, tidak tertutup apa pun */
+    .lab-fab {
+        display: flex !important;
+        left: 10px;
+        bottom: calc(88px + env(safe-area-inset-bottom, 0px));
+        width: 84px; padding: 9px 6px;
+        z-index: 1100;
+    }
+    .lab-fab-ico { width: 36px; height: 36px; }
+    .lab-fab b { font-size: .56rem; }
+
+    /* ikon di dalam reader */
+    .lab-arrow {
+        display: flex; align-items: center; justify-content: center;
+        width: 42px; height: 42px; margin-top: -21px;
+        background: #111; border-color: #fff; opacity: .95; z-index: 5;
+    }
+    .lab-arrow:disabled { opacity: .3; }
+    .lab-arrow.prev { left: 6px; }
+    .lab-arrow.next { right: 6px; }
+
+    .lab-ztools { display: flex; right: 10px; bottom: calc(14px + env(safe-area-inset-bottom, 0px)); }
+    .lab-jump { display: block; max-width: 92px; }
+    .lab-rbar { flex-wrap: wrap; gap: 8px; }
+}
         
     </style>
 </head>
@@ -2198,10 +2234,19 @@ body.is-member .member-only { display: inline-flex; }
         </div>
         <div class="lab-prog"><i id="lab-prog"></i></div>
         <div class="lab-stage" id="lab-stage">
-            <button class="lab-arrow prev" id="lab-prev" type="button" aria-label="Sebelumnya">‹</button>
-            <img class="lab-page" id="lab-img" alt="" decoding="async">
-            <div class="lab-err hidden" id="lab-err"></div>
-            <button class="lab-arrow next" id="lab-next" type="button" aria-label="Berikutnya">›</button>
+    <button class="lab-arrow prev" id="lab-prev" type="button" aria-label="Sebelumnya">‹</button>
+    <div class="lab-book" id="lab-book">
+        <div class="lab-zoom" id="lab-zoom">
+            <img class="lab-page" id="lab-img" alt="" decoding="async" draggable="false">
+        </div>
+    </div>
+    <div class="lab-err hidden" id="lab-err"></div>
+    <button class="lab-arrow next" id="lab-next" type="button" aria-label="Berikutnya">›</button>
+    <div class="lab-ztools">
+        <button id="lab-zin" type="button" title="Zoom in">+</button>
+        <button id="lab-zout" type="button" title="Zoom out">−</button>
+         <button id="lab-zreset" type="button" title="Reset">1x</button>
+           </div>
         </div>
     </div>
 </div>
@@ -5705,15 +5750,26 @@ function showAirdropDashboard() {
 </script>
                 
 <script>
-// ═══ LAB MATERI: reader ringan (WebP per halaman, dimuat satu-satu) ═══
+// ═══ LAB MATERI: reader dengan animasi flip + zoom ═══
 (function () {
-    
-        let LAB_EBOOKS = [];
-    let labLoaded = false;
+    const $ = (id) => document.getElementById(id);
+    const store = {
+        get(k) { try { return localStorage.getItem(k); } catch { return null; } },
+        set(k, v) { try { localStorage.setItem(k, v); } catch {} },
+    };
+    const reduced = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const FLIP_MS = 650, ZMIN = 1, ZMAX = 5;
+
+    let LAB_EBOOKS = [], labLoaded = false;
+    let cur = null, page = 1, touchX = null, flipping = false;
+    const Z = { s: 1, x: 0, y: 0 };
+
+    const pageUrl = (b, n) => b.dir + String(n).padStart(2, '0') + '.webp';
+
     async function loadLab() {
         if (labLoaded) return true;
         try {
-           const r = await fetch('ebook/hasil/index.json', { cache: 'no-cache' });
+            const r = await fetch('ebook/hasil/index.json', { cache: 'no-cache' });
             if (!r.ok) throw new Error('HTTP ' + r.status);
             LAB_EBOOKS = await r.json();
             labLoaded = true;
@@ -5723,14 +5779,6 @@ function showAirdropDashboard() {
             return false;
         }
     }
-
-    const $ = (id) => document.getElementById(id);
-    const store = {
-        get(k) { try { return localStorage.getItem(k); } catch { return null; } },
-        set(k, v) { try { localStorage.setItem(k, v); } catch {} },
-    };
-    let cur = null, page = 1, touchX = null;
-    const pageUrl = (b, n) => b.dir + String(n).padStart(2, '0') + '.webp';
 
     function renderGrid() {
         $('lab-grid').innerHTML = LAB_EBOOKS.map(b => {
@@ -5746,15 +5794,47 @@ function showAirdropDashboard() {
         $('lab-fab-n').textContent = LAB_EBOOKS.length + ' ebook';
     }
 
-    function show(n) {
-        if (!cur) return;
+    // ── ZOOM ──
+    const zoomEl = () => $('lab-zoom');
+    function clampPan() {
+        const el = zoomEl();
+        const mx = Math.max(0, (el.offsetWidth * Z.s - el.offsetWidth) / 2);
+        const my = Math.max(0, (el.offsetHeight * Z.s - el.offsetHeight) / 2);
+        Z.x = Math.min(mx, Math.max(-mx, Z.x));
+        Z.y = Math.min(my, Math.max(-my, Z.y));
+    }
+    function applyZ() {
+        clampPan();
+        const el = zoomEl();
+        el.style.transform = `translate(${Z.x}px, ${Z.y}px) scale(${Z.s})`;
+        el.classList.toggle('zoomed', Z.s > 1.01);
+        $('lab-zreset').textContent = Z.s > 1.01 ? Z.s.toFixed(1) + 'x' : '1x';
+    }
+    function resetZoom() { Z.s = 1; Z.x = 0; Z.y = 0; applyZ(); }
+    // zoom ke titik (clientX, clientY); tanpa titik = tengah halaman
+    function zoomTo(s2, cx, cy) {
+        s2 = Math.min(ZMAX, Math.max(ZMIN, s2));
+        const el = zoomEl(), r = el.getBoundingClientRect();
+        // titik relatif ke pusat elemen (tanpa transform)
+        const ox = r.left + r.width / 2 - Z.x, oy = r.top + r.height / 2 - Z.y;
+        const px = (cx ?? (r.left + r.width / 2)) - ox, py = (cy ?? (r.top + r.height / 2)) - oy;
+        const k = s2 / Z.s;
+        Z.x = px - (px - Z.x) * k;
+        Z.y = py - (py - Z.y) * k;
+        Z.s = s2;
+        if (Z.s <= 1.01) { Z.s = 1; Z.x = 0; Z.y = 0; }
+        applyZ();
+    }
+
+    // ── TAMPILKAN HALAMAN (dir: 1 = maju, -1 = mundur, kosong = tanpa animasi) ──
+    function show(n, dir) {
+        if (!cur || flipping) return;
+        const img = $('lab-img'), err = $('lab-err');
+        const oldSrc = img.getAttribute('src');
         page = Math.min(cur.pages, Math.max(1, n));
-        const img = $('lab-img'), err = $('lab-err'), url = pageUrl(cur, page);
-        img.classList.remove('ready'); err.classList.add('hidden');
-        img.onload = () => img.classList.add('ready');
-        img.onerror = () => { err.textContent = 'Halaman tidak ditemukan: ' + url; err.classList.remove('hidden'); };
-        img.src = url;
-        img.alt = cur.title + ' — halaman ' + page;
+        const url = pageUrl(cur, page);
+
+        err.classList.add('hidden');
         $('lab-open').href = url;
         $('lab-count').textContent = page + ' / ' + cur.pages;
         $('lab-prog').style.width = (page / cur.pages * 100) + '%';
@@ -5762,9 +5842,46 @@ function showAirdropDashboard() {
         $('lab-prev').disabled = page === 1;
         $('lab-next').disabled = page === cur.pages;
         store.set('labPage:' + cur.id, page);
-        [page + 1, page - 1].forEach(p => { if (p >= 1 && p <= cur.pages) new Image().src = pageUrl(cur, p); });   // preload
+        img.alt = cur.title + ' — halaman ' + page;
+        resetZoom();
+        [page + 1, page - 1].forEach(p => { if (p >= 1 && p <= cur.pages) new Image().src = pageUrl(cur, p); });
+
+        img.onerror = () => { err.textContent = 'Halaman tidak ditemukan: ' + url; err.classList.remove('hidden'); };
+
+        if (!dir || !oldSrc || reduced || !img.classList.contains('ready')) {
+            img.classList.remove('ready');
+            img.onload = () => img.classList.add('ready');
+            img.src = url;
+            return;
+        }
+
+        // animasi buku: lembar lama/baru berputar dari tepi kiri
+        flipping = true;
+        const clone = document.createElement('img');
+        clone.className = 'lab-page lab-flip ready';
+        clone.draggable = false;
+        const next = dir > 0;
+        clone.src = next ? oldSrc : url;
+        zoomEl().appendChild(clone);
+
+        if (next) img.src = url;   // halaman baru sudah ada di bawah lembar yang diputar
+
+        const from = { transform: 'rotateY(0deg)', filter: 'brightness(1)', boxShadow: '0 20px 60px rgba(0,0,0,.6)' };
+        const to   = { transform: 'rotateY(-100deg)', filter: 'brightness(.55)', boxShadow: '30px 20px 80px rgba(0,0,0,.9)' };
+        const anim = clone.animate(next ? [from, to] : [to, from], {
+            duration: FLIP_MS, easing: 'cubic-bezier(.45,.05,.25,1)', fill: 'forwards',
+        });
+        anim.onfinish = async () => {
+            if (!next) {
+                img.src = url;
+                try { await img.decode(); } catch {}
+            }
+            clone.remove();
+            flipping = false;
+        };
+        anim.oncancel = () => { clone.remove(); flipping = false; };
     }
-    const go = (d) => show(page + d);
+    const go = (d) => show(page + d, d);
 
     function openBook(id) {
         cur = LAB_EBOOKS.find(b => b.id === id);
@@ -5773,17 +5890,20 @@ function showAirdropDashboard() {
         $('lab-jump').innerHTML = Array.from({ length: cur.pages }, (_, i) => `<option value="${i + 1}">Hal. ${i + 1}</option>`).join('');
         $('lab-library').classList.add('hidden');
         $('lab-reader').classList.remove('hidden');
+        $('lab-img').classList.remove('ready');
+        $('lab-img').removeAttribute('src');
         show(+store.get('labPage:' + cur.id) || 1);
     }
     function backToLibrary() {
-        cur = null;
+        cur = null; flipping = false;
+        zoomEl().querySelectorAll('.lab-flip').forEach(n => n.remove());
         $('lab-img').removeAttribute('src');
         $('lab-reader').classList.add('hidden');
         $('lab-library').classList.remove('hidden');
         renderGrid();
     }
 
-       window.openLab = async function () {
+    window.openLab = async function () {
         $('lab-reader').classList.add('hidden');
         $('lab-library').classList.remove('hidden');
         $('lab-modal').classList.remove('hidden');
@@ -5801,24 +5921,77 @@ function showAirdropDashboard() {
     $('lab-back').onclick = backToLibrary;
     $('lab-prev').onclick = () => go(-1);
     $('lab-next').onclick = () => go(1);
-    $('lab-jump').onchange = (e) => show(+e.target.value);
+    $('lab-jump').onchange = (e) => { const n = +e.target.value; show(n, n > page ? 1 : n < page ? -1 : 0); };
+    $('lab-zin').onclick = () => zoomTo(Z.s * 1.4);
+    $('lab-zout').onclick = () => zoomTo(Z.s / 1.4);
+    $('lab-zreset').onclick = resetZoom;
 
-    // swipe di HP
+    // ── interaksi zoom: wheel, dblclick, drag, pinch ──
+    const book = $('lab-book');
+    book.addEventListener('wheel', e => {
+        e.preventDefault();
+        zoomTo(Z.s * (e.deltaY < 0 ? 1.15 : 1 / 1.15), e.clientX, e.clientY);
+    }, { passive: false });
+    book.addEventListener('dblclick', e => {
+        e.preventDefault();
+        Z.s > 1.01 ? resetZoom() : zoomTo(2.5, e.clientX, e.clientY);
+    });
+
+    const ptrs = new Map();
+    let pinch0 = null, drag0 = null;
+    book.addEventListener('pointerdown', e => {
+        ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        book.setPointerCapture(e.pointerId);
+        if (ptrs.size === 2) {
+            const [a, b] = [...ptrs.values()];
+            pinch0 = { d: Math.hypot(a.x - b.x, a.y - b.y), s: Z.s };
+            drag0 = null;
+        } else if (Z.s > 1.01) {
+            drag0 = { x: e.clientX, y: e.clientY, zx: Z.x, zy: Z.y };
+            zoomEl().classList.add('dragging');
+        }
+    });
+    book.addEventListener('pointermove', e => {
+        if (!ptrs.has(e.pointerId)) return;
+        ptrs.set(e.pointerId, { x: e.clientX, y: e.clientY });
+        if (ptrs.size === 2 && pinch0) {
+            const [a, b] = [...ptrs.values()];
+            zoomTo(pinch0.s * Math.hypot(a.x - b.x, a.y - b.y) / pinch0.d, (a.x + b.x) / 2, (a.y + b.y) / 2);
+        } else if (drag0) {
+            Z.x = drag0.zx + (e.clientX - drag0.x);
+            Z.y = drag0.zy + (e.clientY - drag0.y);
+            applyZ();
+        }
+    });
+    const endPtr = e => {
+        ptrs.delete(e.pointerId);
+        if (ptrs.size < 2) pinch0 = null;
+        if (!ptrs.size) { drag0 = null; zoomEl().classList.remove('dragging'); }
+    };
+    book.addEventListener('pointerup', endPtr);
+    book.addEventListener('pointercancel', endPtr);
+
+    // swipe ganti halaman (hanya saat tidak di-zoom)
     const stage = $('lab-stage');
-    stage.addEventListener('touchstart', e => { touchX = e.touches[0].clientX; }, { passive: true });
+    stage.addEventListener('touchstart', e => { touchX = e.touches.length === 1 && Z.s <= 1.01 ? e.touches[0].clientX : null; }, { passive: true });
     stage.addEventListener('touchend', e => {
-        if (touchX === null) return;
+        if (touchX === null || Z.s > 1.01) { touchX = null; return; }
         const dx = e.changedTouches[0].clientX - touchX; touchX = null;
         if (Math.abs(dx) > 50) go(dx < 0 ? 1 : -1);
     });
 
-    // keyboard: Esc (tutup/kembali), panah kiri/kanan
+    // keyboard
     document.addEventListener('keydown', e => {
         if ($('lab-modal').classList.contains('hidden') || e.target.matches('select,input,textarea')) return;
         if (e.key === 'Escape') cur ? backToLibrary() : closeLab();
-        else if (cur && (e.key === 'ArrowRight' || e.key === 'PageDown')) go(1);
-        else if (cur && (e.key === 'ArrowLeft' || e.key === 'PageUp')) go(-1);
+        else if (!cur) return;
+        else if (e.key === 'ArrowRight' || e.key === 'PageDown') go(1);
+        else if (e.key === 'ArrowLeft' || e.key === 'PageUp') go(-1);
+        else if (e.key === '+' || e.key === '=') zoomTo(Z.s * 1.4);
+        else if (e.key === '-') zoomTo(Z.s / 1.4);
+        else if (e.key === '0') resetZoom();
     });
+    window.addEventListener('resize', () => { if (cur) applyZ(); });
 })();
 </script>
 
