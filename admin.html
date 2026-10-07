@@ -1355,15 +1355,15 @@ body.news-resizing { cursor: col-resize; user-select: none; }
     .cf-cols { padding: 1.6rem 1.3rem; gap: 24px; }
     .cf-bar { padding: 1rem 1.3rem; }
 }
-        
-body.is-member .nav-center a[onclick*="showAirdropDashboard"],
+
+        /* ═══ MODE MEMBER (login Discord) ═══ */
 body.is-member #btnWeexPromo,
 body.is-member #broadcast-toggle-btn,
 body.is-member #agent-toggle-btn,
-body.is-member #cmic-footer a[onclick*="openBroadcastModal"],
-body.is-member [data-send] {
-    display: none !important;
-}
+body.is-member .nav-center a[onclick*="showAirdropDashboard"],
+body.is-member .cf-hide-member,
+body.is-member #news-close-btn { display: none !important; }
+
         
     </style>
 </head>
@@ -1693,7 +1693,7 @@ body.is-member [data-send] {
                 <h4>Tools</h4>
                 <a onclick="toggleNewsPanel()">News Terminal</a>
                 <a onclick="openOnchain()">Onchain Tracer</a>
-                <a onclick="openBroadcastModal()">Broadcast</a>
+                <a class="cf-hide-member" onclick="openBroadcastModal()">Broadcast</a>
                 <a onclick="toggleCalc()">Kalkulator</a>
             </div>
 
@@ -1969,7 +1969,8 @@ body.is-member [data-send] {
     <div class="news-head">
         <div class="news-head-top">
             <div class="hero-eyebrow" style="margin-bottom:0;">News Terminal</div>
-            <button class="modal-close" onclick="toggleNewsPanel()" id="news-close-btn"></button>
+           <button class="nlf-btn member-only" type="button" onclick="logout()">Logout</button>
+          <button class="modal-close" onclick="toggleNewsPanel()" id="news-close-btn"></button>
         </div>
         <div class="news-title">Market &amp; Onchain Feed</div>
         <div class="news-sub"><span class="news-clock" id="news-clock">--:--:--</span> WIB · <span id="news-count">0</span> berita</div>
@@ -2211,7 +2212,6 @@ document.getElementById('pin-input').addEventListener('keydown', (e) => {
 });
 
 async function postBroadcast(payload) {
-    if (isMember()) throw new Error('Tidak diizinkan');
 
     const pin = await askSendPin();
     if (!pin) throw new Error('Dibatalkan, PIN tidak diisi');
@@ -2224,7 +2224,7 @@ async function postBroadcast(payload) {
     if (!res.ok) throw new Error(data.error || data.discord || data.telegram || `HTTP ${res.status}`);
     return data;
 }
-        if (isMember()) throw new Error('Tidak diizinkan');
+      
 
         // Count-up animation helper (GSAP kalau ada, fallback manual)
         function animateCount(el, target) {
@@ -2902,7 +2902,7 @@ document.getElementById('news-feed')?.addEventListener('click', e => {
 
 // Esc menutup News Terminal (kecuali modal Kirim sedang terbuka)
 document.addEventListener('keydown', e => {
-    if (e.key !== 'Escape') return;
+   if (e.key !== 'Escape' || isMember()) return;
     const dr = document.getElementById('news-drawer');
     const sendOpen = !document.getElementById('news-send-modal').classList.contains('hidden');
     if (dr && dr.classList.contains('open') && !sendOpen) toggleNewsPanel();
@@ -4067,6 +4067,7 @@ function enterAdmin(role = 'admin') {
     startNLF();
     startCexFound();
     xlStart();
+    if (role === 'member') toggleNewsPanel();   // ← BARU: langsung buka tempat kirim ke Tele & DC
 }
 
 async function checkSession() {
@@ -5006,7 +5007,7 @@ const weexModal = document.getElementById('weex-modal');
 document.getElementById('weex-close-btn').innerHTML = icon('x');
 document.getElementById('weex-preview').textContent = WEEX_TITLE + '\n\n' + WEEX_BODY;
 
-document.getElementById('btnWeexPromo').onclick = () => weexModal.classList.remove('hidden');
+document.getElementById('btnWeexPromo').onclick = () => { if (isMember()) return; weexModal.classList.remove('hidden'); };
 document.getElementById('weex-close-btn').onclick = () => weexModal.classList.add('hidden');
 document.getElementById('weex-cancel-btn').onclick = () => weexModal.classList.add('hidden');
 
