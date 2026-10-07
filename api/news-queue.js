@@ -2,8 +2,8 @@
 //   POST  -> dipanggil poller lama (auth: header x-secret = ALERT_SECRET)
 //   GET   -> dibaca dashboard admin (auth: cookie admin_token)
 //            + sekalian narik 8 channel Telegram publik lewat t.me/s/<channel> (maks 1x / 60 detik)
-const { verifyAdminToken } = require('../lib/auth');
 const crypto = require('crypto');
+const { verifyAdminToken } = require('../lib/auth');
 const { Redis } = require('@upstash/redis');
 const redis = Redis.fromEnv();
 
@@ -50,19 +50,6 @@ async function koToId(text) {
 const parse = (r) => (typeof r === 'string' ? JSON.parse(r) : r);
 const clean = (v, n) => String(v ?? '').trim().slice(0, n);
 
-function verifyAdminToken(req) {
-  const match = (req.headers.cookie || '').match(/admin_token=([^;]+)/);
-  if (!match) return false;
-  try {
-    const decoded = Buffer.from(decodeURIComponent(match[1]), 'base64').toString();
-    const [payload, sig] = decoded.split('.');
-    if (!payload || !sig) return false;
-    const expected = crypto.createHmac('sha256', process.env.ADMIN_SECRET_KEY).update(payload).digest('hex');
-    const a = Buffer.from(sig), b = Buffer.from(expected);
-    if (a.length !== b.length || !crypto.timingSafeEqual(a, b)) return false;
-    return Date.now() < Number(payload.split(':')[0]);
-  } catch { return false; }
-}
 
 // ─── Telegram: HTML preview -> teks biasa ───
 function decodeEntities(s) {
