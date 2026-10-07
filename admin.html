@@ -1317,7 +1317,7 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 .cf-pill:hover { border-color: var(--border-light); color: var(--text); transform: translateY(-2px); }
 
 .cf-main { background: #0A0A0A; border: 2px solid var(--border-light); border-radius: var(--r-lg); box-shadow: 6px 6px 0 var(--secondary); overflow: hidden; }
-.cf-cols { display: grid; grid-template-columns: 1.3fr repeat(4, 1fr); gap: 32px; padding: 2.4rem 2.2rem 2rem; }
+.cf-cols { display: grid; grid-template-columns: 1.3fr repeat(3, 1fr); gap: 32px; padding: 2.4rem 2.2rem 2rem; }
 .cf-brand img { height: 56px; width: auto; display: block; margin-bottom: 1rem; }
 .cf-brand p { font-size: .78rem; line-height: 1.6; color: var(--text2); max-width: 260px; }
 .cf-col h4 { font-family: var(--display); font-weight: 800; font-size: .95rem; padding-bottom: .7rem; margin-bottom: .9rem; border-bottom: 2px solid var(--border); position: relative; }
@@ -1336,6 +1336,11 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 .cf-social svg { width: 16px; height: 16px; }
 .cf-bar { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; padding: 1rem 2.2rem; border-top: 2px solid var(--border); background: #000; font-family: var(--label); font-size: .72rem; color: var(--text3); }
 .cf-bar b { color: var(--text2); font-weight: 700; }
+
+.cf-col a.cf-partner { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: .8rem 1rem; border: 2px solid var(--border); border-radius: 12px; background: var(--card); }
+.cf-col a.cf-partner:hover { border-color: var(--border-light); transform: none; }
+.cf-partner img { height: 24px; width: auto; display: block; }
+.cf-partner span { font-size: .72rem; font-weight: 700; color: var(--text2); }
 
 @media (max-width: 1100px) { .cf-cols { grid-template-columns: repeat(2, 1fr); } .cf-brand { grid-column: 1 / -1; } }
 @media (max-width: 900px) { .cf-support { grid-template-columns: 1fr; } }
@@ -1625,35 +1630,35 @@ body.news-resizing { cursor: col-resize; user-select: none; }
                 <div class="cf-seal"><b>6+</b><span>Chain onchain</span></div>
             </div>
         </div>
-        <div class="cf-cards">
-            <a class="cf-card c1" href="#" target="https://t.me/Xiobaii?text=Halo%20Bang%2C%20saya%20ingin%20bergabung%20ke%20komunitas%20Discord%20Crypto%20Monkey.%20Mohon%20info%20langkah%20pendaftarannya%20ya.%20Terima%20kasih%20%F0%9F%99%8F" rel="noopener">
-                <span class="t"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></span>Discord</span>
-                <span class="d">Ngobrol dengan member dan dapat alert langsung di server CMIC.</span>
-            </a>
-            <a class="cf-card c2" href="#" target="https://t.me/CryptoMonk3y" rel="noopener">
-                <span class="t"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>Telegram</span>
-                <span class="d">Channel berita dan broadcast Crypto Monkey.</span>
-            </a>
-            <a class="cf-card c3" onclick="openBroadcastModal()">
-                <span class="t"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg></span>Broadcast</span>
-                <span class="d">Kirim pengumuman ke Discord dan Telegram sekaligus.</span>
-            </a>
-            <a class="cf-card c4" onclick="toggleAgentPanel()">
-                <span class="t"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="14" rx="2"/><path d="M8 22h8M12 18v4"/></svg></span>AI Agent</span>
-                <span class="d">Tanya, buat kode, atau edit gambar lewat satu panel.</span>
-            </a>
-        </div>
+       <div class="cf-cards">
+    <a class="cf-card c1" href="https://t.me/Xiobaii?text=Halo%20Bang%2C%20saya%20ingin%20bergabung%20ke%20komunitas%20Discord%20Crypto%20Monkey.%20Mohon%20info%20langkah%20pendaftarannya%20ya.%20Terima%20kasih%20%F0%9F%99%8F" target="_blank" rel="noopener">
+        <span class="t"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></span>Discord</span>
+        <span class="d">Ngobrol dengan member dan dapat alert langsung di server CMIC.</span>
+    </a>
+    <a class="cf-card c2" href="https://t.me/CryptoMonk3y" target="_blank" rel="noopener">
+        <span class="t"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>Telegram</span>
+        <span class="d">Channel berita dan broadcast Crypto Monkey.</span>
+    </a>
+</div>
     </section>
 
     <section class="cf-sources">
-        <p>Data dikumpulkan dari bursa dan sumber yang dipakai komunitas</p>
-        <div class="cf-pills">
-            <span class="cf-pill">Binance</span><span class="cf-pill">Bybit</span><span class="cf-pill">OKX</span>
-            <span class="cf-pill">Bitget</span><span class="cf-pill">Gate</span><span class="cf-pill">Kraken</span>
-            <span class="cf-pill">Aster</span><span class="cf-pill">CoinGecko</span><span class="cf-pill">DefiLlama</span>
-            <span class="cf-pill">Lookonchain</span><span class="cf-pill">Whale Alert</span>
-        </div>
-    </section>
+    <p>Data pasar, unlock, dan listing</p>
+    <div class="cf-pills">
+        <span class="cf-pill">Binance</span><span class="cf-pill">Bybit</span><span class="cf-pill">OKX</span>
+        <span class="cf-pill">Bitget</span><span class="cf-pill">Gate</span><span class="cf-pill">Kraken</span>
+        <span class="cf-pill">Aster</span><span class="cf-pill">CoinGecko</span><span class="cf-pill">DefiLlama</span>
+        <span class="cf-pill">New Listings Feed</span>
+    </div>
+    <p>Sumber berita &amp; onchain (News Terminal)</p>
+    <div class="cf-pills">
+        <span class="cf-pill">Lookonchain</span><span class="cf-pill">Investigations</span><span class="cf-pill">OnchainLens</span>
+        <span class="cf-pill">Wu Blockchain</span><span class="cf-pill">Whale Alert</span><span class="cf-pill">Tree News</span>
+        <span class="cf-pill">Nansen</span><span class="cf-pill">Crypto Media</span><span class="cf-pill">SM News</span>
+        <span class="cf-pill">WatcherGuru</span><span class="cf-pill">REKT</span><span class="cf-pill">Cointelegraph</span>
+        <span class="cf-pill">BRICS News</span><span class="cf-pill">CryptoRank</span><span class="cf-pill">Upbit (TG)</span>
+    </div>
+</section>
 
     <div class="cf-main">
         <div class="cf-cols">
@@ -1669,13 +1674,6 @@ body.news-resizing { cursor: col-resize; user-select: none; }
                 <a onclick="showMarketDashboard(); window.scrollTo({top:0,behavior:'smooth'})">Jadwal Token Unlock</a>
             </div>
 
-            <div class="cf-col">
-                <h4>Airdrop</h4>
-                <a onclick="showAirdropDashboard(); window.scrollTo({top:0,behavior:'smooth'})">Semua Proyek</a>
-                <a onclick="showAirdropDashboard(); openAddModal()">Tambah Proyek</a>
-                <a onclick="showAirdropDashboard(); setPLFilter('confirmed'); window.scrollTo({top:0,behavior:'smooth'})">Confirmed</a>
-                <a onclick="showAirdropDashboard(); setPLFilter('potential'); window.scrollTo({top:0,behavior:'smooth'})">Potential</a>
-            </div>
 
             <div class="cf-col">
                 <h4>Tools</h4>
@@ -1685,27 +1683,29 @@ body.news-resizing { cursor: col-resize; user-select: none; }
                 <a onclick="toggleCalc()">Kalkulator</a>
             </div>
 
-            <div class="cf-col">
+                        <div class="cf-col">
                 <h4>Kemitraan</h4>
-                <a href="https://www.ourbit.com/register?inviteCode=ourbitCMIC" target="_blank" rel="noopener">Daftar OURBIT</a>
-                <a href="https://newlistings.pro" target="_blank" rel="noopener">New Listings Feed</a>
-                <a href="https://t.me/NewListingsFeed" target="_blank" rel="noopener">Channel Telegram</a>
+                <a class="cf-partner" href="https://www.ourbit.com/register?inviteCode=ourbitCMIC" target="_blank" rel="noopener">
+                    <img src="ourbit-logo.svg" alt="OURBIT" width="106" height="24" onerror="this.remove()" />
+                    <span>Daftar OURBIT ↗</span>
+                </a>
                 <div class="cf-follow">
                     <h4>Ikuti Kami</h4>
                     <div class="cf-social">
+                        <!-- isi href X dengan URL aslinya, atau hapus <a> ini -->
                         <a href="#" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></a>
-                        <a href="#" target="_blank" rel="noopener" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></a>
-                        <a href="#" target="_blank" rel="noopener" aria-label="Discord"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+                        <a href="https://t.me/CryptoMonk3y" target="_blank" rel="noopener" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></a>
+                        <a href="https://t.me/Xiobaii?text=Halo%20Bang%2C%20saya%20ingin%20bergabung%20ke%20komunitas%20Discord%20Crypto%20Monkey.%20Mohon%20info%20langkah%20pendaftarannya%20ya.%20Terima%20kasih%20%F0%9F%99%8F" target="_blank" rel="noopener" aria-label="Discord"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
                     </div>
                 </div>
             </div>
-        </div>
+        </div><!-- tutup .cf-cols -->
 
         <div class="cf-bar">
             <span>© <span id="cf-year"></span> <b>CMIC</b> · Private Control Center</span>
             <span>Trade smart. Manage risk. DYOR.</span>
         </div>
-    </div>
+    </div><!-- tutup .cf-main -->
 </footer>
 <script>document.getElementById('cf-year').textContent = new Date().getFullYear();</script>
 
