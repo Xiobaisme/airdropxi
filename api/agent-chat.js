@@ -15,22 +15,7 @@
 //
 // Kalau salah satu env var kosong, provider itu otomatis dilewati /
 // dianggap tidak tersedia (tidak akan bikin request gagal ke provider lain).
-const crypto = require('crypto');
-
-function verifyAdminToken(req) {
-  const cookie = req.headers.cookie || '';
-  const match = cookie.match(/admin_token=([^;]+)/);
-  if (!match) return false;
-  try {
-    const decoded = Buffer.from(decodeURIComponent(match[1]), 'base64').toString();
-    const [payload, sig] = decoded.split('.');
-    if (!payload || !sig) return false;
-    const expectedSig = crypto.createHmac('sha256', process.env.ADMIN_SECRET_KEY).update(payload).digest('hex');
-    const sigBuf = Buffer.from(sig), expBuf = Buffer.from(expectedSig);
-    if (sigBuf.length !== expBuf.length || !crypto.timingSafeEqual(sigBuf, expBuf)) return false;
-    return Date.now() < Number(payload);
-  } catch { return false; }
-}
+const { verifyAdminToken } = require('../lib/auth');
 
 const PROVIDERS = {
   agentrouter: {
@@ -166,9 +151,9 @@ module.exports = async function handler(req, res) {
     return res.status(405).json({ error: `Method ${req.method} tidak diizinkan` });
   }
 
-    if (!verifyAdminToken(req)) {
-    return res.status(401).json({ error: 'Unauthorized' });
-  }
+  const session = verifyAdminToken(req);
+  if (!session) return res.status(401).json({ error: 'Unauthorized' });
+  if (session.provider !== 'google') return res.status(403).json({ error: 'Khusus admin' });
 
   const { agent, mode, prompt, image, history } = req.body || {};
 
