@@ -1362,7 +1362,7 @@ body.is-member #broadcast-toggle-btn,
 body.is-member #agent-toggle-btn,
 body.is-member .nav-center a[onclick*="showAirdropDashboard"],
 body.is-member .cf-hide-member,
-body.is-member #news-close-btn { display: none !important; }
+body.is-member [data-send] { display: none !important; }
 .member-only { display: none; }
 body.is-member .member-only { display: inline-flex; }
 
@@ -2904,7 +2904,7 @@ document.getElementById('news-feed')?.addEventListener('click', e => {
 
 // Esc menutup News Terminal (kecuali modal Kirim sedang terbuka)
 document.addEventListener('keydown', e => {
-   if (e.key !== 'Escape' || isMember()) return;
+      if (e.key !== 'Escape') return;
     const dr = document.getElementById('news-drawer');
     const sendOpen = !document.getElementById('news-send-modal').classList.contains('hidden');
     if (dr && dr.classList.contains('open') && !sendOpen) toggleNewsPanel();
@@ -2913,6 +2913,7 @@ document.addEventListener('keydown', e => {
 // ─── KIRIM item News Terminal ke Discord & Telegram (lewat endpoint broadcast-news yang sama) ───
 let _newsSending = null;
 function openNewsSend(id) {
+    if (isMember()) return;
     const item = newsItems.find(n => String(n.id) === String(id));
     if (!item) return;
     _newsSending = item;
@@ -4069,7 +4070,6 @@ function enterAdmin(role = 'admin') {
     startNLF();
     startCexFound();
     xlStart();
-    if (role === 'member') toggleNewsPanel();   // ← BARU: langsung buka tempat kirim ke Tele & DC
 }
 
 async function checkSession() {
