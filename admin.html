@@ -4156,8 +4156,9 @@ async function logout() {
 
 const sess = await checkSession();
 if (sess) enterAdmin(sess.role); else showLogin();
+};
 
-       // ═══════════════════════════════════════════════════════════
+// ═══════════════════════════════════════════════════════════
 // ─── ONCHAIN TRACER (fullscreen, pan/zoom) ───
 // ═══════════════════════════════════════════════════════════
 const OC_DUST = 0.001;
