@@ -1356,6 +1356,15 @@ body.news-resizing { cursor: col-resize; user-select: none; }
     .cf-bar { padding: 1rem 1.3rem; }
 }
         
+body.is-member .nav-center a[onclick*="showAirdropDashboard"],
+body.is-member #btnWeexPromo,
+body.is-member #broadcast-toggle-btn,
+body.is-member #agent-toggle-btn,
+body.is-member #cmic-footer a[onclick*="openBroadcastModal"],
+body.is-member [data-send] {
+    display: none !important;
+}
+        
     </style>
 </head>
 <body>
@@ -2122,6 +2131,8 @@ body.news-resizing { cursor: col-resize; user-select: none; }
             'Listing / Selesai', 'Ended', 'TBA'
         ];
 
+        const isMember = () => document.body.classList.contains('is-member');
+
         // ─── STATE ───
         let projects = [];
         let _plFilter = 'all';
@@ -2200,6 +2211,8 @@ document.getElementById('pin-input').addEventListener('keydown', (e) => {
 });
 
 async function postBroadcast(payload) {
+    if (isMember()) throw new Error('Tidak diizinkan');
+
     const pin = await askSendPin();
     if (!pin) throw new Error('Dibatalkan, PIN tidak diisi');
     const res = await fetch('/api/admin-airdrop?type=broadcast-news', {
@@ -2211,6 +2224,7 @@ async function postBroadcast(payload) {
     if (!res.ok) throw new Error(data.error || data.discord || data.telegram || `HTTP ${res.status}`);
     return data;
 }
+        if (isMember()) throw new Error('Tidak diizinkan');
 
         // Count-up animation helper (GSAP kalau ada, fallback manual)
         function animateCount(el, target) {
@@ -3226,6 +3240,8 @@ function startCexFound() {
 let _broadcastImageBase64 = null;
 
 function openBroadcastModal() {
+    if (isMember()) return;
+
     document.getElementById('b-title').value = '';
     document.getElementById('b-desc').value = '';
     _activeBroadcastTag = null;
@@ -3412,13 +3428,17 @@ async function sendBroadcast() {
         };
 
         function toggleAgentPanel() {
-            const panel = document.getElementById('agent-modal');
-            if (!panel) return;
-            panel.classList.toggle('hidden');
-            if (!panel.classList.contains('hidden') && agentEl.input) {
-                agentEl.input.focus();
-            }
-        }
+    if (isMember()) return;
+
+    const panel = document.getElementById('agent-modal');
+    if (!panel) return;
+
+    panel.classList.toggle('hidden');
+
+    if (!panel.classList.contains('hidden') && agentEl.input) {
+        agentEl.input.focus();
+    }
+}
 
         /* ---------- render: agent chips ---------- */
         function renderAgents() {
@@ -4036,13 +4056,14 @@ function stopFallingCoins() {
 
                // ─── MASUK PANEL (dipakai login Google & restore sesi) ───
 let _entered = false;
-function enterAdmin() {
+function enterAdmin(role = 'admin') {
     if (_entered) return;
     _entered = true;
+    document.body.classList.toggle('is-member', role === 'member');
     stopFallingCoins();
     document.getElementById('login-section').style.display = 'none';
     document.getElementById('admin-content').classList.remove('hidden');
-    loadProjects();   // dulu jalan sebelum login (kena 401), sekarang setelah cookie ada
+    if (role !== 'member') loadProjects();
     startNLF();
     startCexFound();
     xlStart();
@@ -4051,9 +4072,10 @@ function enterAdmin() {
 async function checkSession() {
     try {
         const r = await fetch('/api/admin-airdrop?type=session', { cache: 'no-store' });
-        if (!r.ok) return false;
-        return !!(await r.json()).authenticated;
-    } catch { return false; }
+        if (!r.ok) return null;
+        const d = await r.json();
+        return d.authenticated ? d : null;
+    } catch { return null; }
 }
 
 const LOGIN_ERRORS = {
@@ -4129,9 +4151,8 @@ async function logout() {
     startGarapWidget();
     startCryptoTicker();
 
-    if (await checkSession()) enterAdmin();
-    else showLogin();
-};
+const sess = await checkSession();
+if (sess) enterAdmin(sess.role); else showLogin();
 
        // ═══════════════════════════════════════════════════════════
 // ─── ONCHAIN TRACER (fullscreen, pan/zoom) ───
@@ -5421,9 +5442,11 @@ function showMarketDashboard() {
     window.xlStart && xlStart();
 }
 function showAirdropDashboard() {
+    if (isMember()) return;
+
     document.getElementById('halaman-market').style.display = 'none';
     document.getElementById('halaman-airdrop').style.display = 'block';
-    window.xlStop && xlStop();   // tutup WebSocket saat pindah halaman
+    window.xlStop && xlStop();
 }
  </script>
 
