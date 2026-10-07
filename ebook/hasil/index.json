@@ -6,7 +6,7 @@
     "level": "Materi",
     "tags": [],
     "pages": 8,
-    "dir": "ebook/cara-membaca-news-untuk-beginer/"
+    "dir": "ebook/hasil/cara-membaca-news-untuk-beginer/"
   },
   {
     "id": "cara-menemukan-candle-konfirmasi",
@@ -15,33 +15,33 @@
     "level": "Materi",
     "tags": [],
     "pages": 10,
-    "dir": "ebook/cara-menemukan-candle-konfirmasi/"
+    "dir": "ebook/hasil/cara-menemukan-candle-konfirmasi/"
   },
   {
     "id": "memahami-fundamental-crypto",
-    "title": "Memahami_fundamental_crypto",
+    "title": "Memahami Fundamental Crypto",
     "desc": "",
     "level": "Materi",
     "tags": [],
     "pages": 66,
-    "dir": "ebook/memahami-fundamental-crypto/"
+    "dir": "ebook/hasil/memahami-fundamental-crypto/"
   },
   {
     "id": "on-chain-analysis",
-    "title": "On-Chain-Analysis",
+    "title": "On-Chain Analysis",
     "desc": "",
     "level": "Materi",
     "tags": [],
     "pages": 18,
-    "dir": "ebook/on-chain-analysis/"
+    "dir": "ebook/hasil/on-chain-analysis/"
   },
   {
-    "id": "strategi-trading-new-listing-binance-alp",
-    "title": "Strategi_Trading_New_Listing_Binance_Alpha_vs_Upbit",
+    "id": "strategi-trading-new-listing",
+    "title": "Strategi Trading New Listing: Binance Alpha vs Upbit",
     "desc": "",
     "level": "Materi",
     "tags": [],
     "pages": 8,
-    "dir": "ebook/strategi-trading-new-listing-binance-alp/"
+    "dir": "ebook/hasil/strategi-trading-new-listing/"
   }
 ]
