@@ -1,7 +1,7 @@
 // api/admin-airdrop.js
 const crypto = require('crypto');
 const { verifyAdminToken, issueSession, clearSession, addCookie } = require('../lib/auth');
-const MEMBER_TYPES = ['onchain', 'btcd', 'token-unlocks', 'feed', 'nlf-history', 'nlf-stream', 'broadcast-news'];
+const MEMBER_TYPES = ['onchain', 'btcd', 'token-unlocks', 'feed', 'nlf-history', 'nlf-stream',];
 const roleOf = (s) => (!s ? null : s.provider === 'google' ? 'admin' : 'member');
 
 // ── lazy load: modul berisiko baru di-require saat dipakai ──
