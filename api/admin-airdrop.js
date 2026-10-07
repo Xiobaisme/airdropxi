@@ -701,14 +701,15 @@ async function sendDiscord() {
     res.write('retry: 5000\n\n');
 
     // Promise ini baru resolve pas stream selesai, biar Vercel nggak matiin fungsi lebih awal
-    return new Promise((resolve) => {
+        return new Promise((resolve) => {
       const send = (obj) => res.write(`data: ${JSON.stringify(obj)}\n\n`);
-      const ws = new WebSocket('wss://ws.newlistings.pro/v2/full', {
-        headers: { authorization: `Bearer ${nlfKey}` },
-        handshakeTimeout: 10000,
-      });
+      const URLS = [
+        'wss://ws.newlistings.pro/v2/full',
+        'wss://ws.newlistings.pro/v2/full?exchange=upbit&market_type=spot,caution-spot',
+      ];
 
       let ended = false;
+      const sockets = [];
       const keepAlive = setInterval(() => res.write(': ping\n\n'), 15000);
       const maxLife = setTimeout(end, 270000); // tutup sebelum limit, browser auto-reconnect
 
@@ -717,27 +718,38 @@ async function sendDiscord() {
         ended = true;
         clearInterval(keepAlive);
         clearTimeout(maxLife);
-        try { ws.terminate(); } catch {}
+        sockets.forEach(w => { try { w.terminate(); } catch {} });
         res.end();
         resolve();
       }
 
-      ws.on('message', (d) => {
-  let m; try { m = JSON.parse(d.toString()); } catch { return; }
-  send(m);
-  saveNLFEvent(m);
-});
-      ws.on('unexpected-response', (_q, r) => {
-        send({ type: 'error', code: 'AUTHENTICATION_FAILED', status: r.statusCode });
-        r.resume();
-        end();
+      URLS.forEach((url, i) => {
+        const ws = new WebSocket(url, {
+          headers: { authorization: `Bearer ${nlfKey}` },
+          handshakeTimeout: 10000,
+        });
+        sockets.push(ws);
+
+        ws.on('message', (d) => {
+          let m; try { m = JSON.parse(d.toString()); } catch { return; }
+          if (i === 1 && m.type !== 'announcement' && m.type !== 'tweet') return; // READY socket Upbit jangan dobel
+          send(m);
+          saveNLFEvent(m);
+        });
+        ws.on('unexpected-response', (_q, r) => {
+          r.resume();
+          if (i === 0) {                       // socket utama gagal auth = putus semua
+            send({ type: 'error', code: 'AUTHENTICATION_FAILED', status: r.statusCode });
+            end();
+          }                                    // socket Upbit gagal = feed utama tetap jalan
+        });
+        ws.on('error', () => {});
+        ws.on('close', () => { if (i === 0) end(); });
       });
-      ws.on('error', () => {});
-      ws.on('close', end);
+
       req.on('close', end);
     });
-  }
-
+   }   
        // ─── AIRDROPS: baca dari file JSON (tanpa Supabase) ───
   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'no-store');
