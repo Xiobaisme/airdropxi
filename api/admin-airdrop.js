@@ -78,13 +78,17 @@ const BASE = `${SUPA_URL}/rest/v1`;
   }
     // ─── BROADCAST NEWS KE DISCORD & TELEGRAM ───
   async function handleBroadcastNews(req, res) {
-    const { title, description, image_base64, url, source, mention_everyone, queue_id } = req.body || {};
+    const { title, description, image_base64, source, mention_everyone, queue_id } = req.body || {};
+let url = (req.body || {}).url;
        if (!title) return res.status(400).json({ error: 'title wajib diisi' });
+    if (roleOf(session) === 'member' && (!queue_id || image_base64)) {
+  return res.status(403).json({ error: 'Member hanya bisa kirim dari News Terminal' });
+}
     const everyone = Boolean(mention_everyone) && roleOf(session) === 'admin';
 
-     if (roleOf(session) === 'member' && url && !/^https:\/\/(x\.com|twitter\.com|t\.me)\//i.test(String(url))) {
-      return res.status(400).json({ error: 'URL tidak diizinkan' });
-    }
+    if (roleOf(session) === 'member' && url && !/^https:\/\/(x\.com|twitter\.com|t\.me|upbit\.com)\//i.test(String(url))) {
+  url = undefined;   // link dibuang, pesan tetap terkirim
+}
 
     // Decode gambar dari data URL (hasil paste) jadi Buffer, biar bisa
     // di-attach sebagai FILE langsung — bukan link URL.
@@ -277,7 +281,7 @@ async function sendDiscord() {
       addCookie(res, `discord_state=${state}; ${STATE_COOKIE}; Max-Age=600`);
       const qs = new URLSearchParams({
         client_id: DISCORD_CLIENT_ID, response_type: 'code', redirect_uri: REDIRECT,
-        scope: 'identify guilds.members.read', state, prompt: 'none',
+        scope: 'identify guilds.members.read', state, prompt: req.query.consent ? 'consent' : 'none',
       });
       return res.redirect(302, `https://discord.com/oauth2/authorize?${qs}`);
     }
@@ -286,7 +290,11 @@ async function sendDiscord() {
     const { code, state, error } = req.query;
     const saved = (req.headers.cookie || '').match(/discord_state=([^;]+)/)?.[1];
     addCookie(res, `discord_state=; ${STATE_COOKIE}; Max-Age=0`);
-    if (error) return back('cancelled');
+    // di callback, ganti:  if (error) return back('cancelled');
+if (error === 'consent_required' || error === 'interaction_required') {
+  return res.redirect(302, '/api/admin-airdrop?type=discord-login&consent=1');
+}
+if (error) return back('cancelled');
     if (!code || !state || !saved || state !== saved) return back('state');
 
     try {
