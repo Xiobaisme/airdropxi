@@ -21,7 +21,18 @@ const TG_CHANNELS = {
   brics:         'bricsnews',
   cryptorank:    'cryptorank_fundraising',
   upbittg:       'upbit_news',
+  listingv2:     ['NewListingsFeed', 'NewListingsFeedPlus', 'DelistingsFeed'],  // BARU: 3 channel -> 1 kolom
 };
+
+// BARU: penanda asal channel (supaya di 1 kolom kelihatan postingan dari mana)
+const TG_TAGS = { NewListingsFeed: 'LISTING', NewListingsFeedPlus: 'LISTING+', DelistingsFeed: 'DELISTING' };
+
+// BARU: ratakan jadi daftar job. Channel lama tetap pakai key lama, jadi data "id terakhir" mereka tidak reset
+const TG_JOBS = Object.entries(TG_CHANNELS).flatMap(([src, v]) =>
+  (Array.isArray(v) ? v : [v]).map((ch) => ({
+    src, ch, multi: Array.isArray(v), key: Array.isArray(v) ? `${src}:${ch}` : src,
+  })));
+
 const TG_EVERY_SEC = 60;   // jeda minimal antar penarikan (semua tab berbagi kunci ini)
 const TG_PER_PAGE = 20;    // post terakhir yang dilihat per channel
 const TG_FIRST_RUN = 10;   // pertama kali jalan: ambil 10 post terbaru saja per channel
@@ -102,7 +113,7 @@ async function pullTelegram() {
 
   const last = (await redis.hgetall('news:tg:last')) || {};
 
-  const results = await Promise.allSettled(Object.entries(TG_CHANNELS).map(async ([src, ch]) => {
+  const results = await Promise.allSettled(TG_JOBS.map(async ({ src, ch, multi, key }) => {
     const ctrl = new AbortController();
     const timer = setTimeout(() => ctrl.abort(), TG_TIMEOUT);
     try {
@@ -112,11 +123,13 @@ async function pullTelegram() {
       });
       if (!r.ok) throw new Error(`${ch} HTTP ${r.status}`);
       const posts = parseChannel(await r.text(), ch).sort((a, b) => a.id - b.id).slice(-TG_PER_PAGE);
-      const seen = Number(last[src]) || 0;
+      const seen = Number(last[key]) || 0;
       let fresh = posts.filter((p) => p.id > seen && p.ms > Date.now() - NEWS_TTL * 1000);
       if (!seen) fresh = fresh.slice(-TG_FIRST_RUN);
-     if (TG_TRANSLATE.has(src)) fresh = await Promise.all(fresh.map(async (x) => ({ ...x, text: await koToId(x.text) })));
-      return { src, fresh, max: posts.length ? posts[posts.length - 1].id : 0, seen };
+          if (TG_TRANSLATE.has(src)) fresh = await Promise.all(fresh.map(async (x) => ({ ...x, text: await koToId(x.text) })));
+      // BARU: sumber multi-channel dikasih tag + id unik (id post antar channel bisa kembar)
+      if (multi) fresh = fresh.map((x) => ({ ...x, text: `[${TG_TAGS[ch] || ch}] ${x.text}`, uid: `${src}:${ch}:${x.id}` }));
+      return { src, key, fresh, max: posts.length ? posts[posts.length - 1].id : 0, seen };
     } finally { clearTimeout(timer); }
   }));
 
@@ -125,12 +138,12 @@ async function pullTelegram() {
   const upd = {};
   results.forEach((r) => {
     if (r.status !== 'fulfilled') { console.warn('[news-queue] tg gagal:', r.reason?.message); return; }
-    const { src, fresh, max, seen } = r.value;
+        const { src, key, fresh, max, seen } = r.value;
     fresh.forEach((x) => {
       p.zadd('news:queue', {
         score: x.ms,
         member: JSON.stringify({
-          id: `${src}:${x.id}`,
+          id: x.uid || `${src}:${x.id}`,
           source: src,
           text: clean(x.text, TG_TEXT_MAX),
           link: x.link,
@@ -139,7 +152,7 @@ async function pullTelegram() {
       });
       added++;
     });
-    if (max > seen) upd[src] = max;
+       if (max > seen) upd[key] = max;
   });
   if (added) p.zremrangebyscore('news:queue', 0, Date.now() - NEWS_TTL * 1000); // buang > 3 hari
   if (Object.keys(upd).length) p.hset('news:tg:last', upd);
