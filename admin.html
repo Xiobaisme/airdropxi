@@ -6093,32 +6093,67 @@ function showAirdropDashboard() {
     }
 
     // ── Fear & Greed ──
-    const fngColor = v => v < 25 ? '#EF4444' : v < 45 ? '#F59E0B' : v < 55 ? '#FFD23F' : v < 75 ? '#84cc16' : '#35E0A1';
-    const fngLabel = v => v < 25 ? 'Extreme Fear' : v < 45 ? 'Fear' : v < 55 ? 'Neutral' : v < 75 ? 'Greed' : 'Extreme Greed';
+const fngColor = v => v < 25 ? '#EF4444' : v < 45 ? '#F59E0B' : v < 55 ? '#FFD23F' : v < 75 ? '#84cc16' : '#35E0A1';
+const fngLabel = v => v < 25 ? 'Extreme Fear' : v < 45 ? 'Fear' : v < 55 ? 'Neutral' : v < 75 ? 'Greed' : 'Extreme Greed';
 
-    async function loadFng() {
-        if (Date.now() - st.fngT < 10 * 60e3) return;
-        try {
-            const r = await fetch('https://api.alternative.me/fng/?limit=3');
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            const rows = (await r.json()).data;
-            if (!rows || !rows.length) throw new Error('data kosong');
-            st.fngT = Date.now();
-            const v = +rows[0].value;
-            $('#fng-needle').style.transform = `rotate(${v * 1.8 - 90}deg)`;
-            $('#fng-val').textContent = v;
-            $('#fng-val').style.color = fngColor(v);
-            $('#fng-cls').textContent = fngLabel(v);
-            $('#fng-cls').style.color = fngColor(v);
-            const names = ['Sekarang', 'Kemarin', '2 hari lalu'];
-            $('#fng-hist').innerHTML = rows.map((x, i) =>
-                `<div class="fng-row"><span>${names[i]}</span><b style="background:${fngColor(+x.value)}">${x.value}</b></div>`).join('');
-            $('#fng-note').textContent = 'Sumber: alternative.me';
-        } catch (e) {
-            $('#fng-cls').textContent = 'Gagal memuat';
-            $('#fng-note').textContent = e.message;
+async function loadFng() {
+    // CMC update setiap 15 menit
+    if (Date.now() - st.fngT < 15 * 60e3) return;
+
+    try {
+        const r = await fetch(
+            'https://pro-api.coinmarketcap.com/public-api/v3/fear-and-greed/latest',
+            {
+                headers: {
+                    'Accept': 'application/json'
+                }
+            }
+        );
+
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+
+        const json = await r.json();
+
+        if (
+            !json.data ||
+            typeof json.data.value === 'undefined'
+        ) {
+            throw new Error('data Fear & Greed kosong');
         }
+
+        st.fngT = Date.now();
+
+        const v = Number(json.data.value);
+        const label = json.data.value_classification || fngLabel(v);
+
+        // Jarum 0–100 => -90° sampai +90°
+        $('#fng-needle').style.transform =
+            `rotate(${v * 1.8 - 90}deg)`;
+
+        $('#fng-val').textContent = v;
+
+        $('#fng-val').style.color = fngColor(v);
+
+        $('#fng-cls').textContent = label;
+        $('#fng-cls').style.color = fngColor(v);
+
+        // Karena endpoint latest hanya memberikan nilai terbaru,
+        // tidak ada data "kemarin / 2 hari lalu" di request ini.
+        $('#fng-hist').innerHTML = `
+            <div class="fng-row">
+                <span>Sekarang</span>
+                <b style="background:${fngColor(v)}">${v}</b>
+            </div>
+        `;
+
+        $('#fng-note').textContent =
+            'Sumber: CoinMarketCap • Update setiap 15 menit';
+
+    } catch (e) {
+        $('#fng-cls').textContent = 'Gagal memuat';
+        $('#fng-note').textContent = e.message;
     }
+}
 
     function start() {
         if (st.run) return;
