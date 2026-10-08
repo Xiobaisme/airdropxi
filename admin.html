@@ -1148,7 +1148,7 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 .hm-tab:hover{color:var(--text)}
 .hm-tab.on{background:#000;color:var(--text)}
 #hm-map{position:relative;height:540px;background:#050505;border:2px solid var(--border);border-radius:var(--r-sm);overflow:hidden}
-.hm-t{position:absolute;box-sizing:border-box;border:1px solid #050505;overflow:hidden;padding:8px 10px;color:#e8e8ea;line-height:1.15;transition:background .3s}
+.hm-t{position:absolute;box-sizing:border-box;border:1px solid #050505;overflow:hidden;padding:8px 10px;color:#e8e8ea;line-height:1.15;transition:left .6s ease,top .6s ease,width .6s ease,height .6s ease,background .4s}
 .hm-t b{display:block;font-family:var(--display);font-weight:500}
 .hm-t span{display:block;font-family:var(--mono);margin-top:6px;opacity:.85}
 .hm-empty{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;color:var(--text3);font-family:var(--label);font-size:.8rem;text-align:center;padding:1rem}
@@ -1761,7 +1761,7 @@ body.is-member .member-only { display: inline-flex; }
                     <div class="fng-val" id="fng-val">--</div>
                     <div class="fng-cls" id="fng-cls">Memuat…</div>
                     <div class="fng-hist" id="fng-hist"></div>
-                    <p class="ls-note">Sumber: alternative.me (indeks crypto harian).</p>
+                   <p class="ls-note" id="fng-note"></p>
                 </aside>
             </div>
         </div>
@@ -5987,187 +5987,8 @@ function showAirdropDashboard() {
     window.xlStart = function () { prevStart && prevStart(); start(); };
     window.xlStop  = function () { prevStop && prevStop(); stop(); };
 })();
-
-// ═══ HEATMAP 24 JAM + FEAR & GREED ═══
-(function () {
-    const $ = s => document.querySelector(s);
-    const FAPI = 'https://fapi.binance.com/fapi/v1';
-    const TOP = 40, POLL = 60000;
-    const MODES = [['volume', 'Volume'], ['chg', 'Chg%'], ['liq', 'Liquidation'], ['oi', 'Open Interest']];
-    const st = { mode: 'volume', tick: [], oi: {}, oiT: 0, liq: {}, since: Date.now(),
-                 ws: null, run: false, timer: null, fngTimer: null, busy: false, rt: null };
-
-    const coinOf = s => s.replace(/USDT$/, '').replace(/^1(0{3,})(?=[A-Z])/, '');
-    const usd = v => { const a = Math.abs(v); return '$' + (a >= 1e9 ? (v / 1e9).toFixed(2) + 'B' : a >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : a >= 1e3 ? (v / 1e3).toFixed(2) + 'K' : v.toFixed(0)); };
-    const setStatus = t => { const el = $('#hm-status'); if (el) el.textContent = t; };
-
-    // ── treemap squarified ──
-    function layout(items, x, y, w, h) {
-        const total = items.reduce((a, i) => a + i.v, 0), out = [];
-        if (!total) return out;
-        const rest = items.map(i => ({ ...i, a: i.v / total * w * h }));
-        while (rest.length) {
-            const sh = Math.min(w, h);
-            const worstOf = (r, sum) => {
-                const mx = Math.max(...r.map(i => i.a)), mn = Math.min(...r.map(i => i.a));
-                return Math.max(sh * sh * mx / (sum * sum), sum * sum / (sh * sh * mn));
-            };
-            let row = [], s = 0, worst = Infinity;
-            while (rest.length) {
-                const nr = [...row, rest[0]], ns = s + rest[0].a, nw = worstOf(nr, ns);
-                if (row.length && nw > worst) break;
-                row = nr; s = ns; worst = nw; rest.shift();
-            }
-            if (w >= h) {
-                const rw = s / h; let cy = y;
-                row.forEach(i => { const ih = i.a / rw; out.push({ ...i, x, y: cy, w: rw, h: ih }); cy += ih; });
-                x += rw; w -= rw;
-            } else {
-                const rh = s / w; let cx = x;
-                row.forEach(i => { const iw = i.a / rh; out.push({ ...i, x: cx, y, w: iw, h: rh }); cx += iw; });
-                y += rh; h -= rh;
-            }
-        }
-        return out;
-    }
-
-    const color = (dir, k) => `rgba(${dir >= 0 ? '53,160,90' : '239,68,68'},${(0.45 + 0.55 * Math.min(k, 1)).toFixed(2)})`;
-
-    function items() {
-        const top = st.tick.slice(0, TOP);
-        const base = x => ({ s: coinOf(x.symbol), chg: +x.priceChangePercent });
-        if (st.mode === 'volume') return top.map(x => ({ ...base(x), v: +x.quoteVolume, txt: usd(+x.quoteVolume), dir: +x.priceChangePercent, k: Math.abs(x.priceChangePercent) / 6 }));
-        if (st.mode === 'chg') return top.map(x => ({ ...base(x), v: Math.abs(+x.priceChangePercent) + 0.01, txt: (x.priceChangePercent >= 0 ? '+' : '') + (+x.priceChangePercent).toFixed(2) + '%', dir: +x.priceChangePercent, k: Math.abs(x.priceChangePercent) / 10 }));
-        if (st.mode === 'oi') return top.filter(x => st.oi[x.symbol] > 0).map(x => ({ ...base(x), v: st.oi[x.symbol], txt: usd(st.oi[x.symbol]), dir: +x.priceChangePercent, k: Math.abs(x.priceChangePercent) / 6 }));
-        return Object.entries(st.liq).map(([sym, l]) => {   // liquidation: merah = long dilikuidasi, hijau = short
-            const t = l.long + l.short, share = l.long / t;
-            return { s: coinOf(sym), v: t, txt: `${usd(t)}`, dir: share >= 0.5 ? -1 : 1, k: Math.abs(share - 0.5) * 2,
-                     tip: `Long liq ${usd(l.long)} · Short liq ${usd(l.short)}` };
-        }).sort((a, b) => b.v - a.v).slice(0, TOP);
-    }
-
-    function render() {
-        const box = $('#hm-map');
-        if (!box) return;
-        const list = items().sort((a, b) => b.v - a.v);
-        if (!list.length) {
-            box.innerHTML = `<div class="hm-empty">${st.mode === 'liq' ? 'Menunggu event likuidasi masuk…' : st.mode === 'oi' ? 'Memuat Open Interest…' : 'Memuat…'}</div>`;
-            return;
-        }
-        const W = box.clientWidth, H = box.clientHeight;
-        box.innerHTML = layout(list, 0, 0, W, H).map(t => {
-            const m = Math.min(t.w, t.h), big = Math.min(Math.max(m / 4.2, 11), 54);
-            const label = t.w > 36 && t.h > 24;
-            const tip = t.tip || `${t.s} · 24h ${t.chg >= 0 ? '+' : ''}${(t.chg || 0).toFixed(2)}%`;
-            return `<div class="hm-t" title="${esc(tip + ' · ' + t.txt)}" style="left:${t.x}px;top:${t.y}px;width:${t.w}px;height:${t.h}px;background:${color(t.dir, t.k)}">
-                ${label ? `<b style="font-size:${big}px">${esc(t.s)}</b>${t.h > big + 30 && t.w > 54 ? `<span style="font-size:${Math.max(10, big * 0.38)}px">${esc(t.txt)}</span>` : ''}` : ''}</div>`;
-        }).join('');
-    }
-    const later = () => { clearTimeout(st.rt); st.rt = setTimeout(render, 800); };
-
-    // ── data ──
-    async function loadTicker() {
-        const r = await fetch(FAPI + '/ticker/24hr');
-        if (!r.ok) throw new Error('HTTP ' + r.status);
-        st.tick = (await r.json()).filter(x => /^[A-Z0-9]+USDT$/.test(x.symbol) && +x.quoteVolume > 0)
-            .sort((a, b) => b.quoteVolume - a.quoteVolume);
-    }
-    async function loadOI() {
-        if (Date.now() - st.oiT < POLL - 5000) return;
-        st.oiT = Date.now();
-        const top = st.tick.slice(0, TOP);
-        const res = await Promise.allSettled(top.map(x => fetch(`${FAPI}/openInterest?symbol=${x.symbol}`).then(r => r.json())));
-        res.forEach((r, i) => { if (r.status === 'fulfilled' && r.value.openInterest) st.oi[top[i].symbol] = +r.value.openInterest * +top[i].lastPrice; });
-    }
-    async function refresh() {
-        if (!st.run || st.busy) return;
-        st.busy = true;
-        try {
-            await loadTicker();
-            if (st.mode === 'oi') await loadOI();
-            render();
-            const hhmm = new Date().toLocaleTimeString('id-ID', { hour12: false, timeZone: 'Asia/Jakarta' }).replace(/\./g, ':');
-            setStatus(`Binance Futures · top ${TOP} · ${hhmm} WIB · update tiap ${POLL / 1000} dtk`);
-        } catch (e) { setStatus('Gagal memuat dari Binance: ' + e.message); }
-        finally { st.busy = false; }
-    }
-
-    // ── likuidasi live (hanya terkumpul sejak halaman dibuka) ──
-    function connectWs() {
-        if (st.ws) { st.ws.onclose = null; st.ws.close(); st.ws = null; }
-        if (!st.run) return;
-        const w = new WebSocket('wss://fstream.binance.com/ws/!forceOrder@arr');
-        st.ws = w;
-        w.onmessage = e => {
-            let o; try { o = JSON.parse(e.data).o; } catch { return; }
-            if (!o || !/USDT$/.test(o.s)) return;
-            const v = (+o.ap || +o.p) * (+o.z || +o.q);
-            const l = st.liq[o.s] || (st.liq[o.s] = { long: 0, short: 0 });
-            o.S === 'SELL' ? (l.long += v) : (l.short += v);   // SELL = posisi long dipaksa tutup
-            if (st.mode === 'liq') later();
-        };
-        w.onclose = () => { if (st.run && st.ws === w) setTimeout(connectWs, 3000); };
-    }
-
-    // ── tabs ──
-    function notes() {
-        $('#hm-note').textContent = {
-            volume: 'Ukuran = volume 24 jam (USDT). Warna = perubahan harga 24 jam (hijau naik, merah turun).',
-            chg: 'Ukuran = besar perubahan harga 24 jam. Warna = arah (hijau naik, merah turun).',
-            oi: 'Ukuran = Open Interest dalam USD (kontrak × harga terakhir). Warna = perubahan harga 24 jam.',
-            liq: 'Ukuran = total likuidasi yang tertangkap sejak halaman ini dibuka (Binance tidak menyediakan data likuidasi 24 jam gratis). Merah = dominan long dilikuidasi, hijau = dominan short.',
-        }[st.mode];
-    }
-    function tabs() {
-        $('#hm-tabs').innerHTML = MODES.map(([k, l]) => `<button type="button" class="hm-tab ${k === st.mode ? 'on' : ''}" data-m="${k}">${l}</button>`).join('');
-        notes();
-    }
-    $('#hm-tabs').addEventListener('click', e => {
-        const m = e.target.closest('[data-m]')?.dataset.m;
-        if (!m || m === st.mode) return;
-        st.mode = m; tabs(); render();
-        if (m === 'oi') { st.oiT = 0; refresh(); }
-    });
-
-    // ── Fear & Greed ──
-    const fngCol = v => v < 25 ? '#EF4444' : v < 45 ? '#F59E0B' : v < 56 ? '#FFD23F' : v < 76 ? '#84cc16' : '#35E0A1';
-    async function loadFng() {
-        try {
-            const r = await fetch('https://api.alternative.me/fng/?limit=31');
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            const d = (await r.json()).data;
-            const v = +d[0].value;
-            $('#fng-needle').style.transform = `rotate(${v * 1.8 - 90}deg)`;
-            $('#fng-val').textContent = v;
-            $('#fng-val').style.color = fngCol(v);
-            $('#fng-cls').textContent = d[0].value_classification;
-            $('#fng-cls').style.color = fngCol(v);
-            const rows = [['Kemarin', 1], ['Minggu lalu', 7], ['Bulan lalu', 30]].filter(([, i]) => d[i]);
-            $('#fng-hist').innerHTML = rows.map(([l, i]) =>
-                `<div class="fng-row"><span>${l}<br><small style="color:var(--text3)">${esc(d[i].value_classification)}</small></span><b style="background:${fngCol(+d[i].value)}">${d[i].value}</b></div>`).join('');
-        } catch (e) { $('#fng-cls').textContent = 'Gagal memuat'; }
-    }
-
-    function start() {
-        if (st.run) return;
-        st.run = true;
-        tabs(); render(); refresh(); connectWs(); loadFng();
-        st.timer = setInterval(() => { if (!document.hidden) refresh(); }, POLL);
-        st.fngTimer = setInterval(loadFng, 10 * 60e3);
-    }
-    function stop() {
-        st.run = false; clearInterval(st.timer); clearInterval(st.fngTimer);
-        if (st.ws) { st.ws.onclose = null; st.ws.close(); st.ws = null; }
-    }
-    if (window.ResizeObserver) new ResizeObserver(() => { if (st.run) render(); }).observe($('#hm-map'));
-    document.addEventListener('visibilitychange', () => { if (st.run && !document.hidden) refresh(); });
-
-    const prevStart = window.xlStart, prevStop = window.xlStop;
-    window.xlStart = function () { prevStart && prevStart(); start(); };
-    window.xlStop  = function () { prevStop && prevStop(); stop(); };
-})();
-        
- </script>
+    
+</script>
 
 <script src="news-columns.js"></script>
 
