@@ -1,5 +1,6 @@
 // api/heatmap.js  ->  /api/heatmap
 // Gabungan Binance + Bybit + OKX + Bitget + Gate (futures USDT). Volume, perubahan 24 jam, OI, funding.
+// Tambahan: ?type=fng -> Fear & Greed Index dari CoinMarketCap (butuh env CMC_API_KEY)
 const H = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36', Accept: 'application/json' };
 const get = url =>
   fetch(url, { headers: H, signal: AbortSignal.timeout(7000) }).then(async r => {
@@ -90,8 +91,45 @@ const EX = {
   },
 };
 
+// ═══════════════════════════════════════════════════════════════
+// ─── FEAR & GREED (CoinMarketCap) ───
+// Dipanggil lewat /api/heatmap?type=fng
+// Butuh environment variable CMC_API_KEY di Vercel (Settings > Environment Variables)
+// ═══════════════════════════════════════════════════════════════
+async function fearGreed() {
+  const key = process.env.CMC_API_KEY;
+  if (!key) throw new Error('CMC_API_KEY belum di-set di environment Vercel');
+
+  const r = await fetch('https://pro-api.coinmarketcap.com/v3/fear-and-greed/latest', {
+    headers: {
+      'X-CMC_PRO_API_KEY': key,
+      Accept: 'application/json',
+    },
+    signal: AbortSignal.timeout(7000),
+  });
+
+  if (!r.ok) {
+    const body = (await r.text()).slice(0, 150);
+    throw new Error(`CMC HTTP ${r.status}: ${body}`);
+  }
+  return r.json();
+}
+
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
+
+  // ─── Route: Fear & Greed ───
+  if (req.query.type === 'fng') {
+    res.setHeader('Cache-Control', 's-maxage=900, stale-while-revalidate=1800'); // cache 15 menit
+    try {
+      const data = await fearGreed();
+      return res.status(200).json(data);
+    } catch (e) {
+      return res.status(502).json({ error: String(e.message || e) });
+    }
+  }
+
+  // ─── Route: Heatmap (default, seperti sebelumnya) ───
   res.setHeader('Cache-Control', 's-maxage=4, stale-while-revalidate=10');
 
   const names = Object.keys(EX);
