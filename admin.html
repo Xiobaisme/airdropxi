@@ -1956,7 +1956,7 @@ body.is-member .member-only { display: inline-flex; }
         <div class="cf-cols">
             <div class="cf-brand">
                 <img src="cmic-footer.svg" alt="CMIC" />
-                <p>Crypto Monkey Inner Circle. Ruang kerja internal untuk memantau market, onchain, dan airdrop dari satu tempat.</p>
+                <p>Crypto Monkey Inner Circle • Crypto Media • Market Intelligence • Market Analysis • Daily News</p>
             </div>
 
             <div class="cf-col">
@@ -2830,7 +2830,7 @@ function updateMarketSessionBadge(hourUTC) {
                 <div class="proj-card ${hasLink?'':'nolink'}" style="animation-delay:${Math.min(i,10)*0.03}s">
                     <div class="top">
                         <div class="logo-wrap">
-                            ${p.logo_url ? `<img src="${esc(p.logo_url)}" onerror="this.parentElement.innerHTML='${ICONS.box.replace(/'/g,"\\'")}'" />` : ICONS.box}
+                            ${p.logo_url ? `<img src="${esc(p.logo_url)}" data-fallback="1" />` : ICONS.box}
                         </div>
                         <div class="info">
                             <div class="name">${esc(p.name)}</div>
@@ -2857,6 +2857,10 @@ function updateMarketSessionBadge(hourUTC) {
                 </div>
             `;
             }).join('');
+            list.querySelectorAll('img[data-fallback]').forEach(img => {
+                img.addEventListener('error', () => { img.parentElement.innerHTML = ICONS.box; }, { once: true });
+            });
+    
         }
 
         // ─── EDIT MODAL ───
@@ -4351,6 +4355,7 @@ async function startFallingCoins() {
     _fc.run = true;
     await fcLoadRanking();
     await fcLoadPrices();
+    if (!_fc.run) return;
     fcConnectWS();
     clearInterval(_fc.rankTimer);
     _fc.rankTimer = setInterval(fcRefreshRanking, FC_RANK_REFRESH_MS);
@@ -4445,11 +4450,6 @@ async function logout() {
     try { google.accounts.id.disableAutoSelect(); } catch {}
     location.reload();
 }
-        // ─── INIT (juga menyuntik semua icon SVG ke tombol/label statis) ───
-            window.onload = async function() {
-            spawnLoginParticles();
-            spawnLoginLetters();
-            startFallingCoins();
 
             // Icon-fill untuk elemen statis (bukan hasil render dinamis)
             document.getElementById('calc-toggle-btn').innerHTML = icon('calculator') + 'Calc';
@@ -5986,6 +5986,145 @@ function showAirdropDashboard() {
     const prevStart = window.xlStart, prevStop = window.xlStop;
     window.xlStart = function () { prevStart && prevStart(); start(); };
     window.xlStop  = function () { prevStop && prevStop(); stop(); };
+})();
+
+// ═══ HEATMAP 24 JAM + FEAR & GREED ═══
+(function () {
+    const $ = s => document.querySelector(s);
+    const TABS = [['vol', 'Volume'], ['oi', 'Open Interest'], ['tradfi', 'TradFi']];
+    const st = { tab: 'vol', coins: [], exchanges: [], failed: {}, run: false, timer: null, fngT: 0 };
+    const tiles = new Map();
+
+    const money = v => '$' + (v >= 1e9 ? (v / 1e9).toFixed(2) + 'B' : v >= 1e6 ? (v / 1e6).toFixed(1) + 'M' : v >= 1e3 ? (v / 1e3).toFixed(0) + 'K' : v.toFixed(0));
+    const bg = chg => {
+        const a = (0.25 + Math.min(Math.abs(chg) / 6, 1) * 0.6).toFixed(2);
+        return chg >= 0 ? `rgba(53,224,161,${a})` : `rgba(239,68,68,${a})`;
+    };
+
+    // ── squarified treemap ──
+    function layout(items, W, H) {
+        const total = items.reduce((s, i) => s + i.v, 0);
+        if (!total) return [];
+        const k = (W * H) / total, nodes = items.map(i => ({ ...i, a: i.v * k }));
+        const out = []; let x = 0, y = 0, w = W, h = H, row = [];
+        const sum = r => r.reduce((t, n) => t + n.a, 0);
+        const worst = (r, side) => {
+            const s = sum(r), mx = Math.max(...r.map(n => n.a)), mn = Math.min(...r.map(n => n.a));
+            return Math.max((side * side * mx) / (s * s), (s * s) / (side * side * mn));
+        };
+        const place = r => {
+            const s = sum(r);
+            if (w >= h) { const rw = s / h; let cy = y; r.forEach(n => { const rh = n.a / rw; out.push({ ...n, x, y: cy, w: rw, h: rh }); cy += rh; }); x += rw; w -= rw; }
+            else { const rh = s / w; let cx = x; r.forEach(n => { const rw = n.a / rh; out.push({ ...n, x: cx, y, w: rw, h: rh }); cx += rw; }); y += rh; h -= rh; }
+        };
+        nodes.forEach(n => {
+            const side = Math.min(w, h);
+            if (!row.length || worst(row.concat(n), side) <= worst(row, side)) row.push(n);
+            else { place(row); row = [n]; }
+        });
+        if (row.length) place(row);
+        return out;
+    }
+
+    function render() {
+        const map = $('#hm-map');
+        if (!map) return;
+        let list = st.coins;
+        if (st.tab === 'tradfi') list = list.filter(c => c.tradfi);
+        const key = st.tab === 'oi' ? 'oi' : 'vol';
+        const items = list.filter(c => c[key] > 0).map(c => ({ ...c, v: c[key] })).sort((a, b) => b.v - a.v).slice(0, st.tab === 'tradfi' ? 30 : 60);
+
+        if (!items.length) {
+            tiles.forEach(t => t.remove()); tiles.clear();
+            if (!map.querySelector('.hm-empty')) map.insertAdjacentHTML('beforeend', '<div class="hm-empty">Tidak ada data untuk tab ini.</div>');
+            return;
+        }
+        map.querySelector('.hm-empty')?.remove();
+
+        const W = map.clientWidth, H = map.clientHeight;
+        const placed = layout(items, W, H), alive = new Set();
+        placed.forEach(n => {
+            alive.add(n.c);
+            let el = tiles.get(n.c);
+            if (!el) { el = document.createElement('div'); el.className = 'hm-t'; el.innerHTML = '<b></b><span></span>'; map.appendChild(el); tiles.set(n.c, el); }
+            const fs = Math.max(9, Math.min(26, Math.sqrt(n.w * n.h) / 5));
+            el.style.cssText = `left:${n.x}px;top:${n.y}px;width:${n.w}px;height:${n.h}px;background:${bg(n.chg)};`;
+            const b = el.firstChild, s = el.lastChild;
+            b.textContent = n.c; b.style.fontSize = fs + 'px';
+            s.textContent = `${n.chg >= 0 ? '+' : ''}${n.chg.toFixed(2)}%`; s.style.fontSize = Math.max(8, fs * 0.6) + 'px';
+            s.style.display = n.h < 38 || n.w < 46 ? 'none' : 'block';
+            b.style.display = n.h < 20 || n.w < 28 ? 'none' : 'block';
+            el.title = `${n.c}\nVol: ${money(n.vol)}\nOI: ${money(n.oi)}\n24h: ${n.chg.toFixed(2)}%` + (n.fund != null ? `\nFunding: ${n.fund.toFixed(4)}%` : '');
+        });
+        tiles.forEach((el, c) => { if (!alive.has(c)) { el.remove(); tiles.delete(c); } });
+    }
+
+    function renderTabs() {
+        $('#hm-tabs').innerHTML = TABS.map(([k, l]) => `<button type="button" class="hm-tab ${k === st.tab ? 'on' : ''}" data-tab="${k}">${l}</button>`).join('');
+    }
+    $('#hm-tabs').addEventListener('click', e => {
+        const b = e.target.closest('[data-tab]');
+        if (!b || b.dataset.tab === st.tab) return;
+        st.tab = b.dataset.tab; renderTabs(); render();
+    });
+
+    async function load() {
+        try {
+            const r = await fetch('/api/heatmap');
+            const d = await r.json().catch(() => ({}));
+            if (!r.ok) throw new Error(d.error || 'HTTP ' + r.status);
+            st.coins = d.coins || []; st.exchanges = d.exchanges || []; st.failed = d.failed || {};
+            render();
+            const hhmm = new Date().toLocaleTimeString('id-ID', { hour12: false, timeZone: 'Asia/Jakarta' }).replace(/\./g, ':');
+            const bad = Object.keys(st.failed);
+            $('#hm-status').textContent = `${st.exchanges.join(', ')} · ${st.coins.length} koin · ${hhmm} WIB`;
+            $('#hm-note').textContent = 'Ukuran kotak = ' + (st.tab === 'oi' ? 'open interest' : 'volume 24 jam')
+                + ', warna = perubahan 24 jam (rata-rata berbobot volume antar bursa). Hijau naik, merah turun.'
+                + (bad.length ? ` Bursa gagal: ${bad.map(k => k + ' (' + st.failed[k] + ')').join(', ')}.` : '');
+        } catch (e) {
+            $('#hm-status').textContent = 'Gagal memuat heatmap: ' + e.message + ' · mencoba lagi…';
+        }
+    }
+
+    // ── Fear & Greed ──
+    const fngColor = v => v < 25 ? '#EF4444' : v < 45 ? '#F59E0B' : v < 55 ? '#FFD23F' : v < 75 ? '#84cc16' : '#35E0A1';
+    const fngLabel = v => v < 25 ? 'Extreme Fear' : v < 45 ? 'Fear' : v < 55 ? 'Neutral' : v < 75 ? 'Greed' : 'Extreme Greed';
+
+    async function loadFng() {
+        if (Date.now() - st.fngT < 10 * 60e3) return;
+        try {
+            const r = await fetch('https://api.alternative.me/fng/?limit=3');
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const rows = (await r.json()).data;
+            if (!rows || !rows.length) throw new Error('data kosong');
+            st.fngT = Date.now();
+            const v = +rows[0].value;
+            $('#fng-needle').style.transform = `rotate(${v * 1.8 - 90}deg)`;
+            $('#fng-val').textContent = v;
+            $('#fng-val').style.color = fngColor(v);
+            $('#fng-cls').textContent = fngLabel(v);
+            $('#fng-cls').style.color = fngColor(v);
+            const names = ['Sekarang', 'Kemarin', '2 hari lalu'];
+            $('#fng-hist').innerHTML = rows.map((x, i) =>
+                `<div class="fng-row"><span>${names[i]}</span><b style="background:${fngColor(+x.value)}">${x.value}</b></div>`).join('');
+            $('#fng-note').textContent = 'Sumber: alternative.me';
+        } catch (e) {
+            $('#fng-cls').textContent = 'Gagal memuat';
+            $('#fng-note').textContent = e.message;
+        }
+    }
+
+    function start() {
+        if (st.run) return;
+        st.run = true; renderTabs(); load(); loadFng();
+        st.timer = setInterval(() => { if (!document.hidden) { load(); loadFng(); } }, 15000);
+    }
+    function stop() { st.run = false; clearInterval(st.timer); st.timer = null; }
+    let rz; window.addEventListener('resize', () => { clearTimeout(rz); rz = setTimeout(() => { if (st.run) render(); }, 150); });
+
+    const ps = window.xlStart, pp = window.xlStop;
+    window.xlStart = function () { ps && ps(); start(); };
+    window.xlStop  = function () { pp && pp(); stop(); };
 })();
     
 </script>
