@@ -6097,60 +6097,39 @@ const fngColor = v => v < 25 ? '#EF4444' : v < 45 ? '#F59E0B' : v < 55 ? '#FFD23
 const fngLabel = v => v < 25 ? 'Extreme Fear' : v < 45 ? 'Fear' : v < 55 ? 'Neutral' : v < 75 ? 'Greed' : 'Extreme Greed';
 
 async function loadFng() {
-    // CMC update setiap 15 menit
-if (Date.now() - st.fngT < 15 * 60e3) return;
+    if (Date.now() - st.fngT < 15 * 60e3) return;
+    try {
+        const r = await fetch('/api/heatmap?type=fng');
+        const json = await r.json().catch(() => ({}));
 
-try {
-    const r = await fetch(
-        'https://pro-api.coinmarketcap.com/v3/fear-and-greed/latest',
-        {
-            headers: {
-                'X-CMC_PRO_API_KEY': process.env.CMC_API_KEY,
-                'Accept': 'application/json'
-            }
+        if (!r.ok) throw new Error(json.error || ('HTTP ' + r.status));
+
+        if (!json.data || typeof json.data.value === 'undefined') {
+            throw new Error('data Fear & Greed kosong');
         }
-    );
 
-    if (!r.ok) throw new Error('HTTP ' + r.status);
+        st.fngT = Date.now();
+        const v = Number(json.data.value);
+        const label = json.data.value_classification || fngLabel(v);
 
-    const json = await r.json();
+        $('#fng-needle').style.transform = `rotate(${v * 1.8 - 90}deg)`;
+        $('#fng-val').textContent = v;
+        $('#fng-val').style.color = fngColor(v);
+        $('#fng-cls').textContent = label;
+        $('#fng-cls').style.color = fngColor(v);
 
-    if (
-        !json.data ||
-        typeof json.data.value === 'undefined'
-    ) {
-        throw new Error('data Fear & Greed kosong');
+        $('#fng-hist').innerHTML = `
+            <div class="fng-row">
+                <span>Sekarang</span>
+                <b style="background:${fngColor(v)}">${v}</b>
+            </div>
+        `;
+        $('#fng-note').textContent = 'Sumber: CoinMarketCap • Update setiap 15 menit';
+    } catch (e) {
+        $('#fng-cls').textContent = 'Gagal memuat';
+        $('#fng-note').textContent = e.message;
     }
-
-    st.fngT = Date.now();
-
-    const v = Number(json.data.value);
-    const label = json.data.value_classification || fngLabel(v);
-
-    $('#fng-needle').style.transform =
-        `rotate(${v * 1.8 - 90}deg)`;
-
-    $('#fng-val').textContent = v;
-    $('#fng-val').style.color = fngColor(v);
-
-    $('#fng-cls').textContent = label;
-    $('#fng-cls').style.color = fngColor(v);
-
-    $('#fng-hist').innerHTML = `
-        <div class="fng-row">
-            <span>Sekarang</span>
-            <b style="background:${fngColor(v)}">${v}</b>
-        </div>
-    `;
-
-    $('#fng-note').textContent =
-        'Sumber: CoinMarketCap • Update setiap 15 menit';
-
-} catch (e) {
-    $('#fng-cls').textContent = 'Gagal memuat';
-    $('#fng-note').textContent = e.message;
 }
-
     function start() {
         if (st.run) return;
         st.run = true; renderTabs(); load(); loadFng();
