@@ -4451,6 +4451,12 @@ async function logout() {
     location.reload();
 }
 
+        // ─── INIT (juga menyuntik semua icon SVG ke tombol/label statis) ───
+            window.onload = async function() {
+            spawnLoginParticles();
+            spawnLoginLetters();
+            startFallingCoins();
+
             // Icon-fill untuk elemen statis (bukan hasil render dinamis)
             document.getElementById('calc-toggle-btn').innerHTML = icon('calculator') + 'Calc';
             document.getElementById('broadcast-toggle-btn').innerHTML = icon('send') + 'Broadcast';
