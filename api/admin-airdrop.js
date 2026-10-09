@@ -1,7 +1,7 @@
 // api/admin-airdrop.js
 const crypto = require('crypto');
 const { verifyAdminToken, issueSession, clearSession, addCookie } = require('../lib/auth');
-const MEMBER_TYPES = ['onchain', 'btcd', 'token-unlocks', 'feed', 'nlf-history', 'nlf-stream',];
+const MEMBER_TYPES = ['onchain', 'btcd', 'usdtd', 'token-unlocks', 'feed', 'nlf-history', 'nlf-stream',];
 const roleOf = (s) => (!s ? null : s.provider === 'google' ? 'admin' : 'member');
 
 // ── lazy load: modul berisiko baru di-require saat dipakai ──
@@ -521,6 +521,34 @@ if (roleOf(session) === 'member' && !MEMBER_TYPES.includes(type)) {
         } catch (e) { console.warn('[btcd] gagal ambil CoinGecko:', e.message); }
       }
       const rows = await redis.lrange('btcd:hist', 0, -1);
+      const pts = rows.map(r => (typeof r === 'string' ? JSON.parse(r) : r)).filter(Array.isArray);
+      return res.status(200).json(pts);
+    } catch (e) {
+      return res.status(500).json({ error: serializeError(e) });
+    }
+  }
+
+    // ─── USDT.D RECORDER (sama seperti btcd: CoinGecko /global cuma kasih nilai sekarang, riwayat direkam sendiri) ───
+  if (type === 'usdtd') {
+    if (req.method !== 'GET') return res.status(405).json({ error: 'Method tidak diizinkan' });
+    res.setHeader('Cache-Control', 'no-store');
+    try {
+      const now = Date.now();
+      // lock atomik 5 menit: kalau banyak tab/user buka bareng, hanya satu yang merekam
+      const got = await redis.set('usdtd:last', now, { nx: true, ex: 300 });
+      if (got) {
+        try {
+          const r = await fetch('https://api.coingecko.com/api/v3/global', { headers: { accept: 'application/json' } });
+          if (r.ok) {
+            const dom = (await r.json())?.data?.market_cap_percentage?.usdt;
+            if (typeof dom === 'number') {
+              await redis.rpush('usdtd:hist', JSON.stringify([Math.floor(now / 1000), +dom.toFixed(4)]));
+              await redis.ltrim('usdtd:hist', -20000, -1);      // simpan ±2 bulan
+            }
+          }
+        } catch (e) { console.warn('[usdtd] gagal ambil CoinGecko:', e.message); }
+      }
+      const rows = await redis.lrange('usdtd:hist', 0, -1);
       const pts = rows.map(r => (typeof r === 'string' ? JSON.parse(r) : r)).filter(Array.isArray);
       return res.status(200).json(pts);
     } catch (e) {
