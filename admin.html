@@ -879,6 +879,30 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 .ie-tools label { font-family: var(--label); font-size: .7rem; font-weight: 700; color: var(--text2); }
 .ie-tools input[type=range] { flex: 1; min-width: 140px; accent-color: var(--primary); }
 .nlf-btn:disabled { opacity: .35; cursor: default; }
+
+.ie-guides { position:absolute; inset:0; pointer-events:none; z-index:4; line-height:1; }
+.ie-guides.off { display:none; }
+.ie-gv, .ie-gh { position:absolute; background:rgba(255,255,255,.16); }
+.ie-gv { top:0; bottom:0; width:1px; margin-left:-.5px; }
+.ie-gh { left:0; right:0; height:1px; margin-top:-.5px; }
+.ie-gv.t, .ie-gh.t { background:rgba(255,210,63,.45); }
+.ie-gv.c, .ie-gh.c { background:rgba(255,79,154,.75); }
+.ie-gl { position:absolute; font:700 9px/1 var(--mono); color:#fff; background:rgba(0,0,0,.65); padding:2px 3px; border-radius:3px; }
+.ie-gl.x { top:2px; transform:translateX(-50%); }
+.ie-gl.y { left:2px; transform:translateY(-50%); }
+.ie-snap { position:absolute; display:none; background:#FFD23F; z-index:6; pointer-events:none; }
+.ie-snap.v { top:0; bottom:0; width:1px; margin-left:-.5px; }
+.ie-snap.h { left:0; right:0; height:1px; margin-top:-.5px; }
+.ie-logo.sel::after { content:attr(data-info); position:absolute; left:0; bottom:100%; margin-bottom:3px; white-space:nowrap;
+    font:700 10px/1 var(--mono); color:#000; background:var(--secondary); padding:3px 6px; border-radius:4px; pointer-events:none; }
+.ie-num label { display:inline-flex; align-items:center; gap:4px; }
+.ie-num input[type=number] { width:76px; background:var(--card-2); border:2px solid var(--border); border-radius:var(--r-sm);
+    color:var(--text); font-family:var(--mono); font-size:.78rem; padding:.4rem .5rem; outline:none; }
+.ie-num input[type=number]:focus { border-color:var(--primary); }
+.ie-num select { background:var(--card-2); color:var(--text); border:2px solid var(--border); border-radius:var(--r-sm);
+    font-family:var(--label); font-weight:700; font-size:.72rem; padding:.4rem .6rem; margin-left:auto; }
+.ie-readout { font-family:var(--mono); font-size:.72rem; line-height:1.7; color:var(--text2); }
+.ie-readout b { color:var(--secondary); }
         
         /* ── Ticker miring (pita) ── */
 #crypto-ticker {
@@ -2202,18 +2226,40 @@ body.is-member .member-only { display: inline-flex; }
             <div class="ie-stage-wrap">
                 <div class="ie-stage" id="ie-stage"><img class="ie-base" id="ie-base" alt="" draggable="false"></div>
             </div>
-            <div class="ie-tools">
-                <button class="nlf-btn" type="button" onclick="ieAddLogo(IE_LOGO_URL)">+ OURBIT × CMIC</button>
-                <button class="nlf-btn" type="button" onclick="document.getElementById('ie-file').click()">+ SVG lain</button>
-                <input type="file" id="ie-file" accept=".svg,image/svg+xml,image/png" class="hidden">
-                <button class="nlf-btn" type="button" id="ie-del" onclick="ieDelete()" disabled>Hapus</button>
-            </div>
-            <div class="ie-tools">
-                <label for="ie-size">Ukuran</label>
-                <input type="range" id="ie-size" min="5" max="100" value="40" disabled>
-            </div>
-            <div class="hint" style="font-family:var(--label);font-size:.7rem;color:var(--text3)">Klik logo lalu geser. Slider untuk mengatur ukuran.</div>
-        </div>
+            <div class="ie-stage-wrap">
+    <div class="ie-stage" id="ie-stage">
+        <img class="ie-base" id="ie-base" alt="" draggable="false">
+        <div class="ie-guides" id="ie-guides"></div>
+        <i class="ie-snap v" id="ie-snap-v"></i><i class="ie-snap h" id="ie-snap-h"></i>
+    </div>
+</div>
+<div class="ie-tools">
+    <button class="nlf-btn" type="button" onclick="ieAddLogo(IE_LOGO_URL)">+ OURBIT × CMIC</button>
+    <button class="nlf-btn" type="button" onclick="document.getElementById('ie-file').click()">+ SVG lain</button>
+    <input type="file" id="ie-file" accept=".svg,image/svg+xml,image/png" class="hidden">
+    <button class="nlf-btn" type="button" id="ie-del" onclick="ieDelete()" disabled>Hapus</button>
+    <label class="oc-check"><input type="checkbox" id="ie-grid" checked> Grid</label>
+    <label class="oc-check"><input type="checkbox" id="ie-snapon" checked> Snap</label>
+</div>
+<div class="ie-tools">
+    <label for="ie-size">Ukuran <b id="ie-size-v">–</b></label>
+    <input type="range" id="ie-size" min="5" max="100" value="40" disabled>
+</div>
+<div class="ie-tools ie-num">
+    <label>X <input type="number" id="ie-x" min="0" max="100" step="0.5" disabled>%</label>
+    <label>Y <input type="number" id="ie-y" min="0" max="100" step="0.5" disabled>%</label>
+    <label>Lebar <input type="number" id="ie-w" min="5" max="100" step="0.5" disabled>%</label>
+    <select id="ie-preset" disabled>
+        <option value="">Posisi cepat…</option>
+        <option value="l,t">Kiri atas</option><option value="c,t">Tengah atas</option><option value="r,t">Kanan atas</option>
+        <option value="c,m">Tengah</option>
+        <option value="l,b">Kiri bawah</option><option value="c,b">Tengah bawah</option><option value="r,b">Kanan bawah</option>
+    </select>
+</div>
+<div class="ie-readout" id="ie-readout"></div>
+<div class="hint" style="font-family:var(--label);font-size:.7rem;color:var(--text3)">
+    Klik logo lalu geser. X/Y = jarak pojok kiri-atas logo dari tepi gambar, Lebar = % dari lebar gambar. Panah keyboard = geser halus (Shift = 5%), Alt saat drag = matikan snap.
+</div>
         <div class="modal-actions">
             <button class="btn-cancel" onclick="closeImageEditor()">Batal</button>
             <button class="btn-save" onclick="applyImageEditor()">Terapkan</button>
@@ -3732,26 +3778,87 @@ document.getElementById('b-image-paste').addEventListener('paste', (e) => {
     }
 });
 
-    // ─── EDITOR GAMBAR: tambah SVG, geser, atur ukuran, lalu digabung ke gambar ───
+   // ─── EDITOR GAMBAR: tambah SVG, geser, atur ukuran, lalu digabung ke gambar ───
 const IE_LOGO_URL = '/ourbit-cmic.svg';
+const IE_SNAP = 0.015;                      // jarak tarik snap (1.5% dari gambar)
+const IE_TARGETS = [0, 1/3, 0.5, 2/3, 1];   // tepi, sepertiga, tengah
 const ie = { layers: [], sel: null, drag: null };
 const ieEl = (id) => document.getElementById(id);
+const iePct = (v) => String(Math.round(v * 1000) / 10);
+const ieClamp = (v, a, b) => Math.min(b, Math.max(a, v));
 ieEl('b-image-edit').innerHTML = icon('edit');
 ieEl('ie-close-btn').innerHTML = icon('x');
+
+// grid patokan (dibangun sekali)
+(function ieBuildGuides() {
+    let h = '';
+    for (let p = 10; p <= 90; p += 10) {
+        const c = p === 50 ? ' c' : '';
+        h += `<i class="ie-gv${c}" style="left:${p}%"></i><i class="ie-gh${c}" style="top:${p}%"></i>`
+           + `<span class="ie-gl x" style="left:${p}%">${p}</span><span class="ie-gl y" style="top:${p}%">${p}</span>`;
+    }
+    h += '<i class="ie-gv t" style="left:33.333%"></i><i class="ie-gv t" style="left:66.667%"></i>'
+       + '<i class="ie-gh t" style="top:33.333%"></i><i class="ie-gh t" style="top:66.667%"></i>';
+    ieEl('ie-guides').innerHTML = h;
+})();
+ieEl('ie-grid').addEventListener('change', e => ieEl('ie-guides').classList.toggle('off', !e.target.checked));
 
 function ieLoad(src) {
     return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
 }
+// tinggi logo sebagai fraksi tinggi gambar
+function ieHf(L) {
+    const r = ieEl('ie-stage').getBoundingClientRect();
+    return r.height ? (L.wf * r.width / L.ar) / r.height : 0;
+}
+
 function ieLayout(L) {
     const s = L.el.style;
     s.left = (L.x * 100) + '%'; s.top = (L.y * 100) + '%'; s.width = (L.wf * 100) + '%';
+    L.el.dataset.info = `${iePct(L.wf)}% · X ${iePct(L.x)} · Y ${iePct(L.y)}`;
+    if (L === ie.sel) ieSync();
 }
+
+// isi kolom angka + keterangan sisa jarak
+function ieSync() {
+    const L = ie.sel, ro = ieEl('ie-readout');
+    ['ie-x', 'ie-y', 'ie-w', 'ie-size', 'ie-preset'].forEach(id => { ieEl(id).disabled = !L; });
+    if (!L) { ro.textContent = 'Klik logo untuk melihat posisi & ukuran.'; ieEl('ie-size-v').textContent = '–'; return; }
+    const hf = ieHf(L);
+    const set = (id, v) => { const el = ieEl(id); if (document.activeElement !== el) el.value = iePct(v); };
+    set('ie-x', L.x); set('ie-y', L.y); set('ie-w', L.wf);
+    ieEl('ie-size').value = Math.round(L.wf * 100);
+    ieEl('ie-size-v').textContent = iePct(L.wf) + '%';
+    ro.innerHTML = `Kiri <b>${iePct(L.x)}%</b> · Atas <b>${iePct(L.y)}%</b> · Lebar <b>${iePct(L.wf)}%</b> · Tinggi <b>${iePct(hf)}%</b><br>`
+                 + `Sisa kanan <b>${iePct(1 - L.x - L.wf)}%</b> · Sisa bawah <b>${iePct(1 - L.y - hf)}%</b>`;
+}
+
 function ieSelect(L) {
     ie.sel = L;
     ie.layers.forEach(x => x.el.classList.toggle('sel', x === L));
     ieEl('ie-del').disabled = !L;
-    const s = ieEl('ie-size'); s.disabled = !L;
-    if (L) s.value = Math.round(L.wf * 100);
+    ieSync();
+}
+
+function ieResize(L, wf) {
+    L.wf = ieClamp(wf, 0.05, 1);
+    L.x = ieClamp(L.x, 0, Math.max(0, 1 - L.wf));
+    L.y = ieClamp(L.y, 0, Math.max(0, 1 - ieHf(L)));
+}
+
+// snap: tepi kiri/tengah/kanan logo ke garis patokan terdekat
+function ieSnap1(pos, size) {
+    let best = null;
+    for (const off of [0, size / 2, size]) for (const t of IE_TARGETS) {
+        const d = t - (pos + off);
+        if (Math.abs(d) <= IE_SNAP && (!best || Math.abs(d) < Math.abs(best.d))) best = { d, t };
+    }
+    return best;
+}
+function ieSnapLines(gx, gy) {
+    const v = ieEl('ie-snap-v'), h = ieEl('ie-snap-h');
+    v.style.display = gx == null ? 'none' : 'block'; if (gx != null) v.style.left = (gx * 100) + '%';
+    h.style.display = gy == null ? 'none' : 'block'; if (gy != null) h.style.top = (gy * 100) + '%';
 }
 
 function openImageEditor(e) {
@@ -3759,7 +3866,7 @@ function openImageEditor(e) {
     if (!_broadcastImageOriginal) return;
     ie.layers = []; ie.sel = null; ie.drag = null;
     ieEl('ie-stage').querySelectorAll('.ie-logo').forEach(n => n.remove());
-    ieSelect(null);
+    ieSelect(null); ieSnapLines(null, null);
     const base = ieEl('ie-base');
     base.onload = () => {
         const maxW = Math.min(820, window.innerWidth - 90), maxH = window.innerHeight * 0.5;
@@ -3792,12 +3899,21 @@ async function ieAddLogo(src) {
     });
     el.addEventListener('pointermove', ev => {
         const d = ie.drag; if (!d || d.L !== L) return;
-        const hf = (L.wf * d.r.width / L.ar) / d.r.height;   // tinggi logo (fraksi)
-        L.x = Math.min(Math.max(0, 1 - L.wf), Math.max(0, d.x0 + (ev.clientX - d.sx) / d.r.width));
-        L.y = Math.min(Math.max(0, 1 - hf),    Math.max(0, d.y0 + (ev.clientY - d.sy) / d.r.height));
+        const hf = (L.wf * d.r.width / L.ar) / d.r.height;
+        let nx = d.x0 + (ev.clientX - d.sx) / d.r.width;
+        let ny = d.y0 + (ev.clientY - d.sy) / d.r.height;
+        let gx = null, gy = null;
+        if (ieEl('ie-snapon').checked && !ev.altKey) {
+            const bx = ieSnap1(nx, L.wf), by = ieSnap1(ny, hf);
+            if (bx) { nx += bx.d; gx = bx.t; }
+            if (by) { ny += by.d; gy = by.t; }
+        }
+        L.x = ieClamp(nx, 0, Math.max(0, 1 - L.wf));
+        L.y = ieClamp(ny, 0, Math.max(0, 1 - hf));
+        ieSnapLines(gx, gy);
         ieLayout(L);
     });
-    const end = () => { ie.drag = null; };
+    const end = () => { ie.drag = null; ieSnapLines(null, null); };
     el.addEventListener('pointerup', end);
     el.addEventListener('pointercancel', end);
 }
@@ -3809,12 +3925,44 @@ function ieDelete() {
     ieSelect(null);
 }
 
+// slider + kolom angka
 ieEl('ie-size').addEventListener('input', e => {
     const L = ie.sel; if (!L) return;
-    L.wf = +e.target.value / 100;
-    L.x = Math.min(L.x, Math.max(0, 1 - L.wf));
+    ieResize(L, +e.target.value / 100); ieLayout(L);
+});
+const ieNum = (id, fn) => ieEl(id).addEventListener('input', e => {
+    const L = ie.sel, v = parseFloat(e.target.value);
+    if (!L || isNaN(v)) return;
+    fn(L, v / 100); ieLayout(L);
+});
+ieNum('ie-x', (L, v) => { L.x = ieClamp(v, 0, Math.max(0, 1 - L.wf)); });
+ieNum('ie-y', (L, v) => { L.y = ieClamp(v, 0, Math.max(0, 1 - ieHf(L))); });
+ieNum('ie-w', (L, v) => ieResize(L, v));
+
+// posisi cepat (margin 3% dari tepi)
+ieEl('ie-preset').addEventListener('change', e => {
+    const L = ie.sel; if (!L || !e.target.value) return;
+    const [h, v] = e.target.value.split(','), hf = ieHf(L), m = 0.03;
+    L.x = h === 'l' ? m : h === 'r' ? 1 - L.wf - m : (1 - L.wf) / 2;
+    L.y = v === 't' ? m : v === 'b' ? 1 - hf - m : (1 - hf) / 2;
+    L.x = ieClamp(L.x, 0, Math.max(0, 1 - L.wf)); L.y = ieClamp(L.y, 0, Math.max(0, 1 - hf));
+    ieLayout(L);
+    e.target.value = '';
+});
+
+// panah keyboard = geser halus
+document.addEventListener('keydown', e => {
+    const L = ie.sel;
+    if (!L || ieEl('image-edit-modal').classList.contains('hidden') || e.target.matches('input,select,textarea')) return;
+    const k = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key];
+    if (!k) return;
+    e.preventDefault();
+    const st = e.shiftKey ? 0.05 : 0.005;
+    L.x = ieClamp(L.x + k[0] * st, 0, Math.max(0, 1 - L.wf));
+    L.y = ieClamp(L.y + k[1] * st, 0, Math.max(0, 1 - ieHf(L)));
     ieLayout(L);
 });
+
 ieEl('ie-stage').addEventListener('pointerdown', e => { if (e.target === ieEl('ie-base')) ieSelect(null); });
 ieEl('ie-file').addEventListener('change', e => {
     const f = e.target.files[0];
@@ -3837,7 +3985,7 @@ async function applyImageEditor() {
         }
     } catch { showToast('Gagal menggabungkan SVG', 'error'); return; }
     let out = c.toDataURL('image/png');
-    if (out.length > 3.5e6) out = c.toDataURL('image/jpeg', 0.9);   // jaga ukuran request tetap kecil
+    if (out.length > 3.5e6) out = c.toDataURL('image/jpeg', 0.9);
     _broadcastImageBase64 = out;
     ieEl('b-image-preview').src = out;
     closeImageEditor();
