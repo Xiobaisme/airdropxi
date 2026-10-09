@@ -1482,6 +1482,34 @@ body.is-member .cf-hide-member,
 body.is-member [data-send] { display: none !important; }
 .member-only { display: none; }
 body.is-member .member-only { display: inline-flex; }
+/* hapus link "Market" tengah (dobel dengan tombol Market di kanan) khusus member */
+body.is-member .nav-center { display: none !important; }
+
+/* ═══ JUMP BAR (khusus member) ═══ */
+.jump-bar { display: none; }
+body.is-member .jump-bar {
+    display: flex; gap: 8px; overflow-x: auto; scrollbar-width: none;
+    position: sticky; top: 92px; z-index: 90;          /* 92px = tepat di bawah nav */
+    max-width: 1240px; width: calc(100% - 2rem); margin: 10px auto 0;
+    padding: 8px 10px; background: rgba(10,10,10,.92); backdrop-filter: blur(6px);
+    border: 2px solid var(--border); border-radius: 999px;
+}
+.jump-bar::-webkit-scrollbar { display: none; }
+.jump-btn {
+    flex-shrink: 0; font-family: var(--label); font-size: .72rem; font-weight: 800;
+    padding: .5rem 1.1rem; border-radius: 999px; cursor: pointer;
+    border: 2px solid var(--border); background: transparent; color: var(--text2);
+    transition: border-color var(--ease), color var(--ease), background var(--ease);
+}
+.jump-btn:hover { border-color: var(--border-light); color: var(--text); }
+.jump-btn.active { background: var(--primary-dim); border-color: var(--primary); color: var(--text); }
+
+/* judul section tidak ketutup nav + jump bar saat dilompati */
+#halaman-market [id^="sec-"] { scroll-margin-top: 160px; }
+
+@media (max-width: 900px) {
+    body.is-member .jump-bar { position: static; }
+}
 
 /* ═══ LAB MATERI (ebook) ═══ */
 .lab-fab{position:fixed;left:16px;bottom:160px;z-index:900;width:112px;padding:14px 10px 12px;display:flex;flex-direction:column;align-items:center;gap:7px;
@@ -1858,9 +1886,16 @@ body.is-member .member-only { display: inline-flex; }
 
     <!-- HALAMAN 1: MARKET DASHBOARD (DEFAULT) -->
 <div id="halaman-market">
+<div class="jump-bar" id="jump-bar">
+    <button class="jump-btn" type="button" data-jump="sec-chart">Live Chart</button>
+    <button class="jump-btn" type="button" data-jump="sec-ls">Long vs Short</button>
+    <button class="jump-btn" type="button" data-jump="sec-fls">Futures L/S</button>
+    <button class="jump-btn" type="button" data-jump="sec-hm">Heatmap 24H</button>
+    <button class="jump-btn" type="button" data-jump="sec-tu">Jadwal Unlock</button>
+</div>
 
        <!-- ─── CHART BTCUSDT.P + BTC.D ─── -->
-    <div class="market-section" style="max-width: 1360px; margin: 0 auto; padding: 2rem 1.5rem 0;">
+   <div class="market-section" id="sec-chart" style="max-width: 1360px; margin: 0 auto; padding: 2rem 1.5rem 0;">
         <div class="section-card" style="padding: 1.5rem 2rem;">
             <div class="btc-chart-head">
                 <div>
@@ -1881,7 +1916,7 @@ body.is-member .member-only { display: inline-flex; }
         </div>
     </div>
 
-    <div class="hero-grid" style="grid-template-columns: 1fr; padding-top: 2rem; padding-bottom: 1rem;">
+    <div class="hero-grid" id="sec-ls" style="grid-template-columns: 1fr; padding-top: 2rem; padding-bottom: 1rem;">
         <div>
             <div class="hero-eyebrow">Market Dashboard</div>
             <h1 style="font-size: clamp(2rem, 4vw, 3.2rem); margin-bottom: 1rem;">Exchange Trade <span>Long vs Short</span></h1>
@@ -1904,7 +1939,7 @@ body.is-member .member-only { display: inline-flex; }
     </div>
 
         <!-- ═══ CRYPTOCURRENCY FUTURES LONGS vs SHORTS (tabel heatmap) ═══ -->
-    <div class="market-section" style="max-width: 1360px; margin: 1.4rem auto 0; padding: 0 1.5rem;">
+        <div class="market-section" id="sec-fls" style="max-width: 1360px; margin: 1.4rem auto 0; padding: 0 1.5rem;">
         <div class="section-card" style="padding: 1.5rem 2rem;">
             <div class="fls-top">
                 <div class="fls-title">Cryptocurrency Futures Longs vs Shorts</div>
@@ -1937,7 +1972,7 @@ body.is-member .member-only { display: inline-flex; }
     </div>
 
          <!-- ═══ HEATMAP 24 JAM + FEAR & GREED ═══ -->
-    <div class="market-section" style="max-width: 1360px; margin: 1.4rem auto 0; padding: 0 1.5rem;">
+    <div class="market-section" id="sec-hm" style="max-width: 1360px; margin: 1.4rem auto 0; padding: 0 1.5rem;">
         <div class="section-card" style="padding: 1.5rem 2rem;">
             <div class="hm-grid">
                 <div class="hm-main">
@@ -1964,7 +1999,7 @@ body.is-member .member-only { display: inline-flex; }
         </div>
     </div>
     
-    <div class="market-section" style="max-width: 1360px; margin: 1.4rem auto 0; padding: 0 1.5rem;">
+    <div class="market-section" id="sec-tu" style="max-width: 1360px; margin: 1.4rem auto 0; padding: 0 1.5rem;">
         <div class="section-card" style="padding: 1.5rem 2rem;">
             <div class="tu-top">
                 <div>
@@ -7121,6 +7156,21 @@ async function loadFng() {
         `<div class="lp-nft"><img src="${s}" alt="" loading="lazy" onerror="this.parentElement.remove()"></div>`).join('');
     document.querySelector('[data-lp="prev"]').onclick = () => track.scrollBy({ left: -240, behavior: 'smooth' });
     document.querySelector('[data-lp="next"]').onclick = () => track.scrollBy({ left: 240, behavior: 'smooth' });
+})();
+// ═══ JUMP BAR (member): klik = scroll ke section, tombol aktif ikut section yang terlihat ═══
+(function () {
+    const bar = document.getElementById('jump-bar');
+    if (!bar) return;
+    const btns = [...bar.querySelectorAll('[data-jump]')];
+    btns.forEach(b => b.addEventListener('click', () => {
+        document.getElementById(b.dataset.jump)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+    }));
+    const io = new IntersectionObserver(es => {
+        es.forEach(e => {
+            if (e.isIntersecting) btns.forEach(b => b.classList.toggle('active', b.dataset.jump === e.target.id));
+        });
+    }, { rootMargin: '-35% 0px -55% 0px' });
+    btns.forEach(b => { const t = document.getElementById(b.dataset.jump); if (t) io.observe(t); });
 })();
 </script>
 
