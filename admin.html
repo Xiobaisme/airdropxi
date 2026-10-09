@@ -2215,7 +2215,7 @@ body.is-member .member-only { display: inline-flex; }
     </div>
 </div>
 
-        <!-- ─── EDITOR GAMBAR BROADCAST (tambah SVG + geser) ─── -->
+      <!-- ─── EDITOR GAMBAR BROADCAST (tambah SVG + geser) ─── -->
 <div id="image-edit-modal" class="modal hidden">
     <div class="modal-box ie-box">
         <div class="modal-head">
@@ -2224,48 +2224,46 @@ body.is-member .member-only { display: inline-flex; }
         </div>
         <div class="modal-body">
             <div class="ie-stage-wrap">
-                <div class="ie-stage" id="ie-stage"><img class="ie-base" id="ie-base" alt="" draggable="false"></div>
+                <div class="ie-stage" id="ie-stage">
+                    <img class="ie-base" id="ie-base" alt="" draggable="false">
+                    <div class="ie-guides" id="ie-guides"></div>
+                    <i class="ie-snap v" id="ie-snap-v"></i><i class="ie-snap h" id="ie-snap-h"></i>
+                </div>
             </div>
-            <div class="ie-stage-wrap">
-    <div class="ie-stage" id="ie-stage">
-        <img class="ie-base" id="ie-base" alt="" draggable="false">
-        <div class="ie-guides" id="ie-guides"></div>
-        <i class="ie-snap v" id="ie-snap-v"></i><i class="ie-snap h" id="ie-snap-h"></i>
-    </div>
-</div>
-<div class="ie-tools">
-    <button class="nlf-btn" type="button" onclick="ieAddLogo(IE_LOGO_URL)">+ OURBIT × CMIC</button>
-    <button class="nlf-btn" type="button" onclick="document.getElementById('ie-file').click()">+ SVG lain</button>
-    <input type="file" id="ie-file" accept=".svg,image/svg+xml,image/png" class="hidden">
-    <button class="nlf-btn" type="button" id="ie-del" onclick="ieDelete()" disabled>Hapus</button>
-    <label class="oc-check"><input type="checkbox" id="ie-grid" checked> Grid</label>
-    <label class="oc-check"><input type="checkbox" id="ie-snapon" checked> Snap</label>
-</div>
-<div class="ie-tools">
-    <label for="ie-size">Ukuran <b id="ie-size-v">–</b></label>
-    <input type="range" id="ie-size" min="5" max="100" value="40" disabled>
-</div>
-<div class="ie-tools ie-num">
-    <label>X <input type="number" id="ie-x" min="0" max="100" step="0.5" disabled>%</label>
-    <label>Y <input type="number" id="ie-y" min="0" max="100" step="0.5" disabled>%</label>
-    <label>Lebar <input type="number" id="ie-w" min="5" max="100" step="0.5" disabled>%</label>
-    <select id="ie-preset" disabled>
-        <option value="">Posisi cepat…</option>
-        <option value="l,t">Kiri atas</option><option value="c,t">Tengah atas</option><option value="r,t">Kanan atas</option>
-        <option value="c,m">Tengah</option>
-        <option value="l,b">Kiri bawah</option><option value="c,b">Tengah bawah</option><option value="r,b">Kanan bawah</option>
-    </select>
-</div>
-<div class="ie-readout" id="ie-readout"></div>
-<div class="hint" style="font-family:var(--label);font-size:.7rem;color:var(--text3)">
-    Klik logo lalu geser. X/Y = jarak pojok kiri-atas logo dari tepi gambar, Lebar = % dari lebar gambar. Panah keyboard = geser halus (Shift = 5%), Alt saat drag = matikan snap.
-</div>
+            <div class="ie-tools">
+                <button class="nlf-btn" type="button" onclick="ieAddLogo(IE_LOGO_URL)">+ OURBIT × CMIC</button>
+                <button class="nlf-btn" type="button" onclick="document.getElementById('ie-file').click()">+ SVG lain</button>
+                <input type="file" id="ie-file" accept=".svg,image/svg+xml,image/png" class="hidden">
+                <button class="nlf-btn" type="button" id="ie-del" onclick="ieDelete()" disabled>Hapus</button>
+                <label class="oc-check"><input type="checkbox" id="ie-grid" checked> Grid</label>
+                <label class="oc-check"><input type="checkbox" id="ie-snapon" checked> Snap</label>
+            </div>
+            <div class="ie-tools">
+                <label for="ie-size">Ukuran <b id="ie-size-v">–</b></label>
+                <input type="range" id="ie-size" min="5" max="100" value="40" disabled>
+            </div>
+            <div class="ie-tools ie-num">
+                <label>X <input type="number" id="ie-x" min="0" max="100" step="0.5" disabled>%</label>
+                <label>Y <input type="number" id="ie-y" min="0" max="100" step="0.5" disabled>%</label>
+                <label>Lebar <input type="number" id="ie-w" min="5" max="100" step="0.5" disabled>%</label>
+                <select id="ie-preset" disabled>
+                    <option value="">Posisi cepat…</option>
+                    <option value="l,t">Kiri atas</option><option value="c,t">Tengah atas</option><option value="r,t">Kanan atas</option>
+                    <option value="c,m">Tengah</option>
+                    <option value="l,b">Kiri bawah</option><option value="c,b">Tengah bawah</option><option value="r,b">Kanan bawah</option>
+                </select>
+            </div>
+            <div class="ie-readout" id="ie-readout"></div>
+            <div class="hint" style="font-family:var(--label);font-size:.7rem;color:var(--text3)">
+                Klik logo lalu geser. X/Y = jarak pojok kiri-atas logo dari tepi gambar, Lebar = % dari lebar gambar. Panah keyboard = geser halus (Shift = 5%), Alt saat drag = matikan snap.
+            </div>
+        </div><!-- ⬅️ tutup .modal-body (ini yang tadi hilang) -->
         <div class="modal-actions">
             <button class="btn-cancel" onclick="closeImageEditor()">Batal</button>
             <button class="btn-save" onclick="applyImageEditor()">Terapkan</button>
         </div>
-    </div>
-</div>
+    </div><!-- tutup .modal-box -->
+</div><!-- tutup #image-edit-modal -->
         
 
               <!-- ─── CONFIRM MODAL (custom, ganti native confirm()) ─── -->
