@@ -1244,6 +1244,17 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 .btc-tf{display:flex;gap:6px}
 #btc-chart{position:relative;height:460px;border:2px solid var(--border);border-radius:var(--r-md);overflow:hidden;background:#0A0A0A}
 @media (max-width:640px){#btc-chart{height:340px}}
+
+/* ═══ FOOTER LANDING LOGIN ═══ */
+.lp-footer { margin-top: 3rem; }
+.lp-footer .cf-col .cf-static {
+    display: block; padding: .28rem 0;
+    font-family: var(--label); font-size: .78rem; color: var(--text3);
+    cursor: default; user-select: none; pointer-events: none;   /* teks biasa, tidak bisa diklik */
+}
+@media (min-width: 1101px) {
+    .lp-footer .cf-cols { grid-template-columns: 1.4fr 1fr 1fr 1fr; }
+}
         
         /* ═══════════════════════════════════════════════════════════
            RESPONSIVE
@@ -1434,6 +1445,7 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 
 .cf-sources { text-align: center; padding: 1.6rem 0 2rem; }
 .cf-sources p { font-family: var(--label); font-size: .82rem; color: var(--text2); margin-bottom: 1rem; }
+.cf-pills + p { margin-top: 1.8rem; }
 .cf-pills { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
 .cf-pill { font-family: var(--display); font-weight: 700; font-size: .85rem; padding: .55rem 1.2rem; border: 2px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text2); transition: border-color var(--ease), color var(--ease), transform var(--ease); }
 .cf-pill:hover { border-color: var(--border-light); color: var(--text); transform: translateY(-2px); }
@@ -1663,7 +1675,7 @@ body.is-member .jump-bar {
 
 .lp-pill { display:inline-flex; align-items:center; gap:8px; font:800 .66rem var(--label); letter-spacing:.16em; text-transform:uppercase; padding:.5rem 1rem; border:1px solid var(--primary-line); border-radius:999px; background:var(--primary-dim); }
 .lp-pill::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--primary); }
-.lp-grad { background:linear-gradient(90deg,var(--primary),var(--secondary),#FFD23F); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.lp-grad { background:linear-gradient(90deg,#1D4ED8,#60A5FA,#FFFFFF); -webkit-background-clip:text; background-clip:text; color:transparent; }
 
 /* 1. HERO */
 .lp-hero { display:grid; grid-template-columns:1.1fr 1fr 360px; gap:24px; align-items:center; min-height:100vh; padding:3rem 0 2rem; }
@@ -1680,9 +1692,12 @@ body.is-member .jump-bar {
 /* SVG hero: wrapper melayang, gambarnya berputar */
 .lp-art { display:flex; justify-content:center; }
 .lp-float { animation:lpFloat 6s ease-in-out infinite; }
-.lp-orbit { display:block; width:min(440px,90%); margin:0 auto; animation:lpSpin 28s linear infinite; filter:drop-shadow(0 0 40px rgba(139,92,246,.45)); }
+.lp-orbit { display:block; width:min(440px,90%); margin:0 auto; transform:rotate(0deg); animation:lpGlow 4s ease-in-out infinite; filter:drop-shadow(0 0 40px rgba(139,92,246,.45)); }
 @keyframes lpFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
-@keyframes lpSpin  { to { transform:rotate(360deg); } }
+@keyframes lpGlow {
+    0%,100% { transform:scale(1);    filter:drop-shadow(0 0 28px rgba(139,92,246,.35)); }
+    50%     { transform:scale(1.04); filter:drop-shadow(0 0 52px rgba(139,92,246,.65)); }
+}
 
 /* kartu login */
 .lp-card { background:rgba(13,13,13,.92); border:2px solid var(--border-light); border-radius:var(--r-lg); padding:1.6rem; box-shadow:6px 6px 0 var(--secondary); }
@@ -1714,11 +1729,17 @@ body.is-member .jump-bar {
 .lp-mini div { padding:1rem 1.2rem; border:1px solid var(--border); border-radius:var(--r-md); background:var(--card); }
 .lp-mini b { display:block; } .lp-mini small { color:var(--text3); }
 
-.lp-track { display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; padding:1rem .2rem; scrollbar-width:none; }
+.lp-track { position:relative; display:flex; align-items:center; gap:18px; overflow-x:auto; scroll-snap-type:x mandatory; padding:56px calc(50% - 100px); scrollbar-width:none; }
 .lp-track::-webkit-scrollbar { display:none; }
-.lp-nft { flex:0 0 200px; aspect-ratio:1; scroll-snap-align:center; border-radius:18px; overflow:hidden; border:2px solid var(--border); transition:transform .25s, border-color .25s; }
-.lp-nft:hover { transform:translateY(-6px) scale(1.04); border-color:var(--border-light); }
+.lp-nft { flex:0 0 200px; aspect-ratio: 1; scroll-snap-align:center; border-radius:18px; overflow:hidden; border:2px solid var(--border);
+    transform:scale(.8); opacity:.5; transition:transform .45s cubic-bezier(.34,1.3,.64,1), opacity .35s, border-color .35s, box-shadow .35s; }
+.lp-nft.near { transform:scale(.92); opacity:.85; }
+.lp-nft.active { transform:scale(1.3); opacity:1; border-color:var(--primary); box-shadow:0 0 44px rgba(139,92,246,.55); z-index:2; aspect-ratio: 3 / 4; }
 .lp-nft img { width:100%; height:100%; object-fit:cover; display:block; }
+.lp-dots { display:flex; justify-content:center; gap:8px; margin-top:.4rem; }
+.lp-dots i { width:8px; height:8px; border-radius:99px; background:var(--border-strong); cursor:pointer; transition:width .3s, background .3s; }
+.lp-dots i.on { width:26px; background:var(--primary); }
+@media (prefers-reduced-motion:reduce) { .lp-nft { transition:none; } }
 .lp-arrows { display:flex; gap:10px; margin-top:1rem; }
 .lp-arrows button { width:42px; height:42px; border-radius:50%; border:2px solid var(--border-light); background:#000; color:#fff; font-size:1.2rem; cursor:pointer; }
 
@@ -1751,9 +1772,7 @@ body.is-member .jump-bar {
       <!-- ─── LOGIN ─── -->
 
 <div id="login-section" class="checking">
-    <div class="login-particles" id="login-particles"></div>
-    <div class="login-letters" id="login-letters"></div>
-    <div class="login-coins" id="login-coins"></div>
+
 
     <div class="login-stack lp">
 
@@ -1761,8 +1780,8 @@ body.is-member .jump-bar {
         <section class="lp-hero">
             <div>
                 <span class="lp-pill">Crypto Monkey Inner Circle</span>
-                <h1>Market Intel<br><span class="lp-grad">Tanpa Jeda.</span></h1>
-                <p>Dashboard privat untuk memantau long/short, berita, jadwal unlock token, dan aktivitas onchain. Semua realtime dalam satu tempat.</p>
+                <h1>Market Intelligence.<br><span class="lp-grad">Tanpa Batas. Tanpa Biaya.</span></h1>
+                <p>Akses informasi pasar crypto, live feed, data on-chain, berita, jadwal unlock token, dan komunitas dalam satu platform. Gratis untuk semua member, tanpa biaya langganan.</p>
                 <div class="lp-icons">
                     <div class="lp-icon"><i data-ico="box"></i>Dashboard</div>
                     <div class="lp-icon"><i data-ico="clock"></i>Live Feed</div>
@@ -1770,7 +1789,7 @@ body.is-member .jump-bar {
                     <div class="lp-icon"><i data-ico="chat"></i>Komunitas</div>
                 </div>
                 <div class="lp-ctas">
-                    <a class="lp-btn" href="#lp-login">Masuk Sekarang</a>
+                    <a class="lp-btn" href="#lp-login">Mulai Gratis →</a>
                     <a class="lp-link" href="#lp-services">Lihat Fitur ↓</a>
                 </div>
             </div>
@@ -1795,16 +1814,22 @@ body.is-member .jump-bar {
                             <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
                             Login dengan Discord
                         </a>
-                        <div class="login-hint">Khusus yang sudah join server dan punya role tertentu.</div>
+                                         <div class="login-hint">
+                        Khusus yang sudah join server dan punya role tertentu.<br>
+                        <a href="https://discord.com/users/1084838828344344708" target="_blank" style="text-decoration: none; font-weight: 800; margin-top: 6px; display: inline-block;">
+                            <span style="color: #ffffff;">Tidak Punya Akses? Daftar Gratis </span>
+                            <span style="color: #38bdf8; text-decoration: underline;">Here</span>
+                        </a>
                     </div>
                 </div>
             </div>
-        </section>
+        </div>
+    </section>
 
         <div class="lp-stats">
             <div class="lp-stat"><b>24/7</b><span>Live feed</span></div>
             <div class="lp-stat"><b>7</b><span>Bursa CEX</span></div>
-            <div class="lp-stat"><b>16</b><span>Sumber berita</span></div>
+            <div class="lp-stat"><b>25+</b><span>Sumber berita</span></div>
             <div class="lp-stat"><b>6+</b><span>Chain onchain</span></div>
         </div>
 
@@ -1817,7 +1842,7 @@ body.is-member .jump-bar {
                     <p class="d">Dari data bursa sampai pelacakan wallet, dirancang untuk keputusan yang lebih cepat dan terukur.</p>
                     <ul class="lp-checks">
                         <li><div><b>Long vs Short Live</b><small>Taker buy/sell 7 bursa via WebSocket</small></div></li>
-                        <li><div><b>News Terminal</b><small>16 sumber berita &amp; onchain, terjemah otomatis</small></div></li>
+                        <li><div><b>News Terminal</b><small>25+ sumber berita &amp; onchain, terjemah otomatis</small></div></li>
                         <li><div><b>Onchain Tracer</b><small>Lacak wallet, saldo, dan live transfer whale</small></div></li>
                     </ul>
                 </div>
@@ -1848,14 +1873,103 @@ body.is-member .jump-bar {
 
             <h2 style="margin-top:4rem">Kata Member</h2>
             <div class="lp-quotes">
-                <div class="lp-quote">“LFG”<small>— Nama, role</small></div>
-                <div class="lp-quote">“Isi testimoni asli member di sini.”<small>— Nama, role</small></div>
-                <div class="lp-quote">“Isi testimoni asli member di sini.”<small>— Nama, role</small></div>
+                <div class="lp-quote">“Makasi Gacor Virtualnya.”<small>— Dru</small></div>
+                <div class="lp-quote">“Masih Bisa Gak Bang?.”<small>— someone</small></div>
+                <div class="lp-quote">“Long Apa Short?.”<small>— Charles</small></div>
             </div>
         </section>
 
-    </div>
-</div>
+        <!-- ═══ 4. FOOTER LANDING (hanya Kemitraan & Sosmed yang bisa diklik) ═══ -->
+        <footer class="lp-footer">
+
+    <section class="cf-support">
+        <div>
+            <div class="cf-kicker">Pantau market tanpa jeda, dari satu dashboard</div>
+            <h2>CMIC<br>𝐈𝐧𝐧𝐞𝐫 𝐂𝐢𝐫𝐜𝐥𝐞</h2>
+            <div class="cf-seals">
+                <div class="cf-seal"><b>24/7</b><span>Live feed</span></div>
+                <div class="cf-seal"><b>7+</b><span>Bursa CEX</span></div>
+                <div class="cf-seal"><b>25+</b><span>Sumber berita</span></div>
+                <div class="cf-seal"><b>6+</b><span>Chain onchain</span></div>
+            </div>
+        </div>
+        <div class="cf-cards">
+            <a class="cf-card c1" href="https://t.me/Xiobaii?text=Halo%20Bang%2C%20saya%20ingin%20bergabung%20ke%20komunitas%20Discord%20Crypto%20Monkey.%20Mohon%20info%20langkah%20pendaftarannya%20ya.%20Terima%20kasih%20%F0%9F%99%8F" target="_blank" rel="noopener">
+                <span class="t"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></span>Discord</span>
+                <span class="d">Ngobrol dengan member dan dapat alert langsung di server CMIC.</span>
+            </a>
+            <a class="cf-card c2" href="https://t.me/CryptoMonk3y" target="_blank" rel="noopener">
+                <span class="t"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>Telegram</span>
+                <span class="d">Channel berita dan broadcast Crypto Monkey.</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="cf-sources">
+        <p>Data pasar, unlock, dan listing</p>
+        <div class="cf-pills">
+            <span class="cf-pill">Binance</span><span class="cf-pill">Bybit</span><span class="cf-pill">OKX</span>
+            <span class="cf-pill">Bitget</span><span class="cf-pill">Gate</span><span class="cf-pill">Kraken</span>
+            <span class="cf-pill">Aster</span><span class="cf-pill">CoinGecko</span><span class="cf-pill">DefiLlama</span>
+            <span class="cf-pill">New Listings Feed</span>
+        </div>
+        <p>Sumber berita &amp; onchain (News Terminal)</p>
+        <div class="cf-pills">
+            <span class="cf-pill">Lookonchain</span><span class="cf-pill">Investigations</span><span class="cf-pill">OnchainLens</span>
+            <span class="cf-pill">Wu Blockchain</span><span class="cf-pill">Whale Alert</span><span class="cf-pill">Tree News</span>
+            <span class="cf-pill">Nansen</span><span class="cf-pill">Crypto Media</span><span class="cf-pill">SM News</span>
+            <span class="cf-pill">WatcherGuru</span><span class="cf-pill">REKT</span><span class="cf-pill">Cointelegraph</span>
+            <span class="cf-pill">BRICS News</span><span class="cf-pill">CryptoRank</span><span class="cf-pill">Upbit (TG)</span>
+            <span class="cf-pill">New Listing &amp; Delisting V2</span>
+        </div>
+    </section>
+            <div class="cf-main">
+                <div class="cf-cols">
+                    <div class="cf-brand">
+                        <img src="cmic-footer.svg" alt="CMIC" />
+                        <p>Crypto Monkey Inner Circle. Market intelligence, analisis, dan berita crypto harian dalam satu dashboard.</p>
+                    </div>
+
+                    <div class="cf-col">
+                        <h4>Fitur</h4>
+                        <span class="cf-static">Long vs Short Live</span>
+                        <span class="cf-static">News Terminal</span>
+                        <span class="cf-static">Onchain Tracer</span>
+                        <span class="cf-static">Lab Materi</span>
+                    </div>
+
+                    <div class="cf-col">
+                        <h4>Kemitraan</h4>
+                        <a class="cf-partner" href="https://www.ourbit.com/register?inviteCode=ourbitCMIC" target="_blank" rel="noopener">
+                            <img src="ourbit-logo.svg" alt="OURBIT" width="106" height="24" onerror="this.remove()" />
+                            <span>Daftar OURBIT ↗</span>
+                        </a>
+                        <a class="cf-partner" href="https://hibt6.com/register?promotionCode=D95M" target="_blank" rel="noopener">
+                            <img src="HIBT.svg" alt="HIBT" width="106" height="24" onerror="this.remove()" />
+                            <span>Daftar HIBT ↗</span>
+                        </a>
+                    </div>
+
+                    <div class="cf-col">
+                        <h4>Ikuti Kami</h4>
+                        <div class="cf-social">
+                            <a href="#" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></a>
+                            <a href="https://t.me/CryptoMonk3y" target="_blank" rel="noopener" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></a>
+                            <a href="https://t.me/Xiobaii?text=Halo%20Bang%2C%20saya%20ingin%20bergabung%20ke%20komunitas%20Discord%20Crypto%20Monkey.%20Mohon%20info%20langkah%20pendaftarannya%20ya.%20Terima%20kasih%20%F0%9F%99%8F" target="_blank" rel="noopener" aria-label="Discord"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="cf-bar">
+                    <span>© <span id="lp-year"></span> <b>CMIC</b> · Crypto Monkey Inner Circle</span>
+                    <span>Trade smart. Manage risk. DYOR.</span>
+                </div>
+            </div>
+        </footer>
+
+    </div>   <!-- tutup .login-stack -->
+</div>       <!-- tutup #login-section -->
+
     
     <!-- ─── ADMIN CONTENT ─── -->
     <div id="admin-content" class="hidden">
@@ -2149,7 +2263,7 @@ body.is-member .jump-bar {
             <div class="cf-seals">
                 <div class="cf-seal"><b>24/7</b><span>Live feed</span></div>
                 <div class="cf-seal"><b>7</b><span>Bursa CEX</span></div>
-                <div class="cf-seal"><b>16</b><span>Sumber berita</span></div>
+                <div class="cf-seal"><b>25+</b><span>Sumber berita</span></div>
                 <div class="cf-seal"><b>6+</b><span>Chain onchain</span></div>
             </div>
         </div>
@@ -4938,9 +5052,6 @@ function showLoginError() {
 
 function showLogin() {
     document.getElementById('login-section').classList.remove('checking');
-    spawnLoginParticles();
-    spawnLoginLetters();
-    startFallingCoins();
     showLoginError();
     google.accounts.id.initialize({ client_id: YOUR_CLIENT_ID, callback: handleCredentialResponse });
     google.accounts.id.renderButton(document.getElementById('google-btn'), {
@@ -7147,16 +7258,65 @@ async function loadFng() {
 (function () {
     // ikon kecil di hero
     document.querySelectorAll('[data-ico]').forEach(el => el.innerHTML = icon(el.dataset.ico));
+    document.getElementById('lp-year').textContent = new Date().getFullYear();
 
     // carousel gambar dari folder /roi: tinggal ganti daftar nama file
-    const ROI = ['roi/1.png','roi/2.png','roi/3.png','roi/4.png','roi/5.png','roi/6.png'];
+    
+   const ROI = Array.from({ length: 34 }, (_, i) => `roi/roi${i + 1}.webp`);
+
     const track = document.getElementById('lp-track');
     if (!track) return;
-    track.innerHTML = ROI.map(s =>
+        track.innerHTML = ROI.map(s =>
         `<div class="lp-nft"><img src="${s}" alt="" loading="lazy" onerror="this.parentElement.remove()"></div>`).join('');
-    document.querySelector('[data-lp="prev"]').onclick = () => track.scrollBy({ left: -240, behavior: 'smooth' });
-    document.querySelector('[data-lp="next"]').onclick = () => track.scrollBy({ left: 240, behavior: 'smooth' });
-})();
+
+    const dots = document.createElement('div');
+    dots.className = 'lp-dots';
+    track.after(dots);
+
+    const items = () => [...track.children];
+    let active = 0, timer = null;
+
+    const centerOf = (el) => el.offsetLeft - (track.clientWidth - el.offsetWidth) / 2;
+    const goTo = (i) => {
+        const list = items(); if (!list.length) return;
+        i = (i + list.length) % list.length;
+        track.scrollTo({ left: centerOf(list[i]), behavior: 'smooth' });
+    };
+
+    function paint() {
+        const list = items(), mid = track.scrollLeft + track.clientWidth / 2;
+        let best = 0, bd = Infinity;
+        list.forEach((el, i) => {
+            const d = Math.abs(el.offsetLeft + el.offsetWidth / 2 - mid);
+            if (d < bd) { bd = d; best = i; }
+        });
+        active = best;
+        list.forEach((el, i) => {
+            el.classList.toggle('active', i === best);
+            el.classList.toggle('near', Math.abs(i - best) === 1);
+        });
+        if (dots.children.length !== list.length)
+            dots.innerHTML = list.map((_, i) => `<i data-i="${i}"></i>`).join('');
+        [...dots.children].forEach((d, i) => d.classList.toggle('on', i === best));
+    }
+
+    let raf = 0;
+    track.addEventListener('scroll', () => { cancelAnimationFrame(raf); raf = requestAnimationFrame(paint); }, { passive: true });
+    dots.addEventListener('click', e => { const d = e.target.closest('[data-i]'); if (d) { goTo(+d.dataset.i); restart(); } });
+    document.querySelector('[data-lp="prev"]').onclick = () => { goTo(active - 1); restart(); };
+    document.querySelector('[data-lp="next"]').onclick = () => { goTo(active + 1); restart(); };
+
+    // autoplay: jalan sendiri tiap 3 detik, berhenti saat disentuh/hover
+    const reduced = matchMedia('(prefers-reduced-motion: reduce)').matches;
+    const stop = () => { clearInterval(timer); timer = null; };
+    const play = () => { if (!reduced && !timer) timer = setInterval(() => goTo(active + 1), 1500); };
+    const restart = () => { stop(); play(); };
+    ['mouseenter', 'pointerdown', 'touchstart'].forEach(ev => track.addEventListener(ev, stop, { passive: true }));
+    ['mouseleave', 'pointerup', 'touchend'].forEach(ev => track.addEventListener(ev, play, { passive: true }));
+
+    setTimeout(() => { goTo(Math.floor(items().length / 2)); paint(); play(); }, 300);
+    })();  
+
 // ═══ JUMP BAR (member): klik = scroll ke section, tombol aktif ikut section yang terlihat ═══
 (function () {
     const bar = document.getElementById('jump-bar');
