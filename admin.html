@@ -106,12 +106,15 @@
         /* ═══════════════════════════════════════════════════════════
            LOGIN
            ═══════════════════════════════════════════════════════════ */
-        #login-section {
-            position: fixed; inset: 0; z-index: 999;
-            display: flex; align-items: center; justify-content: center;
-            background-color: #000; background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px); background-size: 22px 22px;
-            overflow: hidden;
-        }
+       #login-section {
+    position: fixed; inset: 0; z-index: 999;
+    display: block;                       
+    overflow-y: auto; overflow-x: hidden;
+    scroll-behavior: smooth;
+    background-color: #000;
+    background-image: radial-gradient(rgba(255,255,255,0.08) 1px, transparent 1px);
+    background-size: 22px 22px;
+}
         .login-mascot {
             width: 96px; height: 96px; border-radius: var(--r-md); margin: 0 auto 1.4rem;
             background: var(--card);
@@ -1623,6 +1626,88 @@ body.is-member .member-only { display: inline-flex; }
     0%, 100% { box-shadow: 0 0 0 0 transparent; }
     25%      { box-shadow: 0 0 0 3px var(--src-color, var(--primary)); }
 }
+
+    /* ═══ LANDING LOGIN ═══ */
+/* efek koin/huruf tetap diam di belakang saat scroll */
+.login-particles, .login-letters, .login-coins { position: fixed; }
+.login-coins { opacity: .45; }
+.login-stack.lp { display: block; gap: 0; max-width: 1280px; margin: 0 auto; padding: 0 1.5rem 4rem; }
+
+.lp-pill { display:inline-flex; align-items:center; gap:8px; font:800 .66rem var(--label); letter-spacing:.16em; text-transform:uppercase; padding:.5rem 1rem; border:1px solid var(--primary-line); border-radius:999px; background:var(--primary-dim); }
+.lp-pill::before { content:''; width:7px; height:7px; border-radius:50%; background:var(--primary); }
+.lp-grad { background:linear-gradient(90deg,var(--primary),var(--secondary),#FFD23F); -webkit-background-clip:text; background-clip:text; color:transparent; }
+
+/* 1. HERO */
+.lp-hero { display:grid; grid-template-columns:1.1fr 1fr 360px; gap:24px; align-items:center; min-height:100vh; padding:3rem 0 2rem; }
+.lp-hero h1 { font-family:var(--display); font-weight:800; letter-spacing:-.04em; line-height:1; font-size:clamp(2.4rem,5vw,4.2rem); margin:1.2rem 0; }
+.lp-hero p { color:var(--text2); line-height:1.6; max-width:460px; margin-bottom:1.6rem; }
+.lp-icons { display:flex; gap:14px; flex-wrap:wrap; margin-bottom:1.8rem; }
+.lp-icon { width:72px; text-align:center; font:600 .68rem var(--label); color:var(--text2); }
+.lp-icon i { display:flex; width:52px; height:52px; margin:0 auto 6px; align-items:center; justify-content:center; border:1px solid var(--primary-line); border-radius:14px; background:var(--primary-dim); color:var(--primary); font-size:1.3rem; }
+.lp-ctas { display:flex; gap:12px; align-items:center; flex-wrap:wrap; }
+.lp-btn { padding:.85rem 1.7rem; border-radius:999px; background:var(--grad); color:#fff; font:800 .85rem var(--label); text-decoration:none; transition:transform var(--ease); }
+.lp-btn:hover { transform:translateY(-3px); }
+.lp-link { color:var(--text); font:700 .85rem var(--label); text-decoration:none; }
+
+/* SVG hero: wrapper melayang, gambarnya berputar */
+.lp-art { display:flex; justify-content:center; }
+.lp-float { animation:lpFloat 6s ease-in-out infinite; }
+.lp-orbit { display:block; width:min(440px,90%); margin:0 auto; animation:lpSpin 28s linear infinite; filter:drop-shadow(0 0 40px rgba(139,92,246,.45)); }
+@keyframes lpFloat { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-16px)} }
+@keyframes lpSpin  { to { transform:rotate(360deg); } }
+
+/* kartu login */
+.lp-card { background:rgba(13,13,13,.92); border:2px solid var(--border-light); border-radius:var(--r-lg); padding:1.6rem; box-shadow:6px 6px 0 var(--secondary); }
+.lp-card h3 { font-family:var(--display); font-size:1.5rem; font-weight:800; margin-bottom:.3rem; }
+.lp-card .login-sub { margin-bottom:1.2rem; }
+.lp-card .login-methods { gap:1rem; }
+.lp-card .login-btn { width:100%; }
+.lp-card #google-btn { display:flex; justify-content:center; }
+
+/* stats */
+.lp-stats { display:grid; grid-template-columns:repeat(4,1fr); border:1px solid var(--border); border-radius:var(--r-md); background:rgba(13,13,13,.8); margin-bottom:5rem; }
+.lp-stat { padding:1.4rem; text-align:center; border-right:1px solid var(--border); }
+.lp-stat:last-child { border:0; }
+.lp-stat b { display:block; font:800 2rem var(--display); }
+.lp-stat span { color:var(--text3); font:700 .7rem var(--label); text-transform:uppercase; letter-spacing:.08em; }
+
+/* 2 & 3 */
+.lp-sec { padding:4rem 0; }
+.lp-sec h2 { font-family:var(--display); font-weight:800; letter-spacing:-.03em; font-size:clamp(2rem,4vw,3.2rem); margin:1rem 0; }
+.lp-sec p.d { color:var(--text2); line-height:1.6; max-width:520px; }
+.lp-svc  { display:grid; grid-template-columns:1fr 1.1fr 260px; gap:24px; align-items:center; }
+.lp-feat { display:grid; grid-template-columns:340px 1fr; gap:32px; align-items:center; }
+.lp-checks { list-style:none; display:grid; gap:14px; margin:1.6rem 0; }
+.lp-checks li { display:flex; gap:12px; font-size:.88rem; }
+.lp-checks li::before { content:'✓'; flex-shrink:0; width:26px; height:26px; border-radius:8px; border:2px solid var(--primary); display:flex; align-items:center; justify-content:center; color:var(--primary); font-weight:800; }
+.lp-checks b { display:block; } .lp-checks small { color:var(--text3); }
+.lp-shot { width:100%; filter:drop-shadow(0 0 50px rgba(139,92,246,.35)); }
+.lp-mini { display:grid; gap:12px; }
+.lp-mini div { padding:1rem 1.2rem; border:1px solid var(--border); border-radius:var(--r-md); background:var(--card); }
+.lp-mini b { display:block; } .lp-mini small { color:var(--text3); }
+
+.lp-track { display:flex; gap:16px; overflow-x:auto; scroll-snap-type:x mandatory; padding:1rem .2rem; scrollbar-width:none; }
+.lp-track::-webkit-scrollbar { display:none; }
+.lp-nft { flex:0 0 200px; aspect-ratio:1; scroll-snap-align:center; border-radius:18px; overflow:hidden; border:2px solid var(--border); transition:transform .25s, border-color .25s; }
+.lp-nft:hover { transform:translateY(-6px) scale(1.04); border-color:var(--border-light); }
+.lp-nft img { width:100%; height:100%; object-fit:cover; display:block; }
+.lp-arrows { display:flex; gap:10px; margin-top:1rem; }
+.lp-arrows button { width:42px; height:42px; border-radius:50%; border:2px solid var(--border-light); background:#000; color:#fff; font-size:1.2rem; cursor:pointer; }
+
+.lp-quotes { display:grid; grid-template-columns:repeat(3,1fr); gap:16px; margin-top:1.6rem; }
+.lp-quote { padding:1.2rem; border:1px solid var(--border); border-radius:var(--r-md); background:var(--card); font-size:.85rem; line-height:1.55; }
+.lp-quote small { display:block; margin-top:.8rem; color:var(--text3); }
+
+@media (max-width:1100px) {
+    .lp-hero { grid-template-columns:1fr; min-height:0; }
+    .lp-art { order:-1; }
+    .lp-svc, .lp-feat { grid-template-columns:1fr; }
+    .lp-stats { grid-template-columns:repeat(2,1fr); }
+}
+@media (max-width:640px) { .lp-quotes { grid-template-columns:1fr; } }
+@media (prefers-reduced-motion:reduce) { .lp-float, .lp-orbit { animation:none; } }
+
+        
         
     </style>
 </head>
@@ -1636,42 +1721,111 @@ body.is-member .member-only { display: inline-flex; }
     </div>
 
       <!-- ─── LOGIN ─── -->
+
 <div id="login-section" class="checking">
     <div class="login-particles" id="login-particles"></div>
     <div class="login-letters" id="login-letters"></div>
     <div class="login-coins" id="login-coins"></div>
-    <div class="login-stack">
-        <div class="login-card">
-            <div class="login-mascot-wrap">
-                <span class="login-mascot-ring"></span>
-                <span class="login-mascot-ring delay"></span>
-                <div class="login-mascot"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></div>
-            </div>
-            <div class="login-logo">𝐂𝐌𝐈𝐂</div>
-            <div class="login-title">𝐂𝐫𝐲𝐩𝐭𝐨 𝐌𝐨𝐧𝐤𝐞𝐲 𝐈𝐧𝐧𝐞𝐫 𝐂𝐢𝐫𝐜𝐥𝐞</div>
-            <div class="login-divider"></div>
-            <div class="login-sub">Much access. Very login. Wow.</div>
 
-            <div class="login-methods">
-                <div class="login-error hidden" id="login-error" role="alert"></div>
+    <div class="login-stack lp">
 
-                <div class="login-method">
-                    <div class="login-method-label">Admin</div>
-                    <div id="google-btn"></div>
+        <!-- ═══ 1. HERO + LOGIN ═══ -->
+        <section class="lp-hero">
+            <div>
+                <span class="lp-pill">Crypto Monkey Inner Circle</span>
+                <h1>Market Intel<br><span class="lp-grad">Tanpa Jeda.</span></h1>
+                <p>Dashboard privat untuk memantau long/short, berita, jadwal unlock token, dan aktivitas onchain. Semua realtime dalam satu tempat.</p>
+                <div class="lp-icons">
+                    <div class="lp-icon"><i data-ico="box"></i>Dashboard</div>
+                    <div class="lp-icon"><i data-ico="clock"></i>Live Feed</div>
+                    <div class="lp-icon"><i data-ico="target"></i>Onchain</div>
+                    <div class="lp-icon"><i data-ico="chat"></i>Komunitas</div>
                 </div>
-
-                <div class="login-or"><span>atau</span></div>
-
-                <div class="login-method">
-                    <div class="login-method-label">Member Discord</div>
-                    <a class="login-btn discord" href="/api/admin-airdrop?type=discord-login">
-                        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
-                        Login dengan Discord
-                    </a>
-                    <div class="login-hint">Khusus yang sudah join server dan punya role tertentu.</div>
+                <div class="lp-ctas">
+                    <a class="lp-btn" href="#lp-login">Masuk Sekarang</a>
+                    <a class="lp-link" href="#lp-services">Lihat Fitur ↓</a>
                 </div>
             </div>
+
+            <!-- SVG animasi (pakai file footer yang sama) -->
+            <div class="lp-art"><div class="lp-float"><img class="lp-orbit" src="cmic-footer.svg" alt="CMIC"></div></div>
+
+            <!-- kartu login (ID lama dipertahankan) -->
+            <div class="lp-card" id="lp-login">
+                <h3>Selamat datang kembali</h3>
+                <div class="login-sub">Much access. Very login. Wow.</div>
+                <div class="login-methods">
+                    <div class="login-error hidden" id="login-error" role="alert"></div>
+                    <div class="login-method">
+                        <div class="login-method-label">Admin</div>
+                        <div id="google-btn"></div>
+                    </div>
+                    <div class="login-or"><span>atau</span></div>
+                    <div class="login-method">
+                        <div class="login-method-label">Member Discord</div>
+                        <a class="login-btn discord" href="/api/admin-airdrop?type=discord-login">
+                            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg>
+                            Login dengan Discord
+                        </a>
+                        <div class="login-hint">Khusus yang sudah join server dan punya role tertentu.</div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <div class="lp-stats">
+            <div class="lp-stat"><b>24/7</b><span>Live feed</span></div>
+            <div class="lp-stat"><b>7</b><span>Bursa CEX</span></div>
+            <div class="lp-stat"><b>16</b><span>Sumber berita</span></div>
+            <div class="lp-stat"><b>6+</b><span>Chain onchain</span></div>
         </div>
+
+        <!-- ═══ 2. LAYANAN / FITUR ═══ -->
+        <section class="lp-sec" id="lp-services">
+            <div class="lp-svc">
+                <div>
+                    <span class="lp-pill">Fitur</span>
+                    <h2>Semua Alat Trading<br>dalam Satu Dek</h2>
+                    <p class="d">Dari data bursa sampai pelacakan wallet, dirancang untuk keputusan yang lebih cepat dan terukur.</p>
+                    <ul class="lp-checks">
+                        <li><div><b>Long vs Short Live</b><small>Taker buy/sell 7 bursa via WebSocket</small></div></li>
+                        <li><div><b>News Terminal</b><small>16 sumber berita &amp; onchain, terjemah otomatis</small></div></li>
+                        <li><div><b>Onchain Tracer</b><small>Lacak wallet, saldo, dan live transfer whale</small></div></li>
+                    </ul>
+                </div>
+                <!-- ganti dengan gambar laptop/dashboard dari /roi -->
+                <img class="lp-shot" src="roi/dashboard.png" alt="" onerror="this.remove()">
+                <div class="lp-mini">
+                    <div><b>Realtime</b><small>Data langsung, tanpa refresh</small></div>
+                    <div><b>Terintegrasi</b><small>Discord &amp; Telegram</small></div>
+                    <div><b>Edukasi</b><small>Lab Materi ebook CMIC</small></div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ═══ 3. FEATURED (carousel /roi) + KATA MEMBER ═══ -->
+        <section class="lp-sec">
+            <div class="lp-feat">
+                <div>
+                    <span class="lp-pill">Featured</span>
+                    <h2>Komunitas <span class="lp-grad">Monkey</span></h2>
+                    <p class="d">Gabung Inner Circle dan dapatkan akses ke alert, analisis, dan materi edukasi eksklusif.</p>
+                    <div class="lp-arrows">
+                        <button type="button" data-lp="prev" aria-label="Sebelumnya">‹</button>
+                        <button type="button" data-lp="next" aria-label="Berikutnya">›</button>
+                    </div>
+                </div>
+                <div class="lp-track" id="lp-track"></div>
+            </div>
+
+            <h2 style="margin-top:4rem">Kata Member</h2>
+            <div class="lp-quotes">
+                <div class="lp-quote">“LFG”<small>— Nama, role</small></div>
+                <div class="lp-quote">“Isi testimoni asli member di sini.”<small>— Nama, role</small></div>
+                <div class="lp-quote">“Isi testimoni asli member di sini.”<small>— Nama, role</small></div>
+            </div>
+        </section>
+
     </div>
 </div>
     
@@ -6951,6 +7105,22 @@ async function loadFng() {
         return r;
     };
     update();
+})();
+</script>
+
+<script>
+(function () {
+    // ikon kecil di hero
+    document.querySelectorAll('[data-ico]').forEach(el => el.innerHTML = icon(el.dataset.ico));
+
+    // carousel gambar dari folder /roi: tinggal ganti daftar nama file
+    const ROI = ['roi/1.png','roi/2.png','roi/3.png','roi/4.png','roi/5.png','roi/6.png'];
+    const track = document.getElementById('lp-track');
+    if (!track) return;
+    track.innerHTML = ROI.map(s =>
+        `<div class="lp-nft"><img src="${s}" alt="" loading="lazy" onerror="this.parentElement.remove()"></div>`).join('');
+    document.querySelector('[data-lp="prev"]').onclick = () => track.scrollBy({ left: -240, behavior: 'smooth' });
+    document.querySelector('[data-lp="next"]').onclick = () => track.scrollBy({ left: 240, behavior: 'smooth' });
 })();
 </script>
 
