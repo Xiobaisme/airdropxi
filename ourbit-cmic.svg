@@ -1,36 +1,47 @@
-<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="420" viewBox="0 0 1600 420" role="img" aria-labelledby="title desc">
+<svg xmlns="http://www.w3.org/2000/svg" width="1402" height="190" viewBox="30 110 1402 190" role="img" aria-labelledby="title desc">
   <title id="title">OURBIT × CMIC</title>
   <desc id="desc">OURBIT and CMIC partnership lockup with a blue X separator on a transparent background.</desc>
   <defs>
     <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#28e6a0"/><stop offset="1" stop-color="#159a67"/></linearGradient>
     <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#13f5ff"/><stop offset=".45" stop-color="#087cff"/><stop offset="1" stop-color="#1839dc"/></linearGradient>
-    <linearGradient id="white" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dce7f5"/></linearGradient>
+    <linearGradient id="white" gradientUnits="userSpaceOnUse" x1="0" y1="145" x2="0" y2="269"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dce7f5"/></linearGradient>
     <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
   </defs>
 
-  <!-- OURBIT emblem -->
-  <g transform="translate(54 100)">
+  <!-- OURBIT emblem: tinggi 124, sejajar dengan huruf (y 145-269) -->
+  <g transform="translate(40.3 145) scale(1.138)">
     <path d="M58 0 104 26 104 82 58 109 12 82 12 26 31 15 45 23 29 32 29 72 58 89 87 72 87 32 72 23Z" fill="url(#green)"/>
     <path d="M58 28 81 41 81 67 58 80 35 67 35 41Z" fill="#fff"/>
     <path d="M58 39 71 46.5 71 61.5 58 69 45 61.5 45 46.5Z" fill="#20c889"/>
   </g>
 
-  <!-- OURBIT wordmark: lebar OURB dikunci (tidak tergantung font) -->
-  <text x="181" y="225" textLength="335" lengthAdjust="spacingAndGlyphs"
-        fill="url(#white)" stroke="#dbe3ef" stroke-width="1.2" stroke-linejoin="round"
-        font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="122">OURB</text>
-
-  <!-- Huruf T digambar sebagai bentuk: palang putih + batang hijau -->
-  <rect x="526" y="138" width="76" height="22" fill="url(#white)" stroke="#dbe3ef" stroke-width="1.2" stroke-linejoin="round"/>
-  <rect x="552" y="120" width="24" height="116" rx="1" fill="url(#green)"/>
-  <path d="M564 111v9m0 116v9" stroke="#159a67" stroke-width="2"/>
+  <!-- OURBIT wordmark: semua huruf berupa bentuk, tidak bergantung font -->
+  <g fill="url(#white)">
+    <!-- O -->
+    <path fill-rule="evenodd" d="M214 145H222A36 36 0 0 1 258 181V233A36 36 0 0 1 222 269H214A36 36 0 0 1 178 233V181A36 36 0 0 1 214 145Z M218 169A16 16 0 0 1 234 185V229A16 16 0 0 1 218 245A16 16 0 0 1 202 229V185A16 16 0 0 1 218 169Z"/>
+    <!-- U -->
+    <path d="M266 145H290V233A12 12 0 0 0 314 233V145H338V233A36 36 0 0 1 266 233Z"/>
+    <!-- R -->
+    <path fill-rule="evenodd" d="M346 145H382A36 36 0 0 1 382 217H346Z M370 169H382A12 12 0 0 1 382 193H370Z"/>
+    <rect x="346" y="145" width="24" height="124"/>
+    <polygon points="372,205 398,205 420,269 394,269"/>
+    <!-- B -->
+    <rect x="426" y="145" width="24" height="124"/>
+    <path fill-rule="evenodd" d="M426 145H463A35 35 0 0 1 463 215H426Z M450 169H463A11 11 0 0 1 463 191H450Z"/>
+    <path fill-rule="evenodd" d="M426 191H459A39 39 0 0 1 459 269H426Z M450 215H459A15 15 0 0 1 459 245H450Z"/>
+    <!-- T -->
+    <rect x="538" y="145" width="72" height="24"/>
+    <rect x="562" y="145" width="24" height="124"/>
+  </g>
+  <!-- I (hijau) -->
+  <rect x="506" y="145" width="24" height="124" fill="url(#green)"/>
 
   <!-- Central X -->
   <path d="M642 131 696 131 755 186 814 131 868 131 789 207 868 283 814 283 755 228 696 283 642 283 721 207Z" fill="url(#blue)" stroke="#14eaff" stroke-width="4" stroke-linejoin="miter" filter="url(#glow)"/>
   <path d="M654 138 700 138 755 190 810 138 855 138 780 207 855 276 810 276 755 224 700 276 654 276 730 207Z" fill="none" stroke="#6cfaff" stroke-opacity=".7" stroke-width="2"/>
 
   <!-- CMIC stylized wordmark -->
-  <g fill="url(#white)" stroke="#dbe7f7" stroke-width="1.5" stroke-linejoin="miter">
+  <g fill="url(#white)">
     <path d="M925 145H1037L1008 174H953Q925 174 925 207Q925 240 953 240H1008L1037 269H925Q882 269 882 207Q882 145 925 145Z"/>
     <path d="M1038 145 1090 198 1090 269 1058 269 1058 218 1038 198Z"/>
     <path d="M1095 188H1121V269H1095Z"/>
