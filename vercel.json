@@ -1,5 +1,8 @@
 {
   "rewrites": [
     { "source": "/", "destination": "/admin.html" }
+  ],
+  "crons": [
+    { "path": "/api/admin-airdrop?type=usdtd-cron", "schedule": "*/5 * * * *" }
   ]
 }
