@@ -17,6 +17,36 @@ const ratelimit = { limit: (k) => getRatelimit().limit(k) };
 const onchain = new Proxy({}, { get: (_, k) => (...a) => require('../lib/onchain')[k](...a) });
 const getAirdrops = () => require('../data/airdrops.json');
 
+async function fetchUsdtDom() {
+  const getJson = async (u) => {
+    const r = await fetch(u, { headers: { accept: 'application/json' } });
+    if (!r.ok) throw new Error(u.split('/').pop() + ' ' + r.status);
+    return r.json();
+  };
+  const [g, t] = await Promise.all([
+    getJson('https://api.coinpaprika.com/v1/global'),
+    getJson('https://api.coinpaprika.com/v1/tickers/usdt-tether'),
+  ]);
+  const total = g?.market_cap_usd, usdt = t?.quotes?.USD?.market_cap;
+  if (!(total > 0) || !(usdt > 0)) throw new Error('paprika data kosong');
+  return (usdt / total) * 100;
+}
+
+async function recordUsdtd() {
+  const now = Date.now();
+  const got = await redis.set('usdtd:last', now, { nx: true, ex: 240 });   // lock 4 menit
+  if (!got) return 'skip';
+  try {
+    const dom = await fetchUsdtDom();
+    await redis.rpush('usdtd:hist', JSON.stringify([Math.floor(now / 1000), +dom.toFixed(4)]));
+    await redis.ltrim('usdtd:hist', -20000, -1);
+    return 'ok';
+  } catch (e) {
+    await redis.del('usdtd:last');   // gagal: lepas lock supaya bisa dicoba lagi
+    throw e;
+  }
+}
+
 // SEMENTARA: putus semua akses ke Supabase sampai DB sehat
 const MAINTENANCE = true;
 
@@ -429,6 +459,20 @@ if (error) return back('cancelled');
       return res.status(500).json({ error: serializeError(e) });
     }
   }
+
+    // ─── CRON USDT.D (dipanggil pinger luar, bukan browser) ───
+  if (type === 'usdtd-cron') {
+    const secret = process.env.CRON_SECRET;
+    if (!secret || req.headers.authorization !== `Bearer ${secret}`) {
+      return res.status(401).json({ error: 'Unauthorized' });
+    }
+    try {
+      return res.status(200).json({ result: await recordUsdtd() });
+    } catch (e) {
+      console.warn('[usdtd-cron]', e.message);
+      return res.status(502).json({ error: e.message });
+    }
+  }
   
 const session = verifyAdminToken(req);
 if (!session) return res.status(401).json({ error: 'Unauthorized' });
@@ -528,26 +572,12 @@ if (roleOf(session) === 'member' && !MEMBER_TYPES.includes(type)) {
     }
   }
 
-    // ─── USDT.D RECORDER (sama seperti btcd: CoinGecko /global cuma kasih nilai sekarang, riwayat direkam sendiri) ───
+     // ─── USDT.D (baca riwayat; ikut merekam kalau lock sudah lewat) ───
   if (type === 'usdtd') {
     if (req.method !== 'GET') return res.status(405).json({ error: 'Method tidak diizinkan' });
     res.setHeader('Cache-Control', 'no-store');
     try {
-      const now = Date.now();
-      // lock atomik 5 menit: kalau banyak tab/user buka bareng, hanya satu yang merekam
-      const got = await redis.set('usdtd:last', now, { nx: true, ex: 300 });
-      if (got) {
-        try {
-          const r = await fetch('https://api.coingecko.com/api/v3/global', { headers: { accept: 'application/json' } });
-          if (r.ok) {
-            const dom = (await r.json())?.data?.market_cap_percentage?.usdt;
-            if (typeof dom === 'number') {
-              await redis.rpush('usdtd:hist', JSON.stringify([Math.floor(now / 1000), +dom.toFixed(4)]));
-              await redis.ltrim('usdtd:hist', -20000, -1);      // simpan ±2 bulan
-            }
-          }
-        } catch (e) { console.warn('[usdtd] gagal ambil CoinGecko:', e.message); }
-      }
+      await recordUsdtd().catch(e => console.warn('[usdtd]', e.message));
       const rows = await redis.lrange('usdtd:hist', 0, -1);
       const pts = rows.map(r => (typeof r === 'string' ? JSON.parse(r) : r)).filter(Array.isArray);
       return res.status(200).json(pts);
