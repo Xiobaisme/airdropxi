@@ -1,0 +1,43 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="1600" height="420" viewBox="0 0 1600 420" role="img" aria-labelledby="title desc">
+  <title id="title">OURBIT × CMIC</title>
+  <desc id="desc">OURBIT and CMIC partnership lockup with a blue X separator on a transparent background.</desc>
+  <defs>
+    <linearGradient id="green" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#28e6a0"/><stop offset="1" stop-color="#159a67"/></linearGradient>
+    <linearGradient id="blue" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#13f5ff"/><stop offset=".45" stop-color="#087cff"/><stop offset="1" stop-color="#1839dc"/></linearGradient>
+    <linearGradient id="white" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#ffffff"/><stop offset="1" stop-color="#dce7f5"/></linearGradient>
+    <filter id="glow" x="-40%" y="-40%" width="180%" height="180%"><feGaussianBlur stdDeviation="7" result="blur"/><feMerge><feMergeNode in="blur"/><feMergeNode in="SourceGraphic"/></feMerge></filter>
+  </defs>
+  <!-- OURBIT emblem -->
+  <g transform="translate(54 100)">
+    <path d="M58 0 104 26 104 82 58 109 12 82 12 26 31 15 45 23 29 32 29 72 58 89 87 72 87 32 72 23Z" fill="url(#green)"/>
+    <path d="M58 28 81 41 81 67 58 80 35 67 35 41Z" fill="#fff"/>
+    <path d="M58 39 71 46.5 71 61.5 58 69 45 61.5 45 46.5Z" fill="#20c889"/>
+  </g>
+  <!-- OURBIT wordmark -->
+  <g fill="url(#white)" stroke="#dbe3ef" stroke-width="1.2" stroke-linejoin="round" font-family="Arial, Helvetica, sans-serif" font-weight="800" font-size="122" letter-spacing="-5">
+    <text x="181" y="225">OURB</text>
+    <text x="495" y="225">T</text>
+  </g>
+  <rect x="493" y="120" width="24" height="116" rx="1" fill="url(#green)"/>
+  <path d="M505 111v9m0 116v9" stroke="#159a67" stroke-width="2"/>
+  <!-- Central X -->
+  <path d="M642 131 696 131 755 186 814 131 868 131 789 207 868 283 814 283 755 228 696 283 642 283 721 207Z" fill="url(#blue)" stroke="#14eaff" stroke-width="4" stroke-linejoin="miter" filter="url(#glow)"/>
+  <path d="M654 138 700 138 755 190 810 138 855 138 780 207 855 276 810 276 755 224 700 276 654 276 730 207Z" fill="none" stroke="#6cfaff" stroke-opacity=".7" stroke-width="2"/>
+  <!-- CMIC stylized wordmark -->
+  <g fill="url(#white)" stroke="#dbe7f7" stroke-width="1.5" stroke-linejoin="miter">
+    <!-- C -->
+    <path d="M925 145H1037L1008 174H953Q925 174 925 207Q925 240 953 240H1008L1037 269H925Q882 269 882 207Q882 145 925 145Z"/>
+    <!-- M / market bars motif -->
+    <path d="M1038 145 1090 198 1090 269 1058 269 1058 218 1038 198Z"/>
+    <path d="M1095 188H1121V269H1095Z"/>
+    <path d="M1129 163H1155V269H1129Z"/>
+    <path d="M1163 133H1189V269H1163Z"/>
+    <!-- I -->
+    <path d="M1200 145H1232V269H1200Z"/>
+    <!-- C -->
+    <path d="M1300 145H1412L1383 174H1328Q1300 174 1300 207Q1300 240 1328 240H1383L1412 269H1300Q1257 269 1257 207Q1257 145 1300 145Z"/>
+  </g>
+  <!-- Rising arrow over CMIC bars -->
+  <path d="M1024 228 1081 211 1123 176 1167 151" fill="none" stroke="#1686ff" stroke-width="8" stroke-linecap="square" stroke-linejoin="miter"/>
+  <path d="M1148 151 1184 139 1173 175Z" fill="#1686ff"/>
+</svg>
