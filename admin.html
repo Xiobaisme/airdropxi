@@ -863,6 +863,23 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 .toast.warning { border-left-color: var(--secondary); }
 #btn-send-broadcast { background: var(--secondary); border-color: var(--secondary); color: #000; }
 #btn-send-broadcast:hover { background: #ff6aad; }
+        
+/* ── Editor gambar broadcast ── */
+#b-image-edit { position: absolute; top: 6px; right: 52px; }
+#image-edit-modal { z-index: 1700; }
+.ie-box { max-width: 900px; }
+.ie-stage-wrap { display: flex; justify-content: center; background: var(--card-2); border: 2px solid var(--border); border-radius: var(--r-sm); padding: 10px; }
+.ie-stage { position: relative; display: inline-block; line-height: 0; user-select: none; touch-action: none; }
+.ie-stage .ie-base { display: block; }
+.ie-logo { position: absolute; cursor: grab; outline: 2px dashed transparent; touch-action: none; }
+.ie-logo:active { cursor: grabbing; }
+.ie-logo.sel { outline-color: var(--secondary); }
+.ie-logo img { width: 100%; display: block; pointer-events: none; }
+.ie-tools { display: flex; gap: 10px; flex-wrap: wrap; align-items: center; }
+.ie-tools label { font-family: var(--label); font-size: .7rem; font-weight: 700; color: var(--text2); }
+.ie-tools input[type=range] { flex: 1; min-width: 140px; accent-color: var(--primary); }
+.nlf-btn:disabled { opacity: .35; cursor: default; }
+        
         /* ── Ticker miring (pita) ── */
 #crypto-ticker {
     left: -3%; right: -3%; width: 106%;   /* lebihkan supaya ujung miringnya tidak bolong */
@@ -2141,6 +2158,7 @@ body.is-member .member-only { display: inline-flex; }
                     <span id="b-image-placeholder" style="color:var(--text3); font-family:var(--label); font-size:0.8rem;">Klik di sini, lalu paste gambar (Ctrl+V)</span>
                     <img id="b-image-preview" class="hidden" style="max-width:100%; max-height:220px; border-radius:8px;" />
                     <button id="b-image-remove" class="modal-close hidden" style="position:absolute; top:6px; right:6px;" onclick="removeBroadcastImage(event)"></button>
+                    <button id="b-image-edit" class="modal-close hidden" type="button" title="Edit gambar / tambah SVG" onclick="openImageEditor(event)"></button>
                 </div>
             </div>
         </div>
@@ -2170,6 +2188,37 @@ body.is-member .member-only { display: inline-flex; }
         </div>
     </div>
 </div>
+
+        <!-- ─── EDITOR GAMBAR BROADCAST (tambah SVG + geser) ─── -->
+<div id="image-edit-modal" class="modal hidden">
+    <div class="modal-box ie-box">
+        <div class="modal-head">
+            <div class="modal-title">Edit Gambar</div>
+            <button class="modal-close" type="button" onclick="closeImageEditor()" id="ie-close-btn"></button>
+        </div>
+        <div class="modal-body">
+            <div class="ie-stage-wrap">
+                <div class="ie-stage" id="ie-stage"><img class="ie-base" id="ie-base" alt="" draggable="false"></div>
+            </div>
+            <div class="ie-tools">
+                <button class="nlf-btn" type="button" onclick="ieAddLogo(IE_LOGO_URL)">+ OURBIT × CMIC</button>
+                <button class="nlf-btn" type="button" onclick="document.getElementById('ie-file').click()">+ SVG lain</button>
+                <input type="file" id="ie-file" accept=".svg,image/svg+xml,image/png" class="hidden">
+                <button class="nlf-btn" type="button" id="ie-del" onclick="ieDelete()" disabled>Hapus</button>
+            </div>
+            <div class="ie-tools">
+                <label for="ie-size">Ukuran</label>
+                <input type="range" id="ie-size" min="5" max="100" value="40" disabled>
+            </div>
+            <div class="hint" style="font-family:var(--label);font-size:.7rem;color:var(--text3)">Klik logo lalu geser. Slider untuk mengatur ukuran.</div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeImageEditor()">Batal</button>
+            <button class="btn-save" onclick="applyImageEditor()">Terapkan</button>
+        </div>
+    </div>
+</div>
+        
 
               <!-- ─── CONFIRM MODAL (custom, ganti native confirm()) ─── -->
 <div id="confirm-modal" class="modal hidden">
@@ -3591,13 +3640,17 @@ function closeBroadcastModal() {
     document.getElementById('broadcast-modal').classList.add('hidden');
 }
 
+let _broadcastImageOriginal = null;   // gambar asli (sebelum ditempel SVG)
+
 function removeBroadcastImage(e) {
     if (e) e.stopPropagation();
     _broadcastImageBase64 = null;
+    _broadcastImageOriginal = null;
     document.getElementById('b-image-preview').classList.add('hidden');
     document.getElementById('b-image-preview').src = '';
     document.getElementById('b-image-placeholder').classList.remove('hidden');
     document.getElementById('b-image-remove').classList.add('hidden');
+    document.getElementById('b-image-edit').classList.add('hidden');
 }
 
 const BROADCAST_TAGS = [
@@ -3661,19 +3714,133 @@ document.getElementById('b-image-paste').addEventListener('paste', (e) => {
             const blob = item.getAsFile();
             const reader = new FileReader();
             reader.onload = () => {
-                _broadcastImageBase64 = reader.result;
-                const preview = document.getElementById('b-image-preview');
-                preview.src = _broadcastImageBase64;
-                preview.classList.remove('hidden');
-                document.getElementById('b-image-placeholder').classList.add('hidden');
-                document.getElementById('b-image-remove').classList.remove('hidden');
-            };
+    _broadcastImageBase64 = reader.result;
+    _broadcastImageOriginal = reader.result;
+    const preview = document.getElementById('b-image-preview');
+    preview.src = _broadcastImageBase64;
+    preview.classList.remove('hidden');
+    document.getElementById('b-image-placeholder').classList.add('hidden');
+    document.getElementById('b-image-remove').classList.remove('hidden');
+    document.getElementById('b-image-edit').classList.remove('hidden');
+};
             reader.readAsDataURL(blob);
             e.preventDefault();
             break;
         }
     }
 });
+
+    // ─── EDITOR GAMBAR: tambah SVG, geser, atur ukuran, lalu digabung ke gambar ───
+const IE_LOGO_URL = '/ourbit-cmic.svg';
+const ie = { layers: [], sel: null, drag: null };
+const ieEl = (id) => document.getElementById(id);
+ieEl('b-image-edit').innerHTML = icon('edit');
+ieEl('ie-close-btn').innerHTML = icon('x');
+
+function ieLoad(src) {
+    return new Promise((res, rej) => { const im = new Image(); im.onload = () => res(im); im.onerror = rej; im.src = src; });
+}
+function ieLayout(L) {
+    const s = L.el.style;
+    s.left = (L.x * 100) + '%'; s.top = (L.y * 100) + '%'; s.width = (L.wf * 100) + '%';
+}
+function ieSelect(L) {
+    ie.sel = L;
+    ie.layers.forEach(x => x.el.classList.toggle('sel', x === L));
+    ieEl('ie-del').disabled = !L;
+    const s = ieEl('ie-size'); s.disabled = !L;
+    if (L) s.value = Math.round(L.wf * 100);
+}
+
+function openImageEditor(e) {
+    if (e) e.stopPropagation();
+    if (!_broadcastImageOriginal) return;
+    ie.layers = []; ie.sel = null; ie.drag = null;
+    ieEl('ie-stage').querySelectorAll('.ie-logo').forEach(n => n.remove());
+    ieSelect(null);
+    const base = ieEl('ie-base');
+    base.onload = () => {
+        const maxW = Math.min(820, window.innerWidth - 90), maxH = window.innerHeight * 0.5;
+        const k = Math.min(maxW / base.naturalWidth, maxH / base.naturalHeight, 1);
+        base.style.width = Math.round(base.naturalWidth * k) + 'px';
+        base.style.height = Math.round(base.naturalHeight * k) + 'px';
+    };
+    base.src = _broadcastImageOriginal;
+    ieEl('image-edit-modal').classList.remove('hidden');
+}
+function closeImageEditor() { ieEl('image-edit-modal').classList.add('hidden'); }
+
+async function ieAddLogo(src) {
+    let probe;
+    try { probe = await ieLoad(src); } catch { showToast('SVG gagal dimuat: ' + src, 'error'); return; }
+    const L = { src, ar: probe.naturalWidth / probe.naturalHeight, x: 0.05, y: 0.05, wf: 0.4 };
+    const el = document.createElement('div');
+    el.className = 'ie-logo';
+    el.innerHTML = `<img src="${src}" alt="" draggable="false">`;
+    L.el = el;
+    ieEl('ie-stage').appendChild(el);
+    ie.layers.push(L);
+    ieLayout(L); ieSelect(L);
+
+    el.addEventListener('pointerdown', ev => {
+        ieSelect(L);
+        ie.drag = { L, sx: ev.clientX, sy: ev.clientY, x0: L.x, y0: L.y, r: ieEl('ie-stage').getBoundingClientRect() };
+        el.setPointerCapture(ev.pointerId);
+        ev.preventDefault();
+    });
+    el.addEventListener('pointermove', ev => {
+        const d = ie.drag; if (!d || d.L !== L) return;
+        const hf = (L.wf * d.r.width / L.ar) / d.r.height;   // tinggi logo (fraksi)
+        L.x = Math.min(Math.max(0, 1 - L.wf), Math.max(0, d.x0 + (ev.clientX - d.sx) / d.r.width));
+        L.y = Math.min(Math.max(0, 1 - hf),    Math.max(0, d.y0 + (ev.clientY - d.sy) / d.r.height));
+        ieLayout(L);
+    });
+    const end = () => { ie.drag = null; };
+    el.addEventListener('pointerup', end);
+    el.addEventListener('pointercancel', end);
+}
+
+function ieDelete() {
+    const L = ie.sel; if (!L) return;
+    L.el.remove();
+    ie.layers = ie.layers.filter(x => x !== L);
+    ieSelect(null);
+}
+
+ieEl('ie-size').addEventListener('input', e => {
+    const L = ie.sel; if (!L) return;
+    L.wf = +e.target.value / 100;
+    L.x = Math.min(L.x, Math.max(0, 1 - L.wf));
+    ieLayout(L);
+});
+ieEl('ie-stage').addEventListener('pointerdown', e => { if (e.target === ieEl('ie-base')) ieSelect(null); });
+ieEl('ie-file').addEventListener('change', e => {
+    const f = e.target.files[0];
+    if (f) ieAddLogo(URL.createObjectURL(f));
+    e.target.value = '';
+});
+
+// gabungkan gambar asli + semua SVG jadi satu gambar → dipakai sendBroadcast()
+async function applyImageEditor() {
+    const base = ieEl('ie-base');
+    const c = document.createElement('canvas');
+    c.width = base.naturalWidth; c.height = base.naturalHeight;
+    const ctx = c.getContext('2d');
+    ctx.drawImage(base, 0, 0);
+    try {
+        for (const L of ie.layers) {
+            const im = await ieLoad(L.src);
+            const w = L.wf * c.width;
+            ctx.drawImage(im, L.x * c.width, L.y * c.height, w, w / L.ar);
+        }
+    } catch { showToast('Gagal menggabungkan SVG', 'error'); return; }
+    let out = c.toDataURL('image/png');
+    if (out.length > 3.5e6) out = c.toDataURL('image/jpeg', 0.9);   // jaga ukuran request tetap kecil
+    _broadcastImageBase64 = out;
+    ieEl('b-image-preview').src = out;
+    closeImageEditor();
+}
+        
 
 async function sendBroadcast() {
     const title = document.getElementById('b-title').value.trim();
