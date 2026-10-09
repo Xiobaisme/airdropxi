@@ -1213,6 +1213,7 @@ body.news-resizing { cursor: col-resize; user-select: none; }
 .btc-legend i{width:18px;height:3px;border-radius:2px;display:inline-block}
 .btc-legend b{font-weight:700;min-width:58px;text-align:right}
 #btc-b{color:#EF4444}#btc-d{color:#35E0A1}
+#btc-u{color:#38BDF8}
 .btc-tf{display:flex;gap:6px}
 #btc-chart{position:relative;height:460px;border:2px solid var(--border);border-radius:var(--r-md);overflow:hidden;background:#0A0A0A}
 @media (max-width:640px){#btc-chart{height:340px}}
@@ -1692,6 +1693,7 @@ body.is-member .member-only { display: inline-flex; }
                     <div class="btc-legend">
                         <span><i style="background:#EF4444"></i>BTCUSDT.P <b id="btc-b">--</b></span>
                         <span><i style="background:#35E0A1"></i>BTC.D <b id="btc-d">--</b></span>
+                        <span><i style="background:#38BDF8"></i>USDT.D <b id="btc-u">--</b></span>
                     </div>
                     <div class="btc-tf" id="btc-tf"></div>
                 </div>
@@ -5802,14 +5804,15 @@ document.getElementById('weex-send-btn').onclick = async () => {
 (function () {
     const OFF = 7 * 3600;                                   // tampil dalam WIB
     const TFS = [['5m', '5m'], ['15m', '15m'], ['1h', '1H'], ['4h', '4H'], ['1d', '1D']];
-    const st = { tf: '1h', chart: null, sB: null, sD: null, btc: [], dom: [], ws: null, timer: null, run: false, token: 0, bB: 0 };
+    const st = { tf: '1h', chart: null, sB: null, sD: null, sU: null, usdt: [], btc: [], dom: [], ws: null, timer: null, run: false, token: 0, bB: 0 };
     const $ = s => document.querySelector(s);
     const pct = (v, b) => (v / b - 1) * 100;
     const fmtP = v => (v >= 0 ? '+' : '') + v.toFixed(2) + '%';
     const setNote = t => { const el = $('#btc-note'); if (el) el.textContent = t; };
-    const setLegend = (b, d) => {
-        $('#btc-b').textContent = b == null ? '--' : fmtP(b);
-        $('#btc-d').textContent = d == null ? '--' : fmtP(d);
+    const setLegend = (b, d, u) => {
+    $('#btc-b').textContent = b == null ? '--' : fmtP(b);
+    $('#btc-d').textContent = d == null ? '--' : fmtP(d);
+    $('#btc-u').textContent = u == null ? '--' : fmtP(u);
     };
 
     function build() {
@@ -5830,13 +5833,14 @@ document.getElementById('weex-send-btn').onclick = async () => {
             localization: { priceFormatter: fmtP },
         });
         const opt = color => ({ color, lineWidth: 2, priceFormat: { type: 'custom', formatter: fmtP, minMove: 0.01 } });
+        st.sU = st.chart.addLineSeries(opt('#38BDF8'));
         st.sD = st.chart.addLineSeries(opt('#35E0A1'));
         st.sB = st.chart.addLineSeries(opt('#EF4444'));
         st.sB.createPriceLine({ price: 0, color: '#444', lineWidth: 1, lineStyle: 2, axisLabelVisible: false });
 
         st.chart.subscribeCrosshairMove(p => {
             if (!p.time || !p.seriesData) return;
-            setLegend(p.seriesData.get(st.sB)?.value, p.seriesData.get(st.sD)?.value);
+            setLegend(p.seriesData.get(st.sB)?.value, p.seriesData.get(st.sD)?.value, p.seriesData.get(st.sU)?.value);
         });
 
         $('#btc-tf').innerHTML = TFS.map(([k, l]) => `<button class="nlf-btn ${k === st.tf ? 'active' : ''}" data-tf="${k}" type="button">${l}</button>`).join('');
@@ -5875,6 +5879,24 @@ document.getElementById('weex-send-btn').onclick = async () => {
         if (r.ok) { st.dom = await r.json(); st.domSrc = 'rec'; }
     } catch {}
 }
+const USDT_KEY = 'usdtdRec';
+function loadUsdtLocal() {
+    try { const v = JSON.parse(localStorage.getItem(USDT_KEY)); if (Array.isArray(v)) st.usdt = v; } catch {}
+}
+async function pollUsdt() {
+    try {
+        const r = await fetch('https://api.coingecko.com/api/v3/global');
+        if (!r.ok) throw 0;
+        const v = (await r.json()).data.market_cap_percentage.usdt;
+        if (!(v > 0)) return;
+        const t = Math.floor(Date.now() / 1000), last = st.usdt[st.usdt.length - 1];
+        if (!last || t - last[0] >= 300) {
+            st.usdt.push([t, v]);
+            if (st.usdt.length > 2000) st.usdt.shift();
+            try { localStorage.setItem(USDT_KEY, JSON.stringify(st.usdt)); } catch {}
+        }
+    } catch {}
+}
 
     function render(fit) {
         if (!st.sB || !st.btc.length) return;
@@ -5904,8 +5926,15 @@ document.getElementById('weex-send-btn').onclick = async () => {
             setNote('BTC.D baru mulai direkam. Garis hijau muncul setelah ada minimal 2 titik (1 titik / 5 menit selama dashboard terbuka).');
         }
         setLegend(bData[bData.length - 1].value, dLast);
-        if (fit) st.chart.timeScale().fitContent();
-    }
+let uLast = null;
+const u = st.usdt.filter(p => p[0] >= t0);
+if (u.length >= 2) {
+    const seenU = new Set(), uData = [];
+    u.forEach(p => { if (!seenU.has(p[0])) { seenU.add(p[0]); uData.push({ time: p[0] + OFF, value: pct(p[1], u[0][1]) }); } });
+    st.sU.setData(uData);
+    uLast = uData[uData.length - 1].value;
+} else st.sU.setData([]);
+setLegend(bData[bData.length - 1].value, dLast, uLast);
 
     function connectWs() {
         if (st.ws) { st.ws.onclose = null; st.ws.close(); st.ws = null; }
@@ -5925,13 +5954,14 @@ document.getElementById('weex-send-btn').onclick = async () => {
     }
 
     function start() {
-        if (st.run) return;
-        st.run = true;
-        build();
-        Promise.all([loadBtc(), loadDom()]).then(() => render(true));
-        connectWs();
-        st.timer = setInterval(async () => { await loadDom(); render(false); }, 60000);
-    }
+    if (st.run) return;
+    st.run = true;
+    build();
+    loadUsdtLocal(); pollUsdt();
+    Promise.all([loadBtc(), loadDom()]).then(() => render(true));
+    connectWs();
+    st.timer = setInterval(async () => { await Promise.all([loadDom(), pollUsdt()]); render(false); }, 60000);
+}
     function stop() {
         st.run = false;
         clearInterval(st.timer); st.timer = null;
