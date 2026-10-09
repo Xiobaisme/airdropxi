@@ -5925,7 +5925,7 @@ async function pollUsdt() {
             st.sD.setData([]);
             setNote('BTC.D baru mulai direkam. Garis hijau muncul setelah ada minimal 2 titik (1 titik / 5 menit selama dashboard terbuka).');
         }
-        setLegend(bData[bData.length - 1].value, dLast);
+
 let uLast = null;
 const u = st.usdt.filter(p => p[0] >= t0);
 if (u.length >= 2) {
@@ -5933,8 +5933,10 @@ if (u.length >= 2) {
     u.forEach(p => { if (!seenU.has(p[0])) { seenU.add(p[0]); uData.push({ time: p[0] + OFF, value: pct(p[1], u[0][1]) }); } });
     st.sU.setData(uData);
     uLast = uData[uData.length - 1].value;
-} else st.sU.setData([]);
+  } else st.sU.setData([]);
 setLegend(bData[bData.length - 1].value, dLast, uLast);
+    }
+
 
     function connectWs() {
         if (st.ws) { st.ws.onclose = null; st.ws.close(); st.ws = null; }
