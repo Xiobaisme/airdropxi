@@ -1687,7 +1687,7 @@ body.is-member .member-only { display: inline-flex; }
             <div class="btc-chart-head">
                 <div>
                     <div class="hero-eyebrow" style="margin-bottom:.4rem;">Live Chart</div>
-                    <div class="tu-title">BTCUSDT.P vs BTC.D</div>
+                    <div class="tu-title">BTCUSDT.P vs BTC.D vs USDT.D</div>
                 </div>
                 <div class="btc-ctl">
                     <div class="btc-legend">
@@ -5879,22 +5879,12 @@ document.getElementById('weex-send-btn').onclick = async () => {
         if (r.ok) { st.dom = await r.json(); st.domSrc = 'rec'; }
     } catch {}
 }
-const USDT_KEY = 'usdtdRec';
-function loadUsdtLocal() {
-    try { const v = JSON.parse(localStorage.getItem(USDT_KEY)); if (Array.isArray(v)) st.usdt = v; } catch {}
-}
-async function pollUsdt() {
+async function loadUsdt() {
     try {
-        const r = await fetch('https://api.coingecko.com/api/v3/global');
-        if (!r.ok) throw 0;
-        const v = (await r.json()).data.market_cap_percentage.usdt;
-        if (!(v > 0)) return;
-        const t = Math.floor(Date.now() / 1000), last = st.usdt[st.usdt.length - 1];
-        if (!last || t - last[0] >= 300) {
-            st.usdt.push([t, v]);
-            if (st.usdt.length > 2000) st.usdt.shift();
-            try { localStorage.setItem(USDT_KEY, JSON.stringify(st.usdt)); } catch {}
-        }
+        const r = await fetch('/api/admin-airdrop?type=usdtd');
+        if (!r.ok) return;
+        const d = await r.json();
+        if (Array.isArray(d)) st.usdt = d;
     } catch {}
 }
 
@@ -5959,10 +5949,9 @@ setLegend(bData[bData.length - 1].value, dLast, uLast);
     if (st.run) return;
     st.run = true;
     build();
-    loadUsdtLocal(); pollUsdt();
-    Promise.all([loadBtc(), loadDom()]).then(() => render(true));
+    Promise.all([loadBtc(), loadDom(), loadUsdt()]).then(() => render(true));
     connectWs();
-    st.timer = setInterval(async () => { await Promise.all([loadDom(), pollUsdt()]); render(false); }, 60000);
+    st.timer = setInterval(async () => { await Promise.all([loadDom(), loadUsdt()]); render(false); }, 60000);
 }
     function stop() {
         st.run = false;
