@@ -1,4 +1,4 @@
-// ═══ LAB MATERI: reader dengan animasi flip + zoom ═══
+// ═══ LAB MATERI: reader dengan animasi flip + zoom + mode video ═══
 (function () {
     const $ = (id) => document.getElementById(id);
     const store = {
@@ -13,6 +13,7 @@
     const Z = { s: 1, x: 0, y: 0 };
 
     const pageUrl = (b, n) => b.dir + String(n).padStart(2, '0') + '.webp';
+    const isVideo = (b) => b.type === 'video';
 
     async function loadLab() {
         if (labLoaded) return true;
@@ -31,12 +32,18 @@
     function renderGrid() {
         $('lab-grid').innerHTML = LAB_EBOOKS.map(b => {
             const last = +store.get('labPage:' + b.id) || 0;
+            const vid = isVideo(b);
+            const cover = vid
+                ? (b.cover
+                    ? `<img src="${esc(b.cover)}" alt="" loading="lazy" decoding="async">`
+                    : `<div style="display:flex;align-items:center;justify-content:center;width:100%;height:100%;font-size:42px">▶</div>`)
+                : `<img src="${esc(b.dir + 'cover.webp')}" alt="" loading="lazy" decoding="async">`;
             return `<article class="lab-card" data-id="${esc(b.id)}">
-                <div class="lab-cover"><img src="${esc(b.dir + 'cover.webp')}" alt="" loading="lazy" decoding="async"></div>
-                <div class="lab-meta"><span class="lab-chip">${b.pages} hal</span><span class="lab-chip">${esc(b.level)}</span>${(b.tags || []).map(t => `<span class="lab-chip">${esc(t)}</span>`).join('')}</div>
+                <div class="lab-cover">${cover}</div>
+                <div class="lab-meta"><span class="lab-chip">${vid ? esc(b.duration || 'Video') : b.pages + ' hal'}</span><span class="lab-chip">${esc(b.level)}</span>${(b.tags || []).map(t => `<span class="lab-chip">${esc(t)}</span>`).join('')}</div>
                 <h3>${esc(b.title)}</h3>
                 <p>${esc(b.desc)}</p>
-                <button class="lab-read" type="button">${last > 1 ? 'Lanjut hal. ' + last : 'Baca'}</button>
+                <button class="lab-read" type="button">${vid ? 'Putar' : last > 1 ? 'Lanjut hal. ' + last : 'Baca'}</button>
             </article>`;
         }).join('');
         $('lab-fab-n').textContent = LAB_EBOOKS.length + ' ebook';
@@ -76,7 +83,7 @@
 
     // ── TAMPILKAN HALAMAN (dir: 1 = maju, -1 = mundur, kosong = tanpa animasi) ──
     function show(n, dir) {
-        if (!cur || flipping) return;
+        if (!cur || flipping || isVideo(cur)) return;
         const img = $('lab-img'), err = $('lab-err');
         const oldSrc = img.getAttribute('src');
         page = Math.min(cur.pages, Math.max(1, n));
@@ -131,9 +138,41 @@
     }
     const go = (d) => show(page + d, d);
 
+    // ── MODE VIDEO ──
+    const videoUiIds = ['lab-prev', 'lab-next', 'lab-jump', 'lab-zin', 'lab-zout', 'lab-zreset'];
+    function resetVideoUi() {
+        const v = $('lab-video');
+        if (v) { v.pause(); v.remove(); }
+        videoUiIds.forEach(id => { $(id).style.display = ''; });
+        $('lab-book').style.display = '';
+        $('lab-prog').style.display = '';
+    }
+    function openVideo(b) {
+        resetVideoUi();
+        $('lab-rtitle').textContent = b.title;
+        $('lab-count').textContent = b.duration || '';
+        $('lab-open').href = b.src;
+        $('lab-err').classList.add('hidden');
+        $('lab-library').classList.add('hidden');
+        $('lab-reader').classList.remove('hidden');
+        videoUiIds.forEach(id => { $(id).style.display = 'none'; });
+        $('lab-book').style.display = 'none';
+        $('lab-prog').style.display = 'none';
+        const v = document.createElement('video');
+        v.id = 'lab-video';
+        v.src = b.src;
+        v.controls = true;
+        v.preload = 'metadata';
+        v.playsInline = true;
+        v.style.cssText = 'width:100%;height:100%;object-fit:contain;background:#000';
+        $('lab-stage').appendChild(v);
+    }
+
     function openBook(id) {
         cur = LAB_EBOOKS.find(b => b.id === id);
         if (!cur) return;
+        if (isVideo(cur)) { openVideo(cur); return; }
+        resetVideoUi();
         $('lab-rtitle').textContent = cur.title;
         $('lab-jump').innerHTML = Array.from({ length: cur.pages }, (_, i) => `<option value="${i + 1}">Hal. ${i + 1}</option>`).join('');
         $('lab-library').classList.add('hidden');
@@ -143,6 +182,7 @@
         show(+store.get('labPage:' + cur.id) || 1);
     }
     function backToLibrary() {
+        resetVideoUi();
         cur = null; flipping = false;
         zoomEl().querySelectorAll('.lab-flip').forEach(n => n.remove());
         $('lab-img').removeAttribute('src');
@@ -159,6 +199,7 @@
         if (await loadLab()) renderGrid();
     };
     window.closeLab = function () {
+        resetVideoUi();
         $('lab-modal').classList.add('hidden');
         document.body.style.overflow = '';
         cur = null;
