@@ -2,9 +2,14 @@
 (function () {
     const $ = s => document.querySelector(s);
     const state = { coin: 'BTC', tf: '5m' };
-    let running = false, hist = {}, lastPush = {}, token = 0, base = null, socks = [], buf = {}, timers = [];
+    let running = false, hist = {}, lastPush = {}, token = 0, base = null, socks = [], buf = {}, timers = [], coinsLoaded = false;
 
     const fmt = v => v >= 1e9 ? (v/1e9).toFixed(2)+'B' : v >= 1e6 ? (v/1e6).toFixed(2)+'M' : v >= 1e3 ? (v/1e3).toFixed(2)+'K' : v.toFixed(0);
+
+    // [BARU] pemetaan nama koin. Dropdown memakai nama Binance (mis. 1000PEPE); bursa lain sering pakai PEPE.
+    const plain = c => c.replace(/^1(0{3,})(?=[A-Z])/, '');
+    const hlName = c => (plain(c) !== c ? 'k' + plain(c) : c);   // Hyperliquid: kPEPE
+    const xbt = c => (c === 'BTC' ? 'XBT' : c);                   // Kraken: BTC = XBT
 
     function tween(el, to, f) {
         const from = +el.dataset.v || 0; el.dataset.v = to;
@@ -14,6 +19,25 @@
             el.textContent = f(from + (to - from) * p);
             if (p < 1) requestAnimationFrame(step);
         })(t0);
+    }
+
+    /* ---------- [BARU] isi dropdown koin otomatis (top 200 volume Binance Futures) ---------- */
+    async function loadCoins() {
+        const sel = $('#ls-coin');
+        if (!sel) return;
+        try {
+            const r = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr');
+            if (!r.ok) throw new Error('HTTP ' + r.status);
+            const list = (await r.json())
+                .filter(x => /^[A-Z0-9]+USDT$/.test(x.symbol) && +x.quoteVolume > 0)   // buang kontrak kuartalan (BTCUSDT_xxxx)
+                .sort((a, b) => b.quoteVolume - a.quoteVolume)
+                .slice(0, 200)
+                .map(x => x.symbol.replace(/USDT$/, ''));
+            if (!list.includes(state.coin)) list.unshift(state.coin);
+            sel.innerHTML = list.map(c => `<option value="${c}">${c}</option>`).join('');
+            sel.value = state.coin;
+            coinsLoaded = true;
+        } catch (_) { /* gagal: dropdown bawaan di HTML tetap dipakai */ }
     }
 
     /* ---------- WebSocket: trade masuk dikelompokkan per detik ---------- */
@@ -37,7 +61,8 @@
 
     async function startFeeds(coin) {
         socks.forEach(s => s.close()); socks = []; buf = {};
-        const lc = coin.toLowerCase(), kr = `PF_${coin === 'BTC' ? 'XBT' : coin}USD`;
+        const p = plain(coin);                                   // [BARU] nama tanpa awalan 1000
+        const lc = coin.toLowerCase(), kr = `PF_${xbt(p)}USD`;   // [DIUBAH] Kraken pakai nama p
         const agg = ex => m => { const d = JSON.parse(m); if (d.e === 'aggTrade') add(ex, +d.p * +d.q, !d.m); };
         socks.push(connect(`wss://fstream.binance.com/ws/${lc}usdt@aggTrade`, null, agg('Binance')));
         socks.push(connect(`wss://fstream.asterdex.com/ws/${lc}usdt@aggTrade`, null, agg('Aster')));
@@ -48,31 +73,37 @@
         socks.push(connect('wss://futures.kraken.com/ws/v1',
             ws => ws.send(JSON.stringify({ event: 'subscribe', feed: 'trade', product_ids: [kr] })),
             m => { const d = JSON.parse(m); if (d.feed === 'trade' && d.qty) add('Kraken', +d.qty * +d.price, d.side === 'buy'); }));
-        
-                    // Hyperliquid (side B = taker buy, A = taker sell)
+
+        // Hyperliquid (side B = taker buy, A = taker sell)   [DIUBAH] nama koin pakai hlName()
         socks.push(connect('wss://api.hyperliquid.xyz/ws',
-            ws => ws.send(JSON.stringify({ method: 'subscribe', subscription: { type: 'trades', coin } })),
+            ws => ws.send(JSON.stringify({ method: 'subscribe', subscription: { type: 'trades', coin: hlName(coin) } })),
             m => { const d = JSON.parse(m); if (d.channel === 'trades') (d.data || []).forEach(x => add('Hyperliquid', +x.px * +x.sz, x.side === 'B')); },
             '{"method":"ping"}'));
-            
-            // Bitget
+
+        // Bitget
         socks.push(connect('wss://ws.bitget.com/v2/ws/public',
             ws => ws.send(JSON.stringify({ op: 'subscribe', args: [{ instType: 'USDT-FUTURES', channel: 'trade', instId: `${coin}USDT` }] })),
             m => { const d = JSON.parse(m); if (d.action === 'update') (d.data || []).forEach(x => add('Bitget', +x.size * +x.price, x.side === 'buy')); },
             'ping'));
-        // Gate.io (size dalam kontrak, dikali quanto_multiplier)
+
+        // [BARU] dYdX v4: hanya pesan "channel_data" yang dihitung (pesan "subscribed" berisi trade lama, jangan ikut)
+        socks.push(connect('wss://indexer.dydx.trade/v4/ws',
+            ws => ws.send(JSON.stringify({ type: 'subscribe', channel: 'v4_trades', id: `${p}-USD` })),
+            m => { const d = JSON.parse(m); if (d.type === 'channel_data' && d.contents && d.contents.trades) d.contents.trades.forEach(x => add('dYdX', +x.size * +x.price, String(x.side).toUpperCase() === 'BUY')); }));
+
+        // Gate.io (size dalam kontrak, dikali quanto_multiplier)   [DIUBAH] pakai nama p
         let gm = 0;
-        try { gm = +(await (await fetch(`https://api.gateio.ws/api/v4/futures/usdt/contracts/${coin}_USDT`)).json()).quanto_multiplier; } catch (_) {}
+        try { gm = +(await (await fetch(`https://api.gateio.ws/api/v4/futures/usdt/contracts/${p}_USDT`)).json()).quanto_multiplier; } catch (_) {}
         if (gm && running && coin === state.coin) socks.push(connect('wss://fx-ws.gateio.ws/v4/ws/usdt',
-            ws => ws.send(JSON.stringify({ time: Math.floor(Date.now() / 1000), channel: 'futures.trades', event: 'subscribe', payload: [`${coin}_USDT`] })),
+            ws => ws.send(JSON.stringify({ time: Math.floor(Date.now() / 1000), channel: 'futures.trades', event: 'subscribe', payload: [`${p}_USDT`] })),
             m => { const d = JSON.parse(m); if (d.channel === 'futures.trades' && d.event === 'update') (d.result || []).forEach(x => add('Gate', Math.abs(x.size) * gm * +x.price, x.size > 0)); },
             '{"channel":"futures.ping"}'));
 
-        // OKX melaporkan ukuran dalam kontrak, jadi ambil nilai kontrak dulu
+        // OKX melaporkan ukuran dalam kontrak, jadi ambil nilai kontrak dulu   [DIUBAH] pakai nama p
         let ct = 0;
-        try { const j = await (await fetch(`https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=${coin}-USDT-SWAP`)).json(); ct = +j.data[0].ctVal; } catch (_) {}
+        try { const j = await (await fetch(`https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=${p}-USDT-SWAP`)).json(); ct = +j.data[0].ctVal; } catch (_) {}
         if (ct && running && coin === state.coin) socks.push(connect('wss://ws.okx.com:8443/ws/v5/public',
-            ws => ws.send(JSON.stringify({ op: 'subscribe', args: [{ channel: 'trades', instId: `${coin}-USDT-SWAP` }] })),
+            ws => ws.send(JSON.stringify({ op: 'subscribe', args: [{ channel: 'trades', instId: `${p}-USDT-SWAP` }] })),
             m => { const d = JSON.parse(m); (d.data || []).forEach(x => add('OKX', +x.sz * ct * +x.px, x.side === 'buy')); },
             'ping'));
     }
@@ -80,7 +111,18 @@
     /* ---------- angka dasar (server) + trade live (WebSocket) ---------- */
     function live(r) {
         const bk = buf[r.name];
-        if (r.error || !bk) return r;
+        if (!bk) return r;
+
+        // [BARU] server gagal untuk bursa ini, tapi WebSocket browser punya data -> tampilkan dari WebSocket saja (ditandai *)
+        if (r.error) {
+            if (r.na) return r;                                  // pair memang tidak ada di bursa itu
+            let b = 0, s = 0, first = Infinity;
+            for (const k in bk) { b += bk[k][0]; s += bk[k][1]; first = Math.min(first, +k); }
+            if (b + s <= 0) return r;
+            return { name: r.name, usd: true, buy: b, sell: s, pct: (b / (b + s)) * 100, partial: true,
+                     secs: Math.round(Date.now() / 1000 - first), why: r.error };
+        }
+
         const keep = Math.max(0, 1 - (Date.now() - base.t) / (base.minutes * 60000));
         let b = r.buy * keep, s = r.sell * keep;
         const from = Math.floor(base.t / 1000);
@@ -111,9 +153,13 @@
                 box.appendChild(row);
             }
             const q = s => row.querySelector(s);
-            row.classList.toggle('err', !!r.error);
+            // [DIUBAH] pair tidak tersedia (na) tidak ditandai "!" , cuma diredupkan
+            row.classList.toggle('err', !!r.error && !r.na);
+            row.style.opacity = r.na ? '.45' : '';
             q('.ls-nm').textContent = r.name + (r.partial ? '*' : '');
-            q('.ls-bar').title = r.error || (r.partial ?  `Sampel hanya ${r.secs} detik terakhir; ikut rata-rata All tapi bobotnya kecil` : '');
+            // [DIUBAH] tooltip: alasan error / info sampel / alasan kenapa server gagal
+            q('.ls-bar').title = r.na ? 'Pair koin ini tidak tersedia di bursa ini (' + r.error + ')'
+                : r.error || ((r.partial ? `Sampel hanya ${r.secs} detik terakhir; ikut rata-rata All tapi bobotnya kecil` : '') + (r.why ? ` | server gagal: ${r.why}` : ''));
             if (r.error) { q('i').style.width = '0%'; q('.l').textContent = q('.s').textContent = '—'; q('.ls-lv').textContent = q('.ls-sv').textContent = '—'; return; }
 
             q('i').style.width = r.pct + '%';
@@ -153,6 +199,7 @@
     function start() {
         if (running) return;
         running = true;
+        if (!coinsLoaded) loadCoins();     // [BARU] isi dropdown semua koin
         startFeeds(state.coin); pull();
         timers = [
             setInterval(view, 250),
