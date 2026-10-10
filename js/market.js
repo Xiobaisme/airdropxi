@@ -48,7 +48,14 @@
         socks.push(connect('wss://futures.kraken.com/ws/v1',
             ws => ws.send(JSON.stringify({ event: 'subscribe', feed: 'trade', product_ids: [kr] })),
             m => { const d = JSON.parse(m); if (d.feed === 'trade' && d.qty) add('Kraken', +d.qty * +d.price, d.side === 'buy'); }));
-        // Bitget
+        
+                    // Hyperliquid (side B = taker buy, A = taker sell)
+        socks.push(connect('wss://api.hyperliquid.xyz/ws',
+            ws => ws.send(JSON.stringify({ method: 'subscribe', subscription: { type: 'trades', coin } })),
+            m => { const d = JSON.parse(m); if (d.channel === 'trades') (d.data || []).forEach(x => add('Hyperliquid', +x.px * +x.sz, x.side === 'B')); },
+            '{"method":"ping"}'));
+            
+            // Bitget
         socks.push(connect('wss://ws.bitget.com/v2/ws/public',
             ws => ws.send(JSON.stringify({ op: 'subscribe', args: [{ instType: 'USDT-FUTURES', channel: 'trade', instId: `${coin}USDT` }] })),
             m => { const d = JSON.parse(m); if (d.action === 'update') (d.data || []).forEach(x => add('Bitget', +x.size * +x.price, x.side === 'buy')); },
@@ -84,7 +91,7 @@
     function view() {
         if (!base) return;
         const rows = base.rows.filter(r => !r.avg).map(live);
-        const w = rows.filter(r => !r.error && r.usd);
+        const w = rows.filter(r => !r.error && r.usd && !r.partial);
         const tot = w.reduce((s, r) => s + r.buy + r.sell, 0);
         const all = tot
     ? { name: 'All', avg: true, usd: true, buy: w.reduce((s, r) => s + r.buy, 0), sell: w.reduce((s, r) => s + r.sell, 0), pct: (w.reduce((s, r) => s + r.buy, 0) / tot) * 100 }

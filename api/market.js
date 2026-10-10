@@ -8,6 +8,11 @@ const get = url =>
     if (r.ok) return r.json();
     throw new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 80)}`);
   });
+const post = (url, body) =>
+  fetch(url, { method: 'POST', headers: { ...H, 'Content-Type': 'application/json' }, body: JSON.stringify(body), signal: AbortSignal.timeout(7000) }).then(async r => {
+    if (r.ok) return r.json();
+    throw new Error(`HTTP ${r.status}: ${(await r.text()).slice(0, 80)}`);
+  });
 const sum = (a, f) => a.reduce((s, x) => s + Number(f(x) || 0), 0);
 const mult = {};
 const gateMult = async c => (mult[c] ??= Number((await get(`https://api.gateio.ws/api/v4/futures/usdt/contracts/${c}_USDT`)).quanto_multiplier));
@@ -52,7 +57,7 @@ const gateTrades = async (c, n) => {
   return { buy: sum(w.filter(x => x.size > 0), usd), sell: sum(w.filter(x => x.size < 0), usd), usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000) };
 };
 
-// ── helper CEX baru: hitung taker buy/sell dari daftar trade terakhir (pola sama kayak Bybit) ──
+// ── helper CEX/DEX baru: hitung taker buy/sell dari daftar trade terakhir (pola sama kayak Bybit) ──
 // f(x) -> { t: timestamp ms, buy: true kalau taker buy, v: nilai USD }
 // capped = true kalau endpoint kena batas jumlah trade (jendela mungkin belum penuh)
 const tally = (list, n, capped, f) => {
@@ -78,7 +83,7 @@ const sizeOf = async (k, fn) => {
 };
 const rootXbt = c => (c === 'BTC' ? 'XBT' : c);
 // Coinbase: kalau hasilnya kebalik dibanding Binance, ubah jadi true (arti field side beda-beda antar API)
-const COINBASE_FLIP = false;
+const COINBASE_FLIP = true;
 
 const EX = {
   Binance: klineFlow('https://fapi.binance.com'),
@@ -116,7 +121,21 @@ const EX = {
       const b = (j.data || []).map(x => ({ t: Number(x.ts), buy: Number(x.buyVolume), sell: Number(x.sellVolume) }))
         .sort((x, y) => x.t - y.t).slice(-cnt);
       if (!px || b.length < cnt - 1) throw new Error('data kurang');
-      return { buy: sum(b, x => x.buy * px * frac(x.t, ivMs, n)), sell: sum(b, x => x.sell * px * frac(x.t, ivMs, n)), usd: true };
+      const from = Date.now() - n * 60000;
+const now = Date.now();
+
+const complete = b.filter(x =>
+  x.t >= from &&
+  x.t + ivMs <= now
+);
+
+return {
+  buy: sum(complete, x => x.buy * px),
+  sell: sum(complete, x => x.sell * px),
+  usd: true,
+  partial: true,
+  secs: Math.round((now - Math.min(...complete.map(x => x.t))) / 1000)
+};
     } catch (_) { return bitgetTrades(c, n); }
   },
 
@@ -124,15 +143,35 @@ const EX = {
   Gate: async (c, n) => {
     const iv = ivOf(n), ivS = iv * 60, cnt = Math.ceil(n / iv) + 1;
     try {
-      const from = Math.floor(Date.now() / 1000 / ivS) * ivS - (cnt - 1) * ivS;
-      const [rows, m] = await Promise.all([
-        get(`https://api.gateio.ws/api/v4/futures/usdt/contract_stats?contract=${c}_USDT&interval=${ivStr(iv)}&from=${from}&limit=${cnt}`),
-        gateMult(c),
-      ]);
+      const startSec = Math.floor(Date.now() / 1000 / ivS) * ivS - (cnt - 1) * ivS;
+      
+  const [rows, m] = await Promise.all([
+  get(`https://api.gateio.ws/api/v4/futures/usdt/contract_stats?contract=${c}_USDT&interval=${ivStr(iv)}&from=${startSec}&limit=${cnt}`),
+  gateMult(c),
+]);
+
       const b = (Array.isArray(rows) ? rows : []).sort((x, y) => x.time - y.time).slice(-cnt);
       if (b.length < cnt - 1) throw new Error('data kurang');
-      const usd = (size, x) => Number(size || 0) * m * Number(x.mark_price) * frac(x.time * 1000, ivS * 1000, n);
-      return { buy: sum(b, x => usd(x.long_taker_size, x)), sell: sum(b, x => usd(x.short_taker_size, x)), usd: true };
+      const from = Date.now() - n * 60000;
+const now = Date.now();
+
+const complete = b.filter(x =>
+  x.time * 1000 >= from &&
+  (x.time + ivS) * 1000 <= now
+);
+
+const usd = (size, x) =>
+  Number(size || 0) * m * Number(x.mark_price);
+
+return {
+  buy: sum(complete, x => usd(x.long_taker_size, x)),
+  sell: sum(complete, x => usd(x.short_taker_size, x)),
+  usd: true,
+  partial: true,
+  secs: complete.length
+    ? Math.round((now - Math.min(...complete.map(x => x.time * 1000))) / 1000)
+    : 0
+};
     } catch (_) { return gateTrades(c, n); }
   },
 
@@ -156,7 +195,7 @@ const EX = {
     return { buy: sum(b, x => x) * px, sell: sum(s, x => x) * px, usd: true };
   },
 
-  // ───────────── CEX baru (semua endpoint publik, tanpa API key) ─────────────
+  // ───────────── Bursa baru (semua endpoint publik, tanpa API key) ─────────────
 
   // Coinbase: SPOT (BTC-USD), bukan perp. 100 trade terakhir
   Coinbase: async (c, n) => {
@@ -221,14 +260,21 @@ const EX = {
     });
   },
 
-  // BitMEX: pakai perp linear XBTUSDT (USDT). side = sisi taker, foreignNotional = nilai quote
-  BitMEX: async (c, n) => {
-    const j = await get(`https://www.bitmex.com/api/v1/trade?symbol=${rootXbt(c)}USDT&count=1000&reverse=true`);
+  // Hyperliquid (perp DEX): POST /info recentTrades, side B = taker buy, A = taker sell, sz dalam koin
+  Hyperliquid: async (c, n) => {
+    const j = await post('https://api.hyperliquid.xyz/info', { type: 'recentTrades', coin: c });
     const t = Array.isArray(j) ? j : [];
-    return tally(t, n, t.length >= 1000, x => ({
-      t: Date.parse(x.timestamp),
-      buy: x.side === 'Buy',
-      v: Number(x.foreignNotional) || Number(x.size) * Number(x.price),
+    return tally(t, n, true, x => ({ t: Number(x.time), buy: x.side === 'B', v: Number(x.sz) * Number(x.px) }));
+  },
+
+  // dYdX v4 (perp DEX): indexer publik, 100 trade terakhir, side = sisi taker, size dalam koin
+  dYdX: async (c, n) => {
+    const j = await get(`https://indexer.dydx.trade/v4/trades/perpetualMarket/${c}-USD?limit=100`);
+    const t = j.trades || [];
+    return tally(t, n, t.length >= 100, x => ({
+      t: Date.parse(x.createdAt),
+      buy: String(x.side).toUpperCase() === 'BUY',
+      v: Number(x.size) * Number(x.price),
     }));
   },
 
@@ -260,7 +306,7 @@ const EX = {
 
 export default async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Cache-Control', 's-maxage=8, stale-while-revalidate=15');
+  res.setHeader('Cache-Control', 'no-store');
 
   const coin = String(req.query.coin || 'BTC').toUpperCase().replace(/[^A-Z0-9]/g, '').slice(0, 10);
   const tf = TF[req.query.tf] ? req.query.tf : '5m';
@@ -278,12 +324,21 @@ export default async function handler(req, res) {
       : { name: names[i], error: 'Belum ada trade di jendela ini' };
   });
 
-  const ok = rows.filter(r => !r.error);
-  const w = ok.filter(r => r.usd);
-  const avg = w.length
-    ? (sum(w, r => r.buy) / sum(w, r => r.buy + r.sell)) * 100
-    : ok.length ? ok.reduce((s, r) => s + r.pct, 0) / ok.length : null;
-  const all = avg === null ? { name: 'All', error: 'Semua bursa gagal' } : { name: 'All', pct: avg, avg: true };
+const ok = rows.filter(r => !r.error && r.usd);
+const totalBuy = sum(ok, r => r.buy);
+const totalSell = sum(ok, r => r.sell);
+const total = totalBuy + totalSell;
+
+const all = total > 0
+  ? {
+      name: 'All',
+      buy: totalBuy,
+      sell: totalSell,
+      pct: (totalBuy / total) * 100,
+      usd: true,
+      avg: true
+    }
+  : { name: 'All', error: 'Semua bursa gagal' };
 
   res.status(200).json({ coin, tf, minutes: n, rows: [all, ...rows], updated_at: new Date().toISOString() });
 }
