@@ -35,7 +35,7 @@
     "pages": 18,
     "dir": "ebook/hasil/on-chain-analysis/"
   },
-  {
+    {
     "id": "strategi-trading-new-listing-binance-alp",
     "title": "Strategi Trading New Listing: Binance Alpha vs Upbit",
     "desc": "",
@@ -43,5 +43,24 @@
     "tags": [],
     "pages": 8,
     "dir": "ebook/hasil/strategi-trading-new-listing-binance-alp/"
+  },
+  {
+    "id": "zine-liquidity-sweep-rsi",
+    "title": "Zine Liquidity Sweep & RSI",
+    "desc": "",
+    "level": "Materi",
+    "tags": [],
+    "pages": 4,
+    "dir": "ebook/hasil/zine-liquidity-sweep-rsi/"
+  },
+  {
+    "id": "tekinkal",
+    "title": "Materi Teknikal (Video)",
+    "desc": "",
+    "level": "Materi",
+    "tags": [],
+    "type": "video",
+    "src": "ebook/hasil/tekinkal/1.mp4",
+    "duration": "6:09"
   }
 ]
