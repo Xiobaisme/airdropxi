@@ -106,7 +106,7 @@
 
         <div class="lp-stats">
             <div class="lp-stat"><b>24/7</b><span>Live feed</span></div>
-            <div class="lp-stat"><b>7</b><span>Bursa CEX</span></div>
+            <div class="lp-stat"><b>15</b><span>Bursa CEX</span></div>
             <div class="lp-stat"><b>25+</b><span>Sumber berita</span></div>
             <div class="lp-stat"><b>6+</b><span>Chain onchain</span></div>
         </div>
@@ -119,7 +119,7 @@
                     <h2>Semua Alat Trading<br>dalam Satu Dek</h2>
                     <p class="d">Dari data bursa sampai pelacakan wallet, dirancang untuk keputusan yang lebih cepat dan terukur.</p>
                     <ul class="lp-checks">
-                        <li><div><b>Long vs Short Live</b><small>Taker buy/sell 7 bursa via WebSocket</small></div></li>
+                        <li><div><b>Long vs Short Live</b><small>Taker buy/sell 15 bursa, live</small></div></li>
                         <li><div><b>News Terminal</b><small>25+ sumber berita &amp; onchain, terjemah otomatis</small></div></li>
                         <li><div><b>Onchain Tracer</b><small>Lacak wallet, saldo, dan live transfer whale</small></div></li>
                     </ul>
@@ -268,7 +268,7 @@
             <h2>CMIC<br>𝐈𝐧𝐧𝐞𝐫 𝐂𝐢𝐫𝐜𝐥𝐞</h2>
             <div class="cf-seals">
                 <div class="cf-seal"><b>24/7</b><span>Live feed</span></div>
-                <div class="cf-seal"><b>7+</b><span>Bursa CEX</span></div>
+                <div class="cf-seal"><b>15</b><span>Bursa CEX</span></div>
                 <div class="cf-seal"><b>25+</b><span>Sumber berita</span></div>
                 <div class="cf-seal"><b>6+</b><span>Chain onchain</span></div>
             </div>
@@ -290,7 +290,7 @@
         <div class="cf-pills">
             <span class="cf-pill">Binance</span><span class="cf-pill">Bybit</span><span class="cf-pill">OKX</span>
             <span class="cf-pill">Bitget</span><span class="cf-pill">Gate</span><span class="cf-pill">Kraken</span>
-            <span class="cf-pill">Aster</span><span class="cf-pill">CoinGecko</span><span class="cf-pill">DefiLlama</span>
+            <span class="cf-pill">Aster</span><span class="cf-pill">Coinbase</span><span class="cf-pill">MEXC</span><span class="cf-pill">KuCoin</span><span class="cf-pill">HTX</span><span class="cf-pill">BingX</span><span class="cf-pill">BitMEX</span><span class="cf-pill">Deribit</span><span class="cf-pill">Crypto.com</span>
             <span class="cf-pill">New Listings Feed</span>
         </div>
         <p>Sumber berita &amp; onchain (News Terminal)</p>
@@ -448,7 +448,7 @@
             </div>
             <div class="ls-head"><span></span><div class="ml"><span>Longs (Taker Buy)</span><span>Shorts (Taker Sell)</span></div><span class="hv">Longs</span><span class="hv">Shorts</span><span class="hv">Tren</span></div>
             <div id="ls-rows"></div>
-             <p class="ls-note">Baris All = rata-rata berbobot volume USD (Binance, Aster, OKX, Bitget, Gate, Kraken, Bybit). Tanda * = sampel trade pendek (Bybit), ikut All tapi bobotnya kecil. Tanda ! = bursa gagal dimuat; arahkan kursor ke bar untuk alasannya.</p>
+            <p class="ls-note">Baris All = rata-rata berbobot volume USD dari semua bursa yang berhasil dimuat. Tanda * = sampel trade pendek (datanya dari daftar trade terakhir, bukan statistik taker), ikut All tapi bobotnya kecil. Coinbase = spot, bukan futures. Tanda ! = bursa gagal dimuat; arahkan kursor ke bar untuk alasannya.</p>
         </div>
     </div>
 
@@ -545,6 +545,7 @@
                     <tbody id="tu-body"></tbody>
                 </table>
             </div>
+            <div class="fls-pager" id="tu-pager"></div>
             <p class="ls-note">Sumber: dataset emissions DefiLlama (tidak resmi). % Alokasi = jumlah unlock dibanding total alokasi terjadwal di dataset, bukan % circulating supply. Tanggal harian (00:00 UTC). Baris merah = unlock ≥1% alokasi. Cek ulang ke sumber resmi proyek sebelum ambil keputusan.</p>
         </div>
     </div>

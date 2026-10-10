@@ -48,7 +48,7 @@
         socks.push(connect('wss://futures.kraken.com/ws/v1',
             ws => ws.send(JSON.stringify({ event: 'subscribe', feed: 'trade', product_ids: [kr] })),
             m => { const d = JSON.parse(m); if (d.feed === 'trade' && d.qty) add('Kraken', +d.qty * +d.price, d.side === 'buy'); }));
-                // Bitget
+        // Bitget
         socks.push(connect('wss://ws.bitget.com/v2/ws/public',
             ws => ws.send(JSON.stringify({ op: 'subscribe', args: [{ instType: 'USDT-FUTURES', channel: 'trade', instId: `${coin}USDT` }] })),
             m => { const d = JSON.parse(m); if (d.action === 'update') (d.data || []).forEach(x => add('Bitget', +x.size * +x.price, x.side === 'buy')); },
@@ -60,7 +60,7 @@
             ws => ws.send(JSON.stringify({ time: Math.floor(Date.now() / 1000), channel: 'futures.trades', event: 'subscribe', payload: [`${coin}_USDT`] })),
             m => { const d = JSON.parse(m); if (d.channel === 'futures.trades' && d.event === 'update') (d.result || []).forEach(x => add('Gate', Math.abs(x.size) * gm * +x.price, x.size > 0)); },
             '{"channel":"futures.ping"}'));
-        
+
         // OKX melaporkan ukuran dalam kontrak, jadi ambil nilai kontrak dulu
         let ct = 0;
         try { const j = await (await fetch(`https://www.okx.com/api/v5/public/instruments?instType=SWAP&instId=${coin}-USDT-SWAP`)).json(); ct = +j.data[0].ctVal; } catch (_) {}
@@ -99,7 +99,7 @@
             if (!row) {
                 row = document.createElement('div');
                 row.id = 'ls-r-' + r.name;
-                row.className = 'ls-row' + (r.avg ? ' avg' : '');
+                row.className = 'ls-row' + (r.avg ? ' avg' : '') + (r.name === 'Coinbase' ? ' spot' : '');
                 row.innerHTML = `<span class="ls-nm"></span><div class="ls-bar"><i></i><b class="l"></b><b class="s"></b></div><span class="ls-v ls-lv"></span><span class="ls-v ls-sv"></span><svg class="ls-sp" viewBox="0 0 80 22" preserveAspectRatio="none"><polyline points=""/></svg>`;
                 box.appendChild(row);
             }
@@ -168,7 +168,8 @@
 // ═══ TOKEN UNLOCKS (DefiLlama via /api/admin-airdrop?type=token-unlocks) ═══
 (function () {
     const $ = s => document.querySelector(s);
-    const st = { days: 30, kind: 'all', items: [], t: 0, busy: false, tries: 0 };
+    const st = { days: 30, kind: 'all', items: [], t: 0, busy: false, tries: 0, page: 1, size: 10 };
+    const SIZES = [10, 20, 50];
     const pretty = s => s.replace(/-/g, ' ').replace(/\b\w/g, c => c.toUpperCase());
     const dateTxt = ts => new Date(ts * 1000).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric', timeZone: 'Asia/Jakarta' });
     const cdTxt = ts => {
@@ -180,14 +181,34 @@
     };
     const setStatus = t => { const el = $('#tu-status'); if (el) el.textContent = t; };
 
+    function pager(n) {
+        const el = $('#tu-pager');
+        if (!el) return;
+        if (!n) { el.innerHTML = ''; return; }
+        const p = st.page;
+        const nums = [...new Set([1, p - 1, p, p + 1, n].filter(x => x >= 1 && x <= n))].sort((a, b) => a - b);
+        let h = `<button class="fls-pg" type="button" data-pg="${p - 1}" ${p <= 1 ? 'disabled' : ''}>‹</button>`;
+        nums.forEach((x, i) => {
+            if (i && x - nums[i - 1] > 1) h += '<span class="fls-dots">…</span>';
+            h += `<button class="fls-pg ${x === p ? 'on' : ''}" type="button" data-pg="${x}">${x}</button>`;
+        });
+        h += `<button class="fls-pg" type="button" data-pg="${p + 1}" ${p >= n ? 'disabled' : ''}>›</button>`;
+        h += `<select id="tu-size" aria-label="Baris per halaman">${SIZES.map(v => `<option value="${v}" ${v === st.size ? 'selected' : ''}>${v}</option>`).join('')}</select>`;
+        el.innerHTML = h;
+    }
+
     function render() {
         const body = $('#tu-body');
         if (!body) return;
-        const rows = st.items.filter(i => st.kind === 'all' || i.kind === st.kind);
-        if (!rows.length) {
+        const all = st.items.filter(i => st.kind === 'all' || i.kind === st.kind);
+        const n = Math.max(1, Math.ceil(all.length / st.size));
+        if (st.page > n) st.page = n;
+        if (!all.length) {
             body.innerHTML = '<tr><td colspan="7" class="tu-empty">Tidak ada unlock di rentang ini.</td></tr>';
+            pager(0);
             return;
         }
+        const rows = all.slice((st.page - 1) * st.size, st.page * st.size);
         body.innerHTML = rows.map(i => `<tr class="tu-row ${i.pct >= 1 ? 'big' : ''}">
             <td>${dateTxt(i.ts)}</td>
             <td class="tu-tok">${esc(pretty(i.slug))}</td>
@@ -196,6 +217,7 @@
             <td class="r tu-pct">${i.pct.toFixed(2)}%</td>
             <td><span class="tu-badge ${i.kind}">${i.kind === 'linear' ? 'Linear' : 'Cliff'}</span></td>
             <td class="r tu-cd" data-ts="${i.ts}">${cdTxt(i.ts)}</td></tr>`).join('');
+        pager(n);
     }
 
     async function load(force, isRetry) {
@@ -226,9 +248,17 @@
         if (again) { st.tries++; setTimeout(() => load(true, true), 2500); }
     }
 
-    $('#tu-days').onchange = e => { st.days = +e.target.value; load(true); };
-    $('#tu-kind').onchange = e => { st.kind = e.target.value; render(); };
+    $('#tu-days').onchange = e => { st.days = +e.target.value; st.page = 1; load(true); };
+    $('#tu-kind').onchange = e => { st.kind = e.target.value; st.page = 1; render(); };
     $('#tu-refresh').onclick = () => load(true);
+    $('#tu-pager').addEventListener('click', e => {
+        const b = e.target.closest('[data-pg]');
+        if (b && !b.disabled) { st.page = +b.dataset.pg; render(); }
+    });
+    $('#tu-pager').addEventListener('change', e => {
+        if (e.target.id !== 'tu-size') return;
+        st.size = +e.target.value; st.page = 1; render();
+    });
 
     let tRefresh = null, tTick = null;
     const tick = () => document.querySelectorAll('#tu-body .tu-cd[data-ts]')

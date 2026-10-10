@@ -1,4 +1,5 @@
-// api/flow.js  ->  /api/flow?coin=BTC&tf=5m
+// api/market.js
+
 const TF = { '5m': 5, '15m': 15, '30m': 30, '1h': 60, '2h': 120, '4h': 240, '6h': 360, '12h': 720, '1d': 1440 };
 const H = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36', Accept: 'application/json' };
 
@@ -51,6 +52,34 @@ const gateTrades = async (c, n) => {
   return { buy: sum(w.filter(x => x.size > 0), usd), sell: sum(w.filter(x => x.size < 0), usd), usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000) };
 };
 
+// ── helper CEX baru: hitung taker buy/sell dari daftar trade terakhir (pola sama kayak Bybit) ──
+// f(x) -> { t: timestamp ms, buy: true kalau taker buy, v: nilai USD }
+// capped = true kalau endpoint kena batas jumlah trade (jendela mungkin belum penuh)
+const tally = (list, n, capped, f) => {
+  const rows = list.map(f).filter(r => r && r.t && r.v > 0);
+  if (!rows.length) return { buy: 0, sell: 0, usd: true };
+  const from = Date.now() - n * 60000;
+  const w = rows.filter(r => r.t >= from);
+  const oldest = Math.min(...rows.map(r => r.t));
+  const partial = capped && oldest > from;
+  return {
+    buy: sum(w.filter(r => r.buy), r => r.v),
+    sell: sum(w.filter(r => !r.buy), r => r.v),
+    usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000),
+  };
+};
+// cache ukuran kontrak per bursa+koin (hanya disimpan kalau berhasil)
+const csz = {};
+const sizeOf = async (k, fn) => {
+  if (csz[k]) return csz[k];
+  const v = Number(await fn());
+  if (!v) throw new Error('ukuran kontrak kosong');
+  return (csz[k] = v);
+};
+const rootXbt = c => (c === 'BTC' ? 'XBT' : c);
+// Coinbase: kalau hasilnya kebalik dibanding Binance, ubah jadi true (arti field side beda-beda antar API)
+const COINBASE_FLIP = false;
+
 const EX = {
   Binance: klineFlow('https://fapi.binance.com'),
   Aster: klineFlow('https://fapi.asterdex.com'),
@@ -75,7 +104,7 @@ const EX = {
     return { buy: usdOf('Buy'), sell: usdOf('Sell'), usd: true, partial, secs: Math.round((Date.now() - oldest) / 1000) };
   },
 
-      // Bitget: statistik taker buy/sell per bucket (jendela penuh); cadangan: daftar trade
+  // Bitget: statistik taker buy/sell per bucket (jendela penuh); cadangan: daftar trade
   Bitget: async (c, n) => {
     const iv = ivOf(n), ivMs = iv * 60000, cnt = Math.ceil(n / iv) + 1;
     try {
@@ -107,7 +136,7 @@ const EX = {
     } catch (_) { return gateTrades(c, n); }
   },
 
-    // Kraken Futures: analytics cvd (buy_volume / sell_volume dalam BTC) x harga terakhir = USD
+  // Kraken Futures: analytics cvd (buy_volume / sell_volume dalam BTC) x harga terakhir = USD
   Kraken: async (c, n) => {
     const sym = `PF_${c === 'BTC' ? 'XBT' : c}USD`;
     const since = Math.floor(Date.now() / 1000) - (n + 10) * 60;
@@ -125,7 +154,108 @@ const EX = {
     if (!b.length && !s.length) throw new Error('Kraken data: ' + JSON.stringify(d ?? null).slice(0, 200));
     if (!px) throw new Error('Kraken harga tidak ada');
     return { buy: sum(b, x => x) * px, sell: sum(s, x => x) * px, usd: true };
-  }
+  },
+
+  // ───────────── CEX baru (semua endpoint publik, tanpa API key) ─────────────
+
+  // Coinbase: SPOT (BTC-USD), bukan perp. 100 trade terakhir
+  Coinbase: async (c, n) => {
+    const j = await get(`https://api.coinbase.com/api/v3/brokerage/market/products/${c}-USD/ticker?limit=100`);
+    const t = j.trades || [];
+    return tally(t, n, t.length >= 100, x => ({
+      t: Date.parse(x.time),
+      buy: (String(x.side).toUpperCase() === 'BUY') !== COINBASE_FLIP,
+      v: Number(x.size) * Number(x.price),
+    }));
+  },
+
+  // MEXC Futures: 100 trade terakhir, T: 1 = taker buy, 2 = taker sell, v = jumlah kontrak
+  MEXC: async (c, n) => {
+    const s = `${c}_USDT`;
+    const [j, cs] = await Promise.all([
+      get(`https://contract.mexc.com/api/v1/contract/deals/${s}?limit=100`),
+      sizeOf('mexc:' + c, async () => (await get(`https://contract.mexc.com/api/v1/contract/detail?symbol=${s}`)).data?.contractSize),
+    ]);
+    const t = j.data || [];
+    return tally(t, n, t.length >= 100, x => ({ t: Number(x.t), buy: Number(x.T) === 1, v: Number(x.v) * cs * Number(x.p) }));
+  },
+
+  // KuCoin Futures: 100 trade terakhir, side = sisi taker, ts dalam nanodetik, size dalam lot
+  KuCoin: async (c, n) => {
+    const s = `${rootXbt(c)}USDTM`;
+    const [j, ml] = await Promise.all([
+      get(`https://api-futures.kucoin.com/api/v1/trade/history?symbol=${s}`),
+      sizeOf('kucoin:' + c, async () => (await get(`https://api-futures.kucoin.com/api/v1/contracts/${s}`)).data?.multiplier),
+    ]);
+    const t = j.data || [];
+    return tally(t, n, t.length >= 100, x => ({
+      t: Number(x.ts) / 1e6,
+      buy: String(x.side).toLowerCase() === 'buy',
+      v: Number(x.size) * ml * Number(x.price),
+    }));
+  },
+
+  // HTX linear swap: sampai 2000 entri, direction = sisi taker, trade_turnover = nilai USDT
+  HTX: async (c, n) => {
+    const j = await get(`https://api.hbdm.com/linear-swap-ex/market/history/trade?contract_code=${c}-USDT&size=2000`);
+    const raw = j.data || [];
+    const t = raw.flatMap(d => d.data || []);
+    return tally(t, n, raw.length >= 2000, x => ({
+      t: Number(x.ts),
+      buy: x.direction === 'buy',
+      v: Number(x.trade_turnover) || Number(x.price) * Number(x.quantity),
+    }));
+  },
+
+  // BingX swap: sampai 1000 trade, buyerMaker=true berarti taker sell
+  BingX: async (c, n) => {
+    const j = await get(`https://open-api.bingx.com/openApi/swap/v2/quote/trades?symbol=${c}-USDT&limit=1000`);
+    const t = j.data || [];
+    return tally(t, n, t.length >= 1000, x => {
+      const bm = x.isBuyerMaker ?? x.buyerMaker ?? x.m;
+      return {
+        t: Number(x.time),
+        buy: !(bm === true || String(bm) === 'true'),
+        v: Number(x.quoteQty) || Number(x.price) * Number(x.qty),
+      };
+    });
+  },
+
+  // BitMEX: pakai perp linear XBTUSDT (USDT). side = sisi taker, foreignNotional = nilai quote
+  BitMEX: async (c, n) => {
+    const j = await get(`https://www.bitmex.com/api/v1/trade?symbol=${rootXbt(c)}USDT&count=1000&reverse=true`);
+    const t = Array.isArray(j) ? j : [];
+    return tally(t, n, t.length >= 1000, x => ({
+      t: Date.parse(x.timestamp),
+      buy: x.side === 'Buy',
+      v: Number(x.foreignNotional) || Number(x.size) * Number(x.price),
+    }));
+  },
+
+  // Deribit: BTC/ETH = inverse perp (amount sudah USD), koin lain = USDC linear (amount dalam koin)
+  Deribit: async (c, n) => {
+    const lin = c !== 'BTC' && c !== 'ETH';
+    const inst = lin ? `${c}_USDC-PERPETUAL` : `${c}-PERPETUAL`;
+    const now = Date.now(), from = now - n * 60000;
+    const j = await get(`https://www.deribit.com/api/v2/public/get_last_trades_by_instrument_and_time?instrument_name=${inst}&start_timestamp=${from}&end_timestamp=${now}&count=1000&sorting=desc`);
+    const t = j.result?.trades || [];
+    return tally(t, n, !!j.result?.has_more, x => ({
+      t: Number(x.timestamp),
+      buy: x.direction === 'buy',
+      v: lin ? Number(x.amount) * Number(x.price) : Number(x.amount),
+    }));
+  },
+
+  // Crypto.com Exchange: perp BTCUSD-PERP, s = BUY/SELL, q dalam koin, maks 150 trade
+  'Crypto.com': async (c, n) => {
+    const j = await get(`https://api.crypto.com/exchange/v1/public/get-trades?instrument_name=${c}USD-PERP&count=150`);
+    const t = j.result?.data || [];
+    return tally(t, n, t.length >= 150, x => ({
+      t: Number(x.t),
+      buy: String(x.s).toUpperCase() === 'BUY',
+      v: Number(x.q) * Number(x.p),
+    }));
+  },
 };
 
 export default async function handler(req, res) {

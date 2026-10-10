@@ -11,7 +11,7 @@
 .ls-head{color:var(--text3);font-family:var(--label);font-size:.68rem;font-weight:700;padding-bottom:8px}
 .ls-head .ml{display:flex;justify-content:space-between}
 .ls-row{margin-top:7px}
-.ls-nm{font-weight:700}
+.ls-nm{font-weight:700;white-space:nowrap}
 .ls-row.avg .ls-nm{color:#fff}
 .ls-bar{position:relative;height:26px;border-radius:6px;overflow:hidden;background:linear-gradient(90deg,#6b2a37,#4a2530)}
 .ls-bar i{position:absolute;inset:0 auto 0 0;width:0;background:linear-gradient(90deg,#1d6b52,#1a4a3b);transition:width .3s linear}
@@ -21,6 +21,7 @@
 .ls-lv{color:var(--success)}.ls-sv{color:var(--danger)}
 .ls-sp{width:90px;height:22px}
 .ls-sp polyline{fill:none;stroke:var(--text3);stroke-width:1.4;vector-effect:non-scaling-stroke}
+.ls-row.spot .ls-nm::after{content:" spot";color:var(--text3);font-family:var(--label);font-size:.58rem;font-weight:700;text-transform:uppercase}
 .ls-row.err .ls-bar{opacity:.35}
 .ls-row.err .ls-nm::after{content:" !";color:var(--danger)}
 .ls-note{color:var(--text3);font-family:var(--label);font-size:.72rem;margin-top:14px}
@@ -69,7 +70,7 @@
 .fls-pg.on{background:var(--primary);border-color:var(--primary)}
 .fls-pg:disabled{opacity:.35;cursor:default}
 .fls-dots{color:var(--text3)}
-#fls-size{margin-left:auto;background:var(--card-2);color:var(--text);border:2px solid var(--border);border-radius:8px;padding:.4rem .6rem;font-weight:700}
+#fls-size,#tu-size{margin-left:auto;background:var(--card-2);color:var(--text);border:2px solid var(--border);border-radius:8px;padding:.4rem .6rem;font-weight:700}
 
 /* ═══ HEATMAP + FEAR & GREED ═══ */
 .hm-grid{display:grid;grid-template-columns:minmax(0,1fr) 290px;gap:20px;align-items:start}
