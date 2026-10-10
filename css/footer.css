@@ -1,0 +1,68 @@
+/* ═══ CMIC FOOTER ═══ */
+#cmic-footer { position: relative; z-index: 1; max-width: 1360px; margin: 3rem auto 0; padding: 0 1.5rem; }
+
+.cf-support { display: grid; grid-template-columns: 1fr 1.1fr; gap: 40px; align-items: center; padding: 0 0 2.4rem; }
+.cf-support h2 { font-family: var(--display); font-weight: 800; letter-spacing: -.04em; line-height: .98; font-size: clamp(2rem, 4.4vw, 3.4rem); text-shadow: 3px 3px 0 var(--secondary); margin: .5rem 0 1.6rem; }
+.cf-kicker { font-family: var(--label); font-size: .8rem; color: var(--text2); }
+.cf-seals { display: flex; gap: 14px; flex-wrap: wrap; }
+.cf-seal { width: 84px; height: 84px; border-radius: 50%; border: 2px dashed var(--border-strong); display: flex; flex-direction: column; align-items: center; justify-content: center; text-align: center; font-family: var(--display); line-height: 1.05; transition: transform var(--ease), border-color var(--ease); }
+.cf-seal:hover { transform: rotate(-8deg) scale(1.05); border-color: var(--border-light); }
+.cf-seal b { font-size: 1.15rem; font-weight: 800; }
+.cf-seal span { font-family: var(--label); font-size: .5rem; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--text3); margin-top: 3px; }
+.cf-seal:nth-child(1) b { color: var(--success); }
+.cf-seal:nth-child(2) b { color: var(--primary); }
+.cf-seal:nth-child(3) b { color: var(--secondary); }
+.cf-seal:nth-child(4) b { color: #FFD23F; }
+
+.cf-cards { display: grid; grid-template-columns: repeat(2, 1fr); gap: 14px; }
+.cf-card { display: flex; flex-direction: column; gap: 6px; padding: 1.1rem 1.2rem 1.2rem; border: 2px solid var(--border-light); border-radius: var(--r-md); text-decoration: none; color: var(--text); cursor: pointer; transition: transform var(--ease), box-shadow var(--ease); }
+.cf-card:hover { transform: translateY(-4px); box-shadow: 4px 4px 0 var(--border-light); }
+.cf-card .t { display: flex; align-items: center; gap: 8px; font-family: var(--display); font-weight: 800; font-size: 1rem; }
+.cf-card .t .icon { width: 18px; height: 18px; }
+.cf-card .d { font-size: .76rem; line-height: 1.45; color: var(--text2); }
+.cf-card.c1 { background: var(--primary-dim); }   .cf-card.c1 .t { color: var(--primary); }
+.cf-card.c2 { background: var(--secondary-dim); } .cf-card.c2 .t { color: var(--secondary); }
+.cf-card.c3 { background: var(--success-dim); }   .cf-card.c3 .t { color: var(--success); }
+.cf-card.c4 { background: rgba(255,210,63,.12); } .cf-card.c4 .t { color: #FFD23F; }
+
+.cf-sources { text-align: center; padding: 1.6rem 0 2rem; }
+.cf-sources p { font-family: var(--label); font-size: .82rem; color: var(--text2); margin-bottom: 1rem; }
+.cf-pills + p { margin-top: 1.8rem; }
+.cf-pills { display: flex; flex-wrap: wrap; gap: 10px; justify-content: center; }
+.cf-pill { font-family: var(--display); font-weight: 700; font-size: .85rem; padding: .55rem 1.2rem; border: 2px solid var(--border); border-radius: 12px; background: var(--card); color: var(--text2); transition: border-color var(--ease), color var(--ease), transform var(--ease); }
+.cf-pill:hover { border-color: var(--border-light); color: var(--text); transform: translateY(-2px); }
+
+.cf-main { background: #0A0A0A; border: 2px solid var(--border-light); border-radius: var(--r-lg); box-shadow: 6px 6px 0 var(--secondary); overflow: hidden; }
+.cf-cols { display: grid; grid-template-columns: 1.3fr repeat(3, 1fr); gap: 32px; padding: 2.4rem 2.2rem 2rem; }
+.cf-brand img { height: 56px; width: auto; display: block; margin-bottom: 1rem; }
+.cf-brand p { font-size: .78rem; line-height: 1.6; color: var(--text2); max-width: 260px; }
+.cf-col h4 { font-family: var(--display); font-weight: 800; font-size: .95rem; padding-bottom: .7rem; margin-bottom: .9rem; border-bottom: 2px solid var(--border); position: relative; }
+.cf-col h4::after { content: ''; position: absolute; left: 0; bottom: -2px; width: 28px; height: 2px; background: var(--primary); }
+.cf-col:nth-child(3) h4::after { background: var(--secondary); }
+.cf-col:nth-child(4) h4::after { background: var(--success); }
+.cf-col:nth-child(5) h4::after { background: #FFD23F; }
+.cf-col a { display: block; font-family: var(--label); font-size: .78rem; color: var(--text2); text-decoration: none; padding: .28rem 0; cursor: pointer; transition: color var(--ease), transform var(--ease); }
+.cf-col a:hover { color: var(--text); transform: translateX(4px); }
+.cf-follow { margin-top: 1.4rem; }
+.cf-follow h4 { border: 0; padding-bottom: 0; margin-bottom: .7rem; }
+.cf-follow h4::after { display: none; }
+.cf-social { display: flex; gap: 8px; }
+.cf-social a { width: 34px; height: 34px; padding: 0; display: flex; align-items: center; justify-content: center; border: 2px solid var(--border); border-radius: 10px; color: var(--text); transition: border-color var(--ease), background var(--ease), transform var(--ease); }
+.cf-social a:hover { border-color: var(--border-light); background: var(--primary); transform: translateY(-3px); }
+.cf-social svg { width: 16px; height: 16px; }
+.cf-bar { display: flex; flex-wrap: wrap; gap: 8px 24px; justify-content: space-between; padding: 1rem 2.2rem; border-top: 2px solid var(--border); background: #000; font-family: var(--label); font-size: .72rem; color: var(--text3); }
+.cf-bar b { color: var(--text2); font-weight: 700; }
+
+.cf-col a.cf-partner { display: flex; flex-direction: column; align-items: flex-start; gap: 8px; padding: .8rem 1rem; border: 2px solid var(--border); border-radius: 12px; background: var(--card); }
+.cf-col a.cf-partner:hover { border-color: var(--border-light); transform: none; }
+.cf-partner img { height: 24px; width: auto; display: block; }
+.cf-partner span { font-size: .72rem; font-weight: 700; color: var(--text2); }
+
+@media (max-width: 1100px) { .cf-cols { grid-template-columns: repeat(2, 1fr); } .cf-brand { grid-column: 1 / -1; } }
+@media (max-width: 900px) { .cf-support { grid-template-columns: 1fr; } }
+@media (max-width: 640px) {
+    #cmic-footer { padding: 0 .8rem; }
+    .cf-cards { grid-template-columns: 1fr; }
+    .cf-cols { padding: 1.6rem 1.3rem; gap: 24px; }
+    .cf-bar { padding: 1rem 1.3rem; }
+}
