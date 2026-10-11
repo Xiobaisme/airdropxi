@@ -40,13 +40,19 @@
           + `<div class="lq-card r"><span>Short Liq · ${h(d.coin)}</span><b>${money(t.short)}</b></div>`
           + `<div class="lq-card"><span>Total · ${TFS[d.tf] || d.tf}</span><b>${money(t.total)}</b></div>`;
 
-        $('#lq-body').innerHTML = (d.rows || []).map(r => {
-            if (r.error) return `<tr class="tu-row"><td class="tu-tok">${h(r.exchange)}</td><td colspan="4" class="tu-empty">${h(r.error)}</td></tr>`;
+        // hanya bursa yang punya data masuk tabel; sisanya diringkas jadi satu baris catatan
+        const okRows = (d.rows || []).filter(r => !r.error);
+        const noRows = (d.rows || []).filter(r => r.error);
+        let html = okRows.map(r => {
             const p = r.total > 0 ? (r.long / r.total) * 100 : 50;
             return `<tr class="tu-row"><td class="tu-tok">${h(r.exchange)}</td>`
                  + `<td class="r lq-g">${money(r.long)}</td><td class="r lq-r">${money(r.short)}</td><td class="r">${money(r.total)}</td>`
                  + `<td><div class="lq-b"><i style="width:${p.toFixed(1)}%"></i></div><div class="lq-pc">${p.toFixed(0)}% long · ${(100 - p).toFixed(0)}% short</div></td></tr>`;
         }).join('');
+        if (!okRows.length) html = msgRow('Tidak ada data likuidasi untuk koin ini di rentang ini');
+        if (noRows.length) html += `<tr><td colspan="5" class="tu-empty" style="padding:.9rem 0 .2rem;text-align:left;font-size:.72rem">`
+            + `Total di atas hanya dari bursa yang punya data. Tanpa data dari Coinalyze: ${noRows.map(r => h(r.exchange)).join(', ')}.</td></tr>`;
+        $('#lq-body').innerHTML = html;
 
         const okN = (d.rows || []).filter(r => !r.error).length;
         const hhmm = new Date(d.updated_at || Date.now()).toLocaleTimeString('id-ID', { hour12: false, hour: '2-digit', minute: '2-digit', timeZone: 'Asia/Jakarta' }).replace('.', ':');
