@@ -18,6 +18,7 @@
     <link rel="stylesheet" href="/css/news.css">
     <link rel="stylesheet" href="/css/onchain.css">
     <link rel="stylesheet" href="/css/market.css">
+    <link rel="stylesheet" href="/css/likuidasi.css">
     <link rel="stylesheet" href="/css/lab.css">
     <link rel="stylesheet" href="/css/footer.css">
         </head>
@@ -404,6 +405,7 @@
     <button class="jump-btn" type="button" data-jump="sec-chart">Live Chart</button>
     <button class="jump-btn" type="button" data-jump="sec-ls">Long vs Short</button>
     <button class="jump-btn" type="button" data-jump="sec-fls">Futures L/S</button>
+    <button class="jump-btn" type="button" data-jump="sec-liq">Likuidasi</button>
     <button class="jump-btn" type="button" data-jump="sec-hm">Heatmap 24H</button>
     <button class="jump-btn" type="button" data-jump="sec-tu">Jadwal Unlock</button>
 </div>
@@ -484,6 +486,39 @@
             <p class="ls-note">Sumber: Binance Futures (USDT-M). Long = taker buy volume, Short = taker sell volume (metode sama seperti section di atas), dihitung dari kline 1 menit. Warna makin terang = sisi itu makin dominan (di atas 50%). Klik judul kolom untuk sort. Filter "Long/Short dominan" mengacu ke timeframe terpanjang yang aktif.</p>
         </div>
     </div>
+    
+         <!-- ═══ LIKUIDASI PER BURSA ═══ -->
+<div class="market-section" id="sec-liq" style="max-width: 1360px; margin: 1.4rem auto 0; padding: 0 1.5rem;">
+    <div class="section-card" style="padding: 1.5rem 2rem;">
+        <div class="tu-top">
+            <div>
+                <div class="hero-eyebrow" style="margin-bottom:.4rem;">Liquidations</div>
+                <div class="tu-title">Likuidasi per Bursa</div>
+            </div>
+            <div class="ls-ctl">
+                <select id="lq-coin" aria-label="Koin"><option>BTC</option><option>ETH</option><option>SOL</option><option>XRP</option><option>DOGE</option><option>BNB</option></select>
+                <select id="lq-tf" aria-label="Rentang waktu">
+                    <option value="1h">1 jam</option>
+                    <option value="4h">4 jam</option>
+                    <option value="12h">12 jam</option>
+                    <option value="24h" selected>24 jam</option>
+                </select>
+                <button class="nlf-btn" id="lq-refresh" type="button">↻ Refresh</button>
+            </div>
+        </div>
+        <div class="tu-status" id="lq-status">Menunggu…</div>
+        <div class="lq-sum" id="lq-sum"></div>
+        <div class="tu-wrap">
+            <table class="tu-table">
+                <thead><tr>
+                    <th>Bursa</th><th class="r">Long Liq</th><th class="r">Short Liq</th><th class="r">Total</th><th>Long vs Short</th>
+                </tr></thead>
+                <tbody id="lq-body"></tbody>
+            </table>
+        </div>
+        <p class="ls-note">Sumber: Coinalyze. Long Liq = nilai posisi long yang dilikuidasi paksa, Short Liq = posisi short yang dilikuidasi (USD). Angka dihitung per bucket waktu, jadi bucket paling awal/akhir bisa sebagian. Satu kontrak perpetual per bursa.</p>
+    </div>
+</div>
 
          <!-- ═══ HEATMAP 24 JAM + FEAR & GREED ═══ -->
     <div class="market-section" id="sec-hm" style="max-width: 1360px; margin: 1.4rem auto 0; padding: 0 1.5rem;">
