@@ -217,7 +217,7 @@
         if (st.run) return;
         st.run = true;
         loadCoins(); load();
-        st.timer = setInterval(() => { if (!document.hidden) load(); }, 60000);   // cache server 60 detik, jadi tidak boros limit
+        st.timer = setInterval(() => { if (!document.hidden) load(); }, 300000);  // cache server 60 detik, jadi tidak boros limit
     }
     function stop() { st.run = false; clearInterval(st.timer); st.timer = null; }
 
