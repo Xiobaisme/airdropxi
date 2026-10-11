@@ -1,0 +1,35 @@
+/* css/likuidasi.css — tampilan tabel Likuidasi per Bursa (dimuat otomatis oleh js/likuidasi.js) */
+.lq{margin-top:1.5rem;background:#0A0A0A;border:1px solid #2A2A2A;border-radius:14px;padding:1.1rem;color:#E4E4E7;font-family:'JetBrains Mono',monospace}
+.lq-head{display:flex;flex-wrap:wrap;gap:.8rem;justify-content:space-between;align-items:flex-start;margin-bottom:.9rem}
+.lq-title{font-size:.95rem;font-weight:700}
+.lq-sub{font-size:.7rem;color:#8A8A93;margin-top:.25rem}
+.lq-ctl{display:flex;flex-wrap:wrap;gap:.5rem;align-items:center}
+.lq-ctl input{width:7.5rem;background:#141414;border:1px solid #2A2A2A;border-radius:8px;color:#fff;padding:.4rem .6rem;font:inherit;font-size:.8rem;text-transform:uppercase}
+.lq-tf{display:flex;gap:.3rem}
+.lq-tf button{background:#141414;border:1px solid #2A2A2A;color:#A1A1AA;border-radius:8px;padding:.38rem .7rem;font:inherit;font-size:.72rem;cursor:pointer}
+.lq-tf button.on{background:#1E2B25;border-color:#35E0A1;color:#35E0A1}
+
+.lq-sum{display:grid;grid-template-columns:repeat(3,1fr);gap:.6rem;margin-bottom:.9rem}
+.lq-card{background:#111;border:1px solid #232323;border-radius:10px;padding:.65rem .8rem}
+.lq-card span{display:block;font-size:.65rem;color:#8A8A93;margin-bottom:.2rem}
+.lq-card b{font-size:1.05rem}
+.lq-card.g b{color:#35E0A1}
+.lq-card.r b{color:#EF4444}
+
+.lq-wrap{overflow-x:auto}
+.lq-tbl{width:100%;border-collapse:collapse;font-size:.78rem;min-width:520px}
+.lq-tbl th{color:#8A8A93;font-weight:500;text-align:right;padding:.45rem .6rem;border-bottom:1px solid #232323;font-size:.68rem}
+.lq-tbl td{text-align:right;padding:.5rem .6rem;border-bottom:1px solid #161616}
+.lq-tbl .lq-l{text-align:left}
+.lq-tbl td.lq-g{color:#35E0A1}
+.lq-tbl td.lq-r{color:#EF4444}
+.lq-tbl td.lq-bar{width:28%;min-width:120px}
+.lq-b{height:8px;border-radius:4px;background:#EF4444;overflow:hidden}
+.lq-b i{display:block;height:100%;background:#35E0A1}
+.lq-pc{font-size:.62rem;color:#8A8A93;margin-top:.2rem}
+.lq-tbl tr.lq-na td{color:#6B6B73;text-align:left}
+
+.lq-note{font-size:.66rem;color:#6B6B73;margin-top:.8rem;line-height:1.5}
+.lq-note a{color:#8A8A93}
+
+@media(max-width:560px){.lq-sum{grid-template-columns:1fr}}
