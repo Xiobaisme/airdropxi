@@ -21,3 +21,12 @@
 .lq-tip .lq-g{color:#35E0A1}
 .lq-tip .lq-r{color:#EF4444}
 @media(max-width:560px){.lq-sum{grid-template-columns:1fr}}
+
+.lq-grid{display:grid;grid-template-columns:1fr 1fr;gap:.8rem;margin-top:.4rem}
+.lq-panel{background:var(--card-2,#111);border:1px solid var(--border,#2A2A2A);border-radius:var(--r-sm,10px);padding:.7rem .8rem;min-width:0}
+.lq-pt{font-size:.8rem;margin-bottom:.2rem;color:var(--text3,#8A8A93)}
+.lq-pt b{color:#fff}
+.lq-leg{flex-wrap:wrap}
+.lq-leg span{display:inline-flex;align-items:center}
+.lq-tip i{display:inline-block;width:8px;height:8px;border-radius:50%;margin-right:.4rem}
+@media(max-width:900px){.lq-grid{grid-template-columns:1fr}}
