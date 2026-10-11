@@ -1,5 +1,6 @@
 // api/market.js
 
+import liqHandler from '../lib/server/coinalyze-liq.js'; 
 const TF = { '5m': 5, '15m': 15, '30m': 30, '1h': 60, '2h': 120, '4h': 240, '6h': 360, '12h': 720, '1d': 1440 };
 const H = { 'User-Agent': 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120 Safari/537.36', Accept: 'application/json' };
 
@@ -305,6 +306,7 @@ const EX = {
 };
 
 export default async function handler(req, res) {
+  if (req.query.type === 'liq') return liqHandler(req, res);
   res.setHeader('Access-Control-Allow-Origin', '*');
   // [DIUBAH] cache singkat di edge Vercel per koin+timeframe, supaya banyak pengunjung tidak menembak 17 bursa terus-menerus
   res.setHeader('Cache-Control', 's-maxage=5, stale-while-revalidate=10');

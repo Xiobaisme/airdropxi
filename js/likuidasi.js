@@ -9,7 +9,7 @@
     const st = { coin: 'BTC', tf: '24h', run: false, timer: null, token: 0, last: null, coinsLoaded: false };
 
     const h = s => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
-    const money = v => { const a = Math.abs(v); return '$' + (a >= 1e9 ? (v / 1e9).toFixed(2) + 'B' : a >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : a >= 1e3 ? (v / 1e3).toFixed(2) + 'K' : v.toFixed(0)); };
+    const money = v => { v = Number(v) || 0; const a = Math.abs(v); return '$' + (a >= 1e9 ? (v / 1e9).toFixed(2) + 'B' : a >= 1e6 ? (v / 1e6).toFixed(2) + 'M' : a >= 1e3 ? (v / 1e3).toFixed(2) + 'K' : v.toFixed(0)); };
     const setStatus = t => { $('#lq-status').textContent = t; };
     const msgRow = t => `<tr><td colspan="5" class="tu-empty">${h(t)}</td></tr>`;
 
@@ -69,7 +69,8 @@
             const d = await r.json().catch(() => ({}));
             if (my !== st.token) return;
             if (!r.ok) throw new Error(d.error || 'HTTP ' + r.status);
-            st.last = d; render(d);
+            if (!d.totals) throw new Error('respon bukan data likuidasi: api/market.js di server belum versi terbaru (cabang type=liq belum ada)');
+            render(d); st.last = d;
         } catch (e) {
             if (my !== st.token) return;
             setStatus('Gagal: ' + e.message + (st.last ? ' · menampilkan data terakhir' : ''));
