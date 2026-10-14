@@ -385,7 +385,13 @@ const weexModal = document.getElementById('weex-modal');
 document.getElementById('weex-close-btn').innerHTML = icon('x');
 document.getElementById('weex-preview').textContent = WEEX_TITLE + '\n\n' + WEEX_BODY;
 
-document.getElementById('btnWeexPromo').onclick = () => { if (isMember()) return; weexModal.classList.remove('hidden'); };
+document.addEventListener('click', (e) => {
+    if (!e.target.closest('#btnWeexPromo')) return;
+    e.preventDefault();
+    if (isMember()) return;
+    weexModal.classList.remove('hidden');
+});
+
 document.getElementById('weex-close-btn').onclick = () => weexModal.classList.add('hidden');
 document.getElementById('weex-cancel-btn').onclick = () => weexModal.classList.add('hidden');
 

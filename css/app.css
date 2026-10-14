@@ -748,7 +748,7 @@ body.is-member #app-nav [data-nav="airdrop"] { display: none !important; }
 @media (max-width: 900px) { #halaman-market, #halaman-airdrop { padding-top: 60px; } }
 
 /* ═══ OURBIT: api hidup ═══ */
-#app-nav .lp-nav-links #btnWeexPromo {
+#btnWeexPromo {
   border-color: rgba(255, 140, 40, .75);
   animation: ourbitGlow 1.6s ease-in-out infinite;
 }
