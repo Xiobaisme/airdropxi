@@ -108,7 +108,7 @@ const BASE = `${SUPA_URL}/rest/v1`;
   }
     // ─── BROADCAST NEWS KE DISCORD & TELEGRAM ───
   async function handleBroadcastNews(req, res) {
-    const { title, description, image_base64, source, mention_everyone, queue_id } = req.body || {};
+    const { title, description, image_base64, source, mention_everyone, queue_id, discord_target } = req.body || {};
 let url = (req.body || {}).url;
        if (!title) return res.status(400).json({ error: 'title wajib diisi' });
     if (roleOf(session) === 'member' && (!queue_id || image_base64)) {
@@ -131,7 +131,8 @@ let url = (req.body || {}).url;
 
     // ─── DISCORD ───
 async function sendDiscord() {
-  const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
+  const useOurbit = discord_target === 'ourbit' && roleOf(session) === 'admin';
+  const webhookUrl = (useOurbit && process.env.DISCORD_WEBHOOK_URL_OURBIT) || process.env.DISCORD_WEBHOOK_URL;
   if (!webhookUrl) throw new Error('DISCORD_WEBHOOK_URL belum di-set');
 
     const LOGO_URL = 'https://airdropxi.vercel.app/logo1.png';

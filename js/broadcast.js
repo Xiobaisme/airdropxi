@@ -413,7 +413,7 @@ document.getElementById('weex-send-btn').onclick = async () => {
     btn.innerHTML = '<span class="spinner"></span> Mengirim...';
     try {
                const img = await urlToDataUrl('/ourbit-promo.png');
-        const data = await postBroadcast({ title: WEEX_TITLE, description: WEEX_BODY, image_base64: img, mention_everyone: true });
+        const data = await postBroadcast({ title: WEEX_TITLE, description: WEEX_BODY, image_base64: img, mention_everyone: true, discord_target: 'ourbit' });
 
         const dOk = data.discord === 'ok', tOk = data.telegram === 'ok';
         if (dOk && tOk) showToast('Terkirim ke Discord & Telegram!', 'success');
