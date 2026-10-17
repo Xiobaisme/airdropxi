@@ -1,0 +1,238 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
+<meta name="robots" content="noindex,nofollow">
+<title>Broadcast Editor</title>
+<script src="https://telegram.org/js/telegram-web-app.js"></script>
+<style>
+:root{--bg:#0e0e10;--card:#17171a;--line:#2a2a30;--tx:#ececf1;--mut:#8b8b96;--ac:#8b5cf6;--bl:#3b82f6}
+*{box-sizing:border-box}
+body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,sans-serif;padding:14px 14px 90px}
+label,.lb{display:block;color:var(--mut);font-size:12px;margin:14px 0 6px}
+input[type=text],textarea,select,input[type=number]{width:100%;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:10px;font:inherit}
+textarea{min-height:90px;resize:vertical}
+button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 12px}
+button:active{background:var(--line)}
+.tags{display:flex;flex-wrap:wrap;gap:6px}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.row>*{flex:1}
+#pick{width:100%;padding:22px;border-radius:12px;border:1px dashed var(--ac);background:#8b5cf610;font-size:15px}
+#stage{display:none;margin-top:10px}
+#cv{width:100%;border-radius:10px;border:1px solid var(--line);touch-action:none;display:block}
+.chk{display:flex;gap:6px;align-items:center;color:var(--tx);margin:0;flex:0 0 auto}
+input[type=range]{width:100%;accent-color:var(--ac)}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#info{color:var(--bl);font-size:12px;margin-top:8px}
+#bar{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--line)}
+#send{width:100%;background:var(--bl);border-color:var(--bl);padding:13px;font-weight:600}
+#send:disabled{opacity:.5}
+#deny{display:none;text-align:center;margin-top:30vh;color:var(--mut)}
+</style>
+</head>
+<body>
+<div id="deny">Buka halaman ini lewat bot Telegram.</div>
+<main id="app">
+  <label for="title">Judul</label>
+  <input id="title" type="text" placeholder="Judul broadcast…" autocomplete="off">
+  <div class="lb">Tag cepat</div>
+  <div class="tags" id="tags"></div>
+
+  <label for="desc">Deskripsi</label>
+  <textarea id="desc" placeholder="Tulis deskripsi/isi berita…"></textarea>
+
+  <div class="lb">Gambar</div>
+  <button id="pick" type="button">Pilih gambar dari galeri</button>
+  <input id="file" type="file" accept="image/*" hidden>
+  <div class="lb" style="text-align:center;margin-top:6px">atau tempel gambar (Ctrl+V) / seret ke sini</div>
+
+  <div id="stage">
+    <canvas id="cv"></canvas>
+    <div class="row" style="margin-top:10px">
+      <select id="logoSel"></select>
+      <button id="logoUp" type="button">Logo sendiri</button>
+      <button id="logoDel" type="button">Hapus</button>
+    </div>
+    <input id="logoFile" type="file" accept="image/*,.svg" hidden>
+    <div class="row" style="margin-top:10px">
+      <label class="chk"><input type="checkbox" id="grid" checked> Grid</label>
+      <label class="chk"><input type="checkbox" id="snap" checked> Snap</label>
+      <select id="preset">
+        <option value="">Posisi cepat…</option>
+        <option value="5,5">Kiri atas</option><option value="auto,5">Kanan atas</option>
+        <option value="5,auto">Kiri bawah</option><option value="auto,auto">Kanan bawah</option>
+        <option value="center,5">Tengah atas</option>
+      </select>
+    </div>
+    <div class="lb">Ukuran logo: <span id="wv">40</span>%</div>
+    <input id="w" type="range" min="5" max="100" value="40">
+    <div class="grid3">
+      <div><div class="lb" style="margin-top:6px">X %</div><input id="x" type="number" min="0" max="100" step="1" value="5"></div>
+      <div><div class="lb" style="margin-top:6px">Y %</div><input id="y" type="number" min="0" max="100" step="1" value="5"></div>
+      <div><div class="lb" style="margin-top:6px">Lebar %</div><input id="wn" type="number" min="5" max="100" step="1" value="40"></div>
+    </div>
+    <div id="info"></div>
+  </div>
+</main>
+<div id="bar"><button id="send" disabled>Kirim ke Discord &amp; Telegram</button></div>
+
+<script>
+// ===== Konfigurasi =====
+// Taruh file logo di root repo (same-origin supaya canvas tidak "tainted").
+const LOGOS = [
+  { name: 'OURBIT × CMIC', src: '/logo.png' },
+  { name: 'Logo 2', src: '/logo1.png' }
+];
+const TAGS = ['🐳 WHALE ALERT','🔥 BIG','💡 INSIGHT','⚡ JUST IN','🔔 NEW','🔴 BREAKING','🚨 ALERT','🔄 UPDATE','📊 MARKET','📣 ANNOUNCEMENT','⏳ LATEST','🌐 INTERESTING'];
+const MAX_W = 1280;
+
+// ===== Telegram & akses =====
+const tg = window.Telegram && Telegram.WebApp;
+if (!tg || !tg.initData) {
+  document.getElementById('app').style.display = 'none';
+  document.getElementById('bar').style.display = 'none';
+  document.getElementById('deny').style.display = 'block';
+  throw new Error('not in telegram');
+}
+tg.ready(); tg.expand();
+
+// ===== State =====
+const $ = id => document.getElementById(id);
+const cv = $('cv'), ctx = cv.getContext('2d');
+let img = null, logo = null;
+const S = { x: 5, y: 5, w: 40 };
+
+TAGS.forEach(t => {
+  const b = document.createElement('button');
+  b.type = 'button'; b.textContent = t;
+  b.onclick = () => { $('title').value = t + ' ' + $('title').value.replace(/^\S+\s+[A-Z ]+\s?/, ''); $('title').focus(); };
+  $('tags').appendChild(b);
+});
+LOGOS.forEach((l, i) => $('logoSel').add(new Option(l.name, i)));
+
+function loadImage(src) {
+  return new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+}
+function readFile(f) {
+  return new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(f); });
+}
+async function setLogo(src) { try { logo = await loadImage(src); } catch { logo = null; } draw(); }
+
+async function setImage(file) {
+  if (!file || !file.type.startsWith('image/')) return;
+  img = await loadImage(await readFile(file));
+  const k = Math.min(1, MAX_W / img.width);
+  cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
+  $('stage').style.display = 'block'; $('send').disabled = false;
+  if (!logo) setLogo(LOGOS[0].src); else draw();
+}
+
+// ===== Render =====
+function logoRect() {
+  if (!logo) return null;
+  const w = cv.width * S.w / 100, h = w * logo.height / logo.width;
+  return { x: cv.width * S.x / 100, y: cv.height * S.y / 100, w, h };
+}
+function draw(preview = true) {
+  if (!img) return;
+  ctx.clearRect(0, 0, cv.width, cv.height);
+  ctx.drawImage(img, 0, 0, cv.width, cv.height);
+  const r = logoRect();
+  if (r) ctx.drawImage(logo, r.x, r.y, r.w, r.h);
+  if (preview && $('grid').checked) {
+    ctx.save(); ctx.lineWidth = 1; ctx.font = `${cv.width / 50}px sans-serif`;
+    for (let p = 10; p < 100; p += 10) {
+      ctx.strokeStyle = p === 50 ? '#3b82f6aa' : '#ffffff30';
+      ctx.beginPath(); ctx.moveTo(cv.width * p / 100, 0); ctx.lineTo(cv.width * p / 100, cv.height); ctx.stroke();
+      ctx.beginPath(); ctx.moveTo(0, cv.height * p / 100); ctx.lineTo(cv.width, cv.height * p / 100); ctx.stroke();
+      ctx.fillStyle = '#fff'; ctx.fillText(p, cv.width * p / 100 + 3, cv.width / 50 + 2);
+      ctx.fillText(p, 3, cv.height * p / 100 - 3);
+    }
+    ctx.restore();
+  }
+  if (preview && r) { ctx.save(); ctx.setLineDash([6, 4]); ctx.strokeStyle = '#8b5cf6'; ctx.lineWidth = 2; ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.restore(); }
+  syncUI();
+}
+function syncUI() {
+  $('x').value = Math.round(S.x); $('y').value = Math.round(S.y);
+  $('w').value = S.w; $('wn').value = Math.round(S.w); $('wv').textContent = Math.round(S.w);
+  const r = logoRect(); if (!r) { $('info').textContent = 'Tanpa logo'; return; }
+  $('info').textContent = `Kiri ${S.x.toFixed(0)}% · Atas ${S.y.toFixed(0)}% · Lebar ${S.w.toFixed(0)}% · Tinggi ${(r.h / cv.height * 100).toFixed(1)}%`;
+}
+const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
+
+// ===== Drag logo =====
+let drag = null;
+cv.addEventListener('pointerdown', e => {
+  const r = logoRect(); if (!r) return;
+  const p = pt(e);
+  if (p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h) {
+    drag = { dx: p.x - r.x, dy: p.y - r.y }; cv.setPointerCapture(e.pointerId);
+  }
+});
+cv.addEventListener('pointermove', e => {
+  if (!drag) return;
+  const p = pt(e); let x = (p.x - drag.dx) / cv.width * 100, y = (p.y - drag.dy) / cv.height * 100;
+  if ($('snap').checked && !e.altKey) { x = Math.round(x / 5) * 5; y = Math.round(y / 5) * 5; }
+  S.x = clamp(x, 0, 100); S.y = clamp(y, 0, 100); draw();
+});
+cv.addEventListener('pointerup', () => drag = null);
+function pt(e) { const b = cv.getBoundingClientRect(); return { x: (e.clientX - b.left) * cv.width / b.width, y: (e.clientY - b.top) * cv.height / b.height }; }
+
+// ===== Kontrol =====
+$('w').oninput = e => { S.w = +e.target.value; draw(); };
+$('wn').onchange = e => { S.w = clamp(+e.target.value, 5, 100); draw(); };
+$('x').onchange = e => { S.x = clamp(+e.target.value, 0, 100); draw(); };
+$('y').onchange = e => { S.y = clamp(+e.target.value, 0, 100); draw(); };
+$('grid').onchange = () => draw();
+$('preset').onchange = e => {
+  const v = e.target.value; if (!v || !logo) return;
+  const [px, py] = v.split(','), r = logoRect();
+  S.x = px === 'auto' ? 100 - 5 - S.w : px === 'center' ? (100 - S.w) / 2 : +px;
+  S.y = py === 'auto' ? 100 - 5 - r.h / cv.height * 100 : +py;
+  e.target.value = ''; draw();
+};
+$('logoSel').onchange = e => setLogo(LOGOS[e.target.value].src);
+$('logoUp').onclick = () => $('logoFile').click();
+$('logoFile').onchange = async e => { const f = e.target.files[0]; if (f) setLogo(await readFile(f)); e.target.value = ''; };
+$('logoDel').onclick = () => { logo = null; draw(); };
+
+// ===== Input gambar: galeri, paste, drag-drop =====
+$('pick').onclick = () => $('file').click();
+$('file').onchange = e => { setImage(e.target.files[0]); e.target.value = ''; };
+document.addEventListener('paste', e => {
+  const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
+  if (it) { e.preventDefault(); setImage(it.getAsFile()); }
+});
+document.addEventListener('dragover', e => e.preventDefault());
+document.addEventListener('drop', e => { e.preventDefault(); setImage(e.dataTransfer.files[0]); });
+
+// ===== Kirim =====
+$('send').onclick = async () => {
+  const title = $('title').value.trim();
+  if (!title) { tg.showAlert('Judul wajib diisi.'); return; }
+  if (!img) { tg.showAlert('Pilih gambar dulu.'); return; }
+  $('send').disabled = true; $('send').textContent = 'Mengirim…';
+  draw(false); // render bersih tanpa grid/garis bantu
+  const image = cv.toDataURL('image/jpeg', 0.9);
+  draw(true);
+  try {
+    const r = await fetch('/api/miniapp-send', {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData },
+      body: JSON.stringify({ title, description: $('desc').value.trim(), image })
+    });
+    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'Gagal mengirim');
+    tg.HapticFeedback?.notificationOccurred('success');
+    tg.showAlert('Terkirim ke Discord & Telegram.', () => tg.close());
+  } catch (err) {
+    tg.HapticFeedback?.notificationOccurred('error');
+    tg.showAlert(err.message);
+    $('send').disabled = false;
+  }
+  $('send').textContent = 'Kirim ke Discord & Telegram';
+};
+</script>
+</body>
+</html>
