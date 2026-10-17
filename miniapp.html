@@ -4,203 +4,179 @@
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1, viewport-fit=cover">
 <meta name="robots" content="noindex,nofollow">
-<title>Broadcast Editor</title>
+<title>Broadcast</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{--bg:#0e0e10;--card:#17171a;--line:#2a2a30;--tx:#ececf1;--mut:#8b8b96;--ac:#8b5cf6;--bl:#3b82f6}
+:root{--bg:#0e0e10;--card:#17171a;--line:#2a2a30;--tx:#ececf1;--mut:#8b8b96;--ac:#8b5cf6;--bl:#3b82f6;--dg:#ef4444}
 *{box-sizing:border-box}
 body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,sans-serif;padding:14px 14px 90px}
-label,.lb{display:block;color:var(--mut);font-size:12px;margin:14px 0 6px}
+.lb{display:block;color:var(--mut);font-size:12px;margin:14px 0 6px}
 input[type=text],textarea,select,input[type=number]{width:100%;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:10px;font:inherit}
 textarea{min-height:90px;resize:vertical}
 button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 12px}
-button:active{background:var(--line)}
+button:active{background:var(--line)} button:disabled{opacity:.45}
 .tags{display:flex;flex-wrap:wrap;gap:6px}
-.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.btag{display:flex;gap:6px;align-items:center;padding:6px 10px;font-size:12px}
+.btag i{width:6px;height:6px;border-radius:50%;background:var(--dg)}
+.btag.active{border-color:var(--ac);background:#8b5cf620}
+.row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
 .row>*{flex:1}
+.chk{display:flex;gap:6px;align-items:center;flex:0 0 auto}
 #pick{width:100%;padding:22px;border-radius:12px;border:1px dashed var(--ac);background:#8b5cf610;font-size:15px}
-#stage{display:none;margin-top:10px}
-#cv{width:100%;border-radius:10px;border:1px solid var(--line);touch-action:none;display:block}
-.chk{display:flex;gap:6px;align-items:center;color:var(--tx);margin:0;flex:0 0 auto}
-input[type=range]{width:100%;accent-color:var(--ac)}
-.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
-#info{color:var(--bl);font-size:12px;margin-top:8px}
-#bar{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--line)}
+#pimg{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
+#promo{width:100%;margin-top:18px;border-color:#f59e0b66;color:#fbbf24}
+#bar{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--line);z-index:3}
 #send{width:100%;background:var(--bl);border-color:var(--bl);padding:13px;font-weight:600}
-#send:disabled{opacity:.5}
 #deny{display:none;text-align:center;margin-top:30vh;color:var(--mut)}
+#toast{position:fixed;left:14px;right:14px;top:14px;z-index:20;padding:12px;border-radius:10px;background:#16a34a;display:none}
+#toast.error{background:#b91c1c}
+/* editor */
+#ed{position:fixed;inset:0;z-index:5;background:var(--bg);overflow:auto;padding:14px 14px 30px;display:none}
+#ie-stage{position:relative;width:fit-content;max-width:100%;margin:12px auto 0;user-select:none}
+#ie-base{display:block;max-width:100%;max-height:50vh;border-radius:6px}
+#ie-guides{position:absolute;inset:0;pointer-events:none}
+#ie-guides.off{display:none}
+.ie-gv,.ie-gh{position:absolute;background:#ffffff26}
+.ie-gv{top:0;bottom:0;width:1px}.ie-gh{left:0;right:0;height:1px}
+.ie-gv.c,.ie-gh.c{background:#3b82f6aa}.ie-gv.t,.ie-gh.t{background:#f59e0b55}
+.ie-gl{position:absolute;font-size:9px;background:#000a;padding:0 2px;border-radius:2px}
+.ie-gl.x{top:0;transform:translateX(-50%)}.ie-gl.y{left:0;transform:translateY(-50%)}
+.sl{position:absolute;background:#f59e0b;display:none;pointer-events:none;z-index:4;width:1px;top:0;bottom:0}
+.sl.h{width:auto;height:1px;left:0;right:0;top:0;bottom:auto}
+.ie-logo{position:absolute;cursor:grab;touch-action:none;outline:1px dashed #ffffff80}
+.ie-logo.sel{outline:2px dashed var(--ac)}
+.ie-logo img{width:100%;display:block;pointer-events:none}
+input[type=range]{width:100%;accent-color:var(--ac)}
+.g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
+#ie-readout{color:var(--mut);font-size:12px;margin-top:10px;line-height:1.7}
+#ie-readout b{color:var(--bl);font-weight:500}
 </style>
 </head>
 <body>
 <div id="deny">Buka halaman ini lewat bot Telegram.</div>
-<main id="app">
-  <label for="title">Judul</label>
-  <input id="title" type="text" placeholder="Judul broadcast…" autocomplete="off">
-  <div class="lb">Tag cepat</div>
-  <div class="tags" id="tags"></div>
+<div id="toast"></div>
 
-  <label for="desc">Deskripsi</label>
-  <textarea id="desc" placeholder="Tulis deskripsi/isi berita…"></textarea>
+<main id="app">
+  <div class="lb">Judul</div>
+  <input id="b-title" type="text" placeholder="Judul broadcast…" autocomplete="off">
+  <div class="lb">Tag cepat</div>
+  <div class="tags" id="b-tag-row"></div>
+  <div class="lb">Deskripsi</div>
+  <textarea id="b-desc" placeholder="Tulis deskripsi/isi berita…"></textarea>
 
   <div class="lb">Gambar</div>
   <button id="pick" type="button">Pilih gambar dari galeri</button>
-  <input id="file" type="file" accept="image/*" hidden>
-  <div class="lb" style="text-align:center;margin-top:6px">atau tempel gambar (Ctrl+V) / seret ke sini</div>
-
-  <div id="stage">
-    <canvas id="cv"></canvas>
-    <div class="row" style="margin-top:10px">
-      <select id="logoSel"></select>
-      <button id="logoUp" type="button">Logo sendiri</button>
-      <button id="logoDel" type="button">Hapus</button>
-    </div>
-    <input id="logoFile" type="file" accept="image/*,.svg" hidden>
-    <div class="row" style="margin-top:10px">
-      <label class="chk"><input type="checkbox" id="grid" checked> Grid</label>
-      <label class="chk"><input type="checkbox" id="snap" checked> Snap</label>
-      <select id="preset">
-        <option value="">Posisi cepat…</option>
-        <option value="5,5">Kiri atas</option><option value="auto,5">Kanan atas</option>
-        <option value="5,auto">Kiri bawah</option><option value="auto,auto">Kanan bawah</option>
-        <option value="center,5">Tengah atas</option>
-      </select>
-    </div>
-    <div class="lb">Ukuran logo: <span id="wv">40</span>%</div>
-    <input id="w" type="range" min="5" max="100" value="40">
-    <div class="grid3">
-      <div><div class="lb" style="margin-top:6px">X %</div><input id="x" type="number" min="0" max="100" step="1" value="5"></div>
-      <div><div class="lb" style="margin-top:6px">Y %</div><input id="y" type="number" min="0" max="100" step="1" value="5"></div>
-      <div><div class="lb" style="margin-top:6px">Lebar %</div><input id="wn" type="number" min="5" max="100" step="1" value="40"></div>
-    </div>
-    <div id="info"></div>
+  <div id="prev" hidden>
+    <img id="pimg" alt="">
+    <div class="row"><button id="b-edit" type="button">Edit logo</button><button id="b-rm" type="button">Hapus gambar</button></div>
   </div>
+  <input id="file" type="file" accept="image/*" hidden>
+  <div class="lb" style="text-align:center">atau tempel gambar (Ctrl+V) / seret ke sini</div>
+
+  <button id="promo" type="button">Kirim promo OURBIT</button>
 </main>
-<div id="bar"><button id="send" disabled>Kirim ke Discord &amp; Telegram</button></div>
+<div id="bar"><button id="send">Kirim</button></div>
+
+<section id="ed">
+  <div class="row" style="margin:0;justify-content:space-between"><b>Edit Gambar</b><button id="ie-close" type="button" style="flex:0 0 auto">Batal</button></div>
+  <div id="ie-stage"><img id="ie-base" alt=""><div id="ie-guides"></div><i class="sl" id="ie-snap-v"></i><i class="sl h" id="ie-snap-h"></i></div>
+  <div class="row">
+    <button id="ie-add" type="button">+ OURBIT × CMIC</button>
+    <button id="ie-addf" type="button">+ SVG lain</button>
+    <button id="ie-del" type="button">Hapus</button>
+  </div>
+  <input id="ie-file" type="file" accept="image/*,.svg" hidden>
+  <div class="row">
+    <label class="chk"><input type="checkbox" id="ie-grid" checked> Grid</label>
+    <label class="chk"><input type="checkbox" id="ie-snapon" checked> Snap</label>
+    <select id="ie-preset"><option value="">Posisi cepat…</option>
+      <option value="l,t">Kiri atas</option><option value="c,t">Tengah atas</option><option value="r,t">Kanan atas</option>
+      <option value="l,c">Kiri tengah</option><option value="c,c">Tengah</option><option value="r,c">Kanan tengah</option>
+      <option value="l,b">Kiri bawah</option><option value="c,b">Tengah bawah</option><option value="r,b">Kanan bawah</option></select>
+  </div>
+  <div class="lb">Ukuran <span id="ie-size-v">–</span></div>
+  <input id="ie-size" type="range" min="5" max="100" value="40">
+  <div class="g3">
+    <div><div class="lb">X %</div><input id="ie-x" type="number" step="0.5"></div>
+    <div><div class="lb">Y %</div><input id="ie-y" type="number" step="0.5"></div>
+    <div><div class="lb">Lebar %</div><input id="ie-w" type="number" step="0.5"></div>
+  </div>
+  <div id="ie-readout"></div>
+  <button id="ie-apply" type="button" style="width:100%;margin-top:16px;background:var(--ac);border-color:var(--ac);padding:13px;font-weight:600">Terapkan ke gambar</button>
+</section>
 
 <script>
-// ===== Konfigurasi =====
-// Taruh file logo di root repo (same-origin supaya canvas tidak "tainted").
-const LOGOS = [
-  { name: 'OURBIT × CMIC', src: '/logo.png' },
-  { name: 'Logo 2', src: '/logo1.png' }
-];
-const TAGS = ['🐳 WHALE ALERT','🔥 BIG','💡 INSIGHT','⚡ JUST IN','🔔 NEW','🔴 BREAKING','🚨 ALERT','🔄 UPDATE','📊 MARKET','📣 ANNOUNCEMENT','⏳ LATEST','🌐 INTERESTING'];
-const MAX_W = 1280;
+const LOGO_URL = '/ourbit-cmic.svg';
+const TAGS = [['WHALE ALERT','🐋'],['BIG','🔥'],['INSIGHT','💡'],['JUST IN','⚡'],['NEW','🔔'],['BREAKING','🔴'],['ALERT','🚨'],['UPDATE','🔄'],['MARKET','📊'],['ANNOUNCEMENT','📢'],['LATEST','⏳'],['INTERESTING','🌐']];
+const PROMO_TITLE = '🚨 CMIC × OURBIT | TRADE SMARTER, PAY LESS';
+const PROMO_BODY = `Masih cari platform trading dengan fee kompetitif + minimum deposit rendah?
+Mungkin ini bisa jadi salah satu opsi yang kamu cek.
 
-// ===== Telegram & akses =====
+🔥 OURBIT FEATURES
+
+💰 Deposit mulai $1
+
+💸 Withdrawal mulai $1
+
+📊 Fee mulai 0,02% Maker | 0,04% Taker
+
+🌎 Akses global & likuiditas tinggi
+
+⚡ Proses trading cepat & praktis
+
+🎧 Support 24/7
+
+Buat yang sering trading, biaya transaksi juga bagian dari strategi.
+Semakin efisien biaya, semakin banyak ruang untuk mengatur posisi.
+🎯 Ready to trade smarter?
+
+🔗 REGISTER OURBIT
+https://www.ourbit.com/register?inviteCode=ourbitCMIC
+
+OURBIT × CMIC
+Trade smart. Manage risk. DYOR.`;
+const IE_SNAP = 0.015, IE_TARGETS = [0, 1/3, 0.5, 2/3, 1];
+
 const tg = window.Telegram && Telegram.WebApp;
 if (!tg || !tg.initData) {
-  document.getElementById('app').style.display = 'none';
-  document.getElementById('bar').style.display = 'none';
+  ['app','bar'].forEach(i => document.getElementById(i).style.display = 'none');
   document.getElementById('deny').style.display = 'block';
   throw new Error('not in telegram');
 }
 tg.ready(); tg.expand();
 
-// ===== State =====
 const $ = id => document.getElementById(id);
-const cv = $('cv'), ctx = cv.getContext('2d');
-let img = null, logo = null;
-const S = { x: 5, y: 5, w: 40 };
+const clamp = (v, a, b) => Math.min(b, Math.max(a, v));
+const pct = v => String(Math.round(v * 1000) / 10);
+function toast(m, type) { const t = $('toast'); t.textContent = m; t.className = type === 'error' ? 'error' : ''; t.style.display = 'block'; setTimeout(() => t.style.display = 'none', 3500); }
+const readFile = f => new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(f); });
+const loadImg = src => new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
 
-TAGS.forEach(t => {
-  const b = document.createElement('button');
-  b.type = 'button'; b.textContent = t;
-  b.onclick = () => { $('title').value = t + ' ' + $('title').value.replace(/^\S+\s+[A-Z ]+\s?/, ''); $('title').focus(); };
-  $('tags').appendChild(b);
-});
-LOGOS.forEach((l, i) => $('logoSel').add(new Option(l.name, i)));
-
-function loadImage(src) {
-  return new Promise((ok, no) => { const i = new Image(); i.onload = () => ok(i); i.onerror = no; i.src = src; });
+// ── Judul & tag (sama seperti web) ──
+let activeTag = null, imgB64 = null, imgOrig = null;
+function renderTags() {
+  $('b-tag-row').innerHTML = TAGS.map(([k, e]) => `<button type="button" class="btag ${activeTag === k ? 'active' : ''}" data-k="${k}"><i></i>${e} ${k}</button>`).join('');
+  $('b-tag-row').querySelectorAll('.btag').forEach(b => b.onclick = () => applyTag(b.dataset.k));
 }
-function readFile(f) {
-  return new Promise(ok => { const r = new FileReader(); r.onload = () => ok(r.result); r.readAsDataURL(f); });
+function applyTag(key) {
+  const input = $('b-title'); let cur = input.value;
+  TAGS.forEach(([k, e]) => { const p = `${e} ${k}: `; if (cur.startsWith(p)) cur = cur.slice(p.length); });
+  const t = TAGS.find(x => x[0] === key);
+  if (activeTag === key) { activeTag = null; input.value = cur; }
+  else { activeTag = key; input.value = `${t[1]} ${key}: ${cur}`; }
+  renderTags(); input.focus();
 }
-async function setLogo(src) { try { logo = await loadImage(src); } catch { logo = null; } draw(); }
+renderTags();
 
-async function setImage(file) {
-  if (!file || !file.type.startsWith('image/')) return;
-  img = await loadImage(await readFile(file));
-  const k = Math.min(1, MAX_W / img.width);
-  cv.width = Math.round(img.width * k); cv.height = Math.round(img.height * k);
-  $('stage').style.display = 'block'; $('send').disabled = false;
-  if (!logo) setLogo(LOGOS[0].src); else draw();
+// ── Gambar: galeri, paste, drag-drop ──
+function showImage(src) {
+  imgB64 = src; $('pimg').src = src; $('prev').hidden = false; $('pick').hidden = true;
 }
-
-// ===== Render =====
-function logoRect() {
-  if (!logo) return null;
-  const w = cv.width * S.w / 100, h = w * logo.height / logo.width;
-  return { x: cv.width * S.x / 100, y: cv.height * S.y / 100, w, h };
-}
-function draw(preview = true) {
-  if (!img) return;
-  ctx.clearRect(0, 0, cv.width, cv.height);
-  ctx.drawImage(img, 0, 0, cv.width, cv.height);
-  const r = logoRect();
-  if (r) ctx.drawImage(logo, r.x, r.y, r.w, r.h);
-  if (preview && $('grid').checked) {
-    ctx.save(); ctx.lineWidth = 1; ctx.font = `${cv.width / 50}px sans-serif`;
-    for (let p = 10; p < 100; p += 10) {
-      ctx.strokeStyle = p === 50 ? '#3b82f6aa' : '#ffffff30';
-      ctx.beginPath(); ctx.moveTo(cv.width * p / 100, 0); ctx.lineTo(cv.width * p / 100, cv.height); ctx.stroke();
-      ctx.beginPath(); ctx.moveTo(0, cv.height * p / 100); ctx.lineTo(cv.width, cv.height * p / 100); ctx.stroke();
-      ctx.fillStyle = '#fff'; ctx.fillText(p, cv.width * p / 100 + 3, cv.width / 50 + 2);
-      ctx.fillText(p, 3, cv.height * p / 100 - 3);
-    }
-    ctx.restore();
-  }
-  if (preview && r) { ctx.save(); ctx.setLineDash([6, 4]); ctx.strokeStyle = '#8b5cf6'; ctx.lineWidth = 2; ctx.strokeRect(r.x, r.y, r.w, r.h); ctx.restore(); }
-  syncUI();
-}
-function syncUI() {
-  $('x').value = Math.round(S.x); $('y').value = Math.round(S.y);
-  $('w').value = S.w; $('wn').value = Math.round(S.w); $('wv').textContent = Math.round(S.w);
-  const r = logoRect(); if (!r) { $('info').textContent = 'Tanpa logo'; return; }
-  $('info').textContent = `Kiri ${S.x.toFixed(0)}% · Atas ${S.y.toFixed(0)}% · Lebar ${S.w.toFixed(0)}% · Tinggi ${(r.h / cv.height * 100).toFixed(1)}%`;
-}
-const clamp = (v, a, b) => Math.max(a, Math.min(b, v));
-
-// ===== Drag logo =====
-let drag = null;
-cv.addEventListener('pointerdown', e => {
-  const r = logoRect(); if (!r) return;
-  const p = pt(e);
-  if (p.x >= r.x && p.x <= r.x + r.w && p.y >= r.y && p.y <= r.y + r.h) {
-    drag = { dx: p.x - r.x, dy: p.y - r.y }; cv.setPointerCapture(e.pointerId);
-  }
-});
-cv.addEventListener('pointermove', e => {
-  if (!drag) return;
-  const p = pt(e); let x = (p.x - drag.dx) / cv.width * 100, y = (p.y - drag.dy) / cv.height * 100;
-  if ($('snap').checked && !e.altKey) { x = Math.round(x / 5) * 5; y = Math.round(y / 5) * 5; }
-  S.x = clamp(x, 0, 100); S.y = clamp(y, 0, 100); draw();
-});
-cv.addEventListener('pointerup', () => drag = null);
-function pt(e) { const b = cv.getBoundingClientRect(); return { x: (e.clientX - b.left) * cv.width / b.width, y: (e.clientY - b.top) * cv.height / b.height }; }
-
-// ===== Kontrol =====
-$('w').oninput = e => { S.w = +e.target.value; draw(); };
-$('wn').onchange = e => { S.w = clamp(+e.target.value, 5, 100); draw(); };
-$('x').onchange = e => { S.x = clamp(+e.target.value, 0, 100); draw(); };
-$('y').onchange = e => { S.y = clamp(+e.target.value, 0, 100); draw(); };
-$('grid').onchange = () => draw();
-$('preset').onchange = e => {
-  const v = e.target.value; if (!v || !logo) return;
-  const [px, py] = v.split(','), r = logoRect();
-  S.x = px === 'auto' ? 100 - 5 - S.w : px === 'center' ? (100 - S.w) / 2 : +px;
-  S.y = py === 'auto' ? 100 - 5 - r.h / cv.height * 100 : +py;
-  e.target.value = ''; draw();
-};
-$('logoSel').onchange = e => setLogo(LOGOS[e.target.value].src);
-$('logoUp').onclick = () => $('logoFile').click();
-$('logoFile').onchange = async e => { const f = e.target.files[0]; if (f) setLogo(await readFile(f)); e.target.value = ''; };
-$('logoDel').onclick = () => { logo = null; draw(); };
-
-// ===== Input gambar: galeri, paste, drag-drop =====
+function removeImage() { imgB64 = imgOrig = null; $('prev').hidden = true; $('pick').hidden = false; $('pimg').src = ''; }
+async function setImage(f) { if (f && f.type.startsWith('image/')) { imgOrig = await readFile(f); showImage(imgOrig); } }
 $('pick').onclick = () => $('file').click();
 $('file').onchange = e => { setImage(e.target.files[0]); e.target.value = ''; };
+$('b-rm').onclick = removeImage;
 document.addEventListener('paste', e => {
   const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
   if (it) { e.preventDefault(); setImage(it.getAsFile()); }
@@ -208,31 +184,162 @@ document.addEventListener('paste', e => {
 document.addEventListener('dragover', e => e.preventDefault());
 document.addEventListener('drop', e => { e.preventDefault(); setImage(e.dataTransfer.files[0]); });
 
-// ===== Kirim =====
-$('send').onclick = async () => {
-  const title = $('title').value.trim();
-  if (!title) { tg.showAlert('Judul wajib diisi.'); return; }
-  if (!img) { tg.showAlert('Pilih gambar dulu.'); return; }
-  $('send').disabled = true; $('send').textContent = 'Mengirim…';
-  draw(false); // render bersih tanpa grid/garis bantu
-  const image = cv.toDataURL('image/jpeg', 0.9);
-  draw(true);
-  try {
-    const r = await fetch('/api/miniapp-send', {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData },
-      body: JSON.stringify({ title, description: $('desc').value.trim(), image })
-    });
-    if (!r.ok) throw new Error((await r.json().catch(() => ({}))).error || 'Gagal mengirim');
-    tg.HapticFeedback?.notificationOccurred('success');
-    tg.showAlert('Terkirim ke Discord & Telegram.', () => tg.close());
-  } catch (err) {
-    tg.HapticFeedback?.notificationOccurred('error');
-    tg.showAlert(err.message);
-    $('send').disabled = false;
-  }
-  $('send').textContent = 'Kirim ke Discord & Telegram';
+// ── Editor logo (port dari web) ──
+const ie = { layers: [], sel: null, drag: null };
+(function () {
+  let h = '';
+  for (let p = 10; p <= 90; p += 10) { const c = p === 50 ? ' c' : '';
+    h += `<i class="ie-gv${c}" style="left:${p}%"></i><i class="ie-gh${c}" style="top:${p}%"></i><span class="ie-gl x" style="left:${p}%">${p}</span><span class="ie-gl y" style="top:${p}%">${p}</span>`; }
+  h += '<i class="ie-gv t" style="left:33.333%"></i><i class="ie-gv t" style="left:66.667%"></i><i class="ie-gh t" style="top:33.333%"></i><i class="ie-gh t" style="top:66.667%"></i>';
+  $('ie-guides').innerHTML = h;
+})();
+$('ie-grid').onchange = e => $('ie-guides').classList.toggle('off', !e.target.checked);
+
+const ieHf = L => { const r = $('ie-stage').getBoundingClientRect(); return r.height ? (L.wf * r.width / L.ar) / r.height : 0; };
+function ieLayout(L) {
+  const s = L.el.style; s.left = L.x * 100 + '%'; s.top = L.y * 100 + '%'; s.width = L.wf * 100 + '%';
+  if (L === ie.sel) ieSync();
+}
+function ieSync() {
+  const L = ie.sel, ro = $('ie-readout');
+  ['ie-x','ie-y','ie-w','ie-size','ie-preset'].forEach(id => $(id).disabled = !L);
+  if (!L) { ro.textContent = 'Sentuh logo untuk melihat posisi & ukuran.'; $('ie-size-v').textContent = '–'; return; }
+  const hf = ieHf(L), set = (id, v) => { const el = $(id); if (document.activeElement !== el) el.value = pct(v); };
+  set('ie-x', L.x); set('ie-y', L.y); set('ie-w', L.wf);
+  $('ie-size').value = Math.round(L.wf * 100); $('ie-size-v').textContent = pct(L.wf) + '%';
+  ro.innerHTML = `Kiri <b>${pct(L.x)}%</b> · Atas <b>${pct(L.y)}%</b> · Lebar <b>${pct(L.wf)}%</b> · Tinggi <b>${pct(hf)}%</b><br>Sisa kanan <b>${pct(1 - L.x - L.wf)}%</b> · Sisa bawah <b>${pct(1 - L.y - hf)}%</b>`;
+}
+function ieSelect(L) { ie.sel = L; ie.layers.forEach(x => x.el.classList.toggle('sel', x === L)); $('ie-del').disabled = !L; ieSync(); }
+function ieResize(L, wf) { L.wf = clamp(wf, 0.05, 1); L.x = clamp(L.x, 0, Math.max(0, 1 - L.wf)); L.y = clamp(L.y, 0, Math.max(0, 1 - ieHf(L))); }
+function ieSnap1(pos, size) {
+  let best = null;
+  for (const off of [0, size / 2, size]) for (const t of IE_TARGETS) {
+    const d = t - (pos + off); if (Math.abs(d) <= IE_SNAP && (!best || Math.abs(d) < Math.abs(best.d))) best = { d, t };
+  } return best;
+}
+function ieSnapLines(gx, gy) {
+  const v = $('ie-snap-v'), h = $('ie-snap-h');
+  v.style.display = gx == null ? 'none' : 'block'; if (gx != null) v.style.left = gx * 100 + '%';
+  h.style.display = gy == null ? 'none' : 'block'; if (gy != null) h.style.top = gy * 100 + '%';
+}
+
+async function ieAddLogo(src) {
+  let probe; try { probe = await loadImg(src); } catch { toast('SVG gagal dimuat: ' + src, 'error'); return; }
+  const L = { src, ar: probe.naturalWidth / probe.naturalHeight, x: 0.05, y: 0.05, wf: 0.4 };
+  const el = document.createElement('div'); el.className = 'ie-logo';
+  el.innerHTML = `<img src="${src}" alt="" draggable="false">`; L.el = el;
+  $('ie-stage').appendChild(el); ie.layers.push(L); ieLayout(L); ieSelect(L);
+  el.addEventListener('pointerdown', ev => {
+    ieSelect(L);
+    ie.drag = { L, sx: ev.clientX, sy: ev.clientY, x0: L.x, y0: L.y, r: $('ie-stage').getBoundingClientRect() };
+    el.setPointerCapture(ev.pointerId); ev.preventDefault();
+  });
+  el.addEventListener('pointermove', ev => {
+    const d = ie.drag; if (!d || d.L !== L) return;
+    const hf = (L.wf * d.r.width / L.ar) / d.r.height;
+    let nx = d.x0 + (ev.clientX - d.sx) / d.r.width, ny = d.y0 + (ev.clientY - d.sy) / d.r.height, gx = null, gy = null;
+    if ($('ie-snapon').checked && !ev.altKey) {
+      const bx = ieSnap1(nx, L.wf), by = ieSnap1(ny, hf);
+      if (bx) { nx += bx.d; gx = bx.t; } if (by) { ny += by.d; gy = by.t; }
+    }
+    L.x = clamp(nx, 0, Math.max(0, 1 - L.wf)); L.y = clamp(ny, 0, Math.max(0, 1 - hf));
+    ieSnapLines(gx, gy); ieLayout(L);
+  });
+  const end = () => { ie.drag = null; ieSnapLines(null, null); };
+  el.addEventListener('pointerup', end); el.addEventListener('pointercancel', end);
+}
+function ieDelete() { const L = ie.sel; if (!L) return; L.el.remove(); ie.layers = ie.layers.filter(x => x !== L); ieSelect(null); }
+
+$('ie-size').oninput = e => { const L = ie.sel; if (L) { ieResize(L, +e.target.value / 100); ieLayout(L); } };
+const ieNum = (id, fn) => $(id).addEventListener('input', e => { const L = ie.sel, v = parseFloat(e.target.value); if (L && !isNaN(v)) { fn(L, v / 100); ieLayout(L); } });
+ieNum('ie-x', (L, v) => L.x = clamp(v, 0, Math.max(0, 1 - L.wf)));
+ieNum('ie-y', (L, v) => L.y = clamp(v, 0, Math.max(0, 1 - ieHf(L))));
+ieNum('ie-w', (L, v) => ieResize(L, v));
+$('ie-preset').onchange = e => {
+  const L = ie.sel; if (!L || !e.target.value) return;
+  const [h, v] = e.target.value.split(','), hf = ieHf(L), m = 0.03;
+  L.x = h === 'l' ? m : h === 'r' ? 1 - L.wf - m : (1 - L.wf) / 2;
+  L.y = v === 't' ? m : v === 'b' ? 1 - hf - m : (1 - hf) / 2;
+  L.x = clamp(L.x, 0, Math.max(0, 1 - L.wf)); L.y = clamp(L.y, 0, Math.max(0, 1 - hf));
+  ieLayout(L); e.target.value = '';
 };
+document.addEventListener('keydown', e => {
+  const L = ie.sel; if (!L || $('ed').style.display !== 'block' || e.target.matches('input,select,textarea')) return;
+  const k = { ArrowLeft: [-1, 0], ArrowRight: [1, 0], ArrowUp: [0, -1], ArrowDown: [0, 1] }[e.key]; if (!k) return;
+  e.preventDefault(); const st = e.shiftKey ? 0.05 : 0.005;
+  L.x = clamp(L.x + k[0] * st, 0, Math.max(0, 1 - L.wf)); L.y = clamp(L.y + k[1] * st, 0, Math.max(0, 1 - ieHf(L))); ieLayout(L);
+});
+$('ie-stage').addEventListener('pointerdown', e => { if (e.target === $('ie-base')) ieSelect(null); });
+$('ie-add').onclick = () => ieAddLogo(LOGO_URL);
+$('ie-addf').onclick = () => $('ie-file').click();
+$('ie-file').onchange = async e => { const f = e.target.files[0]; if (f) ieAddLogo(await readFile(f)); e.target.value = ''; };
+$('ie-del').onclick = ieDelete;
+
+function openEditor() {
+  if (!imgOrig) return;
+  ie.layers = []; ie.sel = null; ie.drag = null;
+  $('ie-stage').querySelectorAll('.ie-logo').forEach(n => n.remove());
+  ieSelect(null); ieSnapLines(null, null);
+  const base = $('ie-base');
+  base.onload = () => ieAddLogo(LOGO_URL);   // logo default langsung muncul
+  base.src = imgOrig;
+  $('ed').style.display = 'block'; $('bar').style.display = 'none';
+}
+function closeEditor() { $('ed').style.display = 'none'; $('bar').style.display = 'block'; }
+$('b-edit').onclick = openEditor; $('pimg').onclick = openEditor;
+$('ie-close').onclick = closeEditor;
+$('ie-apply').onclick = async () => {
+  const base = $('ie-base'), c = document.createElement('canvas');
+  c.width = base.naturalWidth; c.height = base.naturalHeight;
+  const ctx = c.getContext('2d'); ctx.drawImage(base, 0, 0);
+  try { for (const L of ie.layers) { const im = await loadImg(L.src), w = L.wf * c.width; ctx.drawImage(im, L.x * c.width, L.y * c.height, w, w / L.ar); } }
+  catch { toast('Gagal menggabungkan SVG', 'error'); return; }
+  let out = c.toDataURL('image/png'); if (out.length > 3.5e6) out = c.toDataURL('image/jpeg', 0.9);
+  showImage(out); closeEditor();
+};
+
+// ── Kirim ──
+async function post(body) {
+  const r = await fetch('/api/miniapp-send', { method: 'POST',
+    headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData }, body: JSON.stringify(body) });
+  const d = await r.json().catch(() => ({}));
+  if (!d.discord && !d.telegram) throw new Error(d.error || 'HTTP ' + r.status);
+  return d;
+}
+function report(d) {
+  const dOk = d.discord === 'ok', tOk = d.telegram === 'ok';
+  if (dOk && tOk) { toast('Terkirim ke Discord & Telegram!'); return true; }
+  if (dOk || tOk) toast(`Terkirim sebagian — Discord: ${d.discord}, Telegram: ${d.telegram}`, 'error');
+  else throw new Error(`Discord: ${d.discord} | Telegram: ${d.telegram}`);
+  return true;
+}
+async function shrink(src) {   // jaga body < batas Vercel
+  if (src.length <= 3.5e6) return src;
+  const im = await loadImg(src), c = document.createElement('canvas');
+  c.width = im.naturalWidth; c.height = im.naturalHeight; c.getContext('2d').drawImage(im, 0, 0);
+  return c.toDataURL('image/jpeg', 0.85);
+}
+$('send').onclick = async () => {
+  const title = $('b-title').value.trim(), description = $('b-desc').value.trim();
+  if (!title) { toast('Judul wajib diisi!', 'error'); return; }
+  const b = $('send'); b.disabled = true; b.textContent = 'Mengirim...';
+  try {
+    if (report(await post({ title, description, image_base64: imgB64 ? await shrink(imgB64) : null }))) {
+      $('b-title').value = $('b-desc').value = ''; activeTag = null; renderTags(); removeImage();
+    }
+  } catch (e) { toast('Gagal kirim: ' + e.message, 'error'); }
+  b.disabled = false; b.textContent = 'Kirim';
+};
+$('promo').onclick = () => tg.showConfirm('Kirim promo OURBIT × CMIC ke Discord & Telegram (@everyone di Discord)?', async ok => {
+  if (!ok) return;
+  const b = $('promo'); b.disabled = true; b.textContent = 'Mengirim...';
+  try {
+    const r = await fetch('/ourbit-promo.png'); if (!r.ok) throw new Error('Gambar promo tidak ditemukan');
+    const img = await shrink(await readFile(await r.blob()));
+    report(await post({ title: PROMO_TITLE, description: PROMO_BODY, image_base64: img, mention_everyone: true, discord_target: 'ourbit' }));
+  } catch (e) { toast('Gagal kirim: ' + e.message, 'error'); }
+  b.disabled = false; b.textContent = 'Kirim promo OURBIT';
+});
 </script>
 </body>
 </html>
