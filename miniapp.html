@@ -7,28 +7,43 @@
 <title>Broadcast</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{--bg:#0e0e10;--card:#17171a;--line:#2a2a30;--tx:#ececf1;--mut:#8b8b96;--ac:#8b5cf6;--bl:#3b82f6;--dg:#ef4444}
+:root{--bg:#0d0d12;--card:#16161d;--field:#101016;--line:#262631;--tx:#ececf1;--mut:#8b8b9a;--ac:#8b5cf6;--bl:#3b82f6;--dg:#ef4444}
 *{box-sizing:border-box}
-body{margin:0;background:var(--bg);color:var(--tx);font:14px/1.4 system-ui,sans-serif;padding:14px 14px 90px}
-.lb{display:block;color:var(--mut);font-size:12px;margin:14px 0 6px}
-input[type=text],textarea,select,input[type=number]{width:100%;background:var(--card);border:1px solid var(--line);color:var(--tx);border-radius:10px;padding:10px;font:inherit}
-textarea{min-height:90px;resize:vertical}
-button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:8px 12px}
-button:active{background:var(--line)} button:disabled{opacity:.45}
-.tags{display:flex;flex-wrap:wrap;gap:6px}
-.btag{display:flex;gap:6px;align-items:center;padding:6px 10px;font-size:12px}
+body{margin:0;color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;padding:14px 14px 96px;
+  background:radial-gradient(520px 240px at 50% -60px,#8b5cf622,transparent 70%),radial-gradient(360px 200px at 100% 30%,#3b82f60f,transparent 70%),var(--bg);background-attachment:fixed}
+.lb{display:flex;align-items:center;gap:8px;color:var(--mut);font-size:12.5px;font-weight:500;margin:20px 0 8px}
+.lb::before{content:"";width:3px;height:12px;border-radius:2px;background:linear-gradient(var(--bl),var(--ac))}
+input[type=text],textarea,select,input[type=number]{width:100%;background:var(--field);border:1px solid var(--line);color:var(--tx);border-radius:12px;padding:11px 12px;font:inherit;outline:none;transition:border-color .15s,box-shadow .15s}
+input[type=text]:focus,textarea:focus,select:focus,input[type=number]:focus{border-color:var(--ac);box-shadow:0 0 0 3px #8b5cf622}
+input::placeholder,textarea::placeholder{color:#5d5d6b}
+#b-title{font-size:16px;font-weight:600;padding:13px 14px}
+textarea{min-height:110px;resize:vertical}
+button{font:inherit;color:var(--tx);background:var(--card);border:1px solid var(--line);border-radius:999px;padding:9px 14px;cursor:pointer;transition:background .15s,border-color .15s,transform .1s}
+button:active{background:var(--line);transform:scale(.98)} button:disabled{opacity:.45}
+.tags{display:flex;flex-wrap:wrap;gap:7px}
+.btag{display:flex;gap:6px;align-items:center;padding:6px 11px;font-size:12px}
 .btag i{width:6px;height:6px;border-radius:50%;background:var(--dg)}
-.btag.active{border-color:var(--ac);background:#8b5cf620}
+.btag.active{border-color:var(--ac);background:#8b5cf624;box-shadow:0 2px 12px #8b5cf62e}
+.btag.active i{background:#22c55e}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
 .row>*{flex:1}
 .chk{display:flex;gap:6px;align-items:center;flex:0 0 auto}
-#pick{width:100%;padding:22px;border-radius:12px;border:1px dashed var(--ac);background:#8b5cf610;font-size:15px}
-#pimg{width:100%;border-radius:10px;border:1px solid var(--line);display:block}
-#promo{width:100%;margin-top:18px;border-color:#f59e0b66;color:#fbbf24}
-#bar{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:var(--bg);border-top:1px solid var(--line);z-index:3}
-#send{width:100%;background:var(--bl);border-color:var(--bl);padding:13px;font-weight:600}
+/* dropzone */
+#pick{display:flex;flex-direction:column;align-items:center;gap:6px;width:100%;padding:26px 16px;border-radius:18px;border:1.5px dashed #8b5cf688;
+  background:linear-gradient(160deg,#8b5cf61a,#3b82f60d);font-size:15px;font-weight:600}
+#pick[hidden],#pickbox[hidden]{display:none}
+#pick svg{width:30px;height:30px;stroke:var(--ac)}
+#pick small{font-weight:400;font-size:12px;color:var(--mut)}
+#pickbox.over #pick{border-color:var(--bl);background:#3b82f622}
+#btnPaste{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:11px;border-radius:14px;background:var(--field)}
+#btnPaste svg{width:16px;height:16px;stroke:var(--bl)}
+.hint{text-align:center;color:var(--mut);font-size:12px;margin-top:8px}
+#pimg{width:100%;border-radius:14px;border:1px solid var(--line);display:block}
+#promo{width:100%;margin-top:26px;padding:12px;border-color:#f59e0b55;color:#fbbf24;background:linear-gradient(90deg,#f59e0b14,#f59e0b05)}
+#bar{position:fixed;left:0;right:0;bottom:0;padding:12px 14px calc(12px + env(safe-area-inset-bottom));background:linear-gradient(transparent,var(--bg) 35%);z-index:3}
+#send{width:100%;background:linear-gradient(135deg,var(--bl),var(--ac));border:0;padding:14px;font-weight:600;font-size:15px;box-shadow:0 6px 20px #3b82f655}
 #deny{display:none;text-align:center;margin-top:30vh;color:var(--mut)}
-#toast{position:fixed;left:14px;right:14px;top:14px;z-index:20;padding:12px;border-radius:10px;background:#16a34a;display:none}
+#toast{position:fixed;left:14px;right:14px;top:14px;z-index:20;padding:12px;border-radius:12px;background:#16a34a;display:none;box-shadow:0 6px 20px #0008}
 #toast.error{background:#b91c1c}
 /* editor */
 #ed{position:fixed;inset:0;z-index:5;background:var(--bg);overflow:auto;padding:14px 14px 30px;display:none}
@@ -57,7 +72,7 @@ input[type=range]{width:100%;accent-color:var(--ac)}
 <div id="toast"></div>
 
 <main id="app">
-  <div class="lb">Judul</div>
+  <div class="lb" style="margin-top:4px">Judul</div>
   <input id="b-title" type="text" placeholder="Judul broadcast…" autocomplete="off">
   <div class="lb">Tag cepat</div>
   <div class="tags" id="b-tag-row"></div>
@@ -65,13 +80,23 @@ input[type=range]{width:100%;accent-color:var(--ac)}
   <textarea id="b-desc" placeholder="Tulis deskripsi/isi berita…"></textarea>
 
   <div class="lb">Gambar</div>
-  <button id="pick" type="button">Pilih gambar dari galeri</button>
+  <div id="pickbox">
+    <button id="pick" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="4"/><circle cx="9" cy="9" r="1.6"/><path d="M21 15l-5-5L5 21"/></svg>
+      Pilih gambar dari galeri
+      <small>JPG, PNG, atau WebP</small>
+    </button>
+    <button id="btnPaste" type="button">
+      <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/></svg>
+      Tempel dari clipboard
+    </button>
+    <div class="hint">atau tekan Ctrl+V / seret gambar ke sini</div>
+  </div>
   <div id="prev" hidden>
     <img id="pimg" alt="">
     <div class="row"><button id="b-edit" type="button">Edit logo</button><button id="b-rm" type="button">Hapus gambar</button></div>
   </div>
   <input id="file" type="file" accept="image/*" hidden>
-  <div class="lb" style="text-align:center">atau tempel gambar (Ctrl+V) / seret ke sini</div>
 
   <button id="promo" type="button">Kirim promo OURBIT</button>
 </main>
@@ -102,7 +127,7 @@ input[type=range]{width:100%;accent-color:var(--ac)}
     <div><div class="lb">Lebar %</div><input id="ie-w" type="number" step="0.5"></div>
   </div>
   <div id="ie-readout"></div>
-  <button id="ie-apply" type="button" style="width:100%;margin-top:16px;background:var(--ac);border-color:var(--ac);padding:13px;font-weight:600">Terapkan ke gambar</button>
+  <button id="ie-apply" type="button" style="width:100%;margin-top:16px;background:linear-gradient(135deg,var(--bl),var(--ac));border:0;padding:13px;font-weight:600">Terapkan ke gambar</button>
 </section>
 
 <script>
@@ -170,19 +195,35 @@ renderTags();
 
 // ── Gambar: galeri, paste, drag-drop ──
 function showImage(src) {
-  imgB64 = src; $('pimg').src = src; $('prev').hidden = false; $('pick').hidden = true;
+  imgB64 = src; $('pimg').src = src; $('prev').hidden = false; $('pickbox').hidden = true;
 }
-function removeImage() { imgB64 = imgOrig = null; $('prev').hidden = true; $('pick').hidden = false; $('pimg').src = ''; }
+function removeImage() { imgB64 = imgOrig = null; $('prev').hidden = true; $('pickbox').hidden = false; $('pimg').src = ''; }
 async function setImage(f) { if (f && f.type.startsWith('image/')) { imgOrig = await readFile(f); showImage(imgOrig); } }
 $('pick').onclick = () => $('file').click();
 $('file').onchange = e => { setImage(e.target.files[0]); e.target.value = ''; };
 $('b-rm').onclick = removeImage;
+
+// Tombol "Tempel dari clipboard" (Clipboard API; bisa diblokir di sebagian klien Telegram)
+$('btnPaste').onclick = async () => {
+  try {
+    const items = await navigator.clipboard.read();
+    for (const item of items) {
+      const type = item.types.find(t => t.startsWith('image/'));
+      if (type) { await setImage(await item.getType(type)); toast('Gambar ditempel'); return; }
+    }
+    toast('Tidak ada gambar di clipboard', 'error');
+  } catch (e) {
+    toast('Clipboard diblokir. Tekan Ctrl+V atau pilih dari galeri.', 'error');
+  }
+};
+
 document.addEventListener('paste', e => {
   const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
   if (it) { e.preventDefault(); setImage(it.getAsFile()); }
 });
-document.addEventListener('dragover', e => e.preventDefault());
-document.addEventListener('drop', e => { e.preventDefault(); setImage(e.dataTransfer.files[0]); });
+document.addEventListener('dragover', e => { e.preventDefault(); $('pickbox').classList.add('over'); });
+document.addEventListener('dragleave', () => $('pickbox').classList.remove('over'));
+document.addEventListener('drop', e => { e.preventDefault(); $('pickbox').classList.remove('over'); setImage(e.dataTransfer.files[0]); });
 
 // ── Editor logo (port dari web) ──
 const ie = { layers: [], sel: null, drag: null };
