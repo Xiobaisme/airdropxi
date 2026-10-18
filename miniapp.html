@@ -36,6 +36,8 @@ button:active{background:var(--line);transform:scale(.98)} button:disabled{opaci
 #pick small{font-weight:400;font-size:12px;color:var(--mut)}
 #pickbox.over #pick{border-color:var(--bl);background:#3b82f622}
 #btnPaste{display:flex;align-items:center;justify-content:center;gap:8px;width:100%;margin-top:10px;padding:11px;border-radius:14px;background:var(--field)}
+#btnPaste{border:1px solid var(--line);background:var(--field);color:var(--tx);cursor:pointer;outline:none;caret-color:transparent;-webkit-user-select:text;user-select:text;-webkit-touch-callout:default}
+#btnPaste:focus{border-color:var(--bl);box-shadow:0 0 0 3px #3b82f622}
 #btnPaste svg{width:16px;height:16px;stroke:var(--bl)}
 .hint{text-align:center;color:var(--mut);font-size:12px;margin-top:8px}
 #pimg{width:100%;border-radius:14px;border:1px solid var(--line);display:block}
@@ -86,10 +88,10 @@ input[type=range]{width:100%;accent-color:var(--ac)}
       Pilih gambar dari galeri
       <small>JPG, PNG, atau WebP</small>
     </button>
-    <button id="btnPaste" type="button">
+    <div id="btnPaste" contenteditable="true" spellcheck="false" role="button" tabindex="0">
       <svg viewBox="0 0 24 24" fill="none" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="8" y="3" width="8" height="4" rx="1"/><path d="M16 5h2a2 2 0 0 1 2 2v12a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V7a2 2 0 0 1 2-2h2"/></svg>
-      Tempel dari clipboard
-    </button>
+      <span id="pasteLbl">Tempel dari clipboard</span>
+    </div>
     <div class="hint">atau tekan Ctrl+V / seret gambar ke sini</div>
   </div>
   <div id="prev" hidden>
@@ -213,13 +215,31 @@ $('btnPaste').onclick = async () => {
     }
     toast('Tidak ada gambar di clipboard', 'error');
   } catch (e) {
-    toast('Clipboard diblokir. Tekan Ctrl+V atau pilih dari galeri.', 'error');
+    // Clipboard API diblokir Telegram -> pakai menu Paste bawaan (event paste)
+    $('pasteLbl').textContent = 'Pilih gambar di Papan klip keyboard, atau tahan lalu Tempel';
+    $('btnPaste').focus();
   }
 };
+const PASTE_HTML = $('btnPaste').innerHTML;
+// Gambar dari Papan klip keyboard (Samsung/Gboard) masuk sebagai <img> di area ini
+$('btnPaste').addEventListener('input', async () => {
+  const im = $('btnPaste').querySelector('img'), src = im && im.src;
+  $('btnPaste').innerHTML = PASTE_HTML;   // kembalikan isi tombol, cegah teks nyasar
+  if (!src) return;
+  try {
+    const b = await (await fetch(src)).blob();
+    await setImage(b.type.startsWith('image/') ? b : new Blob([b], { type: 'image/png' }));
+    toast('Gambar ditempel');
+  } catch { toast('Gambar dari keyboard tidak bisa dibaca. Pakai galeri.', 'error'); }
+});
+$('btnPaste').addEventListener('blur', () => $('pasteLbl').textContent = 'Tempel dari clipboard');
 
 document.addEventListener('paste', e => {
-  const it = [...(e.clipboardData?.items || [])].find(i => i.type.startsWith('image/'));
-  if (it) { e.preventDefault(); setImage(it.getAsFile()); }
+  const cd = e.clipboardData; if (!cd) return;
+  // Android sering menaruh gambar di .files, bukan .items
+  const f = [...(cd.files || [])].find(x => x.type.startsWith('image/')) || [...(cd.items || [])].find(i => i.type.startsWith('image/'))?.getAsFile();
+  if (f) { e.preventDefault(); setImage(f); }
+  else if (e.target.closest && e.target.closest('#btnPaste')) { e.preventDefault(); toast('Menu Paste jalan, tapi isinya bukan gambar. Salin gambarnya lagi.', 'error'); }
 });
 document.addEventListener('dragover', e => { e.preventDefault(); $('pickbox').classList.add('over'); });
 document.addEventListener('dragleave', () => $('pickbox').classList.remove('over'));
