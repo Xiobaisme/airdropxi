@@ -205,41 +205,90 @@ $('pick').onclick = () => $('file').click();
 $('file').onchange = e => { setImage(e.target.files[0]); e.target.value = ''; };
 $('b-rm').onclick = removeImage;
 
-// Tombol "Tempel dari clipboard" (Clipboard API; bisa diblokir di sebagian klien Telegram)
-$('btnPaste').onclick = async () => {
+// [paste-fix v2] Tempel gambar: menu Tempel, Papan klip keyboard, Ctrl+V, dan Clipboard API.
+// Di Telegram Android, Clipboard API sering diblokir, jadi kotak tempel juga menerima gambar lewat
+// event paste / beforeinput / input. Baris kecil di bawah kotak menampilkan apa yang terjadi.
+const pbox = $('btnPaste'), PASTE_HTML = pbox.innerHTML;
+const dbg = document.createElement('div');
+dbg.className = 'hint';
+pbox.parentNode.querySelector('.hint').after(dbg);
+const note = t => { dbg.textContent = t; };
+const imgFrom = dt => {
+  if (!dt) return null;
+  const f = [...(dt.files || [])].find(x => x.type.startsWith('image/'));
+  if (f) return f;
+  const it = [...(dt.items || [])].find(i => i.kind === 'file' && i.type.startsWith('image/'));
+  return it ? it.getAsFile() : null;
+};
+async function takeImage(file, via) {
+  note('Menerima gambar (' + via + ')...');
   try {
-    const items = await navigator.clipboard.read();
-    for (const item of items) {
-      const type = item.types.find(t => t.startsWith('image/'));
-      if (type) { await setImage(await item.getType(type)); toast('Gambar ditempel'); return; }
-    }
-    toast('Tidak ada gambar di clipboard', 'error');
+    await setImage(file.type && file.type.startsWith('image/') ? file : new Blob([file], { type: 'image/png' }));
+    note('');
+    toast('Gambar ditempel');
   } catch (e) {
-    // Clipboard API diblokir Telegram -> pakai menu Paste bawaan (event paste)
-    $('pasteLbl').textContent = 'Pilih gambar di Papan klip keyboard, atau tahan lalu Tempel';
-    $('btnPaste').focus();
+    note('Gagal membaca gambar (' + via + ')');
+    toast('Gambar tidak bisa dibaca. Pakai galeri.', 'error');
+  }
+}
+
+// Ketuk kotak: fokus dulu (sinkron) supaya keyboard + Papan klip langsung bisa dipakai, lalu coba Clipboard API.
+pbox.onclick = async () => {
+  pbox.focus();
+  $('pasteLbl').textContent = 'Pilih gambar di Papan klip keyboard, atau tahan lalu pilih Tempel';
+  setTimeout(() => pbox.scrollIntoView({ block: 'center', behavior: 'smooth' }), 300);
+  try {
+    for (const item of await navigator.clipboard.read()) {
+      const type = item.types.find(t => t.startsWith('image/'));
+      if (type) { await takeImage(await item.getType(type), 'clipboard'); return; }
+    }
+    note('Clipboard tidak berisi gambar. Salin gambarnya dulu.');
+  } catch (e) {
+    note('Clipboard API diblokir (' + ((e && e.name) || 'error') + '). Pakai Papan klip keyboard atau tahan lalu Tempel.');
   }
 };
-const PASTE_HTML = $('btnPaste').innerHTML;
-// Gambar dari Papan klip keyboard (Samsung/Gboard) masuk sebagai <img> di area ini
-$('btnPaste').addEventListener('input', async () => {
-  const im = $('btnPaste').querySelector('img'), src = im && im.src;
-  $('btnPaste').innerHTML = PASTE_HTML;   // kembalikan isi tombol, cegah teks nyasar
-  if (!src) return;
-  try {
-    const b = await (await fetch(src)).blob();
-    await setImage(b.type.startsWith('image/') ? b : new Blob([b], { type: 'image/png' }));
-    toast('Gambar ditempel');
-  } catch { toast('Gambar dari keyboard tidak bisa dibaca. Pakai galeri.', 'error'); }
-});
-$('btnPaste').addEventListener('blur', () => $('pasteLbl').textContent = 'Tempel dari clipboard');
 
+// Menu Tempel (tahan lama di kotak)
+pbox.addEventListener('paste', e => {
+  e.preventDefault();
+  const f = imgFrom(e.clipboardData);
+  if (f) takeImage(f, 'paste');
+  else note('Tempel jalan, tapi isinya bukan gambar (' + ([...((e.clipboardData && e.clipboardData.types) || [])].join(', ') || 'kosong') + ')');
+});
+
+// Keyboard yang mengirim gambar sebagai file
+pbox.addEventListener('beforeinput', e => {
+  const f = imgFrom(e.dataTransfer);
+  if (f) { e.preventDefault(); takeImage(f, e.inputType || 'beforeinput'); }
+});
+
+// Keyboard yang memasukkan gambar sebagai <img> di dalam kotak
+pbox.addEventListener('input', async () => {
+  const im = pbox.querySelector('img'), src = im && im.src;
+  pbox.innerHTML = PASTE_HTML;
+  if (!src) { note('Yang dimasukkan keyboard bukan gambar (mungkin teks). Pilih item gambar di Papan klip.'); return; }
+  note('Gambar dari keyboard: ' + src.slice(0, 30) + '...');
+  try {
+    await takeImage(await (await fetch(src)).blob(), 'keyboard');
+  } catch (e1) {
+    try {
+      const i = await loadImg(src), c = document.createElement('canvas');
+      c.width = i.naturalWidth; c.height = i.naturalHeight;
+      c.getContext('2d').drawImage(i, 0, 0);
+      c.toBlob(b => { if (b) takeImage(b, 'keyboard-canvas'); else note('Gambar keyboard kosong.'); }, 'image/png');
+    } catch (e2) {
+      note('Alamat gambar tidak bisa dibaca: ' + src.slice(0, 40));
+      toast('Gambar dari keyboard tidak bisa dibaca. Pakai galeri.', 'error');
+    }
+  }
+});
+pbox.addEventListener('blur', () => { $('pasteLbl').textContent = 'Tempel dari clipboard'; });
+
+// Ctrl+V di mana saja (desktop) selama isinya gambar
 document.addEventListener('paste', e => {
-  const cd = e.clipboardData; if (!cd) return;
-  // Android sering menaruh gambar di .files, bukan .items
-  const f = [...(cd.files || [])].find(x => x.type.startsWith('image/')) || [...(cd.items || [])].find(i => i.type.startsWith('image/'))?.getAsFile();
-  if (f) { e.preventDefault(); setImage(f); }
-  else if (e.target.closest && e.target.closest('#btnPaste')) { e.preventDefault(); toast('Menu Paste jalan, tapi isinya bukan gambar. Salin gambarnya lagi.', 'error'); }
+  if (e.target.closest && e.target.closest('#btnPaste')) return;
+  const f = imgFrom(e.clipboardData);
+  if (f) { e.preventDefault(); takeImage(f, 'Ctrl+V'); }
 });
 document.addEventListener('dragover', e => { e.preventDefault(); $('pickbox').classList.add('over'); });
 document.addEventListener('dragleave', () => $('pickbox').classList.remove('over'));

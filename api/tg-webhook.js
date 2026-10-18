@@ -44,10 +44,13 @@ module.exports = async (req, res) => {
     const chat_id = msg.chat.id;
 
     if (ADMIN_IDS().includes(String(msg.from.id))) {
+      // ?v=... supaya Telegram tidak memakai halaman miniapp lama dari cache
+      const url = `${MINIAPP_URL}?v=${Date.now()}`;
+
       // Tombol "Editor" (Mini App) di samping kolom ketik
       await call('setChatMenuButton', {
         chat_id,
-        menu_button: { type: 'web_app', text: 'Editor', web_app: { url: MINIAPP_URL } },
+        menu_button: { type: 'web_app', text: 'Editor', web_app: { url } },
       }).catch(() => {});
 
       const name = msg.from.first_name || msg.from.username || 'Admin';
@@ -55,7 +58,7 @@ module.exports = async (req, res) => {
         chat_id,
         text: `Hallo <code>${esc(name)}</code>, tekan tombol di bawah untuk membuka Editor.`,
         parse_mode: 'HTML',
-        reply_markup: { inline_keyboard: [[{ text: '🚀 Buka Editor', web_app: { url: MINIAPP_URL } }]] },
+        reply_markup: { inline_keyboard: [[{ text: '🚀 Buka Editor', web_app: { url } }]] },
       });
     } else {
       // Bukan admin: catat di log Vercel + balas pedas (tanpa tombol apa pun)
