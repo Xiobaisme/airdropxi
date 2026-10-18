@@ -1,12 +1,13 @@
-// Webhook bot: admin dapat Menu Utama (tombol), selain admin dapat balasan pedas.
+// Webhook bot: admin dapat tombol untuk membuka Mini App (miniapp.html), selain admin dapat balasan pedas.
 const { ADMIN_IDS } = require('../lib/tg-auth');
-const handleAdminBot = require('../lib/tg-admin-bot');
 
 const API = () => `https://api.telegram.org/bot${process.env.TELEGRAM_BOT_TOKEN}`;
 const call = (method, body) => fetch(`${API()}/${method}`, {
   method: 'POST', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify(body),
 });
 const esc = s => String(s || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+
+const MINIAPP_URL = (process.env.PUBLIC_BASE_URL || 'https://airdropxi.vercel.app').replace(/\/$/, '') + '/miniapp.html';
 
 // Balasan untuk yang bukan admin (dipilih acak)
 const ROASTS = [
@@ -24,29 +25,38 @@ module.exports = async (req, res) => {
   if (req.headers['x-telegram-bot-api-secret-token'] !== process.env.WEBHOOK_SECRET)
     return res.status(401).end();
 
-  // Fitur admin (tombol menu, balasan judul/gambar, preview, kirim). true = sudah ditangani.
-  try {
-    if (await handleAdminBot(req.body)) return res.status(200).json({ ok: true });
-  } catch (e) { console.error('[tg] admin-bot:', e); }
+  const body = req.body || {};
 
-  const msg = req.body && req.body.message;
+  // Tombol judul di post channel (COMMUNITY / TRADING PLATFORMS) memakai callback 'noop'.
+  // Harus dijawab supaya tombolnya tidak loading terus. Tombol menu lama (sudah dihapus) diberi tahu.
+  const q = body.callback_query;
+  if (q) {
+    const stale = q.data !== 'noop';
+    await call('answerCallbackQuery', {
+      callback_query_id: q.id,
+      ...(stale && { text: 'Menu ini sudah tidak aktif. Ketik /start lagi.', show_alert: true }),
+    }).catch(() => {});
+    return res.status(200).json({ ok: true });
+  }
+
+  const msg = body.message;
   if (msg && msg.chat.type === 'private') {
     const chat_id = msg.chat.id;
 
     if (ADMIN_IDS().includes(String(msg.from.id))) {
-      // Hapus tombol "Editor" (Mini App) lama di samping kolom ketik
-      await call('setChatMenuButton', { chat_id, menu_button: { type: 'default' } }).catch(() => {});
+      // Tombol "Editor" (Mini App) di samping kolom ketik
+      await call('setChatMenuButton', {
+        chat_id,
+        menu_button: { type: 'web_app', text: 'Editor', web_app: { url: MINIAPP_URL } },
+      }).catch(() => {});
 
       const name = msg.from.first_name || msg.from.username || 'Admin';
-      const text = `🏠 <b>Menu Utama</b>\nHallo: <code>${esc(name)}</code>\n──────────────\nPilih salah satu menu di bawah ini:`;
-      const reply_markup = { inline_keyboard: [
-        [
-          { text: '🎨 Generate Prompt', callback_data: 'cmic:gen' },
-          { text: '📣 Broadcast', callback_data: 'cmic:bc', style: 'primary' },
-        ],
-        [{ text: '🚀 Promo OURBIT', callback_data: 'cmic:promo' }],
-      ] };
-      await call('sendMessage', { chat_id, text, parse_mode: 'HTML', reply_markup });
+      await call('sendMessage', {
+        chat_id,
+        text: `Hallo <code>${esc(name)}</code>, tekan tombol di bawah untuk membuka Editor.`,
+        parse_mode: 'HTML',
+        reply_markup: { inline_keyboard: [[{ text: '🚀 Buka Editor', web_app: { url: MINIAPP_URL } }]] },
+      });
     } else {
       // Bukan admin: catat di log Vercel + balas pedas (tanpa tombol apa pun)
       console.log('[tg] ditolak:', msg.from.id, msg.from.username || '-');
