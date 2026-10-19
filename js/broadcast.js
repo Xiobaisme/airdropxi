@@ -36,19 +36,44 @@ function removeBroadcastImage(e) {
 }
 
 const BROADCAST_TAGS = [
-    // TAG 
-    { key:'WHALE ALERT',  label:'WHALE ALERT',  emoji:'🐋', color:'var(--danger)' },
-    { key:'BIG',          label:'BIG',          emoji:'🔥', color:'var(--danger)' },
-    { key:'INSIGHT',      label:'INSIGHT',      emoji:'💡', color:'var(--danger)' },
-    { key:'JUST IN',      label:'JUST IN',      emoji:'⚡', color:'var(--danger)' },
-    { key:'NEW',          label:'NEW',          emoji:'🔔', color:'var(--danger)' },
-    { key:'BREAKING',     label:'BREAKING',     emoji:'🔴', color:'var(--danger)' },
-    { key:'ALERT',        label:'ALERT',        emoji:'🚨', color:'var(--danger)' },
-    { key:'UPDATE ',      label:'UPDATE ',      emoji:'🔄', color:'var(--danger)' },
-    { key:'MARKET',       label:'MARKET',       emoji:'📊', color:'var(--danger)' },
-    { key:'ANNOUNCEMENT', label:'ANNOUNCEMENT', emoji:'📢', color:'var(--danger)' },
-    { key:'LATEST',       label:'LATEST',       emoji:'⏳',  color:'var(--danger)' },
-    { key:'INTERESTING',  label:'INTERESTING ', emoji:'🌐', color:'var(--danger)' },
+  // 🔴 High Urgency / Critical
+  { key: 'BREAKING',      label: 'BREAKING',      emoji: '🔴', color: 'var(--danger)' },
+  { key: 'ALERT',         label: 'ALERT',         emoji: '🚨', color: 'var(--danger)' },
+  { key: 'WHALE ALERT',   label: 'WHALE ALERT',   emoji: '🐋', color: 'var(--danger)' },
+  { key: 'JUST IN',       label: 'JUST IN',       emoji: '⚡', color: 'var(--danger)' },
+  { key: 'FLASH',         label: 'FLASH',         emoji: '⚡', color: 'var(--danger)' },
+
+  // 🔥 Important / Hot
+  { key: 'BIG',           label: 'BIG',           emoji: '🔥', color: 'var(--warning)' },
+  { key: 'HOT',           label: 'HOT',           emoji: '🌶️', color: 'var(--warning)' },
+  { key: 'UPDATE',       label: 'UPDATE',       emoji: '🔄', color: 'var(--warning)' },
+  { key: 'EXCLUSIVE',     label: 'EXCLUSIVE',     emoji: '🔒', color: 'var(--warning)' },
+  { key: 'ANNOUNCEMENT',  label: 'ANNOUNCEMENT',  emoji: '📢', color: 'var(--warning)' },
+
+  // 📊 Market & Data
+  { key: 'MARKET',        label: 'MARKET',        emoji: '📊', color: 'var(--info)' },
+  { key: 'PRICE',         label: 'PRICE',         emoji: '💰', color: 'var(--info)' },
+  { key: 'VOLUME',        label: 'VOLUME',        emoji: '📈', color: 'var(--info)' },
+  { key: 'LIQUIDATION',   label: 'LIQUIDATION',   emoji: '💥', color: 'var(--danger)' },
+
+  // 💡 Insight & Analysis
+  { key: 'INSIGHT',       label: 'INSIGHT',       emoji: '💡', color: 'var(--success)' },
+  { key: 'ANALYSIS',      label: 'ANALYSIS',      emoji: '🧠', color: 'var(--success)' },
+  { key: 'ALPHA',         label: 'ALPHA',         emoji: '🎯', color: 'var(--success)' },
+  { key: 'RESEARCH',      label: 'RESEARCH',      emoji: '🔬', color: 'var(--success)' },
+
+  // 🔔 Regular / Soft News
+  { key: 'NEW',           label: 'NEW',           emoji: '🔔', color: 'var(--primary)' },
+  { key: 'LATEST',        label: 'LATEST',        emoji: '⏳', color: 'var(--primary)' },
+  { key: 'INTERESTING',   label: 'INTERESTING',   emoji: '✨', color: 'var(--primary)' },
+  { key: 'TRENDING',      label: 'TRENDING',      emoji: '🚀', color: 'var(--primary)' },
+
+  // ✅ Status
+  { key: 'CONFIRMED',     label: 'CONFIRMED',     emoji: '✅', color: 'var(--success)' },
+  { key: 'RUMOR',         label: 'RUMOR',         emoji: '🗣️', color: 'var(--muted)' },
+  { key: 'UNCONFIRMED',   label: 'UNCONFIRMED',   emoji: '❓', color: 'var(--muted)' },
+  { key: 'DELISTED',      label: 'DELISTED',      emoji: '❌', color: 'var(--danger)' },
+  { key: 'LISTED',        label: 'LISTED',        emoji: '🟢', color: 'var(--success)' },
 ];
 let _activeBroadcastTag = null;
 

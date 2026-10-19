@@ -7,7 +7,8 @@
 <title>Broadcast</title>
 <script src="https://telegram.org/js/telegram-web-app.js"></script>
 <style>
-:root{--bg:#0d0d12;--card:#16161d;--field:#101016;--line:#262631;--tx:#ececf1;--mut:#8b8b9a;--ac:#8b5cf6;--bl:#3b82f6;--dg:#ef4444}
+:root{--bg:#0d0d12;--card:#16161d;--field:#101016;--line:#262631;--tx:#ececf1;--mut:#8b8b9a;--ac:#8b5cf6;--bl:#3b82f6;--dg:#ef4444;
+  --danger:#ef4444;--warning:#f59e0b;--info:#3b82f6;--success:#22c55e;--primary:#8b5cf6;--muted:#8b8b9a}
 *{box-sizing:border-box}
 body{margin:0;color:var(--tx);font:14px/1.45 system-ui,-apple-system,"Segoe UI",sans-serif;padding:14px 14px 96px;
   background:radial-gradient(520px 240px at 50% -60px,#8b5cf622,transparent 70%),radial-gradient(360px 200px at 100% 30%,#3b82f60f,transparent 70%),var(--bg);background-attachment:fixed}
@@ -24,7 +25,6 @@ button:active{background:var(--line);transform:scale(.98)} button:disabled{opaci
 .btag{display:flex;gap:6px;align-items:center;padding:6px 11px;font-size:12px}
 .btag i{width:6px;height:6px;border-radius:50%;background:var(--dg)}
 .btag.active{border-color:var(--ac);background:#8b5cf624;box-shadow:0 2px 12px #8b5cf62e}
-.btag.active i{background:#22c55e}
 .row{display:flex;gap:8px;align-items:center;flex-wrap:wrap;margin-top:10px}
 .row>*{flex:1}
 .chk{display:flex;gap:6px;align-items:center;flex:0 0 auto}
@@ -134,7 +134,48 @@ input[type=range]{width:100%;accent-color:var(--ac)}
 
 <script>
 const LOGO_URL = '/ourbit-cmic.svg';
-const TAGS = [['WHALE ALERT','🐋'],['BIG','🔥'],['INSIGHT','💡'],['JUST IN','⚡'],['NEW','🔔'],['BREAKING','🔴'],['ALERT','🚨'],['UPDATE','🔄'],['MARKET','📊'],['ANNOUNCEMENT','📢'],['LATEST','⏳'],['INTERESTING','🌐']];
+const tag = (key, emoji, color) => ({ key, label: key, emoji, color });
+
+const BROADCAST_TAGS = [
+  // Critical
+  tag('BREAKING',     '🔴', 'var(--danger)'),
+  tag('ALERT',        '🚨', 'var(--danger)'),
+  tag('WHALE ALERT',  '🐋', 'var(--danger)'),
+  tag('JUST IN',      '⚡', 'var(--danger)'),
+  tag('FLASH',        '📡', 'var(--danger)'),
+  tag('LIQUIDATION',  '💥', 'var(--danger)'),
+
+  // Important
+  tag('BIG',          '🔥', 'var(--warning)'),
+  tag('HOT',          '🌶️', 'var(--warning)'),
+  tag('UPDATE',       '🔄', 'var(--warning)'),
+  tag('EXCLUSIVE',    '🔒', 'var(--warning)'),
+  tag('ANNOUNCEMENT', '📢', 'var(--warning)'),
+
+  // Market & Data
+  tag('MARKET',       '📊', 'var(--info)'),
+  tag('PRICE',        '💰', 'var(--info)'),
+  tag('VOLUME',       '📈', 'var(--info)'),
+
+  // Insight & Analysis
+  tag('INSIGHT',      '💡', 'var(--success)'),
+  tag('ANALYSIS',     '🧠', 'var(--success)'),
+  tag('ALPHA',        '🎯', 'var(--success)'),
+  tag('RESEARCH',     '🔬', 'var(--success)'),
+
+  // Regular News
+  tag('NEW',          '🔔', 'var(--primary)'),
+  tag('LATEST',       '⏳', 'var(--primary)'),
+  tag('INTERESTING',  '✨', 'var(--primary)'),
+  tag('TRENDING',     '🚀', 'var(--primary)'),
+
+  // Status
+  tag('CONFIRMED',    '✅', 'var(--success)'),
+  tag('LISTED',       '🟢', 'var(--success)'),
+  tag('DELISTED',     '❌', 'var(--danger)'),
+  tag('RUMOR',        '🗣️', 'var(--muted)'),
+  tag('UNCONFIRMED',  '❓', 'var(--muted)'),
+];
 const PROMO_TITLE = '🚨 CMIC × OURBIT | TRADE SMARTER, PAY LESS';
 const PROMO_BODY = `Masih cari platform trading dengan fee kompetitif + minimum deposit rendah?
 Mungkin ini bisa jadi salah satu opsi yang kamu cek.
@@ -182,15 +223,17 @@ const loadImg = src => new Promise((ok, no) => { const i = new Image(); i.onload
 // ── Judul & tag (sama seperti web) ──
 let activeTag = null, imgB64 = null, imgOrig = null;
 function renderTags() {
-  $('b-tag-row').innerHTML = TAGS.map(([k, e]) => `<button type="button" class="btag ${activeTag === k ? 'active' : ''}" data-k="${k}"><i></i>${e} ${k}</button>`).join('');
+  $('b-tag-row').innerHTML = BROADCAST_TAGS.map(t =>
+    `<button type="button" class="btag ${activeTag === t.key ? 'active' : ''}" data-k="${t.key}"><i style="background:${t.color}"></i>${t.emoji} ${t.label}</button>`
+  ).join('');
   $('b-tag-row').querySelectorAll('.btag').forEach(b => b.onclick = () => applyTag(b.dataset.k));
 }
 function applyTag(key) {
   const input = $('b-title'); let cur = input.value;
-  TAGS.forEach(([k, e]) => { const p = `${e} ${k}: `; if (cur.startsWith(p)) cur = cur.slice(p.length); });
-  const t = TAGS.find(x => x[0] === key);
+  BROADCAST_TAGS.forEach(t => { const p = `${t.emoji} ${t.key}: `; if (cur.startsWith(p)) cur = cur.slice(p.length); });
+  const t = BROADCAST_TAGS.find(x => x.key === key);
   if (activeTag === key) { activeTag = null; input.value = cur; }
-  else { activeTag = key; input.value = `${t[1]} ${key}: ${cur}`; }
+  else { activeTag = key; input.value = `${t.emoji} ${key}: ${cur}`; }
   renderTags(); input.focus();
 }
 renderTags();
