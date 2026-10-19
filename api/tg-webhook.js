@@ -112,6 +112,20 @@ module.exports = async (req, res) => {
     return res.status(200).json({ ok: true });
   }
 
+      if (q.data && q.data.startsWith('v:')) {
+      const uid = String(q.from.id), ok = q.data === 'v:1';
+      if (ok && stage.get(uid) !== 'denied') stage.set(uid, 'passed');
+      await call('answerCallbackQuery', { callback_query_id: q.id }).catch(() => {});
+      await call('editMessageText', {
+        chat_id: q.message.chat.id,
+        message_id: q.message.message_id,
+        text: ok
+          ? 'Verifikasi berhasil. Ketik /start lagi untuk melanjutkan.'
+          : 'Jawaban salah. Ketik /start untuk mencoba lagi dengan soal baru.',
+      }).catch(() => {});
+      return res.status(200).json({ ok: true });
+    }
+
     const stale = q.data !== 'noop';
     await call('answerCallbackQuery', {
       callback_query_id: q.id,
@@ -144,10 +158,28 @@ module.exports = async (req, res) => {
           { text: '📋 Prompt Poster', callback_data: 'prompt' },
         ]] },
       });
-    } else {
-      // Bukan admin: catat di log Vercel + balas pedas (tanpa tombol apa pun)
-      console.log('[tg] ditolak:', msg.from.id, msg.from.username || '-');
-      await call('sendMessage', { chat_id, text: pick(ROASTS) });
+        } else {
+      const uid = String(msg.from.id), st = stage.get(uid);
+      console.log('[tg] ditolak:', msg.from.id, msg.from.username || '-', st || 'baru');
+
+      if (st === 'denied') {
+        await call('sendMessage', { chat_id, text: pick(SAVAGE) });
+      } else if (st === 'passed') {
+        stage.set(uid, 'denied');
+        await call('sendMessage', {
+          chat_id,
+          parse_mode: 'HTML',
+          text: '<b>Hasil verifikasi: DITOLAK</b>\n\nMohon maaf, akses Anda tidak dapat disetujui karena kurang ganteng. Keputusan ini final dan tidak dapat diganggu gugat.',
+        });
+      } else {
+        const { q, buttons } = makeChallenge();
+        await call('sendMessage', {
+          chat_id,
+          parse_mode: 'HTML',
+          text: `<b>Verifikasi Keamanan</b>\n\nBuktikan kamu bukan bot. Berapa hasil dari:\n\n<b>${q} = ?</b>`,
+          reply_markup: { inline_keyboard: [buttons] },
+        });
+      }
     }
   }
   res.status(200).json({ ok: true });
