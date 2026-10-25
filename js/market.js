@@ -10,6 +10,16 @@
     const plain = c => c.replace(/^1(0{3,})(?=[A-Z])/, '');
     const hlName = c => (plain(c) !== c ? 'k' + plain(c) : c);   // Hyperliquid: kPEPE
     const xbt = c => (c === 'BTC' ? 'XBT' : c);                   // Kraken: BTC = XBT
+    
+    // ── logo bursa (favicon resmi) & logo koin ──
+const EXD = { Binance:'binance.com', Aster:'asterdex.com', OKX:'okx.com', Bybit:'bybit.com', Bitget:'bitget.com', Gate:'gate.io', Kraken:'kraken.com', Hyperliquid:'hyperliquid.xyz', dYdX:'dydx.exchange', Coinbase:'coinbase.com' };
+const exIcon = n => `https://www.google.com/s2/favicons?domain=${EXD[n]}&sz=64`;
+const LOGO = [
+    s => `https://bin.bnbstatic.com/static/assets/logos/${s}.png`,
+    s => `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${s.toLowerCase()}.png`,
+];
+const hue = s => { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) % 360; return `hsl(${h} 80% 62%)`; };
+const coinLogo = c => { const b = plain(c); return `<img class="cp-img" src="${LOGO[0](b)}" data-c="${esc(b)}" data-i="0" alt="" loading="lazy" referrerpolicy="no-referrer">`; };
 
     function tween(el, to, f) {
         const from = +el.dataset.v || 0; el.dataset.v = to;
@@ -22,23 +32,65 @@
     }
 
     /* ---------- [BARU] isi dropdown koin otomatis (top 200 volume Binance Futures) ---------- */
-    async function loadCoins() {
-        const sel = $('#ls-coin');
-        if (!sel) return;
-        try {
-            const r = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr');
-            if (!r.ok) throw new Error('HTTP ' + r.status);
-            const list = (await r.json())
-                .filter(x => /^[A-Z0-9]+USDT$/.test(x.symbol) && +x.quoteVolume > 0)   // buang kontrak kuartalan (BTCUSDT_xxxx)
-                .sort((a, b) => b.quoteVolume - a.quoteVolume)
-                .slice(0, 200)
-                .map(x => x.symbol.replace(/USDT$/, ''));
-            if (!list.includes(state.coin)) list.unshift(state.coin);
-            sel.innerHTML = list.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
-            sel.value = state.coin;
-            coinsLoaded = true;
-        } catch (_) { /* gagal: dropdown bawaan di HTML tetap dipakai */ }
-    }
+    /* ---------- pilihan koin (dropdown custom, top 200 volume Binance Futures) ---------- */
+let coinList = ['BTC', 'ETH', 'SOL', 'XRP', 'BNB', 'DOGE', 'HYPE', 'SUI'];   // cadangan kalau fetch gagal
+const cpBtn = $('#cp-btn'), cpPop = $('#cp-pop'), cpQ = $('#cp-q'), cpList = $('#cp-list');
+
+function cpLabel() { $('#cp-ico').innerHTML = coinLogo(state.coin); $('#cp-name').textContent = state.coin; }
+function cpDraw() {
+    const q = cpQ.value.trim().toLowerCase();
+    const l = coinList.filter(c => !q || c.toLowerCase().includes(q) || plain(c).toLowerCase().includes(q)).slice(0, 200);
+    cpList.innerHTML = l.length
+        ? l.map(c => `<button type="button" class="cp-it ${c === state.coin ? 'on' : ''}" data-c="${esc(c)}">${coinLogo(c)}<span>${esc(c)}</span></button>`).join('')
+        : '<div class="cp-none">Koin tidak ditemukan</div>';
+}
+function cpOpen(on) {
+    cpPop.classList.toggle('hidden', !on);
+    cpBtn.setAttribute('aria-expanded', on);
+    if (on) { cpQ.value = ''; cpDraw(); cpQ.focus(); }
+}
+function cpPick(c) {
+    if (!c) return;
+    cpOpen(false);
+    if (c === state.coin) return;
+    state.coin = c; cpLabel();
+    startFeeds(c); reset();
+}
+cpBtn.addEventListener('click', e => { e.stopPropagation(); cpOpen(cpPop.classList.contains('hidden')); });
+cpPop.addEventListener('click', e => { e.stopPropagation(); const b = e.target.closest('.cp-it'); if (b) cpPick(b.dataset.c); });
+cpQ.addEventListener('input', cpDraw);
+cpQ.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { const b = cpList.querySelector('.cp-it'); if (b) cpPick(b.dataset.c); }
+    if (e.key === 'Escape') cpOpen(false);
+});
+document.addEventListener('click', () => cpOpen(false));
+// logo koin gagal -> sumber berikutnya -> huruf
+document.getElementById('ls-cp').addEventListener('error', e => {
+    const im = e.target;
+    if (im.tagName !== 'IMG' || !im.dataset.c) return;
+    const i = +im.dataset.i + 1, c = im.dataset.c;
+    if (i < LOGO.length) { im.dataset.i = i; im.src = LOGO[i](c); return; }
+    const s = document.createElement('span');
+    s.className = 'cp-img cp-let'; s.textContent = c[0]; s.style.background = hue(c);
+    im.replaceWith(s);
+}, true);
+
+async function loadCoins() {
+    try {
+        const r = await fetch('https://fapi.binance.com/fapi/v1/ticker/24hr');
+        if (!r.ok) throw new Error('HTTP ' + r.status);
+        const list = (await r.json())
+            .filter(x => /^[A-Z0-9]+USDT$/.test(x.symbol) && +x.quoteVolume > 0)   // buang kontrak kuartalan
+            .sort((a, b) => b.quoteVolume - a.quoteVolume)
+            .slice(0, 200)
+            .map(x => x.symbol.replace(/USDT$/, ''));
+        if (!list.includes(state.coin)) list.unshift(state.coin);
+        coinList = list;
+        coinsLoaded = true;
+        if (!cpPop.classList.contains('hidden')) cpDraw();
+    } catch (_) { /* gagal: daftar cadangan tetap dipakai */ }
+}
+cpLabel();
 
     /* ---------- WebSocket: trade masuk dikelompokkan per detik ---------- */
     const add = (ex, usd, buy) => {
@@ -149,14 +201,15 @@
                 row = document.createElement('div');
                 row.id = 'ls-r-' + r.name;
                 row.className = 'ls-row' + (r.avg ? ' avg' : '') + (r.name === 'Coinbase' ? ' spot' : '');
-                row.innerHTML = `<span class="ls-nm"></span><div class="ls-bar"><i></i><b class="l"></b><b class="s"></b></div><span class="ls-v ls-lv"></span><span class="ls-v ls-sv"></span><svg class="ls-sp" viewBox="0 0 80 22" preserveAspectRatio="none"><polyline points=""/></svg>`;
+                row.innerHTML = `<span class="ls-nm"><span class="ls-ex"></span><span class="t"></span></span><div class="ls-bar"><i></i><b class="l"></b><b class="s"></b></div><span class="ls-v ls-lv"></span><span class="ls-v ls-sv"></span><svg class="ls-sp" viewBox="0 0 80 22" preserveAspectRatio="none"><polyline points=""/></svg>`;
                 box.appendChild(row);
+                if (!r.avg && EXD[r.name]) row.querySelector('.ls-ex').outerHTML = `<img class="ls-ex" src="${exIcon(r.name)}" data-n="${esc(r.name)}" alt="" referrerpolicy="no-referrer">`;
             }
             const q = s => row.querySelector(s);
             // [DIUBAH] pair tidak tersedia (na) tidak ditandai "!" , cuma diredupkan
             row.classList.toggle('err', !!r.error && !r.na);
             row.style.opacity = r.na ? '.45' : '';
-            q('.ls-nm').textContent = r.name + (r.partial ? '*' : '');
+            q('.ls-nm .t').textContent = r.name + (r.partial ? '*' : '');
             // [DIUBAH] tooltip: alasan error / info sampel / alasan kenapa server gagal
             q('.ls-bar').title = r.na ? 'Pair koin ini tidak tersedia di bursa ini (' + r.error + ')'
                 : r.error || ((r.partial ? `Sampel hanya ${r.secs} detik terakhir; ikut rata-rata All tapi bobotnya kecil` : '') + (r.why ? ` | server gagal: ${r.why}` : ''));
@@ -213,7 +266,15 @@
         socks.forEach(s => s.close()); socks = []; buf = {};
     }
 
-    $('#ls-coin').onchange = e => { state.coin = e.target.value; startFeeds(state.coin); reset(); };
+    // logo bursa gagal dimuat -> huruf berwarna
+$('#ls-rows').addEventListener('error', e => {
+    const im = e.target;
+    if (im.tagName !== 'IMG' || !im.dataset.n) return;
+    const s = document.createElement('span');
+    s.className = 'ls-ex ls-let'; s.textContent = im.dataset.n[0]; s.style.background = hue(im.dataset.n);
+    im.replaceWith(s);
+}, true);
+
     $('#ls-tf').onchange = e => { state.tf = e.target.value; reset(); };
     document.addEventListener('visibilitychange', () => { if (running && !document.hidden) pull(); });
     window.xlStart = start; window.xlStop = stop;
@@ -520,7 +581,7 @@ function showAirdropDashboard() {
     const st = {
         tfs: load('flsTfs', DEF_TFS).filter(t => TFS.some(x => x[0] === t)),
         size: loadSize(), page: 1, list: [], tick: null, data: {}, pgSig: '',
-        sort: null, filter: 'all', run: false, timer: null, token: 0, busy: false, again: false,
+        sort: null, filter: 'all', q: '', run: false, timer: null, token: 0, busy: false, again: false,
     };
     if (!st.tfs.length) st.tfs = DEF_TFS.slice();
 
@@ -531,6 +592,17 @@ function showAirdropDashboard() {
     const hue = s => { let h = 0; for (const ch of s) h = (h * 31 + ch.charCodeAt(0)) % 360; return `hsl(${h} 80% 62%)`; };
     const setStatus = t => { const el = $('#fls-status'); if (el) el.textContent = t; };
     const heat = (pct, rgb) => pct > 50 ? `background:rgba(${rgb},${((Math.min(pct, 90) - 50) / 40 * 0.75).toFixed(2)})` : '';
+    
+    // logo otomatis: coba sumber 1 -> sumber 2 -> huruf (fallback)
+const LOGO = [
+    s => `https://bin.bnbstatic.com/static/assets/logos/${s}.png`,
+    s => `https://cdn.jsdelivr.net/gh/spothq/cryptocurrency-icons@master/128/color/${s.toLowerCase()}.png`,
+];
+const logoAt = {};   // simpan sumber mana yang dipakai per koin (-1 = pakai huruf)
+const logoHtml = c => {
+    const i = logoAt[c] ?? 0;
+    return i < 0 ? esc(c[0]) : `<img src="${LOGO[i](c)}" data-c="${esc(c)}" alt="" loading="lazy" referrerpolicy="no-referrer">`;
+};
 
     async function getTicker() {
         const r = await fetch(FAPI + '/ticker/24hr');
@@ -546,10 +618,14 @@ function showAirdropDashboard() {
         return m;
     }
 
-    const pages = () => Math.max(1, Math.ceil(st.list.length / st.size));
+    const shown = () => {
+    if (!st.q) return st.list;
+    return st.list.filter(s => s.toLowerCase().includes(st.q) || coinOf(s).toLowerCase().includes(st.q));
+};
+const pages = () => Math.max(1, Math.ceil(shown().length / st.size));
 
     function ordered() {   // sort global hanya untuk price & 24h (datanya ada di ticker)
-        const l = st.list.slice();
+        const l = shown().slice();
         if (st.sort && (st.sort.key === 'price' || st.sort.key === 'chg')) {
             const f = st.sort.key === 'price' ? 'lastPrice' : 'priceChangePercent';
             l.sort((a, b) => (+st.tick[a][f] - +st.tick[b][f]) * st.sort.dir);
@@ -623,7 +699,8 @@ function showAirdropDashboard() {
 
         const span = 2 + tfs.length * 2;
         body.innerHTML = list.length ? list.map(({ c, d }) => {
-            const sym = `<td class="fls-l"><div class="fls-sym"><span class="fls-ico" style="background:${hue(c)}">${esc(c[0])}</span>${esc(c)}</div></td>`;
+            const ix = logoAt[c] ?? 0;
+const sym = `<td class="fls-l"><div class="fls-sym"><span class="fls-ico ${ix < 0 ? '' : 'img'}" style="${ix < 0 ? 'background:' + hue(c) : ''}">${logoHtml(c)}</span>${esc(c)}</div></td>`;
             if (!d || d.err) return `<tr>${sym}<td class="fls-err" colspan="${span}">${d ? esc(d.err) : 'Memuat…'}</td></tr>`;
             const chgBg = `background:rgba(${d.chg >= 0 ? '53,224,161' : '239,68,68'},${Math.min(Math.abs(d.chg) / 8, 1) * 0.35})`;
             const cells = tfs.map(t => {
@@ -697,6 +774,31 @@ function showAirdropDashboard() {
         st.page = 1; pager(); render(); refresh();   // urutan global berubah, jadi koin di halaman ikut berubah
     });
     $('#fls-filter').onchange = e => { st.filter = e.target.value; render(); };
+
+    // logo gagal dimuat -> coba sumber berikutnya, kalau habis pakai huruf
+$('#fls-body').addEventListener('error', e => {
+    const im = e.target;
+    if (im.tagName !== 'IMG') return;
+    const c = im.dataset.c;
+    logoAt[c] = (logoAt[c] ?? 0) + 1;
+    if (logoAt[c] >= LOGO.length) {
+        logoAt[c] = -1;
+        const ico = im.parentElement;
+        ico.classList.remove('img');
+        ico.style.background = hue(c);
+        ico.textContent = c[0];
+    } else im.src = LOGO[logoAt[c]](c);
+}, true);   // true wajib: event error tidak bubble
+
+// cari koin (seluruh 742 koin, bukan hanya halaman aktif)
+let qt;
+$('#fls-search').addEventListener('input', e => {
+    clearTimeout(qt);
+    qt = setTimeout(() => {
+        st.q = e.target.value.trim().toLowerCase();
+        st.page = 1; pager(true); render(); refresh();
+    }, 250);
+});
 
     function start() {
         if (st.run) return;

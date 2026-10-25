@@ -434,29 +434,43 @@
         </div>
     </div>
 
-    <div class="hero-grid" id="sec-ls" style="grid-template-columns: 1fr; padding-top: 2rem; padding-bottom: 1rem;">
+          <!-- ═══ EXCHANGE TRADE LONG vs SHORT ═══ -->
+        <div class="hero-grid" id="sec-ls" style="grid-template-columns: 1fr; padding-top: 2rem; padding-bottom: 1rem;">
         <div>
             <div class="hero-eyebrow">Market Dashboard</div>
             <h1 style="font-size: clamp(2rem, 4vw, 3.2rem); margin-bottom: 1rem;">Exchange Trade <span>Long vs Short</span></h1>
             <p class="hero-sub">Taker buy vs taker sell per bursa, live lewat WebSocket.</p>
         </div>
     </div>
+
     <div class="market-section" style="max-width: 1360px; margin: 0 auto; padding: 0 1.5rem;">
         <div class="section-card" style="padding: 1.5rem 2rem;">
+
             <div class="ls-top">
                 <div class="ls-status" id="ls-st"><span class="ls-dot"></span><span id="ls-clock">--:--:--</span><span id="ls-info">memuat…</span></div>
+
                 <div class="ls-ctl">
-                    <select id="ls-coin" aria-label="Koin"><option>BTC</option><option>ETH</option><option>SOL</option><option>XRP</option><option>DOGE</option><option>BNB</option></select>
+                    <div class="cp" id="ls-cp">
+                        <button type="button" class="cp-btn" id="cp-btn" aria-expanded="false">
+                            <span id="cp-ico"></span><b id="cp-name">BTC</b><i>▾</i>
+                        </button>
+                        <div class="cp-pop hidden" id="cp-pop">
+                            <input id="cp-q" class="cp-q" type="search" placeholder="Cari koin…" autocomplete="off" spellcheck="false">
+                            <div class="cp-list" id="cp-list"></div>
+                        </div>
+                    </div>
                     <select id="ls-tf" aria-label="Jendela waktu"><option value="5m">5m</option><option value="15m">15m</option><option value="30m">30m</option><option value="1h">1h</option><option value="2h">2h</option><option value="4h">4h</option><option value="6h">6h</option><option value="12h">12h</option><option value="1d">1d</option></select>
                 </div>
             </div>
+
             <div class="ls-head"><span></span><div class="ml"><span>Longs (Taker Buy)</span><span>Shorts (Taker Sell)</span></div><span class="hv">Longs</span><span class="hv">Shorts</span><span class="hv">Tren</span></div>
             <div id="ls-rows"></div>
             <p class="ls-note">Baris All = rata-rata berbobot volume USD dari semua bursa yang berhasil dimuat. Tanda * = sampel trade pendek (datanya dari daftar trade terakhir, bukan statistik taker), ikut All tapi bobotnya kecil. Coinbase = spot, bukan futures. Tanda ! = bursa gagal dimuat; arahkan kursor ke bar untuk alasannya.</p>
         </div>
     </div>
+       
+      <!-- ═══ CRYPTOCURRENCY FUTURES LONGS vs SHORTS (tabel heatmap) ═══ -->
 
-        <!-- ═══ CRYPTOCURRENCY FUTURES LONGS vs SHORTS (tabel heatmap) ═══ -->
         <div class="market-section" id="sec-fls" style="max-width: 1360px; margin: 1.4rem auto 0; padding: 0 1.5rem;">
         <div class="section-card" style="padding: 1.5rem 2rem;">
             <div class="fls-top">
@@ -470,6 +484,7 @@
                             <button class="fls-reset" id="fls-reset" type="button">Reset default</button>
                         </div>
                     </div>
+                          <input id="fls-search" class="fls-search" type="search" placeholder="Cari koin… (BTC)" autocomplete="off" spellcheck="false">
                     <select id="fls-filter" aria-label="Filter dominasi">
                         <option value="all">ALL</option>
                         <option value="long">Long dominan</option>
