@@ -1,6 +1,7 @@
 // api/admin-airdrop.js
 const crypto = require('crypto');
 const { verifyAdminToken, issueSession, clearSession, addCookie } = require('../lib/auth');
+const { verifyTurnstile } = require('../lib/turnstile');
 const MEMBER_TYPES = ['onchain', 'btcd', 'usdtd', 'token-unlocks', 'feed', 'nlf-history', 'nlf-stream',];
 const roleOf = (s) => (!s ? null : s.provider === 'google' ? 'admin' : 'member');
 
@@ -53,24 +54,28 @@ const MAINTENANCE = true;
 const SESSION_MS_DISCORD = 12 * 60 * 60 * 1000; // member Discord: 12 jam, role dicek ulang tiap login
 
 // PIN wajib tiap kirim ke Discord/Telegram. Salah 5x = kunci 10 menit per IP.
+
 async function checkSendPin(req) {
   const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
   const failKey = `pinfail:${ip}`;
   const want = process.env.SEND_PIN;
   if (!want) return { ok: false, status: 500, error: 'SEND_PIN belum di-set' };
 
-  const fails = Number(await redis.get(failKey)) || 0;
-  if (fails >= 5) return { ok: false, status: 429, error: 'Terlalu banyak PIN salah, coba lagi 10 menit lagi' };
-
   const h = (s) => crypto.createHash('sha256').update(String(s)).digest();
   const given = String(req.headers['x-send-pin'] || '');
-  if (!given || !crypto.timingSafeEqual(h(given), h(want))) {
-    await redis.incr(failKey);
-    await redis.expire(failKey, 600);
-    return { ok: false, status: 401, error: 'PIN salah' };
+  const correct = !!given && crypto.timingSafeEqual(h(given), h(want));
+
+  if (correct) {
+    const fails = Number(await redis.get(failKey)) || 0;
+    if (fails >= 5) return { ok: false, status: 429, error: 'Terlalu banyak PIN salah, coba lagi 10 menit lagi' };
+    await redis.del(failKey);
+    return { ok: true };
   }
-  await redis.del(failKey);
-  return { ok: true };
+
+  const n = await redis.incr(failKey);
+  await redis.expire(failKey, 600);
+  if (n > 5) return { ok: false, status: 429, error: 'Terlalu banyak PIN salah, coba lagi 10 menit lagi' };
+  return { ok: false, status: 401, error: 'PIN salah' };
 }
 
   module.exports = async function handler(req, res) {
@@ -79,7 +84,7 @@ async function checkSendPin(req) {
   } catch (e) {
     console.error('[admin-airdrop] FATAL:', e);
     if (!res.headersSent) {
-      return res.status(500).json({ error: 'Internal error', detail: e.message });
+      return res.status(500).json({ error: 'Internal error' });
     }
   }
 };
@@ -298,8 +303,12 @@ async function sendDiscord() {
     if (!DISCORD_CLIENT_ID || !DISCORD_CLIENT_SECRET || !DISCORD_GUILD_ID || !DISCORD_ROLE_IDS) return back('config');
 
       // 1) arahkan ke Discord
-    if (step === 'discord-login') {
+      if (step === 'discord-login') {
+      const hasTicket = /(?:^|;\s*)ts_ok=1/.test(req.headers.cookie || '');
+      if (!hasTicket) return back('human');
+      addCookie(res, `ts_ok=; ${STATE_COOKIE}; Max-Age=0`);
       const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim() || 'unknown';
+
       let allowed = true;
       try {
         ({ success: allowed } = await ratelimit.limit(`discord:${ip}`));
@@ -370,6 +379,16 @@ if (error) return back('cancelled');
     clearSession(res);
     return res.status(200).json({ success: true });
   }
+    if (type === 'ts-verify') {
+    if (req.method !== 'POST') return res.status(405).json({ error: 'Method tidak diizinkan' });
+    const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim();
+    if (!(await verifyTurnstile((req.body || {}).ts, ip))) {
+      return res.status(403).json({ error: 'Verifikasi manusia gagal' });
+    }
+    addCookie(res, 'ts_ok=1; Path=/api/admin-airdrop; HttpOnly; Secure; SameSite=Lax; Max-Age=120');
+    return res.status(200).json({ ok: true });
+  }
+  
   if (type === 'discord-login' || type === 'discord-callback') {
     return await handleDiscordAuth(req, res, type);
   }
@@ -464,7 +483,9 @@ if (error) return back('cancelled');
     // ─── CRON USDT.D (dipanggil pinger luar, bukan browser) ───
   if (type === 'usdtd-cron') {
     const secret = process.env.CRON_SECRET;
-    if (!secret || req.headers.authorization !== `Bearer ${secret}`) {
+    const given = Buffer.from(String(req.headers.authorization || ''));
+    const want = Buffer.from(`Bearer ${secret || ''}`);
+   if (!secret || given.length !== want.length || !crypto.timingSafeEqual(given, want)) {
       return res.status(401).json({ error: 'Unauthorized' });
     }
     try {
@@ -502,7 +523,7 @@ if (roleOf(session) === 'member' && !MEMBER_TYPES.includes(type)) {
 
     if (action === 'labels') {
       try {
-        const out = await onchain.labels(chain, String(req.query.addresses || '').split(','), {
+        const out = await onchain.labels(chain, String(req.query.addresses || '').split(',').slice(0, 50), {
           get: async (k) => { const v = await redis.get(k); return v == null ? null : (typeof v === 'string' ? JSON.parse(v) : v); },
           set: (k, v) => redis.set(k, JSON.stringify(v), { ex: 60 * 60 * 24 }),
         });
@@ -511,7 +532,7 @@ if (roleOf(session) === 'member' && !MEMBER_TYPES.includes(type)) {
     }
         if (action === 'balances') {
   try {
-    const addrs = String(req.query.addresses || '').split(',').filter(Boolean);
+    const addrs = String(req.query.addresses || '').split(',').filter(Boolean).slice(0, 50);
     return res.status(200).json(await onchain.balances(chain, addrs, req.query.full === '1'));
   } catch (e) {
     console.error('[onchain] balances error:', e);   // ← BARU: kelihatan di Vercel logs
@@ -596,7 +617,7 @@ if (roleOf(session) === 'member' && !MEMBER_TYPES.includes(type)) {
       'layerzero', 'hyperliquid', 'berachain', 'monad', 'ethena', 'jupiter', 'pyth', 'sei', 'zksync-era',
       'pendle', 'eigencloud', 'jito', 'movement', 'grass', 'aster', 'kaito', 'walrus-protocol', 'initia', 'ondo-finance'];
     const picked = String(req.query.slugs || '').split(',').map(s => s.trim().toLowerCase())
-      .filter(s => /^[a-z0-9.\-]{1,60}$/.test(s)).slice(0, 40);
+      .filter(s => /^[a-z0-9][a-z0-9.\-]{0,59}$/.test(s)).slice(0, 40);
     const watch = picked.length ? picked : DEFAULT_WATCH;
     const days = Math.min(Math.max(parseInt(req.query.days, 10) || 30, 1), 180);
 
@@ -829,6 +850,11 @@ if (roleOf(session) === 'member' && !MEMBER_TYPES.includes(type)) {
       req.on('close', end);
     });
    }   
+
+   if (roleOf(session) !== 'admin') {
+  return res.status(403).json({ error: 'Khusus admin' });
+}
+
        // ─── AIRDROPS: baca dari file JSON (tanpa Supabase) ───
   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'no-store');

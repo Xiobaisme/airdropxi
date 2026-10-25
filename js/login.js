@@ -235,22 +235,51 @@ function stopFallingCoins() {
         // ─── GOOGLE LOGIN ───
         const YOUR_CLIENT_ID = '1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com';
 
-        async function handleCredentialResponse(response) {
+        let _tsToken = null, _pendingCred = null;
+function onTsOk(t) {
+    _tsToken = t;
+    if (_pendingCred) { const c = _pendingCred; _pendingCred = null; handleCredentialResponse(c); }
+}
+function onTsOff() { _tsToken = null; }
+
+async function handleCredentialResponse(response) {
+    if (!_tsToken) { _pendingCred = response; return; }   // tunggu widget lolos dulu
+    const ts = _tsToken; _tsToken = null;
     try {
         const res = await fetch('/api/verify-token', {
             method: 'POST',
             headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({ token: response.credential }),
+            body: JSON.stringify({ token: response.credential, ts }),
         });
         const result = await res.json();
         if (res.ok && result.success) {
-          enterAdmin();
+            enterAdmin();
         } else {
+            try { turnstile.reset(); } catch {}
             alert(`Akses ditolak: ${result.message || 'Unauthorized'}`);
-            google.accounts.id.disableAutoSelect();
+            try { google.accounts.id.disableAutoSelect(); } catch {}
         }
     } catch (err) {
+        try { turnstile.reset(); } catch {}
         alert('Verifikasi gagal. Coba lagi nanti.');
+    }
+}
+
+async function discordLogin(e) {
+    e.preventDefault();
+    if (!_tsToken) { alert('Selesaikan verifikasi dulu.'); return; }
+    const ts = _tsToken; _tsToken = null;
+    try {
+        const r = await fetch('/api/admin-airdrop?type=ts-verify', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ ts }),
+        });
+        if (!r.ok) throw new Error();
+        location.href = '/api/admin-airdrop?type=discord-login';
+    } catch {
+        try { turnstile.reset(); } catch {}
+        alert('Verifikasi gagal. Coba lagi.');
     }
 }
 
@@ -285,6 +314,7 @@ const LOGIN_ERRORS = {
     state:      'Sesi login kedaluwarsa, coba lagi.',
     ratelimit:  'Terlalu banyak percobaan, coba lagi sebentar.',
     config:     'Login Discord belum dikonfigurasi di server.',
+    human:      'Verifikasi manusia diperlukan, coba lagi.',
 };
 function showLoginError() {
     const code = new URLSearchParams(location.search).get('login_error');

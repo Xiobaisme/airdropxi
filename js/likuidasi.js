@@ -42,7 +42,7 @@
             if (!list.length) return;
             if (!list.includes(st.coin)) list.unshift(st.coin);
             const sel = $('#lq-coin');
-            sel.innerHTML = list.map(c => `<option value="${c}">${c}</option>`).join('');
+            sel.innerHTML = list.map(c => `<option value="${h(c)}">${h(c)}</option>`).join('');
             sel.value = st.coin;
             st.coinsLoaded = true;
         } catch (_) {}

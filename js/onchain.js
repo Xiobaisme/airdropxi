@@ -340,7 +340,7 @@ function ocRender(fit) {
             <a href="${esc(oc.ex.addr + a)}" target="_blank" rel="noopener">
                 <text class="oc-addr" x="${p.x}" y="${p.y + R + (hasName ? 38 : 20)}" text-anchor="middle">${esc(ocShort(a))}</text></a>`);
 
-        return `<g class="oc-node" onclick="ocExpand('${esc(a)}')">
+        return `<g class="oc-node" data-a="${esc(a)}" onclick="ocExpand(this.dataset.a)">
             <title>${esc((n.label ? n.label + '\n' : '') + a)}</title>
             <circle cx="${p.x}" cy="${p.y}" r="${R + 8}" fill="${fill}" opacity=".12"/>
             <circle class="main" cx="${p.x}" cy="${p.y}" r="${R}" fill="${fill}" stroke="${oc.raw.has(a) ? '#fff' : 'transparent'}" stroke-width="2"/>

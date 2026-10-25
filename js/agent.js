@@ -128,7 +128,7 @@
             if (!agentState.attachedImage) { agentEl.attachSlot.innerHTML = ''; return; }
             agentEl.attachSlot.innerHTML = `
                 <div class="agent-attach-preview">
-                    <img src="${agentState.attachedImage.dataUrl}" />
+                    <img src="${esc(agentState.attachedImage.dataUrl)}" />
                     <span>${esc(agentState.attachedImage.name)}</span>
                     <button id="agentRemoveAttach">${icon('x')}</button>
                 </div>`;
@@ -163,7 +163,11 @@
                     setTimeout(() => ev.target.textContent = 'Copy', 1200);
                 };
             } else if (kind === 'image') {
-                bubble.innerHTML = `<img class="agent-result-img" src="${imgSrc}"/><div class="agent-img-caption">${esc(text)}</div>`;
+            bubble.innerHTML = `<div class="agent-img-caption">${esc(text)}</div>`;
+            const im = document.createElement('img');
+            im.className = 'agent-result-img';
+            if (/^(https:\/\/|data:image\/(png|jpe?g|webp|gif);base64,)/i.test(String(imgSrc))) im.src = imgSrc;
+         bubble.prepend(im);
             } else {
                 bubble.textContent = text;
             }

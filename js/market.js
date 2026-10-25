@@ -34,7 +34,7 @@
                 .slice(0, 200)
                 .map(x => x.symbol.replace(/USDT$/, ''));
             if (!list.includes(state.coin)) list.unshift(state.coin);
-            sel.innerHTML = list.map(c => `<option value="${c}">${c}</option>`).join('');
+            sel.innerHTML = list.map(c => `<option value="${esc(c)}">${esc(c)}</option>`).join('');
             sel.value = state.coin;
             coinsLoaded = true;
         } catch (_) { /* gagal: dropdown bawaan di HTML tetap dipakai */ }

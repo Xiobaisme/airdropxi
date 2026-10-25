@@ -87,11 +87,11 @@ async function callProvider({ providerName, model, systemPrompt, history, prompt
 
   const messages = [{ role: 'system', content: systemPrompt }];
 
-  (history || []).forEach((h) => {
-    if (h && h.role && h.content) {
-      messages.push({ role: h.role, content: h.content });
-    }
-  });
+  (Array.isArray(history) ? history.slice(-20) : []).forEach((h) => {
+  if (h && (h.role === 'user' || h.role === 'assistant') && typeof h.content === 'string' && h.content) {
+    messages.push({ role: h.role, content: h.content.slice(0, 8000) });
+  }
+});
 
   // Kalau ada gambar terlampir dan modelnya kemungkinan vision-capable,
   // kirim sebagai content multi-part (format vision OpenAI-compatible).

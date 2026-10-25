@@ -133,7 +133,7 @@ function renderNewsFeed() {
             <button class="nt-more" type="button" data-more="${esc(item.id)}">${open ? 'Tutup ▲' : 'Lihat semua ▼'}</button>
             <div class="nt-foot">
                 <button class="btn-save" data-send="${esc(item.id)}" ${sent ? 'disabled' : ''}>${sent ? 'Terkirim ✓' : icon('send') + 'Kirim'}</button>
-                ${item.url ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">buka post ↗</a>` : ''}
+                ${/^https?:\/\//i.test(String(item.url || '')) ? `<a href="${esc(item.url)}" target="_blank" rel="noopener">buka post ↗</a>` : ''}
             </div>
         </div>`;
     }).join('');

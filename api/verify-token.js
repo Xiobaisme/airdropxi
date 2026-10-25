@@ -1,6 +1,7 @@
 const crypto = require('crypto');
 const { OAuth2Client } = require('google-auth-library');
 const { issueSession } = require('../lib/auth');
+const { verifyTurnstile } = require('../lib/turnstile');
 
 const SESSION_MS_GOOGLE = 7 * 24 * 60 * 60 * 1000; // admin: 7 hari (sebelumnya 4 jam)
 
@@ -8,7 +9,7 @@ const CLIENT_ID = '1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleuse
 const ALLOWED_EMAILS = (process.env.ALLOWED_ADMIN_EMAILS
   ? process.env.ALLOWED_ADMIN_EMAILS.split(',')
   : ['regifrdm@gmail.com']
-).map(e => e.trim().toLowerCase());
+).map(e => e.trim().toLowerCase()).filter(Boolean);
 
 const client = new OAuth2Client(CLIENT_ID);
 
@@ -19,6 +20,10 @@ module.exports = async function handler(req, res) {
   const { token } = req.body || {};
   if (!token) {
     return res.status(400).json({ success: false, message: 'Token missing' });
+  }
+  const ip = req.headers['x-forwarded-for']?.split(',')[0]?.trim();
+  if (!(await verifyTurnstile((req.body || {}).ts, ip))) {
+    return res.status(403).json({ success: false, message: 'Verifikasi manusia gagal, coba lagi' });
   }
   if (!process.env.ADMIN_SECRET_KEY) {
     return res.status(500).json({ success: false, message: 'Konfigurasi server belum lengkap' });
