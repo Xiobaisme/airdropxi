@@ -54,7 +54,7 @@ const BROADCAST_TAGS = [
   { key: 'MARKET',        label: 'MARKET',        emoji: '📊', color: 'var(--info)' },
   { key: 'PRICE',         label: 'PRICE',         emoji: '💰', color: 'var(--info)' },
   { key: 'VOLUME',        label: 'VOLUME',        emoji: '📈', color: 'var(--info)' },
-  { key: 'LIQUIDATION',   label: 'LIQUIDATION',   emoji: '💥', color: 'var(--danger)' },
+  { key: 'REKT',          label: 'REKT',          emoji: '💥', color: 'var(--danger)' },
 
   // 💡 Insight & Analysis
   { key: 'INSIGHT',       label: 'INSIGHT',       emoji: '💡', color: 'var(--success)' },
@@ -63,7 +63,7 @@ const BROADCAST_TAGS = [
   { key: 'RESEARCH',      label: 'RESEARCH',      emoji: '🔬', color: 'var(--success)' },
 
   // 🔔 Regular / Soft News
-  { key: 'NEW',           label: 'NEW',           emoji: '🔔', color: 'var(--primary)' },
+  { key: 'NOW',           label: 'NOW',           emoji: '🔔', color: 'var(--primary)' },
   { key: 'LATEST',        label: 'LATEST',        emoji: '⏳', color: 'var(--primary)' },
   { key: 'INTERESTING',   label: 'INTERESTING',   emoji: '✨', color: 'var(--primary)' },
   { key: 'TRENDING',      label: 'TRENDING',      emoji: '🚀', color: 'var(--primary)' },
