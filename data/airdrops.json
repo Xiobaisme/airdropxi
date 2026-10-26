@@ -789,5 +789,24 @@
   "sort_order": null,
   "website_url": null,
   "backers": null
+},
+{
+  "id": 96,
+  "created_at": "2026-10-26 19:00:00+00",
+  "name": "4Dlabs",
+  "status": "Active",
+  "RaisedID": "$0M",
+  "RaisedEN": "$0M",
+  "tasksID": null,
+  "tasksEN": null,
+  "link": "https://dapp.4dlabs.space/",
+  "tags": "AI",
+  "testnet_links": null,
+  "published": false,
+  "confirmation_status": null,
+  "view_count": 0,
+  "sort_order": null,
+  "website_url": null,
+  "backers": null
 }
 ]
