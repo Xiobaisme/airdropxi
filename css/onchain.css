@@ -140,3 +140,45 @@
     /* di layar kecil panel kiri berubah jadi bottom sheet */
     .oc-live { position: fixed; left: 0; right: 0; bottom: 0; height: 48vh; z-index: 6; border-radius: 18px 18px 0 0; border-bottom: 0; box-shadow: 0 -18px 50px rgba(0,0,0,.65); }
 }
+
+/* ═══ MOBILE / HP ═══ */
+@media (max-width: 1100px) {
+    /* bottom sheet Live Transfers: ada handle, animasi naik, aman dari notch iOS */
+    .oc-live { height: min(52vh, 460px); padding-bottom: env(safe-area-inset-bottom); animation: ocSheetUp .22s ease; }
+    .oc-live::before { content: ''; position: absolute; top: 6px; left: 50%; width: 38px; height: 4px; margin-left: -19px; border-radius: 4px; background: var(--border-strong); z-index: 1; }
+    .oc-live-head { padding-top: 1rem; }
+    .oc-live-arrow { width: 40px; height: 40px; }
+    .oc-live-btn { padding: .55rem 1rem; }
+}
+@keyframes ocSheetUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
+
+@media (max-width: 700px) {
+    /* header: baris 1 = judul + Live Feed + tutup, baris 2+ = form */
+    .oc-top { gap: 8px 10px; padding: 10px 12px; padding-top: max(10px, env(safe-area-inset-top)); }
+    .oc-title { order: 1; flex: 1; font-size: 1rem; }
+    #oc-live-toggle { order: 2; }
+    #onchain-close-btn { order: 3; }
+    .oc-form { order: 4; flex: 1 1 100%; min-width: 0; gap: 8px; }
+    .oc-form input[type="text"] { flex: 1 1 100%; min-width: 0; }
+    .oc-form select { flex: 1 1 0; min-width: 0; }
+    .oc-form .btn-save { flex-shrink: 0; }
+    .oc-check { flex: 1 1 100%; }
+    /* 16px supaya iOS tidak auto-zoom saat input difokus */
+    .oc-form input[type="text"], .oc-form select, .oc-live-tools input { font-size: 16px; }
+
+    /* ringkasan: 1 baris yang bisa digeser, tidak makan tinggi layar */
+    .oc-summary { display: flex; gap: 8px; padding: 8px 12px 0; overflow-x: auto; scrollbar-width: none; }
+    .oc-summary::-webkit-scrollbar { display: none; }
+    .oc-stat { flex: 0 0 132px; padding: .5rem .75rem; }
+    .oc-stat .n { font-size: 1.1rem; }
+
+    /* diagram di atas, tabel aset/transaksi di bawah */
+    .oc-main { padding: 8px 10px 10px; gap: 8px; }
+    .oc-main.has-tx, .oc-main.live-off.has-tx { grid-template-rows: minmax(0, 1fr) 36vh; }
+    .oc-tools { right: 8px; top: 8px; }
+    .oc-tools button { width: 40px; height: 40px; }
+    .oc-note { display: none; }
+    .oc-empty { padding: 0 24px; text-align: center; }
+    .oc-table { font-size: .68rem; }
+    .oc-table td { padding: .45rem .6rem; }
+}

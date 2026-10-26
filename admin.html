@@ -1084,17 +1084,92 @@
             </div>
         </div>
 
-        <!-- ─── CALCULATOR ─── -->
         <div id="calc-panel" class="hidden">
-            <div class="calc-head">
-                <span class="t" id="calc-title">Kalkulator</span>
-                <button class="calc-close" onclick="toggleCalc()" id="calc-close-btn"></button>
-            </div>
-            <div class="calc-body">
-                <input id="calc-display" type="text" readonly value="0" />
-                <div class="calc-grid" id="calc-grid"></div>
-            </div>
-        </div>
+  <div class="pnl-head">
+    <span>PNL CALCULATOR</span>
+    <button class="pnl-x" onclick="toggleCalc()">✕</button>
+  </div>
+
+  <div class="pnl-grid">
+    <label class="pnl-f">
+      <span>Coin <em id="pnl-live" class="pnl-liveTag"></em></span>
+      <input id="pnl-coin" list="pnl-coins" value="BTC" autocomplete="off" oninput="pnlCoinInput()">
+      <datalist id="pnl-coins"></datalist>
+    </label>
+
+    <label class="pnl-f">
+      <span>Posisi</span>
+      <select id="pnl-dir" onchange="pnlCalc()">
+        <option value="long">Long</option>
+        <option value="short">Short</option>
+      </select>
+    </label>
+
+    <label class="pnl-f">
+      <span>Buy price <button type="button" class="pnl-mini" onclick="pnlUseLive('pnl-buy')">Live</button></span>
+      <input id="pnl-buy" type="number" step="any" placeholder="0" oninput="pnlCalc()">
+    </label>
+
+    <label class="pnl-f">
+      <span>Sell price <button type="button" class="pnl-mini" onclick="pnlUseLive('pnl-sell')">Live</button></span>
+      <input id="pnl-sell" type="number" step="any" placeholder="0" oninput="pnlCalc()">
+    </label>
+
+    <label class="pnl-f">
+      <span>Investment ($)</span>
+      <input id="pnl-margin" type="number" step="any" placeholder="0" oninput="pnlCalc()">
+    </label>
+
+    <label class="pnl-f">
+      <span>Leverage (x)</span>
+      <input id="pnl-lev" type="number" step="any" min="1" value="10" oninput="pnlCalc()">
+    </label>
+
+    <label class="pnl-f">
+      <span>Tipe fee</span>
+      <select id="pnl-feemode" onchange="pnlFeeMode()">
+        <option value="taker">Market (Taker) 0.05%</option>
+        <option value="maker">Limit (Maker) 0.02%</option>
+        <option value="manual">Manual ($)</option>
+      </select>
+    </label>
+
+    <label class="pnl-f">
+      <span>Funding / lainnya ($)</span>
+      <input id="pnl-other" type="number" step="any" placeholder="0" oninput="pnlCalc()">
+    </label>
+
+    <label class="pnl-f">
+      <span>Investment Fee ($)</span>
+      <input id="pnl-feein" type="number" step="any" placeholder="0" disabled oninput="pnlCalc()">
+    </label>
+
+    <label class="pnl-f">
+      <span>Exit Fee ($)</span>
+      <input id="pnl-feeout" type="number" step="any" placeholder="0" disabled oninput="pnlCalc()">
+    </label>
+  </div>
+
+  <div class="pnl-result">
+    <div class="pnl-title">Investment Result</div>
+    <div class="pnl-lbl">Profit/Loss</div>
+    <div class="pnl-row">
+      <span id="pnl-res" class="pnl-big">$0.00</span>
+      <span id="pnl-roe" class="pnl-roe">0.00%</span>
+    </div>
+
+    <div class="pnl-two">
+      <div><div class="pnl-lbl">Total Investment Amount</div><div id="pnl-totin" class="pnl-val">$0.00</div></div>
+      <div><div class="pnl-lbl">Total Exit Amount</div><div id="pnl-totout" class="pnl-val">$0.00</div></div>
+      <div><div class="pnl-lbl">Position Size</div><div id="pnl-size" class="pnl-val">$0.00</div></div>
+      <div><div class="pnl-lbl">Total Fee</div><div id="pnl-totfee" class="pnl-val">$0.00</div></div>
+    </div>
+
+    <div class="pnl-liqrow">Est. Liq. Price: <b id="pnl-liq">-</b></div>
+    <div id="pnl-warn" class="pnl-warn">Harga sell menyentuh estimasi likuidasi. Margin dianggap habis.</div>
+  </div>
+</div>
+
 
         <!-- ─── NEWS TERMINAL ─── -->
 <div class="news-overlay" id="news-overlay"></div>
