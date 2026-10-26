@@ -1,13 +1,17 @@
 // ─── MOUSE GLOW ───
-        // Dimatikan lewat CSS (.mouse-glow { display:none }) supaya gak ada
-        // repaint tiap mousemove. Listener dibiarkan no-op ringan kalau nanti
-        // mau diaktifkan lagi tinggal hapus display:none di CSS.
-        window.addEventListener('mousemove', e => {
-            const glow = document.getElementById('mouse-glow');
-            if (glow) { glow.style.left = e.clientX + 'px'; glow.style.top = e.clientY + 'px'; }
-        }, { passive: true });
+// Dimatikan lewat CSS (.mouse-glow { display:none }) supaya gak ada
+// repaint tiap mousemove. Listener dibiarkan no-op ringan kalau nanti
+// mau diaktifkan lagi tinggal hapus display:none di CSS.
+window.addEventListener('mousemove', e => {
+    const glow = document.getElementById('mouse-glow');
+    if (glow) {
+        glow.style.left = e.clientX + 'px';
+        glow.style.top = e.clientY + 'px';
+    }
+}, { passive: true });
 
-        // ─── LOGIN PARTICLES (efek visual doang, gak ada suara) ───
+
+// ─── LOGIN PARTICLES (efek visual doang, gak ada suara) ───
 function spawnLoginParticles(count = 22) {
     const wrap = document.getElementById('login-particles');
     if (!wrap) return;
@@ -26,7 +30,9 @@ function spawnLoginParticles(count = 22) {
         wrap.appendChild(p);
     }
 }
-        // ─── HURUF BERJATUHAN DI LOGIN (X I O B A I I, warna-warni) ───
+
+
+// ─── HURUF BERJATUHAN DI LOGIN (warna-warni) ───
 function spawnLoginLetters(count = 30) {
     const wrap = document.getElementById('login-letters');
     if (!wrap) return;
@@ -42,7 +48,7 @@ function spawnLoginLetters(count = 30) {
         el.style.fontSize = (20 + Math.random() * 40) + 'px';
         el.style.color = colors[Math.floor(Math.random() * colors.length)];
         el.style.animationDuration = dur + 's';
-        el.style.animationDelay = (-Math.random() * dur) + 's';   // negatif: langsung sudah jatuh saat dibuka
+        el.style.animationDelay = (-Math.random() * dur) + 's'; // negatif: langsung sudah jatuh saat dibuka
         el.style.setProperty('--op', (0.18 + Math.random() * 0.25).toFixed(2));
         el.style.setProperty('--rot0', (Math.random() * 60 - 30) + 'deg');
         el.style.setProperty('--rot1', (Math.random() * 360 - 180) + 'deg');
@@ -50,27 +56,35 @@ function spawnLoginLetters(count = 30) {
     }
 }
 
-        // ─── KOIN CRYPTO BERJATUHAN DI LOGIN — TOP 20 MARKETCAP (dinamis) ───
+
+// ─── KOIN CRYPTO BERJATUHAN DI LOGIN — TOP 20 MARKETCAP (dinamis) ───
 const FC_TOP_N = 20;
 const FC_SLOTS = 16;
 const FC_RANK_REFRESH_MS = 60 * 60 * 1000; // cek ulang ranking tiap 1 jam
-const FC_FALLBACK = ['BTC','ETH','BNB','SOL','XRP','DOGE','ADA','TRX','AVAX','LINK',
-    'DOT','TON','SHIB','LTC','BCH','NEAR','UNI','APT','ICP','ETC'];
+const FC_FALLBACK = [
+    'BTC', 'ETH', 'BNB', 'SOL', 'XRP', 'DOGE', 'ADA', 'TRX', 'AVAX', 'LINK',
+    'DOT', 'TON', 'SHIB', 'LTC', 'BCH', 'NEAR', 'UNI', 'APT', 'ICP', 'ETC',
+];
 const _fc = { coins: [], price: {}, chg: {}, ws: null, run: false, rankTimer: null };
 
 function fcFmt(n) {
     if (!n) return '--';
-    if (n >= 1) return '$' + n.toLocaleString('en-US', { maximumFractionDigits: n >= 100 ? 0 : 2 });
+    if (n >= 1) {
+        return '$' + n.toLocaleString('en-US', { maximumFractionDigits: n >= 100 ? 0 : 2 });
+    }
     return '$' + n.toLocaleString('en-US', { maximumSignificantDigits: 4 });
 }
 
-function fcColor(sym) { // warna fallback konsisten per simbol kalau logo gagal load
-    let h = 0; for (const ch of sym) h = (h * 31 + ch.charCodeAt(0)) % 360;
+// warna fallback konsisten per simbol kalau logo gagal load
+function fcColor(sym) {
+    let h = 0;
+    for (const ch of sym) h = (h * 31 + ch.charCodeAt(0)) % 360;
     return `hsl(${h} 80% 62%)`;
 }
 
 function fcRefreshDom(sym) {
-    const p = _fc.price[sym], ch = _fc.chg[sym] || 0;
+    const p = _fc.price[sym];
+    const ch = _fc.chg[sym] || 0;
     document.querySelectorAll(`.fall-coin[data-sym="${sym}"]`).forEach(el => {
         el.querySelector('.fc-price').textContent = fcFmt(p);
         el.classList.toggle('up', ch >= 0);
@@ -78,14 +92,18 @@ function fcRefreshDom(sym) {
     });
 }
 
-// Ambil ranking top 20 dari CoinGecko (via /api/markets), cocokkan dengan pair Binance
+// Ambil ranking top 20 dari CoinGecko (via /api/admin-airdrop?type=markets),
+// cocokkan dengan pair Binance
 async function fcLoadRanking() {
     let next = [];
     try {
         const [cg, all] = await Promise.all([
-          fetch('/api/admin-airdrop?type=markets').then(r => { if (!r.ok) throw new Error('markets ' + r.status); return r.json(); }),
-         fetch(`${BN}/ticker/price`).then(r => r.json()),
-         ]);
+            fetch('/api/admin-airdrop?type=markets').then(r => {
+                if (!r.ok) throw new Error('markets ' + r.status);
+                return r.json();
+            }),
+            fetch(`${BN}/ticker/price`).then(r => r.json()),
+        ]);
         const pairs = new Set(all.map(x => x.symbol));
         const seen = new Set();
         next = cg
@@ -93,7 +111,8 @@ async function fcLoadRanking() {
                 const s = c.symbol.toUpperCase();
                 if (TICKER_SKIP.has(c.symbol.toLowerCase()) || seen.has(s)) return false;
                 if (!pairs.has(s + 'USDT')) return false;
-                seen.add(s); return true;
+                seen.add(s);
+                return true;
             })
             .slice(0, FC_TOP_N)
             .map(c => ({ sym: c.symbol.toUpperCase(), name: c.name, image: c.image }));
@@ -114,13 +133,21 @@ async function fcLoadPrices() {
         const data = await res.json();
         data.forEach(d => {
             const s = d.symbol.replace('USDT', '');
-            _fc.price[s] = +d.lastPrice; _fc.chg[s] = +d.priceChangePercent;
+            _fc.price[s] = +d.lastPrice;
+            _fc.chg[s] = +d.priceChangePercent;
         });
-    } catch (e) { console.warn('[fall-coins] REST gagal:', e.message); }
+    } catch (e) {
+        console.warn('[fall-coins] REST gagal:', e.message);
+    }
 }
 
 function fcConnectWS() {
-    if (_fc.ws) { _fc.ws.onclose = null; _fc.ws.close(); _fc.ws = null; } // tutup koneksi lama dulu
+    // tutup koneksi lama dulu
+    if (_fc.ws) {
+        _fc.ws.onclose = null;
+        _fc.ws.close();
+        _fc.ws = null;
+    }
     if (!_fc.run || !_fc.coins.length) return;
     try {
         const streams = _fc.coins.map(c => c.sym.toLowerCase() + 'usdt@miniTicker').join('/');
@@ -130,19 +157,27 @@ function fcConnectWS() {
             const d = JSON.parse(e.data).data;
             if (!d) return;
             const s = d.s.replace('USDT', '');
-            const price = +d.c, open = +d.o;
+            const price = +d.c;
+            const open = +d.o;
             _fc.price[s] = price;
             _fc.chg[s] = open ? ((price - open) / open) * 100 : 0;
             fcRefreshDom(s);
         };
-        ws.onclose = () => { if (_fc.run && _fc.ws === ws) setTimeout(fcConnectWS, 3000); };
-    } catch (e) { console.warn('[fall-coins] WS gagal:', e.message); }
+        ws.onclose = () => {
+            if (_fc.run && _fc.ws === ws) setTimeout(fcConnectWS, 3000);
+        };
+    } catch (e) {
+        console.warn('[fall-coins] WS gagal:', e.message);
+    }
 }
 
 // Dipanggil tiap jam: kalau ranking bergeser, update list + resubscribe WS
 async function fcRefreshRanking() {
     const changed = await fcLoadRanking();
-    if (changed) { await fcLoadPrices(); fcConnectWS(); }
+    if (changed) {
+        await fcLoadPrices();
+        fcConnectWS();
+    }
 }
 
 function fcImpact(wrap, x, y, color) {
@@ -151,7 +186,10 @@ function fcImpact(wrap, x, y, color) {
     ring.style.cssText = `left:${x}px;top:${y}px;--c:${color}`;
     wrap.appendChild(ring);
     ring.animate(
-        [{ transform: 'scale(.15)', opacity: .9 }, { transform: 'scale(1.8)', opacity: 0 }],
+        [
+            { transform: 'scale(.15)', opacity: .9 },
+            { transform: 'scale(1.8)', opacity: 0 },
+        ],
         { duration: 650, easing: 'ease-out' }
     ).onfinish = () => ring.remove();
 
@@ -160,38 +198,48 @@ function fcImpact(wrap, x, y, color) {
         sh.className = 'coin-shard';
         sh.style.cssText = `left:${x}px;top:${y}px;--c:${color}`;
         wrap.appendChild(sh);
-        const dx = (Math.random() - .5) * 220, up = 40 + Math.random() * 110;
+        const dx = (Math.random() - .5) * 220;
+        const up = 40 + Math.random() * 110;
         sh.animate([
             { transform: 'translate(0,0) rotate(0)', opacity: 1, offset: 0 },
             { transform: `translate(${dx * .6}px,${-up}px) rotate(180deg)`, opacity: 1, offset: .45 },
             { transform: `translate(${dx}px,${up * .4}px) rotate(420deg)`, opacity: 0, offset: 1 },
-        ], { duration: 700 + Math.random() * 300, easing: 'ease-out' }).onfinish = () => sh.remove();
+        ], {
+            duration: 700 + Math.random() * 300,
+            easing: 'ease-out',
+        }).onfinish = () => sh.remove();
     }
 }
 
 function fcSpawn(wrap) {
     if (!_fc.run || !_fc.coins.length) return;
-    const idx = Math.floor(Math.random() * _fc.coins.length);
-    const coin = _fc.coins[idx];
+
+    const coin = _fc.coins[Math.floor(Math.random() * _fc.coins.length)];
     const ch = _fc.chg[coin.sym] || 0;
     const dumping = ch < 0;
 
     const el = document.createElement('div');
     el.className = 'fall-coin ' + (dumping ? 'down' : 'up');
     el.dataset.sym = coin.sym;
+
     const fallbackIco = `<span class="fc-ico" style="background:${fcColor(coin.sym)}">${esc(coin.sym.slice(0, 3))}</span>`;
-    el.innerHTML = `${coin.image ? `<img class="fc-ico fc-img" src="${esc(coin.image)}" alt="" />` : fallbackIco}
-    <span class="fc-price"></span>`;
+    const iconHtml = coin.image
+        ? `<img class="fc-ico fc-img" src="${esc(coin.image)}" alt="" />`
+        : fallbackIco;
+    el.innerHTML = `${iconHtml}<span class="fc-price"></span>`;
+
     const img = el.querySelector('.fc-img');
-    if (img) img.onerror = () => img.outerHTML = fallbackIco;
+    if (img) img.onerror = () => { img.outerHTML = fallbackIco; };
     wrap.appendChild(el);
     fcRefreshDom(coin.sym);
 
-    const W = wrap.clientWidth, H = wrap.clientHeight;
+    const W = wrap.clientWidth;
+    const H = wrap.clientHeight;
     const x = Math.random() * Math.max(80, W - 100);
     const drift = (Math.random() - .5) * 120;
     const scale = .75 + Math.random() * .35;
-    const r0 = (Math.random() - .5) * 20, r1 = r0 + (dumping ? 1 : -1) * (15 + Math.random() * 40);
+    const r0 = (Math.random() - .5) * 20;
+    const r1 = r0 + (dumping ? 1 : -1) * (15 + Math.random() * 40);
     // koin merah jatuh cepat & brutal, koin hijau lebih "melayang"
     const dur = dumping ? 1800 + Math.random() * 1400 : 3800 + Math.random() * 2600;
     const yEnd = H - 34;
@@ -206,7 +254,8 @@ function fcSpawn(wrap) {
         fill: 'forwards',
     }).onfinish = () => {
         fcImpact(wrap, x + drift + 42, yEnd + 30, dumping ? '#EF4444' : '#35E0A1');
-        el.animate([{ opacity: .9 }, { opacity: 0 }], { duration: 160, fill: 'forwards' }).onfinish = () => el.remove();
+        el.animate([{ opacity: .9 }, { opacity: 0 }], { duration: 160, fill: 'forwards' })
+            .onfinish = () => el.remove();
         setTimeout(() => fcSpawn(wrap), 200 + Math.random() * 1200);
     };
 }
@@ -215,36 +264,55 @@ async function startFallingCoins() {
     if (window.matchMedia('(prefers-reduced-motion: reduce)').matches) return;
     const wrap = document.getElementById('login-coins');
     if (!wrap) return;
+
     _fc.run = true;
     await fcLoadRanking();
     await fcLoadPrices();
     if (!_fc.run) return;
+
     fcConnectWS();
     clearInterval(_fc.rankTimer);
     _fc.rankTimer = setInterval(fcRefreshRanking, FC_RANK_REFRESH_MS);
-    for (let i = 0; i < FC_SLOTS; i++) setTimeout(() => fcSpawn(wrap), Math.random() * 5000);
+    for (let i = 0; i < FC_SLOTS; i++) {
+        setTimeout(() => fcSpawn(wrap), Math.random() * 5000);
+    }
 }
 
 function stopFallingCoins() {
     _fc.run = false;
     clearInterval(_fc.rankTimer);
-    if (_fc.ws) { _fc.ws.onclose = null; _fc.ws.close(); _fc.ws = null; }
+    if (_fc.ws) {
+        _fc.ws.onclose = null;
+        _fc.ws.close();
+        _fc.ws = null;
+    }
     document.getElementById('login-coins')?.replaceChildren();
 }
 
-        // ─── GOOGLE LOGIN ───
-        const YOUR_CLIENT_ID = '1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com';
 
-        let _tsToken = null, _pendingCred = null;
+// ─── GOOGLE LOGIN ───
+const YOUR_CLIENT_ID = '1041020002267-qj0oaoco5idr8obsfsemcm1n9tihue0p.apps.googleusercontent.com';
+
+let _tsToken = null;
+let _pendingCred = null;
+
 function onTsOk(t) {
     _tsToken = t;
-    if (_pendingCred) { const c = _pendingCred; _pendingCred = null; handleCredentialResponse(c); }
+    if (_pendingCred) {
+        const c = _pendingCred;
+        _pendingCred = null;
+        handleCredentialResponse(c);
+    }
 }
-function onTsOff() { _tsToken = null; }
+
+function onTsOff() {
+    _tsToken = null;
+}
 
 async function handleCredentialResponse(response) {
-    if (!_tsToken) { _pendingCred = response; return; }   // tunggu widget lolos dulu
-    const ts = _tsToken; _tsToken = null;
+    if (!_tsToken) { _pendingCred = response; return; } // tunggu widget lolos dulu
+    const ts = _tsToken;
+    _tsToken = null;
     try {
         const res = await fetch('/api/verify-token', {
             method: 'POST',
@@ -265,10 +333,13 @@ async function handleCredentialResponse(response) {
     }
 }
 
+
+// ─── DISCORD LOGIN ───
 async function discordLogin(e) {
     e.preventDefault();
     if (!_tsToken) { alert('Selesaikan verifikasi dulu.'); return; }
-    const ts = _tsToken; _tsToken = null;
+    const ts = _tsToken;
+    _tsToken = null;
     try {
         const r = await fetch('/api/admin-airdrop?type=ts-verify', {
             method: 'POST',
@@ -283,8 +354,10 @@ async function discordLogin(e) {
     }
 }
 
-               // ─── MASUK PANEL (dipakai login Google & restore sesi) ───
+
+// ─── MASUK PANEL (dipakai login Google & restore sesi) ───
 let _entered = false;
+
 function enterAdmin(role = 'admin') {
     if (_entered) return;
     _entered = true;
@@ -304,7 +377,9 @@ async function checkSession() {
         if (!r.ok) return null;
         const d = await r.json();
         return d.authenticated ? d : null;
-    } catch { return null; }
+    } catch {
+        return null;
+    }
 }
 
 const LOGIN_ERRORS = {
@@ -316,10 +391,12 @@ const LOGIN_ERRORS = {
     config:     'Login Discord belum dikonfigurasi di server.',
     human:      'Verifikasi manusia diperlukan, coba lagi.',
 };
+
 function showLoginError() {
     const code = new URLSearchParams(location.search).get('login_error');
     if (!code) return;
     const el = document.getElementById('login-error');
+    if (!el) return;
     el.textContent = LOGIN_ERRORS[code] || 'Login gagal, coba lagi.';
     el.classList.remove('hidden');
     history.replaceState(null, '', location.pathname);
@@ -330,7 +407,12 @@ function showLogin() {
     showLoginError();
     google.accounts.id.initialize({ client_id: YOUR_CLIENT_ID, callback: handleCredentialResponse });
     google.accounts.id.renderButton(document.getElementById('google-btn'), {
-        theme: 'outline', size: 'large', text: 'signin_with', shape: 'pill', logo_alignment: 'left', width: 280,
+        theme: 'outline',
+        size: 'large',
+        text: 'signin_with',
+        shape: 'pill',
+        logo_alignment: 'left',
+        width: 280,
     });
     google.accounts.id.prompt();
 }
@@ -341,42 +423,50 @@ async function logout() {
     location.reload();
 }
 
-        // ─── INIT (juga menyuntik semua icon SVG ke tombol/label statis) ───
-            window.onload = async function() {
-            spawnLoginParticles();
-            spawnLoginLetters();
-            startFallingCoins();
 
-            // Icon-fill untuk elemen statis (bukan hasil render dinamis)
-            document.getElementById('section-label-link-icon').innerHTML = icon('link') + 'Project Links';
-            document.getElementById('add-proj-btn').innerHTML = icon('plus') + 'Tambah Proyek';
-            document.getElementById('initial-loading-state').innerHTML = icon('hourglass') + 'Loading projects...';
-            document.getElementById('edit-modal-title').innerHTML = icon('edit') + 'Edit Proyek';
-            document.getElementById('edit-modal-close-btn').innerHTML = icon('x');
-            document.getElementById('add-modal-title').innerHTML = icon('plus') + 'Tambah Proyek Baru';
-            document.getElementById('add-modal-close-btn').innerHTML = icon('x');
-            document.getElementById('btn-save-edit').innerHTML = icon('save') + 'Simpan';
-            document.getElementById('btn-save-add').innerHTML = icon('rocket') + 'Tambah';
-            document.getElementById('calc-title').innerHTML = icon('calculator') + 'Kalkulator';
-            document.getElementById('calc-close-btn').innerHTML = icon('x');
-            document.getElementById('news-close-btn').innerHTML = icon('x');
-            document.getElementById('ftab-haslink').innerHTML = icon('check') + 'Ada Link';
-            document.getElementById('ftab-nolink').innerHTML = icon('x') + 'No Link';
-            document.getElementById('onchain-close-btn').innerHTML = icon('x');
+// ─── INIT (juga menyuntik semua icon SVG ke tombol/label statis) ───
+window.onload = async function () {
+    spawnLoginParticles();
+    spawnLoginLetters();
+    startFallingCoins();
 
-            // Populate status selects
-            const statusSelects = ['e-status', 'a-status'];
-            statusSelects.forEach(id => {
-                const sel = document.getElementById(id);
-                if (sel) {
-                    sel.innerHTML = STATUS_OPTIONS.map(s => `<option value="${s}">${s}</option>`).join('');
-                }
-            });
+    // Icon-fill untuk elemen statis (bukan hasil render dinamis).
+    // Aman kalau ada elemen yang tidak ada di HTML: dilewati, tidak crash.
+    const setHTML = (id, html) => {
+        const el = document.getElementById(id);
+        if (el) el.innerHTML = html;
+    };
 
-     buildCalcGrid();
-    startGarapWidget();
-    startCryptoTicker();
+    setHTML('section-label-link-icon', icon('link') + 'Project Links');
+    setHTML('add-proj-btn',            icon('plus') + 'Tambah Proyek');
+    setHTML('initial-loading-state',   icon('hourglass') + 'Loading projects...');
+    setHTML('edit-modal-title',        icon('edit') + 'Edit Proyek');
+    setHTML('edit-modal-close-btn',    icon('x'));
+    setHTML('add-modal-title',         icon('plus') + 'Tambah Proyek Baru');
+    setHTML('add-modal-close-btn',     icon('x'));
+    setHTML('btn-save-edit',           icon('save') + 'Simpan');
+    setHTML('btn-save-add',            icon('rocket') + 'Tambah');
+    setHTML('calc-title',              icon('calculator') + 'PnL Calculator');
+    setHTML('calc-close-btn',          icon('x'));
+    setHTML('news-close-btn',          icon('x'));
+    setHTML('ftab-haslink',            icon('check') + 'Ada Link');
+    setHTML('ftab-nolink',             icon('x') + 'No Link');
+    setHTML('onchain-close-btn',       icon('x'));
 
-const sess = await checkSession();
-if (sess) enterAdmin(sess.role); else showLogin();
+    // Populate status selects
+    ['e-status', 'a-status'].forEach(id => {
+        const sel = document.getElementById(id);
+        if (sel) {
+            sel.innerHTML = STATUS_OPTIONS.map(s => `<option value="${s}">${s}</option>`).join('');
+        }
+    });
+
+    // Init widget lain: satu gagal tidak boleh mematikan login
+    if (typeof buildCalcGrid === 'function') buildCalcGrid();
+    try { startGarapWidget(); } catch (e) { console.warn('garap:', e); }
+    try { startCryptoTicker(); } catch (e) { console.warn('ticker:', e); }
+
+    const sess = await checkSession();
+    if (sess) enterAdmin(sess.role);
+    else showLogin();
 };
