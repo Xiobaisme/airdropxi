@@ -139,6 +139,22 @@ module.exports = async (req, res) => {
     const chat_id = msg.chat.id;
 
     if (ADMIN_IDS().includes(String(msg.from.id))) {
+
+            // Admin kirim gambar -> beri tombol buka Editor dengan gambar itu
+      const photo = msg.photo && msg.photo[msg.photo.length - 1];
+      const doc = msg.document && /^image\//.test(msg.document.mime_type || '') ? msg.document : null;
+      const fid = photo ? photo.file_id : doc ? doc.file_id : null;
+      if (fid) {
+        const imgUrl = `${MINIAPP_URL}?v=${Date.now()}&img=${encodeURIComponent(fid)}`;
+        await call('sendMessage', {
+          chat_id,
+          text: 'Gambar diterima. Tekan tombol untuk edit logo & kirim.',
+          reply_to_message_id: msg.message_id,
+          reply_markup: { inline_keyboard: [[{ text: '🖼️ Edit gambar ini', web_app: { url: imgUrl } }]] },
+        });
+        return res.status(200).json({ ok: true });
+      }
+      
       // ?v=... supaya Telegram tidak memakai halaman miniapp lama dari cache
       const url = `${MINIAPP_URL}?v=${Date.now()}`;
 

@@ -248,6 +248,22 @@ $('pick').onclick = () => $('file').click();
 $('file').onchange = e => { setImage(e.target.files[0]); e.target.value = ''; };
 $('b-rm').onclick = removeImage;
 
+// Gambar dari chat bot (?img=file_id)
+(async () => {
+  const fid = new URLSearchParams(location.search).get('img');
+  if (!fid) return;
+  toast('Mengambil gambar dari chat...');
+  try {
+    const r = await fetch('/api/tg-image', { method: 'POST',
+      headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData },
+      body: JSON.stringify({ file_id: fid }) });
+    const d = await r.json().catch(() => ({}));
+    if (!r.ok) throw new Error(d.error || 'HTTP ' + r.status);
+    imgOrig = d.data_url; showImage(imgOrig);
+    toast('Gambar dari chat dimuat');
+  } catch (e) { toast('Gagal ambil gambar: ' + e.message, 'error'); }
+})();
+
 // [paste-fix v3] Telegram Desktop memblokir Clipboard API, jadi pakai event paste saja.
 const pbox = $('btnPaste'), PASTE_HTML = pbox.innerHTML;
 const dbg = document.createElement('div');
