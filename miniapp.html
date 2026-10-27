@@ -326,6 +326,19 @@ document.addEventListener('dragover', e => { e.preventDefault(); $('pickbox').cl
 document.addEventListener('dragleave', () => $('pickbox').classList.remove('over'));
 document.addEventListener('drop', e => { e.preventDefault(); $('pickbox').classList.remove('over'); setImage(e.dataTransfer.files[0]); });
 
+// DEBUG sementara: tampilkan event apa yang benar-benar diterima
+const dbg2 = document.createElement('div');
+dbg2.className = 'hint';
+dbg2.style.color = '#fbbf24';
+dbg.after(dbg2);
+['paste', 'beforeinput', 'input', 'drop', 'keydown'].forEach(ev =>
+  document.addEventListener(ev, e => {
+    if (ev === 'keydown' && !(e.ctrlKey && e.key.toLowerCase() === 'v')) return;
+    const dt = e.clipboardData || e.dataTransfer;
+    dbg2.textContent = `[${ev}] ${e.inputType || ''} types=${[...(dt && dt.types || [])].join(',') || '-'} files=${(dt && dt.files && dt.files.length) || 0} items=${[...(dt && dt.items || [])].map(i => i.kind + ':' + i.type).join(',') || '-'}`;
+  }, true)
+);
+
 // ── Editor logo (port dari web) ──
 const ie = { layers: [], sel: null, drag: null };
 (function () {
