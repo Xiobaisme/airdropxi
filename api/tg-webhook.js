@@ -51,7 +51,7 @@ const SAVAGE = [
 ];
 
 // Prompt poster siap salin. Ganti hanya bagian "JUDUL BERITA DI SINI".
-const POSTER_PROMPT = `Buat poster berita crypto profesional bergaya fotojurnalistik editorial: dramatis, realistis, premium, high-contrast. Rasio 4:5 vertikal.
+const POSTER_TEMPLATE = `Buat poster berita crypto profesional bergaya fotojurnalistik editorial: dramatis, realistis, premium, high-contrast. Rasio 4:5 vertikal.
 
 JUDUL BERITA:
 "JUDUL BERITA DI SINI"
@@ -83,6 +83,9 @@ Logo, nama brand dalam bentuk teks apa pun, watermark, teks selain headline, gar
 HASIL AKHIR
 Terasa seperti cover berita media crypto profesional untuk X/Twitter, bukan poster iklan. Prioritas: hierarki visual, keterbacaan headline, hero image yang kuat, transisi gradient halus. Dramatis, premium, editorial, modern, minimalis, dominan hitam dengan aksen biru.`;
 
+const PROMPT_ASK = '✍️ Ketik judul beritanya (balas pesan ini).';
+const buildPoster = t => POSTER_TEMPLATE.split('JUDUL BERITA DI SINI').join(t.replace(/"/g, "'"));
+
 module.exports = async (req, res) => {
   if (req.headers['x-telegram-bot-api-secret-token'] !== process.env.WEBHOOK_SECRET)
     return res.status(401).end();
@@ -93,25 +96,21 @@ module.exports = async (req, res) => {
   // Harus dijawab supaya tombolnya tidak loading terus. Tombol menu lama (sudah dihapus) diberi tahu.
   const q = body.callback_query;
   if (q) {
-      if (q.data === 'prompt') {
-    if (ADMIN_IDS().includes(String(q.from.id))) {
-      await call('answerCallbackQuery', {
-        callback_query_id: q.id,
-        text: 'Prompt dikirim. Tap untuk salin, lalu ganti bagian JUDUL.',
-      }).catch(() => {});
-      await call('sendMessage', {
-        chat_id: q.message.chat.id,
-        text: `<pre>${esc(POSTER_PROMPT)}</pre>`,
-        parse_mode: 'HTML',
-      });
-    } else {
-      await call('answerCallbackQuery', {
-        callback_query_id: q.id, text: 'Khusus admin.', show_alert: true,
-      }).catch(() => {});
-    }
-    return res.status(200).json({ ok: true });
-  }
-
+           if (q.data === 'prompt') {
+        if (ADMIN_IDS().includes(String(q.from.id))) {
+          await call('answerCallbackQuery', { callback_query_id: q.id }).catch(() => {});
+          await call('sendMessage', {
+            chat_id: q.message.chat.id,
+            text: PROMPT_ASK,
+            reply_markup: { force_reply: true, input_field_placeholder: 'contoh: BTC tembus $80.000' },
+          });
+        } else {
+          await call('answerCallbackQuery', {
+            callback_query_id: q.id, text: 'Khusus admin.', show_alert: true,
+          }).catch(() => {});
+        }
+        return res.status(200).json({ ok: true });
+      }
       if (q.data && q.data.startsWith('v:')) {
       const uid = String(q.from.id), ok = q.data === 'v:1';
       if (ok && stage.get(uid) !== 'denied') stage.set(uid, 'passed');
@@ -140,6 +139,23 @@ module.exports = async (req, res) => {
 
     if (ADMIN_IDS().includes(String(msg.from.id))) {
 
+
+            // Balasan judul untuk Prompt Poster
+      const rt = msg.reply_to_message;
+      if (rt && rt.from && rt.from.is_bot && rt.text === PROMPT_ASK) {
+        const title = (msg.text || '').trim().slice(0, 200);
+        if (!title) {
+          await call('sendMessage', { chat_id, text: 'Judulnya harus berupa teks. Tekan Prompt Poster lagi.' });
+        } else {
+          await call('sendMessage', {
+            chat_id,
+            text: `<pre>${esc(buildPoster(title))}</pre>`,
+            parse_mode: 'HTML',
+          });
+        }
+        return res.status(200).json({ ok: true });
+      }
+
             // Admin kirim gambar -> beri tombol buka Editor dengan gambar itu
       const photo = msg.photo && msg.photo[msg.photo.length - 1];
       const doc = msg.document && /^image\//.test(msg.document.mime_type || '') ? msg.document : null;
@@ -154,7 +170,7 @@ module.exports = async (req, res) => {
         });
         return res.status(200).json({ ok: true });
       }
-      
+
       // ?v=... supaya Telegram tidak memakai halaman miniapp lama dari cache
       const url = `${MINIAPP_URL}?v=${Date.now()}`;
 
