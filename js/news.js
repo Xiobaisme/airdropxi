@@ -36,7 +36,7 @@ const NEWS_ABBR = {
     antara: 'AN', cnbcid: 'CN', detik: 'DE', kontan: 'KD', coindesk: 'CD', decrypt: 'DC', theblock: 'TH',
 };
 const NEWS_POLL_SEC = 30;
-const PANEL_PAGE = 20;      // berita per panel, tombol "Muat lagi" nambah 20
+const PANEL_PAGE = 15;      // kartu per panel (ringan); tombol "Tampilkan lebih banyak" nambah segini
 let newsItems = [], _newsCountdown = NEWS_POLL_SEC, _newsCountdownInt = null, _newsClockInt = null, _newsSig = '';
 let _newsInFlight = false, _newsFails = 0, _newsQuery = '';
 const _newsUnread = {}, _newsPanelSig = {}, _newsShown = {}, _newsHidden = new Set();
@@ -45,8 +45,9 @@ try { JSON.parse(localStorage.getItem('newsHidden') || '[]').forEach(k => _newsH
 const $n = (id) => document.getElementById(id);
 let rssItems = [];
 const allNews = () => { const s = new Set(); return [...newsItems, ...rssItems].filter(n => !s.has(n.id) && s.add(n.id)); };
-const newsKeys = () => {
-    const extra = [...new Set(allNews().map(n => n.source))].filter(k => !NEWS_SOURCES[k]);
+let _newsBy = {};
+const newsKeys = (all = allNews()) => {
+    const extra = [...new Set(all.map(n => n.source))].filter(k => !NEWS_SOURCES[k]);
     return [...Object.keys(NEWS_SOURCES), ...extra];
 };
 const newsSrc = (k) => NEWS_SOURCES[k] || { label: k, color: 'var(--primary)' };
@@ -212,23 +213,23 @@ function buildNewsPanel(k) {
 }
 
 function updateNewsPanel(p, k, items) {
-    // update INKREMENTAL: kartu yang sudah ada tidak dibuat ulang (terjemahan & posisi scroll aman)
+    // INKREMENTAL + dibatasi: hanya N kartu teratas yang ada di DOM (ringan), kartu lama tidak dibuat ulang
     p.querySelector('.n').textContent = items.length;
     p.classList.toggle('is-empty', !items.length);
     if (p.hidden) return;
-    const list = p.querySelector('.nt-col-list');
-    const sig = _newsQuery + '|' + items.map(n => n.id + n.status).join();
+    const shown = _newsShown[k] || PANEL_PAGE;
+    const slice = items.slice(0, shown);
+    const sig = _newsQuery + '|' + shown + '|' + slice.map(n => n.id + n.status).join();
     if (_newsPanelSig[k] === sig) return;
     _newsPanelSig[k] = sig;
-
-    const t0 = list.scrollTop, h0 = list.scrollHeight;
-    const want = new Set(items.map(n => String(n.id)));
+    const list = p.querySelector('.nt-col-list');
+    const want = new Set(slice.map(n => String(n.id)));
     const have = new Map([...list.querySelectorAll(':scope > .nt-card')].map(c => [c.dataset.id, c]));
     have.forEach((c, id) => { if (!want.has(id)) { c.remove(); have.delete(id); } });
     list.querySelector('.nt-empty')?.remove();
     const fresh = [];
     let prev = null;
-    items.forEach(n => {
+    slice.forEach(n => {
         const id = String(n.id);
         let c = have.get(id);
         if (!c) {
@@ -242,14 +243,17 @@ function updateNewsPanel(p, k, items) {
         if (c !== expected) list.insertBefore(c, expected);
         prev = c;
     });
-    if (!items.length) list.innerHTML = `<div class="nt-empty">${_newsQuery ? 'Tidak ada yang cocok' : 'Belum ada berita'}</div>`;
+    if (!slice.length) list.innerHTML = `<div class="nt-empty">${_newsQuery ? 'Tidak ada yang cocok' : 'Belum ada berita'}</div>`;
     fresh.forEach(c => {
         const t = c.querySelector('.nt-text');
         if (c.classList.contains('open') || t.scrollHeight > t.clientHeight + 4) c.classList.add('has-more');
     });
-    // browser tanpa scroll-anchoring (Safari): kompensasi manual supaya tidak loncat
-    if (t0 > 8 && list.scrollTop === t0) list.scrollTop = t0 + (list.scrollHeight - h0);
-    if (list.scrollTop < 30) _newsUnread[k] = 0;
+    let more = p.querySelector(':scope > .nt-col-more');
+    const rest = items.length - slice.length;
+    if (rest > 0) {
+        if (!more) { more = document.createElement('button'); more.className = 'nt-col-more'; more.type = 'button'; more.dataset.load = k; p.appendChild(more); }
+        more.textContent = `Tampilkan lebih banyak (${rest}) ▼`;
+    } else more?.remove();
 }
 
 function renderNewsSrcBar(by) {
@@ -260,24 +264,49 @@ function renderNewsSrcBar(by) {
     }).join('');
 }
 
+const ntColCount = (feed) => Math.max(1, Math.min(6, Math.floor((feed.clientWidth + 18) / 358)));
+
+// true kalau ada badge yang dibersihkan (panel sudah kelihatan di layar)
+function clearSeenUnread() {
+    let dirty = false;
+    for (const k in _newsUnread) {
+        if (!_newsUnread[k]) continue;
+        const p = document.querySelector(`#news-feed .nt-col[data-col="${CSS.escape(k)}"]`);
+        if (!p || p.hidden) continue;
+        const r = p.getBoundingClientRect();
+        if (r.top < innerHeight - 40 && r.bottom > 120) { _newsUnread[k] = 0; dirty = true; }
+    }
+    return dirty;
+}
+
+// Kolom TETAP: panel ke-i selalu masuk kolom (i % jumlahKolom), jadi tidak pernah pindah kolom sendiri.
 function renderNewsFeed() {
     const feed = $n('news-feed'); if (!feed) return;
-    if (!feed.querySelector('.nt-col')) feed.innerHTML = '';
+    const all = allNews(), keys = newsKeys(all), n = ntColCount(feed);
+    let lanes = [...feed.children].filter(c => c.classList.contains('nt-lane'));
+    const saved = new Map([...feed.querySelectorAll('.nt-col')].map(p => [p.dataset.col, p]));
+    if (lanes.length !== n) {
+        feed.textContent = ''; lanes = [];
+        for (let i = 0; i < n; i++) { const l = document.createElement('div'); l.className = 'nt-lane'; feed.appendChild(l); lanes.push(l); }
+    }
     const by = {};
-    newsKeys().forEach(k => by[k] = []);
-    allNews().forEach(n => {
-        if (_newsQuery && !String(n.title || '').toLowerCase().includes(_newsQuery)) return;
-        (by[n.source] ||= []).push(n);
+    keys.forEach(k => by[k] = []);
+    all.forEach(it => {
+        if (_newsQuery && !String(it.title || '').toLowerCase().includes(_newsQuery)) return;
+        (by[it.source] ||= []).push(it);
     });
-    Object.values(by).forEach(a => a.sort((x, y) => new Date(y.published_at) - new Date(x.published_at)));
-    newsKeys().forEach(k => {
-        let p = feed.querySelector(`.nt-col[data-col="${CSS.escape(k)}"]`);
-        if (!p) { p = buildNewsPanel(k); feed.appendChild(p); }
+    Object.values(by).forEach(a => a.sort((x, y) => (y._t ||= Date.parse(y.published_at)) - (x._t ||= Date.parse(x.published_at))));
+    keys.forEach((k, i) => {
+        let p = saved.get(k) || buildNewsPanel(k);
+        const lane = lanes[i % n];
+        if (p.parentNode !== lane) lane.appendChild(p);
         p.hidden = _newsHidden.has(k);
         updateNewsPanel(p, k, by[k]);
     });
+    _newsBy = by;
+    clearSeenUnread();
     renderNewsSrcBar(by);
-    const c = $n('news-count'); if (c) c.textContent = allNews().length;
+    const c = $n('news-count'); if (c) c.textContent = all.length;
 }
 
 // ─── event: satu delegasi di feed + bar sumber ───
@@ -293,6 +322,8 @@ _newsFeedEl?.addEventListener('click', e => {
     }
     const send = e.target.closest('[data-send]');
     if (send && !send.disabled) return openNewsSend(send.dataset.send);
+    const load = e.target.closest('[data-load]');
+    if (load) { const k = load.dataset.load; _newsShown[k] = (_newsShown[k] || PANEL_PAGE) + PANEL_PAGE; return renderNewsFeed(); }
     const hide = e.target.closest('[data-hide]');
     if (hide) {
         _newsHidden.add(hide.dataset.hide);
@@ -300,12 +331,17 @@ _newsFeedEl?.addEventListener('click', e => {
         renderNewsFeed();
     }
 });
-// scroll tidak bubble → pakai capture. Balik ke atas panel = berita baru dianggap sudah dibaca
-_newsFeedEl?.addEventListener('scroll', e => {
-    const list = e.target; if (!list.classList?.contains('nt-col-list')) return;
-    const k = list.closest('.nt-col')?.dataset.col;
-    if (k && list.scrollTop < 30 && _newsUnread[k]) { _newsUnread[k] = 0; renderNewsFeed(); }
-}, true);
+// badge berita baru hilang kalau panelnya sudah kelihatan di layar (scroll satu halaman)
+let _ntScrollRaf = 0;
+$n('news-drawer')?.addEventListener('scroll', () => {
+    if (_ntScrollRaf) return;
+    _ntScrollRaf = requestAnimationFrame(() => { _ntScrollRaf = 0; if (clearSeenUnread()) renderNewsSrcBar(_newsBy); });
+}, { passive: true });
+let _ntResizeT;
+window.addEventListener('resize', () => {
+    clearTimeout(_ntResizeT);
+    _ntResizeT = setTimeout(() => { if ($n('news-drawer')?.classList.contains('open')) renderNewsFeed(); }, 150);
+});
 document.addEventListener('click', e => {
     const b = e.target.closest('#news-src-bar [data-jump]'); if (!b) return;
     const k = b.dataset.jump;
@@ -392,9 +428,8 @@ async function loadRss() {
 }
 setInterval(() => { if ($n('news-drawer')?.classList.contains('open') && !document.hidden) loadRss(); }, 5 * 60e3);
 
-// ═══ TERJEMAHAN otomatis ke Bahasa Indonesia + batas kartu per panel ═══
+// ═══ TERJEMAHAN otomatis ke Bahasa Indonesia ═══
 (function () {
-    const NT_CAP = 20;
     const store = { get(k) { try { return localStorage.getItem(k); } catch { return null; } },
                     set(k, v) { try { localStorage.setItem(k, v); } catch {} } };
     const cache = new Map();
@@ -477,27 +512,6 @@ setInterval(() => { if ($n('news-drawer')?.classList.contains('open') && !docume
         });
     }
 
-    const openCols = new Set();
-    function capCols() {
-        document.querySelectorAll('#news-feed .nt-col').forEach(col => {
-            const list = col.querySelector('.nt-col-list'); if (!list) return;
-            const cards = [...list.children].filter(c => c.classList.contains('nt-card'));
-            const key = col.dataset.col;
-            let btn = col.querySelector('.nt-col-more');
-            if (cards.length <= NT_CAP) { if (btn) btn.remove(); return; }
-            const open = openCols.has(key);
-            cards.forEach((c, i) => { const h = !open && i >= NT_CAP; if (c.hidden !== h) c.hidden = h; });
-            if (!btn) {
-                btn = document.createElement('button');
-                btn.className = 'nt-col-more'; btn.type = 'button';
-                btn.onclick = () => { openCols.has(key) ? openCols.delete(key) : openCols.add(key); capCols(); };
-                col.appendChild(btn);
-            }
-            const txt = open ? 'Tampilkan lebih sedikit ▲' : `Tampilkan semua (${cards.length}) ▼`;
-            if (btn.textContent !== txt) btn.textContent = txt;
-        });
-    }
-
     const btn = document.createElement('button');
     btn.type = 'button'; btn.className = 'nlf-btn nt-tr-btn' + (on ? ' active' : ' off');
     const label = () => { btn.textContent = on ? '🌐 Terjemah: ID' : '🌐 Terjemah: Asli'; };
@@ -509,12 +523,12 @@ setInterval(() => { if ($n('news-drawer')?.classList.contains('open') && !docume
     };
     document.querySelector('.news-head-top')?.prepend(btn);
 
-    const mo = new MutationObserver(() => { scan(); capCols(); });
+    let moT; const mo = new MutationObserver(() => { clearTimeout(moT); moT = setTimeout(scan, 50); });
     ['news-feed', 'new-list'].forEach(id => {
         const el = document.getElementById(id);
         if (el) mo.observe(el, { childList: true, subtree: true });
     });
-    scan(); capCols();
+    scan();
 })();
 
 
