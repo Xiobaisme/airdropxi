@@ -16,7 +16,7 @@ const getRatelimit = () => (_ratelimit ||= new (require('@upstash/ratelimit').Ra
 const redis = new Proxy({}, { get: (_, k) => (...a) => getRedis()[k](...a) });
 const ratelimit = { limit: (k) => getRatelimit().limit(k) };
 const onchain = new Proxy({}, { get: (_, k) => (...a) => require('../lib/onchain')[k](...a) });
-const getAirdrops = () => require('../data/airdrops.json');
+const { loadAirdrops } = require('../lib/airdropStore');
 
 async function fetchUsdtDom() {
   const getJson = async (u) => {
@@ -856,16 +856,17 @@ if (roleOf(session) === 'member' && !MEMBER_TYPES.includes(type)) {
 }
 
        // ─── AIRDROPS: baca dari file JSON (tanpa Supabase) ───
-  if (req.method === 'GET') {
+   if (req.method === 'GET') {
     res.setHeader('Cache-Control', 'no-store');
+    const all = await loadAirdrops(redis);
 
     if (!id) {
-      const list = [...getAirdrops()].sort((a, b) =>
+      const list = [...all].sort((a, b) =>
         String(b.created_at).localeCompare(String(a.created_at)));
       return res.status(200).json(list);
     }
 
-    const row = getAirdrops().find(a => String(a.id) === String(id));
+    const row = all.find(a => String(a.id) === String(id));
     if (!row) return res.status(404).json({ error: 'Project tidak ditemukan' });
     return res.status(200).json({ ...row, view_count: row.view_count || 0 });
   }

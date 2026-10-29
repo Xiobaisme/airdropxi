@@ -67,6 +67,14 @@ input[type=range]{width:100%;accent-color:var(--ac)}
 .g3{display:grid;grid-template-columns:repeat(3,1fr);gap:8px}
 #ie-readout{color:var(--mut);font-size:12px;margin-top:10px;line-height:1.7}
 #ie-readout b{color:var(--bl);font-weight:500}
+
+#ad{position:fixed;inset:0;z-index:6;background:var(--bg);overflow:auto;padding:14px 14px 30px;display:none}
+.ad-item{display:flex;justify-content:space-between;align-items:center;gap:8px;padding:11px 12px;margin-top:8px;background:var(--card);border:1px solid var(--line);border-radius:12px}
+.ad-item small{color:var(--mut)}
+.ad-item button{flex:0 0 auto;padding:6px 12px}
+#ad input[type=text],#ad textarea{margin-bottom:2px}
+#ad textarea{min-height:70px}
+
 </style>
 </head>
 <body>
@@ -101,6 +109,7 @@ input[type=range]{width:100%;accent-color:var(--ac)}
   <input id="file" type="file" accept="image/*" hidden>
 
   <button id="promo" type="button">Kirim promo OURBIT</button>
+  <button id="btnAd" type="button" style="width:100%;margin-top:10px;padding:12px">Kelola Airdrop</button>
 </main>
 <div id="bar"><button id="send">Kirim</button></div>
 
@@ -130,6 +139,32 @@ input[type=range]{width:100%;accent-color:var(--ac)}
   </div>
   <div id="ie-readout"></div>
   <button id="ie-apply" type="button" style="width:100%;margin-top:16px;background:linear-gradient(135deg,var(--bl),var(--ac));border:0;padding:13px;font-weight:600">Terapkan ke gambar</button>
+</section>
+
+<section id="ad">
+  <div class="row" style="margin:0;justify-content:space-between">
+    <b>Airdrops</b><button id="ad-close" type="button" style="flex:0 0 auto">Tutup</button>
+  </div>
+  <button id="ad-new" type="button" style="width:100%;margin-top:12px">+ Tambah baru</button>
+  <div id="ad-list"></div>
+
+  <div id="ad-form" hidden>
+    <div class="lb">Nama</div><input id="f-name" type="text">
+    <div class="lb">Status</div><input id="f-status" type="text">
+    <div class="lb">Confirmation status</div><input id="f-confirmation_status" type="text">
+    <div class="lb">Tags (pisah koma)</div><input id="f-tags" type="text">
+    <div class="lb">Link</div><input id="f-link" type="text">
+    <div class="lb">Website</div><input id="f-website_url" type="text">
+    <div class="lb">Raised (ID)</div><input id="f-RaisedID" type="text">
+    <div class="lb">Raised (EN)</div><input id="f-RaisedEN" type="text">
+    <div class="lb">Tasks (ID)</div><textarea id="f-tasksID"></textarea>
+    <div class="lb">Tasks (EN)</div><textarea id="f-tasksEN"></textarea>
+    <label class="chk" style="margin-top:12px"><input type="checkbox" id="f-published"> Published</label>
+    <div class="row">
+      <button id="ad-save" type="button" style="background:linear-gradient(135deg,var(--bl),var(--ac));border:0;font-weight:600">Simpan</button>
+            <button id="ad-del" type="button" style="border-color:var(--dg);color:var(--dg)">Hapus</button>
+    </div>
+  </div>
 </section>
 
 <script>
@@ -511,6 +546,59 @@ $('promo').onclick = () => tg.showConfirm('Kirim promo OURBIT × CMIC ke Discord
   } catch (e) { toast('Gagal kirim: ' + e.message, 'error'); }
   b.disabled = false; b.textContent = 'Kirim promo OURBIT';
 });
+
+// ── Kelola Airdrop ──
+const AD_FIELDS = ['name','status','confirmation_status','tags','link','website_url','RaisedID','RaisedEN','tasksID','tasksEN'];
+let adList = [], adId = null;
+const adApi = async (method, body, q = '') => {
+  const r = await fetch('/api/miniapp-airdrops' + q, { method,
+    headers: { 'Content-Type': 'application/json', 'X-Telegram-Init-Data': tg.initData },
+    body: body ? JSON.stringify(body) : undefined });
+  const d = await r.json().catch(() => ({}));
+  if (!r.ok) throw new Error(d.error || 'HTTP ' + r.status);
+  return d;
+};
+const adStr = v => Array.isArray(v) ? v.join(', ') : (v ?? '');
+const adEsc = s => String(s ?? '').replace(/[&<>"]/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+
+function adRender() {
+  $('ad-list').innerHTML = adList.map(a =>
+    `<div class="ad-item"><div><b>${adEsc(a.name)}</b><br><small>${adEsc(a.status || '-')} · ${a.published ? 'published' : 'draft'}</small></div>
+     <button type="button" data-id="${adEsc(a.id)}">Edit</button></div>`).join('') || '<div class="hint">Belum ada data</div>';
+  $('ad-list').querySelectorAll('button').forEach(b => b.onclick = () => adEdit(b.dataset.id));
+}
+function adEdit(id) {
+  const a = id == null ? {} : adList.find(x => String(x.id) === String(id)) || {};
+  adId = id == null ? null : a.id;
+  AD_FIELDS.forEach(f => $('f-' + f).value = adStr(a[f]));
+  $('f-published').checked = !!a.published;
+  $('ad-del').style.display = adId == null ? 'none' : '';
+  $('ad-form').hidden = false;
+  $('ad-form').scrollIntoView({ behavior: 'smooth' });
+}
+async function adLoad() {
+  try { adList = await adApi('GET'); adRender(); }
+  catch (e) { toast('Gagal muat: ' + e.message, 'error'); }
+}
+$('btnAd').onclick = () => { $('ad').style.display = 'block'; $('bar').style.display = 'none'; $('ad-form').hidden = true; adLoad(); };
+$('ad-close').onclick = () => { $('ad').style.display = 'none'; $('bar').style.display = 'block'; };
+$('ad-new').onclick = () => adEdit(null);
+$('ad-save').onclick = async () => {
+  const body = { id: adId, published: $('f-published').checked };
+  AD_FIELDS.forEach(f => body[f] = $('f-' + f).value.trim());
+  if (!body.name) { toast('Nama wajib diisi!', 'error'); return; }
+  const b = $('ad-save'); b.disabled = true;
+  try { await adApi('POST', body); toast('Tersimpan'); $('ad-form').hidden = true; await adLoad(); }
+  catch (e) { toast('Gagal simpan: ' + e.message, 'error'); }
+  b.disabled = false;
+};
+$('ad-del').onclick = () => tg.showConfirm('Hapus airdrop ini?', async ok => {
+  if (!ok || adId == null) return;
+  try { await adApi('DELETE', null, '?id=' + encodeURIComponent(adId)); toast('Terhapus'); $('ad-form').hidden = true; await adLoad(); }
+  catch (e) { toast('Gagal hapus: ' + e.message, 'error'); }
+});
+
+
 </script>
 </body>
 </html>
