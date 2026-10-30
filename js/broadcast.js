@@ -138,7 +138,7 @@ document.getElementById('b-image-paste').addEventListener('paste', (e) => {
 });
 
    // ─── EDITOR GAMBAR: tambah SVG, geser, atur ukuran, lalu digabung ke gambar ───
-const IE_LOGO_URL = '/ourbit-cmic.svg';
+const IE_LOGO_URL = '/weex-cmic.svg';
 const IE_SNAP = 0.015;                      // jarak tarik snap (1.5% dari gambar)
 const IE_TARGETS = [0, 1/3, 0.5, 2/3, 1];   // tepi, sepertiga, tengah
 const ie = { layers: [], sel: null, drag: null };
