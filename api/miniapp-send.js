@@ -5,7 +5,7 @@ module.exports = async (req, res) => {
   if (req.method !== 'POST') return res.status(405).end();
   if (!authAdmin(req.headers['x-telegram-init-data'])) return res.status(403).json({ error: 'Akses ditolak' });
 
-  const { title, description, image_base64, mention_everyone, discord_target } = req.body || {};
+  const { title, description, image_base64, mention_everyone } = req.body || {};
   if (!title) return res.status(400).json({ error: 'title wajib diisi' });
   const everyone = Boolean(mention_everyone);
 
@@ -18,15 +18,14 @@ module.exports = async (req, res) => {
 
   // ─── DISCORD ───
   async function sendDiscord() {
-    const useOurbit = discord_target === 'ourbit';
-    const webhookUrl = (useOurbit && process.env.DISCORD_WEBHOOK_URL_OURBIT) || process.env.DISCORD_WEBHOOK_URL;
+    const webhookUrl = process.env.DISCORD_WEBHOOK_URL;
     if (!webhookUrl) throw new Error('DISCORD_WEBHOOK_URL belum di-set');
 
     const LOGO_URL = 'https://airdropxi.vercel.app/logo1.png';
     const LINKS = {
       tiktok:   'https://tiktok.com/@hellovry',
       telegram: 'https://t.me/CryptoMonk3y',
-      ourbit:   'https://www.ourbit.com/register?inviteCode=ourbitCMIC',
+      weex:     'https://www.weex.com/en/register?vipCode=98ci',
     };
     const embed = {
       author: { name: '🗣 CMIC BROADCAST', icon_url: LOGO_URL },
@@ -36,8 +35,10 @@ module.exports = async (req, res) => {
         '\n\u200b\n\u200b\n' +
         `**COMMUNITY**\n` +
         `[TikTok](${LINKS.tiktok}) • [Telegram](${LINKS.telegram})\n\u200b\n` +
-        `**TRADING PLATFORMS**\n` +
-        `[Ourbit](${LINKS.ourbit})`,
+        `**Global Exchange:**\n` +
+        `[WEEX](${LINKS.weex})\n` +
+        `Kenapa WEEX? Spot 1.200+ pair dengan 120+ listing baru per bulan. ` +
+        `Futures leverage hingga 400× di 1.000+ pair.`,
       color: 0x3B82F6,
       footer: { text: 'Xiobaii • Crypto Monkey Inner Circle', icon_url: LOGO_URL },
       timestamp: new Date().toISOString(),
@@ -76,14 +77,22 @@ module.exports = async (req, res) => {
       .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
       .replace(/`([^`]+)`/g, '<code>$1</code>');
 
+    const WEEX_URL = 'https://www.weex.com/en/register?vipCode=98ci';
+    const exchangeBlock =
+      `<b>Global Exchange:</b>\n` +
+      `<a href="${WEEX_URL}">WEEX</a>\n` +
+      `Kenapa WEEX? Spot 1.200+ pair dengan 120+ listing baru per bulan. ` +
+      `Futures leverage hingga 400× di 1.000+ pair.`;
+
     const buildText = () =>
       ` <b>${escHtml(title)}</b>\n\n` +
       `${escHtml(description || '')}\n\n` +
+      `${exchangeBlock}\n\n` +
       `<i>Xiobaii • Crypto Monkey Inner Circle</i>`;
 
     const buildCaption = () => {
       const header = ` <b>${escHtml(title)}</b>\n\n`;
-      const footer = `\n\n<i>Xiobaii • Crypto Monkey Inner Circle</i>`;
+      const footer = `\n\n${exchangeBlock}\n\n<i>Xiobaii • Crypto Monkey Inner Circle</i>`;
       const maxDescLen = Math.max(1024 - header.length - footer.length - 3, 0);
       const descEsc = escHtml(description || '');
       const truncated = descEsc.length > maxDescLen;
@@ -98,8 +107,6 @@ module.exports = async (req, res) => {
           { text: 'TikTok', url: 'https://tiktok.com/@hellovry', style: 'primary' },
           { text: 'Discord', url: 'https://t.me/Xiobaii?text=Halo%20Bang%2C%20saya%20ingin%20bergabung%20ke%20komunitas%20Discord%20Crypto%20Monkey.%20Mohon%20info%20langkah%20pendaftarannya%20ya.%20Terima%20kasih%20%F0%9F%99%8F', style: 'primary' },
         ],
-        [{ text: 'TRADING PLATFORMS', callback_data: 'noop' }],
-        [{ text: 'Ourbit', url: 'https://www.ourbit.com/register?inviteCode=ourbitCMIC', style: 'primary' }],
       ],
     };
 
