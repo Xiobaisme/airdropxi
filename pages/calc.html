@@ -5,119 +5,257 @@
     <script src="/js/guard.js"></script>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Calculator · CMIC</title>
     <link rel="icon" type="image/svg+xml" href="/cmic-icon.svg" />
-    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600;700;800&display=swap" rel="stylesheet" />
     <link rel="stylesheet" href="/css/base.css">
     <link rel="stylesheet" href="/css/app.css">
     <link rel="stylesheet" href="/css/news.css">
     <link rel="stylesheet" href="/css/onchain.css">
     <link rel="stylesheet" href="/css/lab.css">
+    <link rel="stylesheet" href="/css/landing.css">
+    <link rel="stylesheet" href="/css/footer.css">
+    <link rel="stylesheet" href="/css/profile.css">
+    <!-- WAJIB paling bawah -->
+    <link rel="stylesheet" href="/css/calc.css">
 </head>
-<body>
+<body class="calc-page">
 
+<header class="lp-nav app-nav" id="app-nav">
+    <div class="lp-nav-inner">
+        <a class="lp-nav-logo" id="app-nav-logo" href="/"><img src="/cmic-footer.svg" alt="CMIC"></a>
+
+        <div class="lp-nav-links">
+            <a href="/">Market</a>
+            <a href="/" data-role="admin">Airdrop</a>
+            <a href="/news" id="news-toggle-btn"><span class="news-live-dot"></span>News Terminal</a>
+            <a href="/onchain" id="onchain-toggle-btn">Onchain</a>
+            <a href="/broadcast" id="broadcast-toggle-btn" data-role="admin">Broadcast</a>
+            <a href="/agent" id="agent-toggle-btn" data-role="admin">AI Agent</a>
+            <a href="/calc" id="calc-toggle-btn" class="active">Calc</a>
+        </div>
+
+        <div class="pf" id="pf">
+            <button class="pf-btn" id="pf-btn" type="button" aria-expanded="false">
+                <img class="pf-ava" id="pf-ava" alt="">
+                <span class="pf-name" id="pf-name">...</span>
+                <i>▾</i>
+            </button>
+            <div class="pf-pop hidden" id="pf-pop">
+                <div class="pf-head">
+                    <img class="pf-ava big" id="pf-ava2" alt="">
+                    <div><b id="pf-name2">-</b><small id="pf-sub">-</small></div>
+                </div>
+                <div class="pf-row"><span>Role</span><b id="pf-role">-</b></div>
+                <div class="pf-row"><span>Login via</span><b id="pf-via">-</b></div>
+                <div class="pf-row"><span>ID / Email</span><b id="pf-id">-</b></div>
+                <div class="pf-row"><span>Akun dibuat</span><b id="pf-created">-</b></div>
+                <div class="pf-row"><span>Join server</span><b id="pf-joined">-</b></div>
+                <button class="pf-logout" type="button" onclick="logout()">Logout</button>
+            </div>
+        </div>
+    </div>
+</header>
+
+<main class="calc-main">
 <div id="calc-panel" class="hidden">
-     <div class="pnl-head">
-  <span id="calc-title">PNL CALCULATOR</span>
-  <button class="pnl-x" id="calc-close-btn" onclick="toggleCalc()">✕</button>
-</div>
-  <div class="pnl-grid">
-    <label class="pnl-f">
-      <span>Coin <em id="pnl-live" class="pnl-liveTag"></em></span>
-      <input id="pnl-coin" list="pnl-coins" value="BTC" autocomplete="off" oninput="pnlCoinInput()">
-      <datalist id="pnl-coins"></datalist>
-    </label>
-
-    <label class="pnl-f">
-      <span>Posisi</span>
-      <select id="pnl-dir" onchange="pnlCalc()">
-        <option value="long">Long</option>
-        <option value="short">Short</option>
-      </select>
-    </label>
-
-    <label class="pnl-f">
-      <span>Buy price <button type="button" class="pnl-mini" onclick="pnlUseLive('pnl-buy')">Live</button></span>
-      <input id="pnl-buy" type="number" step="any" placeholder="0" oninput="pnlCalc()">
-    </label>
-
-    <label class="pnl-f">
-      <span>Sell price <button type="button" class="pnl-mini" onclick="pnlUseLive('pnl-sell')">Live</button></span>
-      <input id="pnl-sell" type="number" step="any" placeholder="0" oninput="pnlCalc()">
-    </label>
-
-    <label class="pnl-f">
-      <span>Investment ($)</span>
-      <input id="pnl-margin" type="number" step="any" placeholder="0" oninput="pnlCalc()">
-    </label>
-
-    <label class="pnl-f">
-      <span>Leverage (x)</span>
-      <input id="pnl-lev" type="number" step="any" min="1" value="10" oninput="pnlCalc()">
-    </label>
-
-    <label class="pnl-f">
-      <span>Tipe fee</span>
-      <select id="pnl-feemode" onchange="pnlFeeMode()">
-        <option value="taker">Market (Taker) 0.05%</option>
-        <option value="maker">Limit (Maker) 0.02%</option>
-        <option value="manual">Manual ($)</option>
-      </select>
-    </label>
-
-    <label class="pnl-f">
-      <span>Funding / lainnya ($)</span>
-      <input id="pnl-other" type="number" step="any" placeholder="0" oninput="pnlCalc()">
-    </label>
-
-    <label class="pnl-f">
-      <span>Investment Fee ($)</span>
-      <input id="pnl-feein" type="number" step="any" placeholder="0" disabled oninput="pnlCalc()">
-    </label>
-
-    <label class="pnl-f">
-      <span>Exit Fee ($)</span>
-      <input id="pnl-feeout" type="number" step="any" placeholder="0" disabled oninput="pnlCalc()">
-    </label>
-  </div>
-
-  <div class="pnl-result">
-    <div class="pnl-title">Investment Result</div>
-    <div class="pnl-lbl">Profit/Loss</div>
-    <div class="pnl-row">
-      <span id="pnl-res" class="pnl-big">$0.00</span>
-      <span id="pnl-roe" class="pnl-roe">0.00%</span>
+    <div class="pnl-head">
+        <span id="calc-title">PnL calculator</span>
     </div>
 
-    <div class="pnl-two">
-      <div><div class="pnl-lbl">Total Investment Amount</div><div id="pnl-totin" class="pnl-val">$0.00</div></div>
-      <div><div class="pnl-lbl">Total Exit Amount</div><div id="pnl-totout" class="pnl-val">$0.00</div></div>
-      <div><div class="pnl-lbl">Position Size</div><div id="pnl-size" class="pnl-val">$0.00</div></div>
-      <div><div class="pnl-lbl">Total Fee</div><div id="pnl-totfee" class="pnl-val">$0.00</div></div>
+    <div class="pnl-grid">
+        <label class="pnl-f">
+            <span>Coin <em id="pnl-live" class="pnl-liveTag"></em></span>
+            <input id="pnl-coin" list="pnl-coins" value="BTC" autocomplete="off" oninput="pnlCoinInput()">
+            <datalist id="pnl-coins"></datalist>
+        </label>
+
+        <label class="pnl-f">
+            <span>Posisi</span>
+            <select id="pnl-dir" onchange="pnlCalc()">
+                <option value="long">Long</option>
+                <option value="short">Short</option>
+            </select>
+        </label>
+
+        <label class="pnl-f">
+            <span>Harga beli <button type="button" class="pnl-mini" onclick="pnlUseLive('pnl-buy')">Live</button></span>
+            <input id="pnl-buy" type="number" step="any" inputmode="decimal" placeholder="0" oninput="pnlCalc()">
+        </label>
+
+        <label class="pnl-f">
+            <span>Harga jual <button type="button" class="pnl-mini" onclick="pnlUseLive('pnl-sell')">Live</button></span>
+            <input id="pnl-sell" type="number" step="any" inputmode="decimal" placeholder="0" oninput="pnlCalc()">
+        </label>
+
+        <label class="pnl-f">
+            <span>Modal ($)</span>
+            <input id="pnl-margin" type="number" step="any" inputmode="decimal" placeholder="0" oninput="pnlCalc()">
+        </label>
+
+        <label class="pnl-f">
+            <span>Leverage (x)</span>
+            <input id="pnl-lev" type="number" step="any" min="1" inputmode="decimal" value="10" oninput="pnlCalc()">
+        </label>
+
+        <label class="pnl-f">
+            <span>Tipe fee</span>
+            <select id="pnl-feemode" onchange="pnlFeeMode()">
+                <option value="taker">Market (Taker) 0.05%</option>
+                <option value="maker">Limit (Maker) 0.02%</option>
+                <option value="manual">Manual ($)</option>
+            </select>
+        </label>
+
+        <label class="pnl-f">
+            <span>Funding / lainnya ($)</span>
+            <input id="pnl-other" type="number" step="any" inputmode="decimal" placeholder="0" oninput="pnlCalc()">
+        </label>
+
+        <label class="pnl-f">
+            <span>Fee masuk ($)</span>
+            <input id="pnl-feein" type="number" step="any" placeholder="0" disabled oninput="pnlCalc()">
+        </label>
+
+        <label class="pnl-f">
+            <span>Fee keluar ($)</span>
+            <input id="pnl-feeout" type="number" step="any" placeholder="0" disabled oninput="pnlCalc()">
+        </label>
     </div>
 
-    <div class="pnl-liqrow">Est. Liq. Price: <b id="pnl-liq">-</b></div>
-    <div id="pnl-warn" class="pnl-warn">Harga sell menyentuh estimasi likuidasi. Margin dianggap habis.</div>
-  </div>
+    <div class="pnl-result">
+        <div class="pnl-title">Hasil</div>
+        <div class="pnl-lbl">Profit / loss</div>
+        <div class="pnl-row">
+            <span id="pnl-res" class="pnl-big">$0.00</span>
+            <span id="pnl-roe" class="pnl-roe">0.00%</span>
+        </div>
+
+        <div class="pnl-two">
+            <div><div class="pnl-lbl">Total modal</div><div id="pnl-totin" class="pnl-val">$0.00</div></div>
+            <div><div class="pnl-lbl">Total diterima</div><div id="pnl-totout" class="pnl-val">$0.00</div></div>
+            <div><div class="pnl-lbl">Ukuran posisi</div><div id="pnl-size" class="pnl-val">$0.00</div></div>
+            <div><div class="pnl-lbl">Total fee</div><div id="pnl-totfee" class="pnl-val">$0.00</div></div>
+        </div>
+
+        <div class="pnl-liqrow"><span>Estimasi harga likuidasi</span><b id="pnl-liq">-</b></div>
+        <div id="pnl-warn" class="pnl-warn">Harga jual menyentuh estimasi likuidasi. Margin dianggap habis.</div>
+    </div>
 </div>
 
+</main>
 
-        
+<footer id="cmic-footer">
+    <section class="cf-support">
+        <div>
+            <div class="cf-kicker">Pantau market tanpa jeda, dari satu dashboard</div>
+            <h2>CMIC<br>𝐈𝐧𝐧𝐞𝐫 𝐂𝐢𝐫𝐜𝐥𝐞</h2>
+            <div class="cf-seals">
+                <div class="cf-seal"><b>24/7</b><span>Live feed</span></div>
+                <div class="cf-seal"><b>7</b><span>Bursa CEX</span></div>
+                <div class="cf-seal"><b>25+</b><span>Sumber berita</span></div>
+                <div class="cf-seal"><b>6+</b><span>Chain onchain</span></div>
+            </div>
+        </div>
+        <div class="cf-cards">
+            <a class="cf-card c1" href="https://t.me/Xiobaii?text=Halo%20Bang%2C%20saya%20ingin%20bergabung%20ke%20komunitas%20Discord%20Crypto%20Monkey.%20Mohon%20info%20langkah%20pendaftarannya%20ya.%20Terima%20kasih%20%F0%9F%99%8F" target="_blank" rel="noopener">
+                <span class="t"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></span>Discord</span>
+                <span class="d">Ngobrol dengan member dan dapat alert langsung di server CMIC.</span>
+            </a>
+            <a class="cf-card c2" href="https://t.me/CryptoMonk3y" target="_blank" rel="noopener">
+                <span class="t"><span class="icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></span>Telegram</span>
+                <span class="d">Channel berita dan broadcast Crypto Monkey.</span>
+            </a>
+        </div>
+    </section>
 
-    <div class="toast" id="toast"></div>
+    <section class="cf-sources">
+        <p>Data pasar, unlock, dan listing</p>
+        <div class="cf-pills">
+            <span class="cf-pill">Binance</span><span class="cf-pill">Bybit</span><span class="cf-pill">OKX</span>
+            <span class="cf-pill">Bitget</span><span class="cf-pill">Gate</span><span class="cf-pill">Kraken</span>
+            <span class="cf-pill">Aster</span><span class="cf-pill">CoinGecko</span><span class="cf-pill">DefiLlama</span>
+            <span class="cf-pill">New Listings Feed</span>
+        </div>
+        <p>Sumber berita &amp; onchain (News Terminal)</p>
+        <div class="cf-pills">
+            <span class="cf-pill">Lookonchain</span><span class="cf-pill">Investigations</span><span class="cf-pill">OnchainLens</span>
+            <span class="cf-pill">Wu Blockchain</span><span class="cf-pill">Whale Alert</span><span class="cf-pill">Tree News</span>
+            <span class="cf-pill">Nansen</span><span class="cf-pill">Crypto Media</span><span class="cf-pill">SM News</span>
+            <span class="cf-pill">WatcherGuru</span><span class="cf-pill">REKT</span><span class="cf-pill">Cointelegraph</span>
+            <span class="cf-pill">BRICS News</span><span class="cf-pill">CryptoRank</span><span class="cf-pill">Upbit (TG)</span>
+            <span class="cf-pill">New Listing &amp; Delisting V2</span>
+        </div>
+    </section>
 
-    <script src="/js/core.js"></script>
-    <script src="/js/calc.js"></script>
-    <script>
-        window.addEventListener('DOMContentLoaded', function () {
-            toggleCalc();
-            ['toggleCalc'].forEach(function (n) {
-                window[n] = function () { location.href = '/'; };
-            });
+    <div class="cf-main">
+        <div class="cf-cols">
+            <div class="cf-brand">
+                <img src="/cmic-footer.svg" alt="CMIC" />
+                <p>Crypto Monkey Inner Circle Crypto Media Market Intelligence Market Analysis Daily News</p>
+            </div>
+            <div class="cf-col">
+                <h4>Market</h4>
+                <a href="/">Chart BTC vs BTC.D</a>
+                <a href="/">Long vs Short</a>
+                <a href="/">Jadwal Token Unlock</a>
+            </div>
+            <div class="cf-col">
+                <h4>Tools</h4>
+                <a href="/news">News Terminal</a>
+                <a href="/onchain">Onchain Tracer</a>
+                <a class="cf-hide-member" href="/broadcast">Broadcast</a>
+                <a href="/calc">Kalkulator</a>
+                <a href="/lab">Lab Materi</a>
+            </div>
+            <div class="cf-col">
+                <h4>Kemitraan</h4>
+                <a class="cf-partner" href="https://www.ourbit.com/register?inviteCode=ourbitCMIC" target="_blank" rel="noopener">
+                    <img src="/ourbit-logo.svg" alt="OURBIT" width="106" height="24" onerror="this.remove()" />
+                    <span>Daftar OURBIT ↗</span>
+                </a>
+                <a class="cf-partner" href="https://www.hibt.com/register?promotionCode=3I9I" target="_blank" rel="noopener">
+                    <img src="/HIBT.svg" alt="HIBT" width="106" height="24" onerror="this.remove()" />
+                    <span>Daftar HIBT ↗</span>
+                </a>
+                <div class="cf-follow">
+                    <h4>Ikuti Kami</h4>
+                    <div class="cf-social">
+                        <a href="#" target="_blank" rel="noopener" aria-label="X"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="5" y1="5" x2="19" y2="19"/><line x1="19" y1="5" x2="5" y2="19"/></svg></a>
+                        <a href="https://t.me/CryptoMonk3y" target="_blank" rel="noopener" aria-label="Telegram"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><line x1="22" y1="2" x2="11" y2="13"/><polygon points="22 2 15 22 11 13 2 9 22 2"/></svg></a>
+                        <a href="https://t.me/Xiobaii?text=Halo%20Bang%2C%20saya%20ingin%20bergabung%20ke%20komunitas%20Discord%20Crypto%20Monkey.%20Mohon%20info%20langkah%20pendaftarannya%20ya.%20Terima%20kasih%20%F0%9F%99%8F" target="_blank" rel="noopener" aria-label="Discord"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.38 8.38 0 01-.9 3.8 8.5 8.5 0 01-7.6 4.7 8.38 8.38 0 01-3.8-.9L3 21l1.9-5.7a8.38 8.38 0 01-.9-3.8 8.5 8.5 0 014.7-7.6 8.38 8.38 0 013.8-.9h.5a8.48 8.48 0 018 8v.5z"/></svg></a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <div class="cf-bar">
+            <span>© <span id="cf-year"></span> <b>CMIC</b> · Private Control Center</span>
+            <span>Trade smart. Manage risk. DYOR.</span>
+        </div>
+    </div>
+</footer>
+
+<div id="crypto-ticker">
+    <div class="ticker-label"><span class="dot"></span>LIVE</div>
+    <div class="ticker-track" id="ticker-track">
+        <div class="empty-state" style="padding:0 1.6rem;">Loading market data...</div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="/js/core.js"></script>
+<script src="/js/calc.js"></script>
+<script src="/js/app-nav.js"></script>
+<script src="/js/profile.js"></script>
+<script>
+    window.addEventListener('DOMContentLoaded', function () {
+        toggleCalc();
+        var y = document.getElementById('cf-year'); if (y) y.textContent = new Date().getFullYear();
+        ['toggleCalc'].forEach(function (n) {
+            window[n] = function () { location.href = '/'; };
         });
-    </script>
+    });
+</script>
 </body>
 </html>

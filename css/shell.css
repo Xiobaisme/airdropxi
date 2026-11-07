@@ -1,0 +1,21 @@
+/* shell.css · dimuat otomatis oleh shell.js, paling akhir.
+   Halaman News, Onchain, Lab tadinya popup fullscreen (position: fixed menutupi layar).
+   Di sini dijadikan blok biasa setinggi sisa layar di bawah header, jadi footer ada di bawahnya. */
+
+body.shell-page { padding-bottom: 64px; }
+
+body.shell-page .oc-screen,
+body.shell-page .lab-screen {
+  position: relative !important; inset: auto !important; transform: none !important; z-index: auto !important;
+  width: 100% !important;
+  height: calc(100vh - var(--shell-top, 96px) - 24px) !important; min-height: 520px;
+}
+
+body.shell-page .news-overlay,
+body.shell-page .news-resizer { display: none !important; }
+
+body.shell-page .news-drawer {
+  position: relative !important; inset: auto !important; transform: none !important; z-index: auto !important;
+  width: min(1100px, 100%) !important; max-width: 100% !important; margin: 0 auto;
+  height: calc(100vh - var(--shell-top, 96px) - 24px) !important; min-height: 520px;
+}

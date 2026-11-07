@@ -1,0 +1,69 @@
+/* calc.css · khusus halaman /calc
+   Taruh di css/calc.css dan load PALING BAWAH (setelah lab.css) supaya menimpa style popup lama.
+   Semua selector diawali "body.calc-page #calc-panel" biar menang dari rule lama (#calc-panel .pnl-xxx). */
+
+body.calc-page { margin: 0; padding-bottom: 64px; }
+.calc-main { width: 100%; max-width: 560px; margin: 0 auto; padding: 96px 16px 56px; }
+
+body.calc-page #calc-panel {
+  --bg: #0d0d12; --field: #15151c; --line: rgba(255,255,255,.09); --tx: #f3f3f6; --mut: #8d8d9b;
+  --ok: #35E0A1; --bad: #EF4444; --warn: #F5B942; --mono: 'JetBrains Mono', ui-monospace, monospace;
+  position: relative; inset: auto; transform: none; z-index: 1;
+  width: 100%; max-width: 560px; max-height: none; margin: 0; padding: 24px; overflow: visible;
+  background: var(--bg); border: 1px solid var(--line); border-radius: 18px; color: var(--tx);
+  font-family: Inter, system-ui, sans-serif; box-shadow: 0 28px 70px rgba(0,0,0,.55);
+
+  & *, & *::before, & *::after { box-sizing: border-box; }
+
+  & .pnl-head { display: flex; align-items: center; justify-content: space-between; margin: 0 0 22px; padding: 0; }
+  & #calc-title { font: 700 18px/1.2 Inter, system-ui, sans-serif; letter-spacing: -.01em; text-transform: none; }
+  & .pnl-x { width: 34px; height: 34px; display: grid; place-items: center; padding: 0; border-radius: 10px; background: var(--field); border: 1px solid var(--line); color: var(--mut); font-size: 13px; cursor: pointer; transition: color .15s, border-color .15s; }
+  & .pnl-x:hover, & .pnl-x:focus-visible { color: #fff; border-color: rgba(255,255,255,.4); outline: none; }
+
+  & .pnl-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px 14px; margin: 0; padding: 0; }
+  & .pnl-f { display: flex; flex-direction: column; gap: 7px; min-width: 0; margin: 0; }
+  & .pnl-f > span { display: flex; align-items: center; justify-content: space-between; gap: 8px; min-height: 22px; font-size: 12.5px; font-weight: 600; color: var(--mut); text-transform: none; letter-spacing: 0; }
+  & .pnl-liveTag { font: 500 11.5px/1 var(--mono); font-style: normal; color: var(--ok); }
+  & .pnl-mini { padding: 3px 10px; border-radius: 999px; border: 1px solid rgba(150,140,255,.4); background: rgba(150,140,255,.12); color: #b9b1ff; font: 600 11px/1.4 Inter, sans-serif; text-transform: none; cursor: pointer; transition: background .15s; }
+  & .pnl-mini:hover { background: rgba(150,140,255,.24); }
+
+  & input, & select { width: 100%; height: 46px; margin: 0; padding: 0 14px; background: var(--field); border: 1px solid var(--line); border-radius: 10px; color: var(--tx); font: 600 14px/1 var(--mono); outline: none; transition: border-color .15s, box-shadow .15s; }
+  & input::placeholder { color: #55555f; }
+  & input:focus, & select:focus { border-color: var(--ok); box-shadow: 0 0 0 3px rgba(53,224,161,.16); }
+  & input:disabled { background: transparent; border-style: dashed; opacity: .55; cursor: not-allowed; }
+  & input[type=number] { -moz-appearance: textfield; appearance: textfield; }
+  & input::-webkit-outer-spin-button, & input::-webkit-inner-spin-button { -webkit-appearance: none; margin: 0; }
+  & select { appearance: none; padding-right: 36px; cursor: pointer; font-family: Inter, system-ui, sans-serif; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='8' viewBox='0 0 12 8'%3E%3Cpath d='M1 1l5 5 5-5' fill='none' stroke='%238d8d9b' stroke-width='2' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; }
+  & select option { background: #15151c; color: #fff; }
+  & #pnl-dir { color: var(--ok); }
+  & #pnl-dir:has(option[value="short"]:checked) { color: var(--bad); }
+
+  & .pnl-result { margin: 26px 0 0; padding: 22px 0 0; background: none; border: 0; border-top: 1px solid var(--line); border-radius: 0; }
+  & .pnl-title { margin: 0 0 16px; font: 600 14px/1 Inter, sans-serif; color: var(--mut); text-transform: none; letter-spacing: 0; }
+  & .pnl-lbl { margin: 0 0 5px; font-size: 12px; font-weight: 500; color: var(--mut); text-transform: none; letter-spacing: 0; }
+  & .pnl-row { display: flex; align-items: center; flex-wrap: wrap; gap: 12px; margin: 0 0 22px; }
+  & .pnl-big { font: 800 38px/1 var(--mono); letter-spacing: -.03em; color: var(--tx); background: none; padding: 0; }
+  & .pnl-roe { padding: 6px 11px; border-radius: 999px; background: rgba(255,255,255,.07); color: var(--mut); font: 700 13px/1 var(--mono); }
+  & .pos { color: var(--ok); }
+  & .neg { color: var(--bad); }
+  & .pnl-roe.pos { background: rgba(53,224,161,.14); }
+  & .pnl-roe.neg { background: rgba(239,68,68,.15); }
+
+  & .pnl-two { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--line); border-radius: 12px; overflow: hidden; }
+  & .pnl-two > div { padding: 14px 16px; background: none; border: 0; border-radius: 0; }
+  & .pnl-two > div:nth-child(odd) { border-right: 1px solid var(--line); }
+  & .pnl-two > div:nth-child(-n+2) { border-bottom: 1px solid var(--line); }
+  & .pnl-val { margin: 0; padding: 0; background: none; border-radius: 0; font: 700 16px/1.2 var(--mono); color: var(--tx); }
+
+  & .pnl-liqrow { display: flex; justify-content: space-between; align-items: center; margin: 16px 2px 0; font-size: 12.5px; color: var(--mut); }
+  & .pnl-liqrow b { color: var(--warn); font: 700 13px/1 var(--mono); }
+  & .pnl-warn { display: none; margin: 14px 0 0; padding: 11px 14px; border-radius: 10px; background: rgba(239,68,68,.12); border: 1px solid rgba(239,68,68,.4); color: #ff9a9a; font-size: 12.5px; line-height: 1.5; }
+}
+
+body.calc-page #calc-panel.hidden { display: none; }
+
+@media (max-width: 440px) {
+  body.calc-page #calc-panel { padding: 18px; }
+  body.calc-page #calc-panel .pnl-grid { grid-template-columns: 1fr; }
+  body.calc-page #calc-panel .pnl-big { font-size: 30px; }
+}
