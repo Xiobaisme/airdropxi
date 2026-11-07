@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="id" data-require="admin">
+<head>
+    <style>html{visibility:hidden}</style>
+    <script src="/js/guard.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Broadcast · CMIC</title>
+    <link rel="icon" type="image/svg+xml" href="/cmic-icon.svg" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/news.css">
+    <link rel="stylesheet" href="/css/onchain.css">
+    <link rel="stylesheet" href="/css/lab.css">
+</head>
+<body>
+
+<!-- ─── BROADCAST MODAL (compose manual, kirim ke Discord & Telegram) ─── -->
+<div id="broadcast-modal" class="modal hidden">
+    <div class="modal-box">
+        <div class="modal-head">
+            <div class="modal-title" id="broadcast-modal-title">Broadcast ke Discord & Telegram</div>
+            <button class="modal-close" onclick="closeBroadcastModal()" id="broadcast-modal-close-btn"></button>
+        </div>
+        <div class="modal-body">
+            <div class="field">
+                  <label>Judul <span style="color:var(--secondary)">*</span></label>
+                    <input id="b-title" type="text" placeholder="Judul broadcast..." />
+                 </div>
+              <div class="field">
+          <label>Quick Tags <span class="hint">— klik buat nempel ke judul</span></label>
+      <div class="tag-row" id="b-tag-row"></div>
+  </div>
+<div class="field">
+    <label>Deskripsi</label>
+                <textarea id="b-desc" placeholder="Tulis deskripsi/isi berita..." style="min-height:120px;"></textarea>
+            </div>
+            <div class="field">
+                <label>Gambar <span class="hint">— klik kotak di bawah lalu Ctrl+V</span></label>
+                <div id="b-image-paste" tabindex="0" style="min-height:140px; border:2px dashed var(--border); border-radius:var(--r-sm); display:flex; align-items:center; justify-content:center; cursor:text; background:var(--card-2); position:relative; overflow:hidden; padding:10px;">
+                    <span id="b-image-placeholder" style="color:var(--text3); font-family:var(--label); font-size:0.8rem;">Klik di sini, lalu paste gambar (Ctrl+V)</span>
+                    <img id="b-image-preview" class="hidden" style="max-width:100%; max-height:220px; border-radius:8px;" />
+                    <button id="b-image-remove" class="modal-close hidden" style="position:absolute; top:6px; right:6px;" onclick="removeBroadcastImage(event)"></button>
+                    <button id="b-image-edit" class="modal-close hidden" type="button" title="Edit gambar / tambah SVG" onclick="openImageEditor(event)"></button>
+                </div>
+            </div>
+        </div>
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeBroadcastModal()">Batal</button>
+            <button class="btn-save" id="btn-send-broadcast" onclick="sendBroadcast()">Kirim</button>
+        </div>
+    </div>
+</div>
+
+        
+<!-- ─── EDITOR GAMBAR BROADCAST (tambah SVG + geser) ─── -->
+<div id="image-edit-modal" class="modal hidden">
+    <div class="modal-box ie-box">
+        <div class="modal-head">
+            <div class="modal-title">Edit Gambar</div>
+            <button class="modal-close" type="button" onclick="closeImageEditor()" id="ie-close-btn"></button>
+        </div>
+        <div class="modal-body">
+            <div class="ie-stage-wrap">
+                <div class="ie-stage" id="ie-stage">
+                    <img class="ie-base" id="ie-base" alt="" draggable="false">
+                    <div class="ie-guides" id="ie-guides"></div>
+                    <i class="ie-snap v" id="ie-snap-v"></i><i class="ie-snap h" id="ie-snap-h"></i>
+                </div>
+            </div>
+            <div class="ie-tools">
+                <button class="nlf-btn" type="button" onclick="ieAddLogo(IE_LOGO_URL)">+ OURBIT × CMIC</button>
+                <button class="nlf-btn" type="button" onclick="document.getElementById('ie-file').click()">+ SVG lain</button>
+                <input type="file" id="ie-file" accept=".svg,image/svg+xml,image/png" class="hidden">
+                <button class="nlf-btn" type="button" id="ie-del" onclick="ieDelete()" disabled>Hapus</button>
+                <label class="oc-check"><input type="checkbox" id="ie-grid" checked> Grid</label>
+                <label class="oc-check"><input type="checkbox" id="ie-snapon" checked> Snap</label>
+            </div>
+            <div class="ie-tools">
+                <label for="ie-size">Ukuran <b id="ie-size-v">–</b></label>
+                <input type="range" id="ie-size" min="5" max="100" value="40" disabled>
+            </div>
+            <div class="ie-tools ie-num">
+                <label>X <input type="number" id="ie-x" min="0" max="100" step="0.5" disabled>%</label>
+                <label>Y <input type="number" id="ie-y" min="0" max="100" step="0.5" disabled>%</label>
+                <label>Lebar <input type="number" id="ie-w" min="5" max="100" step="0.5" disabled>%</label>
+                <select id="ie-preset" disabled>
+                    <option value="">Posisi cepat…</option>
+                    <option value="l,t">Kiri atas</option><option value="c,t">Tengah atas</option><option value="r,t">Kanan atas</option>
+                    <option value="c,m">Tengah</option>
+                    <option value="l,b">Kiri bawah</option><option value="c,b">Tengah bawah</option><option value="r,b">Kanan bawah</option>
+                </select>
+            </div>
+            <div class="ie-readout" id="ie-readout"></div>
+            <div class="hint" style="font-family:var(--label);font-size:.7rem;color:var(--text3)">
+                Klik logo lalu geser. X/Y = jarak pojok kiri-atas logo dari tepi gambar, Lebar = % dari lebar gambar. Panah keyboard = geser halus (Shift = 5%), Alt saat drag = matikan snap.
+            </div>
+        </div><!-- ⬅️ tutup .modal-body (ini yang tadi hilang) -->
+        <div class="modal-actions">
+            <button class="btn-cancel" onclick="closeImageEditor()">Batal</button>
+            <button class="btn-save" onclick="applyImageEditor()">Terapkan</button>
+        </div>
+    </div><!-- tutup .modal-box -->
+</div><!-- tutup #image-edit-modal -->
+        
+
+              
+<!-- ─── CONFIRM MODAL (custom, ganti native confirm()) ─── -->
+<div id="confirm-modal" class="modal hidden">
+    <div class="modal-box confirm-box">
+        <div class="confirm-icon" id="confirm-icon"></div>
+        <div class="confirm-title" id="confirm-title">Konfirmasi</div>
+        <div class="confirm-msg" id="confirm-msg">Yakin ingin melanjutkan?</div>
+        <div class="confirm-actions">
+            <button class="btn-cancel" id="confirm-cancel-btn">Batal</button>
+            <button class="btn-danger-confirm" id="confirm-ok-btn">Ya, Hapus</button>
+        </div>
+    </div>
+</div>
+
+        
+<!-- ─── PIN MODAL (wajib tiap kirim) ─── -->
+<div id="pin-modal" class="modal hidden" style="z-index:1800">
+    <div class="modal-box confirm-box">
+        <div class="confirm-title">Masukkan PIN</div>
+        <div class="confirm-msg">Verifikasi dulu sebelum kirim ke Discord &amp; Telegram.</div>
+        <div class="field">
+            <input id="pin-input" type="password" inputmode="numeric" autocomplete="off"
+                   placeholder="••••••" style="text-align:center;letter-spacing:.4em;" />
+        </div>
+        <div class="confirm-actions" style="margin-top:1.2rem;">
+            <button class="btn-cancel" id="pin-cancel-btn">Batal</button>
+            <button class="btn-save" id="pin-ok-btn">Verifikasi</button>
+        </div>
+    </div>
+</div>
+
+
+
+    <div class="toast" id="toast"></div>
+
+    <script src="/js/core.js"></script>
+    <script src="/js/broadcast.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            openBroadcastModal();
+            ['closeBroadcastModal'].forEach(function (n) {
+                window[n] = function () { location.href = '/'; };
+            });
+        });
+    </script>
+</body>
+</html>

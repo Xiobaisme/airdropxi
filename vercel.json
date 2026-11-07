@@ -1,6 +1,12 @@
 {
   "rewrites": [
-    { "source": "/", "destination": "/admin.html" }
+    { "source": "/", "destination": "/admin.html" },
+    { "source": "/onchain", "destination": "/pages/onchain.html" },
+    { "source": "/news", "destination": "/pages/news.html" },
+    { "source": "/calc", "destination": "/pages/calc.html" },
+    { "source": "/broadcast", "destination": "/pages/broadcast.html" },
+    { "source": "/agent", "destination": "/pages/agent.html" },
+    { "source": "/lab", "destination": "/pages/lab.html" }
   ],
   "redirects": [
     { "source": "/admin.html", "destination": "/", "permanent": false }

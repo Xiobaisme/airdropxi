@@ -1,0 +1,101 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <style>html{visibility:hidden}</style>
+    <script src="/js/guard.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Onchain · CMIC</title>
+    <link rel="icon" type="image/svg+xml" href="/cmic-icon.svg" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/onchain.css">
+</head>
+<body>
+
+<!-- ─── ONCHAIN TRACER (fullscreen) ─── -->
+<div id="onchain-modal" class="oc-screen">
+    <div class="oc-top">
+        <div class="oc-title">Onchain Tracer</div>
+   <button class="nlf-btn active" id="oc-live-toggle" type="button" onclick="ocLiveToggle()"><span class="news-live-dot"></span>Live Feed</button>
+        <div class="oc-form">
+            <input id="oc-address" type="text" placeholder="0x... / bc1... / alamat Solana" autocomplete="off" spellcheck="false" />
+            <select id="oc-chain"></select>
+            <button class="btn-save" id="oc-go" onclick="ocSearch()">Lacak</button>
+            <label class="oc-check"><input type="checkbox" id="oc-dust" checked onchange="ocToggleDust()" /> Sembunyikan dust</label>
+        </div>
+        <button class="modal-close" onclick="closeOnchain()" id="onchain-close-btn"></button>
+    </div>
+
+    <div id="oc-summary" class="oc-summary hidden"></div>
+
+    <div class="oc-main" id="oc-main">
+        <aside class="oc-live" id="oc-live">
+    <div class="oc-live-head">
+        <div class="oc-live-title"><span class="news-live-dot"></span>Live Transfers</div>
+        <button class="modal-close" id="oc-live-close" type="button" onclick="ocLiveToggle(false)"></button>
+    </div>
+    <div class="oc-live-tools">
+        <input id="oc-live-search" type="text" placeholder="Cari alamat / ENS / token / hash…" autocomplete="off" spellcheck="false" />
+        <div class="oc-live-chips" id="oc-live-chips"></div>
+    </div>
+    <div class="oc-live-list" id="oc-live-list"></div>
+        <div class="oc-live-foot">
+        <button class="oc-live-btn on" id="oc-live-btn" type="button" title="Jeda / lanjut live"><span class="news-live-dot"></span><span id="oc-live-btn-t">Live</span></button>
+        <span class="oc-live-st" id="oc-live-status">Memuat…</span>
+        <div class="oc-live-arrows">
+            <button class="oc-live-arrow" data-dir="up" type="button" title="Ke atas (terbaru)">↑<span class="badge hidden" id="oc-live-up-n">0</span></button>
+            <button class="oc-live-arrow" data-dir="down" type="button" title="Ke bawah">↓</button>
+        </div>
+    </div>
+</aside>
+        
+        <div class="oc-stage">
+            <div class="oc-diagram" id="oc-diagram"></div>
+            <div class="oc-empty" id="oc-empty">Masukkan alamat wallet lalu klik Lacak</div>
+            <div class="oc-tools">
+                <button onclick="ocZoom(1.25)" title="Zoom in">+</button>
+                <button onclick="ocZoom(0.8)" title="Zoom out">−</button>
+                <button onclick="ocFit()" title="Pas layar">Fit</button>
+            </div>
+            <div class="oc-note">Scroll = zoom · Drag = geser · Klik node = telusuri · Klik label panah = buka TX</div>
+        </div>
+        <aside class="oc-side hidden" id="oc-tx">
+            <div class="oc-assets">
+    <div class="oc-side-head" id="oc-assets-head">Aset Wallet</div>
+    <div class="oc-assets-wrap">
+        <table class="oc-table">
+            <thead><tr><th>Aset</th><th class="r">Jumlah</th><th class="r">Nilai</th><th class="r">%</th></tr></thead>
+            <tbody id="oc-assets-body"></tbody>
+        </table>
+    </div>
+</div>
+            <div class="oc-side-head" id="oc-tx-head">Transaksi</div>
+            <div class="oc-tablewrap">
+                <table class="oc-table">
+                    <thead><tr><th>TX Hash</th><th>Tanggal</th><th>Arah</th><th>Jumlah</th></tr></thead>
+                    <tbody id="oc-tx-body"></tbody>
+                </table>
+            </div>
+        </aside>
+    </div>
+</div>
+
+        
+
+    <div class="toast" id="toast"></div>
+
+    <script src="/js/core.js"></script>
+    <script src="/js/onchain.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            window.closeOnchain = function () { location.href = '/'; };
+            openOnchain();
+        });
+    </script>
+</body>
+</html>

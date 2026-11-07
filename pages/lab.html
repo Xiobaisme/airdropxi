@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="id">
+<head>
+    <style>html{visibility:hidden}</style>
+    <script src="/js/guard.js"></script>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Lab Materi · CMIC</title>
+    <link rel="icon" type="image/svg+xml" href="/cmic-icon.svg" />
+    <link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@500;600;700;800&family=Inter:wght@400;500;600;700;800;900&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet" />
+    <link rel="stylesheet" href="/css/base.css">
+    <link rel="stylesheet" href="/css/app.css">
+    <link rel="stylesheet" href="/css/news.css">
+    <link rel="stylesheet" href="/css/onchain.css">
+    <link rel="stylesheet" href="/css/lab.css">
+</head>
+<body>
+
+<!-- ─── LAB MATERI: popup fullscreen ─── -->
+<div id="lab-modal" class="lab-screen hidden" role="dialog" aria-modal="true" aria-label="Lab Materi">
+    <div class="lab-top">
+        <div class="lab-title">LAB <span>MATERI</span></div>
+        <div class="lab-sub">Ebook &amp; materi edukasi CMIC</div>
+        <button class="modal-close" type="button" onclick="closeLab()" id="lab-close-btn"></button>
+    </div>
+
+    <!-- tampilan 1: daftar card ebook -->
+    <div class="lab-body" id="lab-library"><div class="lab-grid" id="lab-grid"></div></div>
+
+    <!-- tampilan 2: baca ebook -->
+    <div class="lab-reader hidden" id="lab-reader">
+        <div class="lab-rbar">
+            <button class="nlf-btn" type="button" id="lab-back">← Lab Materi</button>
+            <div class="lab-rtitle" id="lab-rtitle"></div>
+            <select class="lab-jump" id="lab-jump" aria-label="Loncat ke halaman"></select>
+            <span class="lab-count" id="lab-count">1 / 1</span>
+            <a class="nlf-btn" id="lab-open" href="#" target="_blank" rel="noopener" style="text-decoration:none;">Buka ↗</a>
+        </div>
+        <div class="lab-prog"><i id="lab-prog"></i></div>
+        <div class="lab-stage" id="lab-stage">
+    <button class="lab-arrow prev" id="lab-prev" type="button" aria-label="Sebelumnya">‹</button>
+    <div class="lab-book" id="lab-book">
+        <div class="lab-zoom" id="lab-zoom">
+            <img class="lab-page" id="lab-img" alt="" decoding="async" draggable="false">
+        </div>
+    </div>
+    <div class="lab-err hidden" id="lab-err"></div>
+    <button class="lab-arrow next" id="lab-next" type="button" aria-label="Berikutnya">›</button>
+    <div class="lab-ztools">
+        <button id="lab-zin" type="button" title="Zoom in">+</button>
+        <button id="lab-zout" type="button" title="Zoom out">−</button>
+         <button id="lab-zreset" type="button" title="Reset">1x</button>
+           </div>
+        </div>
+    </div>
+</div>
+
+        
+
+    <div class="toast" id="toast"></div>
+
+    <script src="/js/core.js"></script>
+    <script src="/js/lab.js"></script>
+    <script>
+        window.addEventListener('DOMContentLoaded', function () {
+            openLab();
+            ['closeLab'].forEach(function (n) {
+                window[n] = function () { location.href = '/'; };
+            });
+        });
+    </script>
+</body>
+</html>
